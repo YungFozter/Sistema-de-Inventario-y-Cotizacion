@@ -9,9 +9,9 @@
     <!-- Lado Izquierdo: Visual (Solo Escritorio) -->
     <div class="auth-sidebar">
         <div style="z-index: 1; text-align: center;">
-            <i class="bi bi-calculator" style="font-size: 5rem; text-shadow: 0 4px 15px rgba(0,0,0,0.2);"></i>
-            <h1 class="mt-4" style="font-weight: 800; font-size: 2.5rem;">Sistema de Cotizaciones</h1>
-            <p class="mt-3 text-white-50" style="font-size: 1.1rem; max-width: 400px; margin: 0 auto;">
+            <i class="bi bi-calculator fade-up-enter" style="font-size: 5rem; text-shadow: 0 4px 15px rgba(0,0,0,0.2);"></i>
+            <h1 class="mt-4 fade-up-enter delay-100" style="font-weight: 800; font-size: 2.5rem;">Sistema de Cotizaciones</h1>
+            <p class="mt-3 text-white-50 fade-up-enter delay-200" style="font-size: 1.1rem; max-width: 400px; margin: 0 auto;">
                 Gestiona tus clientes, productos y crea presupuestos profesionales en segundos.
             </p>
         </div>
@@ -21,13 +21,13 @@
     <div class="auth-main">
         <div class="auth-card">
             
-            <div class="text-center mb-5">
+            <div class="text-center mb-5 fade-up-enter">
                 <h2 style="font-weight: 800; color: var(--dark);">Bienvenido de vuelta</h2>
                 <p class="text-muted">Por favor, ingresa tus credenciales</p>
             </div>
 
             <!-- Selector de Tipo de Usuario -->
-            <div class="d-flex justify-content-center mb-4">
+            <div class="d-flex justify-content-center mb-4 fade-up-enter delay-100">
                 <div class="btn-group" role="group" style="background: var(--light); padding: 5px; border-radius: var(--radius-lg);">
                     <a href="{{ url_for('login', tipo='standard') }}" 
                        class="btn {% if tipo == 'standard' %}btn-white shadow-sm{% else %}btn-transparent text-muted{% endif %}" 
@@ -43,7 +43,7 @@
             </div>
 
             {% if error %}
-                <div class="alert alert-danger d-flex align-items-center" style="border-radius: var(--radius-md); border: none;">
+                <div class="alert alert-danger d-flex align-items-center fade-up-enter delay-100" style="border-radius: var(--radius-md); border: none;">
                     <i class="bi bi-exclamation-triangle-fill me-2 fs-5"></i>
                     <div>
                         {{ error }}
@@ -59,7 +59,7 @@
             <form method="post" action="{{ url_for('login') }}">
                 <input type="hidden" name="tipo_login" value="{{ tipo }}">
 
-                <div class="form-floating-custom">
+                <div class="form-floating-custom fade-up-enter delay-200">
                     <label class="form-label-custom">Correo electrónico</label>
                     <div class="input-group">
                         <span class="input-group-text bg-light border-0 ps-4 pe-2 text-muted" style="border-radius: var(--radius-lg) 0 0 var(--radius-lg);">
@@ -69,29 +69,35 @@
                     </div>
                 </div>
 
-                <div class="form-floating-custom">
+                <div class="form-floating-custom fade-up-enter delay-300">
                     <label class="form-label-custom">Contraseña</label>
                     <div class="input-group">
                         <span class="input-group-text bg-light border-0 ps-4 pe-2 text-muted" style="border-radius: var(--radius-lg) 0 0 var(--radius-lg);">
                             <i class="bi bi-lock"></i>
                         </span>
-                        <input type="password" name="contrasena" class="form-control form-control-custom ps-2 border-0 bg-light" required placeholder="••••••••" style="border-radius: 0 var(--radius-lg) var(--radius-lg) 0;">
+                        <input type="password" id="password_input" name="contrasena" class="form-control form-control-custom ps-2 border-0 bg-light" required placeholder="••••••••" style="border-radius: 0;">
+                        <button type="button" class="btn-reveal" onclick="togglePassword('password_input', 'eye_icon_pw')">
+                            <i id="eye_icon_pw" class="bi bi-eye"></i>
+                        </button>
                     </div>
                 </div>
 
                 {% if tipo == 'admin' %}
-                <div class="form-floating-custom">
+                <div class="form-floating-custom fade-up-enter delay-400">
                     <label class="form-label-custom">PIN de Seguridad (Opcional)</label>
                     <div class="input-group">
                         <span class="input-group-text bg-light border-0 ps-4 pe-2 text-muted" style="border-radius: var(--radius-lg) 0 0 var(--radius-lg);">
                             <i class="bi bi-key"></i>
                         </span>
-                        <input type="password" name="pin_admin" class="form-control form-control-custom ps-2 border-0 bg-light" placeholder="••••" style="border-radius: 0 var(--radius-lg) var(--radius-lg) 0;">
+                        <input type="password" id="pin_input" name="pin_admin" class="form-control form-control-custom ps-2 border-0 bg-light" placeholder="••••" style="border-radius: 0;">
+                        <button type="button" class="btn-reveal" onclick="togglePassword('pin_input', 'eye_icon_pin')">
+                            <i id="eye_icon_pin" class="bi bi-eye"></i>
+                        </button>
                     </div>
                 </div>
                 {% endif %}
 
-                <div class="d-grid mt-5">
+                <div class="d-grid mt-5 fade-up-enter delay-500">
                     <button type="submit" class="btn btn-primary-custom btn-lg">
                         {% if tipo == 'admin' %}Acceder al Panel Admin{% else %}Iniciar Sesión{% endif %}
                         <i class="bi bi-arrow-right ms-2"></i>
@@ -99,11 +105,27 @@
                 </div>
             </form>
 
-            <div class="text-center mt-4">
+            <div class="text-center mt-4 fade-up-enter delay-500">
                 <p class="text-muted mb-0">¿No tienes cuenta? <a href="{{ url_for('registro') }}" class="text-primary text-decoration-none fw-bold" style="color: var(--primary) !important;">Regístrate aquí</a></p>
             </div>
             
         </div>
     </div>
 </div>
+
+<script>
+function togglePassword(inputId, iconId) {
+    const input = document.getElementById(inputId);
+    const icon = document.getElementById(iconId);
+    if (input.type === 'password') {
+        input.type = 'text';
+        icon.classList.remove('bi-eye');
+        icon.classList.add('bi-eye-slash');
+    } else {
+        input.type = 'password';
+        icon.classList.remove('bi-eye-slash');
+        icon.classList.add('bi-eye');
+    }
+}
+</script>
 {% endblock %}

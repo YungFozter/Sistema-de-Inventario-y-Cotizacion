@@ -1,5 +1,5 @@
-# Usar una imagen base oficial de Python
-FROM python:3.9-slim
+# Usar una imagen base oficial de Python (bullseye aún incluye wkhtmltopdf)
+FROM python:3.9-slim-bullseye
 
 # Establecer el directorio de trabajo en /app
 WORKDIR /app

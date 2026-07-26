@@ -242,7 +242,7 @@ def migrar_clientes_existentes():
                 'admin@default.com',
                 'admin',
                 1,
-                1
+                True
             ))
             admin_id = cursor.lastrowid
             conexion.commit()
@@ -461,7 +461,7 @@ def registrar_productos_seleccionados(items, empresa="General", categoria_id=Non
             
             # Si el item venía de una importación guardada, marcarlo como registrado
             if item.get('temp_id'):
-                cursor.execute('UPDATE items_importados_temp SET registrado = 1 WHERE id = ?', (item['temp_id'],))
+                cursor.execute('UPDATE items_importados_temp SET registrado = TRUE WHERE id = ?', (item['temp_id'],))
 
             registrados_count += 1
 

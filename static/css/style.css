@@ -1,0 +1,200 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap');
+
+:root {
+  /* Paleta Premium UI-UX Pro Max */
+  --primary: #4F46E5; /* Indigo */
+  --primary-hover: #4338CA;
+  --secondary: #10B981; /* Emerald */
+  --accent: #F43F5E; /* Rose */
+  --dark: #111827;
+  --light: #F9FAFB;
+  --surface: #FFFFFF;
+  --text-main: #1F2937;
+  --text-muted: #6B7280;
+  
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+}
+
+body {
+  font-family: 'Outfit', sans-serif;
+  background-color: var(--light);
+  color: var(--text-main);
+  letter-spacing: -0.015em;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Tipografía */
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 700;
+  color: var(--dark);
+}
+
+/* Navbar Premium */
+.navbar-premium {
+  background: rgba(255, 255, 255, 0.8) !important;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(0,0,0,0.05);
+  box-shadow: var(--shadow-sm);
+  transition: all 0.3s ease;
+}
+
+.navbar-premium .navbar-brand {
+  color: var(--primary) !important;
+  font-weight: 800;
+  font-size: 1.5rem;
+  letter-spacing: -0.025em;
+}
+
+.navbar-premium .nav-link {
+  color: var(--text-muted) !important;
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+.navbar-premium .nav-link:hover,
+.navbar-premium .nav-link.active {
+  color: var(--primary) !important;
+}
+
+/* Cards Premium */
+.card-premium {
+  background: var(--surface);
+  border: 1px solid rgba(0,0,0,0.05);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-sm);
+  transition: all 0.3s ease;
+  overflow: hidden;
+}
+
+.card-premium:hover {
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-3px);
+}
+
+.card-premium-header {
+  background: transparent;
+  border-bottom: 1px solid rgba(0,0,0,0.05);
+  padding: 1.25rem 1.5rem;
+}
+
+/* Botones Premium */
+.btn-primary-custom {
+  background: linear-gradient(135deg, var(--primary), var(--primary-hover));
+  color: white;
+  border: none;
+  border-radius: var(--radius-md);
+  padding: 0.6rem 1.5rem;
+  font-weight: 600;
+  box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.2);
+  transition: all 0.3s ease;
+}
+
+.btn-primary-custom:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.3);
+  color: white;
+}
+
+/* Formularios Premium (Floating Labels custom) */
+.form-floating-custom {
+  position: relative;
+  margin-bottom: 1.5rem;
+}
+
+.form-control-custom {
+  display: block;
+  width: 100%;
+  padding: 1rem 1.25rem;
+  font-size: 1rem;
+  font-weight: 500;
+  line-height: 1.5;
+  color: var(--text-main);
+  background-color: var(--light);
+  background-clip: padding-box;
+  border: 2px solid transparent;
+  border-radius: var(--radius-lg);
+  transition: all 0.3s ease;
+}
+
+.form-control-custom:focus {
+  background-color: var(--surface);
+  border-color: var(--primary);
+  box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+  outline: 0;
+}
+
+.form-label-custom {
+  font-weight: 600;
+  color: var(--text-muted);
+  margin-bottom: 0.5rem;
+  display: block;
+  font-size: 0.9rem;
+}
+
+/* Layout Split-Screen Login */
+.auth-wrapper {
+  min-height: 100vh;
+  display: flex;
+}
+
+.auth-sidebar {
+  flex: 1;
+  background: linear-gradient(135deg, var(--primary), #312E81);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  color: white;
+  padding: 3rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.auth-sidebar::before {
+  content: '';
+  position: absolute;
+  top: -50%; left: -50%;
+  width: 200%; height: 200%;
+  background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 60%);
+  animation: pulse 10s infinite alternate;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  100% { transform: scale(1.2); }
+}
+
+.auth-main {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: var(--surface);
+  padding: 3rem;
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 450px;
+}
+
+@media (max-width: 991.98px) {
+  .auth-sidebar { display: none; }
+}
+
+/* Utils */
+.glass {
+  background: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+}

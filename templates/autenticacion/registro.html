@@ -3,90 +3,147 @@
 {% block titulo %}Registro de Usuario{% endblock %}
 
 {% block contenido %}
-<div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-md-6">
-            <div class="card shadow">
-                <div class="card-header bg-primary text-white">
-                    <h3 class="text-center">Crear cuenta nueva</h3>
+<!-- Rediseño Premium: Split Screen -->
+<div class="auth-wrapper" style="margin-top: -1.5rem; margin-bottom: -3rem; margin-left: -12px; margin-right: -12px;">
+    
+    <!-- Lado Izquierdo: Visual (Solo Escritorio) -->
+    <div class="auth-sidebar" style="background: linear-gradient(135deg, var(--secondary), #065F46);">
+        <div style="z-index: 1; text-align: center;">
+            <i class="bi bi-person-plus" style="font-size: 5rem; text-shadow: 0 4px 15px rgba(0,0,0,0.2);"></i>
+            <h1 class="mt-4" style="font-weight: 800; font-size: 2.5rem;">Únete al Equipo</h1>
+            <p class="mt-3 text-white-50" style="font-size: 1.1rem; max-width: 400px; margin: 0 auto;">
+                Crea una cuenta en segundos y empieza a gestionar tus cotizaciones de manera profesional.
+            </p>
+        </div>
+    </div>
+
+    <!-- Lado Derecho: Formulario -->
+    <div class="auth-main">
+        <div class="auth-card" style="max-width: 500px;">
+            
+            <div class="text-center mb-4">
+                <h2 style="font-weight: 800; color: var(--dark);">Crear cuenta nueva</h2>
+                <p class="text-muted">Completa tus datos para registrarte</p>
+            </div>
+
+            <form action="/registro" method="post">
+                <!-- Selección de Rol -->
+                <div class="mb-4">
+                    <label class="form-label-custom mb-2">Tipo de Usuario</label>
+                    <div class="d-flex gap-3">
+                        <div class="form-check flex-fill bg-light p-3 border-0 rounded" style="border-radius: var(--radius-md) !important;">
+                            <input class="form-check-input ms-1" type="radio" name="rol" id="rol_standard" value="standard" checked>
+                            <label class="form-check-label ms-2 fw-semibold" for="rol_standard">Usuario Standard</label>
+                        </div>
+                        <div class="form-check flex-fill bg-light p-3 border-0 rounded" style="border-radius: var(--radius-md) !important;">
+                            <input class="form-check-input ms-1" type="radio" name="rol" id="rol_admin" value="admin">
+                            <label class="form-check-label ms-2 fw-semibold" for="rol_admin">Administrador</label>
+                        </div>
+                    </div>
                 </div>
 
-                <div class="card-body">
-                    <form action="/registro" method="post">
-                        <div class="mb-3">
-                            <label class="form-label">Tipo de Usuario</label>
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" name="rol" id="rol_standard" value="standard" checked>
-                                <label class="form-check-label" for="rol_standard">Usuario Standard</label>
+                <!-- Campo PIN (visible solo si selecciona "admin") -->
+                <div class="form-floating-custom" id="pin_admin_container" style="display: none;">
+                    <label class="form-label-custom text-danger"><i class="bi bi-shield-lock"></i> PIN de Administrador (Requerido)</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-light border-0 ps-4 pe-2 text-muted" style="border-radius: var(--radius-lg) 0 0 var(--radius-lg);"><i class="bi bi-key"></i></span>
+                        <input type="password" name="pin_admin" class="form-control form-control-custom ps-2 border-0 bg-light" placeholder="Ingresa el PIN de seguridad" style="border-radius: 0 var(--radius-lg) var(--radius-lg) 0;">
+                    </div>
+                </div>
+
+                <!-- Datos Personales -->
+                <div class="form-floating-custom">
+                    <label class="form-label-custom">Nombre completo</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-light border-0 ps-4 pe-2 text-muted" style="border-radius: var(--radius-lg) 0 0 var(--radius-lg);"><i class="bi bi-person"></i></span>
+                        <input type="text" name="nombre" class="form-control form-control-custom ps-2 border-0 bg-light" required placeholder="Juan Pérez" style="border-radius: 0 var(--radius-lg) var(--radius-lg) 0;">
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-floating-custom">
+                            <label class="form-label-custom">Correo electrónico</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-0 ps-3 pe-2 text-muted" style="border-radius: var(--radius-lg) 0 0 var(--radius-lg);"><i class="bi bi-envelope"></i></span>
+                                <input type="email" name="correo" class="form-control form-control-custom ps-2 border-0 bg-light" required placeholder="correo@ejemplo.com" style="border-radius: 0 var(--radius-lg) var(--radius-lg) 0;">
                             </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" name="rol" id="rol_admin" value="admin">
-                                <label class="form-check-label" for="rol_admin">Administrador</label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-floating-custom">
+                            <label class="form-label-custom">Teléfono</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-0 ps-3 pe-2 text-muted" style="border-radius: var(--radius-lg) 0 0 var(--radius-lg);"><i class="bi bi-telephone"></i></span>
+                                <input type="tel" name="telefono" class="form-control form-control-custom ps-2 border-0 bg-light" placeholder="+12345678" style="border-radius: 0 var(--radius-lg) var(--radius-lg) 0;">
                             </div>
                         </div>
-
-                        <!-- Campo PIN (visible solo si selecciona "admin") -->
-                        <div class="mb-3" id="pin_admin_container" style="display: none;">
-                            <label class="form-label">PIN de Administrador</label>
-                            <input type="password" name="pin_admin" class="form-control" placeholder="Ingresa el PIN">
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">Nombre completo</label>
-                            <input type="text" name="nombre" class="form-control" required>
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">Correo electrónico</label>
-                            <input type="email" name="correo" class="form-control" required>
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">Teléfono</label>
-                            <input type="tel" name="telefono" class="form-control">
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">Contraseña</label>
-                            <input type="password" name="contrasena" class="form-control" required>
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">Confirmar contraseña</label>
-                            <input type="password" name="confirmar_contrasena" class="form-control" required>
-                        </div>
-
-                        <div class="d-grid gap-2">
-                            <button type="submit" class="btn btn-primary">Registrarse</button>
-                            <a href="/" class="btn btn-outline-secondary">Cancelar</a>
-                        </div>
-                    </form>
+                    </div>
                 </div>
 
-                <div class="card-footer text-center">
-                    <small>¿Ya tienes una cuenta? <a href="/login">Inicia sesión</a></small>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-floating-custom">
+                            <label class="form-label-custom">Contraseña</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-0 ps-3 pe-2 text-muted" style="border-radius: var(--radius-lg) 0 0 var(--radius-lg);"><i class="bi bi-lock"></i></span>
+                                <input type="password" name="contrasena" class="form-control form-control-custom ps-2 border-0 bg-light" required placeholder="••••••••" style="border-radius: 0 var(--radius-lg) var(--radius-lg) 0;">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-floating-custom">
+                            <label class="form-label-custom">Confirmar Contraseña</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-0 ps-3 pe-2 text-muted" style="border-radius: var(--radius-lg) 0 0 var(--radius-lg);"><i class="bi bi-lock-fill"></i></span>
+                                <input type="password" name="confirmar_contrasena" class="form-control form-control-custom ps-2 border-0 bg-light" required placeholder="••••••••" style="border-radius: 0 var(--radius-lg) var(--radius-lg) 0;">
+                            </div>
+                        </div>
+                    </div>
                 </div>
+
+                <div class="d-grid gap-2 mt-4">
+                    <button type="submit" class="btn btn-primary-custom btn-lg w-100" style="background: linear-gradient(135deg, var(--secondary), #047857); box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.2);">
+                        Crear Cuenta <i class="bi bi-check-circle ms-2"></i>
+                    </button>
+                    <a href="/login" class="btn btn-light mt-2" style="border-radius: var(--radius-md); font-weight: 600;">
+                        Cancelar
+                    </a>
+                </div>
+            </form>
+
+            <div class="text-center mt-4">
+                <p class="text-muted mb-0">¿Ya tienes una cuenta? <a href="/login" class="text-success text-decoration-none fw-bold" style="color: var(--secondary) !important;">Inicia sesión</a></p>
             </div>
         </div>
     </div>
 </div>
+
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const rolAdmin = document.getElementById('rol_admin');
     const rolStandard = document.getElementById('rol_standard');
     const pinContainer = document.getElementById('pin_admin_container');
+    const pinInput = document.querySelector('input[name="pin_admin"]');
 
-    rolAdmin.addEventListener('change', function() {
-        if (this.checked) {
+    function togglePin() {
+        if (rolAdmin.checked) {
             pinContainer.style.display = 'block';
-        }
-    });
-
-    rolStandard.addEventListener('change', function() {
-        if (this.checked) {
+            // Animación suave
+            pinContainer.style.opacity = '0';
+            setTimeout(() => {
+                pinContainer.style.transition = 'opacity 0.3s ease';
+                pinContainer.style.opacity = '1';
+            }, 10);
+            pinInput.setAttribute('required', 'required');
+        } else {
             pinContainer.style.display = 'none';
+            pinInput.removeAttribute('required');
         }
-    });
+    }
+
+    rolAdmin.addEventListener('change', togglePin);
+    rolStandard.addEventListener('change', togglePin);
 });
 </script>
 {% endblock %}

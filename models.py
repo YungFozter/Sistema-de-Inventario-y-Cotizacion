@@ -20,18 +20,6 @@ def crear_tablas():
     is_postgres = bool(os.environ.get('DATABASE_URL') and os.environ.get('DATABASE_URL').startswith('postgres'))
 
     try:
-        # Tabla de logs/auditoría
-        cursor.execute(f'''
-            CREATE TABLE IF NOT EXISTS logs (
-                id {"SERIAL PRIMARY KEY" if is_postgres else "INTEGER PRIMARY KEY AUTOINCREMENT"},
-                usuario_id INTEGER,
-                accion TEXT NOT NULL,
-                detalle TEXT,
-                fecha TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                FOREIGN KEY (usuario_id) REFERENCES clientes(id)
-            ){";" if is_postgres else ""}
-        ''')
-
         # Tabla de clientes/usuarios
         cursor.execute(f'''
             CREATE TABLE IF NOT EXISTS clientes (
@@ -49,6 +37,18 @@ def crear_tablas():
                 activo {"BOOLEAN DEFAULT TRUE" if is_postgres else "BOOLEAN DEFAULT 1"},
                 creador_id INTEGER,
                 FOREIGN KEY (creador_id) REFERENCES clientes(id)
+            ){";" if is_postgres else ""}
+        ''')
+
+        # Tabla de logs/auditoría
+        cursor.execute(f'''
+            CREATE TABLE IF NOT EXISTS logs (
+                id {"SERIAL PRIMARY KEY" if is_postgres else "INTEGER PRIMARY KEY AUTOINCREMENT"},
+                usuario_id INTEGER,
+                accion TEXT NOT NULL,
+                detalle TEXT,
+                fecha TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (usuario_id) REFERENCES clientes(id)
             ){";" if is_postgres else ""}
         ''')
 

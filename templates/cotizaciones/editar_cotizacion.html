@@ -1,0 +1,218 @@
+{% extends 'shared/layout.html' %}
+
+{% block titulo %}Editar Cotización{% endblock %}
+
+{% block contenido %}
+<div class="container">
+  <h2 class="mb-4">Editar Cotización #{{ cotizacion['id'] }}</h2>
+
+  <form method="post" action="/cotizaciones/editar/{{ cotizacion['id'] }}">
+    <!-- Selección de cliente -->
+    <div class="mb-3">
+      <label for="cliente" class="form-label">Seleccionar Cliente:</label>
+      <select name="cliente_id" id="cliente" class="form-select" required>
+        <option value="">-- Selecciona un cliente --</option>
+        {% for cliente in clientes %}
+          <option value="{{ cliente[0] }}"
+            {% if cliente[0] == cotizacion['cliente_id'] %}selected{% endif %}>
+            {{ cliente[1] }}
+          </option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <!-- Catálogo de productos -->
+    <h4>Catálogo de Productos</h4>
+    <div class="table-responsive mb-4">
+      <table class="table table-striped table-bordered">
+        <thead class="table-dark">
+          <tr>
+            <th>Código</th>
+            <th>Descripción</th>
+            <th>Marca</th>
+            <th>UM</th>
+            <th>Cantidad</th>
+            <th>P/Unitario</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for producto in productos %}
+          <tr>
+            <td>{{ producto[2] }}</td>
+            <td>{{ producto[3] }}</td>
+            <td>{{ producto[4] }}</td>
+            <td>{{ producto[6] }}</td>
+            <td>{{ producto[7] }}</td>
+            <td>Bs {{ "%.2f"|format(producto[8]) }}</td>
+            <td>
+              <button type="button" class="btn btn-success btn-sm"
+                onclick="agregarAlCarrito('{{ producto[0] }}', '{{ producto[2] }}',
+                         '{{ producto[3] }}', '{{ producto[8] }}')">
+                ➕ Agregar
+              </button>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Productos seleccionados -->
+    <h4>Productos Seleccionados</h4>
+    <div class="table-responsive mb-3">
+      <table id="carrito-table" class="table table-bordered align-middle">
+        <thead class="table-primary">
+          <tr>
+            <th>Producto</th>
+            <th>Cantidad</th>
+            <th>Precio Unitario</th>
+            <th>Subtotal</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for p in productos_seleccionados %}
+          <tr>
+            <td>
+              {% for prod in productos %}
+                {% if prod[0] == p[0] %}
+                  {{ prod[2] }} - {{ prod[3] }}
+                  <input type="hidden" name="producto_id[]" value="{{ p[0] }}">
+                {% endif %}
+              {% endfor %}
+            </td>
+            <td>
+              <input type="number" name="cantidad[]" class="form-control" min="1"
+                     value="{{ p[1] }}" onchange="calcularSubtotal(this)" required>
+            </td>
+            <td>
+              <input type="number" name="precio_unitario[]" class="form-control" step="0.01"
+                     value="{{ p[2] }}" onchange="calcularSubtotal(this)" required>
+            </td>
+            <td><span class="subtotal">{{ "%.2f"|format(p[1] * p[2]) }}</span></td>
+            <td>
+              <button type="button" class="btn btn-danger btn-sm"
+                      onclick="eliminarFila(this, '{{ p[0] }}')">🗑</button>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="row align-items-center bg-light p-3 rounded border shadow-sm my-3">
+      <div class="col-md-5">
+        <label for="descuento_porcentaje" class="form-label fw-bold text-primary mb-1">
+          <i class="bi bi-percent me-1"></i> Descuento Global (%):
+        </label>
+        <div class="input-group">
+          <input type="number" step="0.01" min="0" max="100" class="form-control fw-bold text-primary fs-5" 
+                 id="descuento_porcentaje" name="descuento_porcentaje" 
+                 value="{{ '%.2f'|format(cotizacion['descuento_porcentaje'] or 0.0) if cotizacion['descuento_porcentaje'] is not none else '0.00' }}" 
+                 onchange="actualizarTotal()" onkeyup="actualizarTotal()">
+          <span class="input-group-text fw-bold">%</span>
+        </div>
+      </div>
+      <div class="col-md-7 text-end">
+        <div class="fs-6 text-muted">Subtotal Bruto: <strong class="text-dark">Bs <span id="subtotal-bruto">0.00</span></strong></div>
+        <div class="fs-6 text-danger">Descuento Comercial (<span id="lbl-descuento-porcentaje">0.00</span>%): <strong>-Bs <span id="monto-descuento">0.00</span></strong></div>
+        <h4 class="fw-bold text-success mb-0 mt-1">Total Final: Bs <span id="total-final">0.00</span></h4>
+      </div>
+    </div>
+
+    <button type="submit" class="btn btn-primary mt-3">Guardar Cambios</button>
+    <a href="/cotizaciones" class="btn btn-secondary mt-3">⬅ Volver a Cotizaciones</a>
+  </form>
+</div>
+
+<script>
+// Almacenar IDs ya agregados para evitar duplicados
+const carritoIds = [];
+
+// Inicializar con los productos existentes
+{% for p in productos_seleccionados %}
+    carritoIds.push({{ p[0] }});
+{% endfor %}
+
+// Inicializar los cálculos al cargar la página
+document.addEventListener('DOMContentLoaded', function() {
+    actualizarTotal();
+});
+
+function agregarAlCarrito(id, codigo, descripcion, precio_unitario) {
+  if (carritoIds.includes(id)) {
+    alert("Este producto ya está en el carrito.");
+    return;
+  }
+
+  carritoIds.push(id);
+
+  const tbody = document.querySelector('#carrito-table tbody');
+  const fila = document.createElement('tr');
+
+  // Convertir a número y formatear
+  const precio = parseFloat(precio_unitario);
+  const subtotalInicial = precio.toFixed(2);
+
+  fila.innerHTML = `
+    <td>
+      ${codigo} - ${descripcion}
+      <input type="hidden" name="producto_id[]" value="${id}">
+    </td>
+    <td>
+      <input type="number" name="cantidad[]" class="form-control" min="1" value="1" onchange="calcularSubtotal(this)" required>
+    </td>
+    <td>
+      <input type="number" name="precio_unitario[]" class="form-control" step="0.01" value="${precio.toFixed(2)}" onchange="calcularSubtotal(this)" required>
+    </td>
+    <td><span class="subtotal">${subtotalInicial}</span></td>
+    <td>
+      <button type="button" class="btn btn-danger btn-sm" onclick="eliminarFila(this, '${id}')">🗑</button>
+    </td>
+  `;
+  tbody.appendChild(fila);
+  actualizarTotal();
+}
+
+function calcularSubtotal(elemento) {
+  const fila = elemento.closest('tr');
+  const cantidad = parseFloat(fila.querySelector('input[name="cantidad[]"]').value) || 0;
+  const precio = parseFloat(fila.querySelector('input[name="precio_unitario[]"]').value) || 0;
+  const subtotal = cantidad * precio;
+  fila.querySelector('.subtotal').textContent = subtotal.toFixed(2);
+  actualizarTotal();
+}
+
+function actualizarTotal() {
+  let subtotalBruto = 0;
+  document.querySelectorAll('.subtotal').forEach(span => {
+    subtotalBruto += parseFloat(span.textContent) || 0;
+  });
+  
+  const pctInput = document.getElementById('descuento_porcentaje');
+  const pct = pctInput ? (parseFloat(pctInput.value) || 0.0) : 0.0;
+  const montoDescuento = subtotalBruto * (pct / 100.0);
+  const totalFinal = Math.max(0, subtotalBruto - montoDescuento);
+
+  const elemSub = document.getElementById('subtotal-bruto');
+  const elemLblPct = document.getElementById('lbl-descuento-porcentaje');
+  const elemMontoDesc = document.getElementById('monto-descuento');
+  const elemTotal = document.getElementById('total-final');
+
+  if (elemSub) elemSub.textContent = subtotalBruto.toFixed(2);
+  if (elemLblPct) elemLblPct.textContent = pct.toFixed(2);
+  if (elemMontoDesc) elemMontoDesc.textContent = montoDescuento.toFixed(2);
+  if (elemTotal) elemTotal.textContent = totalFinal.toFixed(2);
+}
+
+function eliminarFila(boton, id) {
+  const fila = boton.closest('tr');
+  fila.remove();
+  // Remover ID del carrito
+  const index = carritoIds.indexOf(id);
+  if (index > -1) carritoIds.splice(index, 1);
+  actualizarTotal();
+}
+</script>
+{% endblock %}

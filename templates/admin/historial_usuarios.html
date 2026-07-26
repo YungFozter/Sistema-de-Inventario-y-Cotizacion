@@ -1,0 +1,138 @@
+{% extends 'shared/layout.html' %}
+
+{% block title %}Historial de Auditoría{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <h1 class="mt-4">Historial de Auditoría</h1>
+    <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <div>
+                <i class="fas fa-history me-1"></i>
+                Últimas 100 acciones registradas
+            </div>
+            <div>
+                <button class="btn btn-sm btn-secondary" onclick="location.reload()">
+                    <i class="fas fa-sync-alt"></i> Actualizar
+                </button>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover" id="dataTable" width="100%" cellspacing="0">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Fecha/Hora</th>
+                            <th>Usuario</th>
+                            <th>Rol</th>
+                            <th>Acción</th>
+                            <th>Detalles</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for registro in historial %}
+                        <tr>
+                            <td>{{ registro['fecha'] }}</td>
+                            <td>
+                                <strong>{{ registro['usuario_nombre'] }}</strong>
+                                <div class="text-muted small">{{ registro['usuario_email'] }}</div>
+                            </td>
+                            <td>
+                                <span class="badge {% if registro['usuario_rol'] == 'superadmin' %}bg-danger{% elif registro['usuario_rol'] == 'admin' %}bg-warning text-dark{% else %}bg-primary{% endif %}">
+                                    {{ registro['usuario_rol'] }}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="text-capitalize">{{ registro['accion'].replace('_', ' ') }}</span>
+                            </td>
+                            <td>
+                                {% if registro['detalle'] %}
+                                <button class="btn btn-sm btn-outline-info"
+                                        onclick="showDetails(this, `{{ registro['detalle'] | replace('\'', '\\\\\'') | safe }}`)">
+                                    <i class="fas fa-eye"></i> Ver
+                                </button>
+                                {% else %}
+                                <span class="text-muted">Sin detalles</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="card-footer small text-muted">
+            Actualizado el {{ ahora }}
+        </div>
+    </div>
+</div>
+
+<!-- Modal para detalles -->
+<div class="modal fade" id="detailsModal" tabindex="-1" aria-labelledby="detailsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-dark text-white">
+                <h5 class="modal-title" id="detailsModalLabel">Detalles completos</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <pre id="detailsContent" class="p-3 bg-light rounded"></pre>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function showDetails(button, detailData) {
+    try {
+        const detailsModal = new bootstrap.Modal(document.getElementById('detailsModal'));
+        const detailsContent = document.getElementById('detailsContent');
+
+        // Intentar parsear como JSON
+        try {
+            const parsedData = JSON.parse(detailData);
+            detailsContent.innerHTML = syntaxHighlight(parsedData);
+        } catch {
+            // Si no es JSON válido, mostrar como texto plano
+            detailsContent.textContent = detailData;
+        }
+
+        detailsModal.show();
+    } catch (error) {
+        console.error('Error al mostrar detalles:', error);
+        alert('Error al mostrar los detalles');
+    }
+}
+
+// Función para resaltar sintaxis JSON
+function syntaxHighlight(json) {
+    if (typeof json != 'string') {
+        json = JSON.stringify(json, undefined, 2);
+    }
+    json = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    return json.replace(
+        /("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g,
+        function (match) {
+            let cls = 'text-dark';
+            if (/^"/.test(match)) {
+                if (/:$/.test(match)) {
+                    cls = 'text-primary';
+                } else {
+                    cls = 'text-success';
+                }
+            } else if (/true|false/.test(match)) {
+                cls = 'text-info';
+            } else if (/null/.test(match)) {
+                cls = 'text-danger';
+            }
+            return '<span class="' + cls + '">' + match + '</span>';
+        }
+    );
+}
+</script>
+{% endblock %}

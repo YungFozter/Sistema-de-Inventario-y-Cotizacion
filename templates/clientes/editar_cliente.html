@@ -1,0 +1,65 @@
+{% extends 'shared/layout.html' %}
+
+{% block titulo %}Editar Cliente{% endblock %}
+
+{% block contenido %}
+<div class="container mt-4">
+    <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+            <h3 class="card-title mb-0">Editar Cliente</h3>
+        </div>
+
+        <div class="card-body">
+            <form method="post" action="/clientes/editar/{{ cliente[0] }}" class="row g-3">
+                <!-- Primera columna -->
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label for="nombre" class="form-label">Nombre/Razón Social</label>
+                        <input type="text" class="form-control" id="nombre" name="nombre"
+                               value="{{ cliente[1] }}" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="nit" class="form-label">NIT/CI</label>
+                        <input type="text" class="form-control" id="nit" name="nit"
+                               value="{{ cliente[2] }}" required>
+                    </div>
+                </div>
+
+                <!-- Segunda columna -->
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label for="codigo_cliente" class="form-label">Código de Cliente</label>
+               <input type="text" class="form-control" id="codigo_cliente" name="codigo_cliente"
+                   value="{{ cliente[3] }}" readonly>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="telefono" class="form-label">Teléfono/Contacto</label>
+                        <input type="text" class="form-control" id="telefono" name="telefono"
+                               value="{{ cliente[4] }}">
+                    </div>
+                </div>
+
+                <!-- Campo de ancho completo -->
+                <div class="col-12">
+                    <div class="mb-3">
+                        <label for="referencia" class="form-label">Referencia</label>
+                        <input type="text" class="form-control" id="referencia" name="referencia"
+                               value="{{ cliente[5] }}">
+                        <div class="form-text">Información adicional o código interno</div>
+                    </div>
+                </div>
+
+                <!-- Botones de acción -->
+                <div class="col-12">
+                    <div class="d-flex justify-content-end gap-2">
+                        <a href="/clientes" class="btn btn-secondary">Cancelar</a>
+                        <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

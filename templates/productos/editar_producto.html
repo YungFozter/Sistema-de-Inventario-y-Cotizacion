@@ -1,0 +1,167 @@
+{% extends 'shared/layout.html' %}
+
+{% block titulo %}Editar Producto{% endblock %}
+
+{% block contenido %}
+<div class="container mt-4">
+    <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+            <h3 class="card-title mb-0">Editar Producto</h3>
+        </div>
+
+        <div class="card-body">
+            <form action="/productos/editar/{{ producto[0] }}" method="post" class="row g-3">
+                <!-- Campos ocultos para mantener la pestaña, paginación y filtros -->
+                <input type="hidden" name="tab" value="{{ tab }}">
+                <input type="hidden" name="page_reg" value="{{ page_reg }}">
+                <input type="hidden" name="page_imp" value="{{ page_imp }}">
+                <input type="hidden" name="empresa_filtro" value="{{ filtros.empresa }}">
+                <input type="hidden" name="codigo_filtro" value="{{ filtros.codigo }}">
+                <input type="hidden" name="descripcion_filtro" value="{{ filtros.descripcion }}">
+                <input type="hidden" name="marca_filtro" value="{{ filtros.marca }}">
+                <input type="hidden" name="categoria_filtro" value="{{ filtros.categoria }}">
+                
+                <!-- Primera columna -->
+
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label for="empresa" class="form-label">Nombre de Empresa</label>
+                        <input type="text" class="form-control" id="empresa" name="empresa"
+                               value="{{ producto[1] }}">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="codigo" class="form-label">Código</label>
+                        <input type="text" class="form-control" id="codigo" name="codigo"
+                               value="{{ producto[2] }}" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="descripcion" class="form-label">Descripción</label>
+                        <input type="text" class="form-control" id="descripcion" name="descripcion"
+                               value="{{ producto[3] }}">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="marca" class="form-label">Marca</label>
+                        <input type="text" class="form-control" id="marca" name="marca"
+                               value="{{ producto[4] }}">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="categoria_id" class="form-label">Categoría</label>
+                        <select class="form-select" id="categoria_id" name="categoria_id">
+                            <option value="">Sin categoría</option>
+                            {% for categoria in categorias %}
+                                <option value="{{ categoria[0] }}" 
+                                    {% if producto|length > 11 and producto[11] == categoria[0] %}selected{% endif %}>
+                                    {{ categoria[1] }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                        <div class="form-text">
+                            {% if categorias|length > 0 %}
+                                Categorías disponibles (en uso por otros productos)
+                            {% else %}
+                                No hay categorías en uso. <a href="/productos" class="text-primary">Crear nueva categoría</a>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Botón para mostrar todas las categorías si es necesario -->
+                        <button type="button" class="btn btn-sm btn-outline-info mt-2" id="btnMostrarTodasCategorias">
+                            <i class="bi bi-tags"></i> Ver todas las categorías disponibles
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Segunda columna -->
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label for="tm" class="form-label">Tipo de Moneda (TM)</label>
+                        <input type="text" class="form-control" id="tm" name="tm"
+                               value="{{ producto[5] }}">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="um" class="form-label">Unidad de Medida (UM)</label>
+                        <input type="text" class="form-control" id="um" name="um"
+                               value="{{ producto[6] }}">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="cantidad" class="form-label">Cantidad</label>
+                        <input type="number" class="form-control" id="cantidad" name="cantidad"
+                               min="1" value="{{ producto[7] }}">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="precio_unitario" class="form-label">Precio Unitario</label>
+                        <input type="number" class="form-control" id="precio_unitario" name="precio_unitario"
+                               step="any" value="{{ producto[8] }}">
+                    </div>
+                </div>
+
+                <!-- Botones de acción -->
+                <div class="col-12">
+                    <div class="d-flex justify-content-between">
+                        <a href="{{ url_for('productos', tab=tab, page_reg=page_reg, page_imp=page_imp, empresa=filtros.empresa, codigo=filtros.codigo, descripcion=filtros.descripcion, marca=filtros.marca, categoria=filtros.categoria) }}" class="btn btn-secondary">
+                            <i class="bi bi-arrow-left"></i> Volver a productos
+                        </a>
+
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-circle"></i> Actualizar
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const btnMostrarTodas = document.getElementById('btnMostrarTodasCategorias');
+    const selectCategoria = document.getElementById('categoria_id');
+    let todasCategoriasCargadas = false;
+    
+    if (btnMostrarTodas) {
+        btnMostrarTodas.addEventListener('click', function() {
+            if (!todasCategoriasCargadas) {
+                // Cargar todas las categorías vía AJAX
+                fetch('/api/categorias')
+                    .then(response => response.json())
+                    .then(data => {
+                        // Guardar la opción seleccionada actual
+                        const valorActual = selectCategoria.value;
+                        
+                        // Limpiar el select y agregar opción por defecto
+                        selectCategoria.innerHTML = '<option value="">Sin categoría</option>';
+                        
+                        // Agregar todas las categorías
+                        data.forEach(categoria => {
+                            const option = document.createElement('option');
+                            option.value = categoria.id;
+                            option.textContent = categoria.nombre;
+                            if (categoria.id == valorActual) {
+                                option.selected = true;
+                            }
+                            selectCategoria.appendChild(option);
+                        });
+                        
+                        todasCategoriasCargadas = true;
+                        btnMostrarTodas.textContent = 'Todas las categorías cargadas';
+                        btnMostrarTodas.disabled = true;
+                        btnMostrarTodas.classList.remove('btn-outline-info');
+                        btnMostrarTodas.classList.add('btn-success');
+                    })
+                    .catch(error => {
+                        console.error('Error al cargar categorías:', error);
+                        alert('Error al cargar todas las categorías');
+                    });
+            }
+        });
+    }
+});
+</script>
+
+{% endblock %}

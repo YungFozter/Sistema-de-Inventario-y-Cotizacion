@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Debug Fondo Cotización</title>
+    <style>
+        .debug-info {
+            background: yellow;
+            padding: 10px;
+            margin: 10px;
+            border: 2px solid red;
+        }
+        .body-with-background {
+            background-image: url('{{ fondo_base64 }}');
+            background-repeat: no-repeat;
+            background-position: center center;
+            background-size: cover;
+            position: relative;
+            min-height: 100vh;
+            opacity: 0.9;
+        }
+        .content {
+            background: rgba(255, 255, 255, 0.8);
+            padding: 20px;
+            margin: 20px;
+        }
+    </style>
+</head>
+<body{% if fondo_base64 %} class="body-with-background"{% endif %}>
+    <div class="debug-info">
+        <h1>DEBUG INFORMACIÓN</h1>
+        <p><strong>fondo_base64 existe:</strong> {% if fondo_base64 %}SÍ{% else %}NO{% endif %}</p>
+        {% if fondo_base64 %}
+        <p><strong>Longitud:</strong> {{ fondo_base64|length }} caracteres</p>
+        <p><strong>Prefijo:</strong> {{ fondo_base64[:50] }}...</p>
+        {% endif %}
+        <p><strong>Clase del body:</strong> {% if fondo_base64 %}body-with-background{% else %}sin-fondo{% endif %}</p>
+    </div>
+    
+    <div class="content">
+        <h2>CONTENIDO DE PRUEBA</h2>
+        <p>Si ves una imagen de fondo, está funcionando correctamente.</p>
+        <p>Cliente: {{ cliente.nombre if cliente else 'No hay datos de cliente' }}</p>
+        <p>Fecha: {{ cotizacion.fecha if cotizacion else 'No hay fecha' }}</p>
+    </div>
+</body>
+</html>

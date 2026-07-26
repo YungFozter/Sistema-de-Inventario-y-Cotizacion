@@ -1,0 +1,82 @@
+{% extends 'shared/layout.html' %}
+
+{% block titulo %}Iniciar Sesión{% endblock %}
+
+{% block contenido %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="text-center">Iniciar Sesión</h3>
+                    <div class="text-center mt-3">
+                        <a href="{{ url_for('login', tipo='standard') }}"
+                           class="btn btn-outline-light {% if tipo == 'standard' %}active{% endif %}">
+                            Usuario Standard
+                        </a>
+                        <a href="{{ url_for('login', tipo='admin') }}"
+                           class="btn btn-outline-light {% if tipo == 'admin' %}active{% endif %}">
+                            Administrador
+                        </a>
+                    </div>
+                </div>
+
+                <div class="card-body">
+                    {% if error %}
+                        <div class="alert alert-danger">
+                            <i class="bi bi-exclamation-triangle"></i> {{ error }}
+                            {% if error == 'Credenciales incorrectas' %}
+                                <div class="mt-2">
+                                    <small>¿Olvidaste tu contraseña? <a href="/reset-password">Restablecer contraseña</a></small>
+                                </div>
+                            {% endif %}
+                        </div>
+                    {% endif %}
+
+                    <form method="post" action="{{ url_for('login') }}">
+                        <input type="hidden" name="tipo_login" value="{{ tipo }}">
+
+                        <div class="mb-3">
+                            <label class="form-label">Correo electrónico</label>
+                            <input type="email" name="correo" class="form-control" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Contraseña</label>
+                            <input type="password" name="contrasena" class="form-control" required>
+                        </div>
+
+                        {% if tipo == 'admin' %}
+                        <div class="mb-3">
+                            <label class="form-label">PIN de Administrador</label>
+                            <input type="password" name="pin_admin" class="form-control" required>
+                            <small class="form-text">
+                                Ingresa el PIN de administrador
+                            </small>
+                        </div>
+                        {% endif %}
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                {% if tipo == 'admin' %}Ingresar como Admin{% else %}Ingresar{% endif %}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="card-footer text-center">
+                    <small>¿No tienes cuenta? <a href="{{ url_for('registro') }}">Regístrate aquí</a></small>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .btn-outline-light.active {
+        background-color: rgba(255, 255, 255, 0.2);
+        border-color: white;
+    }
+</style>
+{% endblock %}

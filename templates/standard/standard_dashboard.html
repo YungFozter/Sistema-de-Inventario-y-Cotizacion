@@ -1,0 +1,123 @@
+{% extends 'shared/layout.html' %}
+
+{% block titulo %}Mi Panel - Usuario Standard{% endblock %}
+
+{% block contenido %}
+<div class="container mt-4">
+    <!-- Banner de Bienvenida -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 bg-primary text-white">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h2 class="fw-bold">Bienvenido, {{ nombre }}</h2>
+                            <p class="mb-0">Panel exclusivo para usuarios Standard</p>
+                        </div>
+                        <div class="col-md-4 text-md-end">
+                            <span class="badge bg-light text-primary rounded-pill p-2">
+                                <i class="bi bi-person-check me-1"></i> Usuario Standard
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Estadísticas Rápidas -->
+    <div class="row">
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body text-center">
+                    <h3 class="text-primary">{{ total_cotizaciones }}</h3>
+                    <p class="mb-0">Cotizaciones Totales</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body text-center">
+                    <h3 class="text-success">{{ "%.2f"|format(total_cotizado) }} Bs.</h3>
+                    <p class="mb-0">Total Cotizado</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Acciones Rápidas -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="bi bi-lightning me-2"></i>Acciones Rápidas</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2 d-md-flex">
+                        <a href="{{ url_for('gestion_cotizaciones') }}" class="btn btn-primary me-md-2">
+                            <i class="bi bi-plus-circle me-1"></i> Nueva Cotización
+                        </a>
+                        <a href="{{ url_for('standard_cotizaciones') }}" class="btn btn-outline-primary">
+                            <i class="bi bi-list-check me-1"></i> Ver Mis Cotizaciones
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Actividad Reciente -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="bi bi-clock-history me-2"></i>Actividad Reciente</h5>
+                </div>
+                <div class="card-body">
+                    {% if actividad_reciente %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Fecha</th>
+                                    <th>Total</th>
+                                    <th>Estado</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for cot in actividad_reciente %}
+                                <tr>
+                                    <td>#{{ cot[0] }}</td>
+                                    <td>{{ cot[1]|date('%d/%m/%Y') }}</td>
+                                    <td>{{ "%.2f"|format(cot[2]) }} Bs.</td>
+                                    <td>
+                                        <span class="badge
+                                            {% if cot[3] == 'aprobada' %}bg-success
+                                            {% elif cot[3] == 'pendiente' %}bg-warning
+                                            {% else %}bg-secondary{% endif %}">
+                                            {{ cot[3]|capitalize }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <a href="{{ url_for('vista_previa_cotizacion', id=cot[0]) }}"
+                                           class="btn btn-sm btn-outline-primary">
+                                            <i class="bi bi-eye"></i> Ver
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="alert alert-info mb-0">No hay actividad reciente</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

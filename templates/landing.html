@@ -1,0 +1,256 @@
+{% extends 'shared/layout.html' %}
+
+{% block titulo %}Sistema de Gestión de Cotizaciones{% endblock %}
+
+{% block contenido %}
+<div class="container my-5">
+    <!-- Hero Section -->
+    <div class="row align-items-center py-5">
+        <div class="col-lg-6">
+            <h1 class="display-4 fw-bold mb-4">Simplifica tus cotizaciones con nuestro sistema</h1>
+            <p class="lead mb-4">Una solución completa para crear, gestionar y seguir el estado de tus cotizaciones de manera profesional y eficiente.</p>
+            <div class="d-grid gap-3 d-sm-flex">
+                <a href="/login" class="btn btn-primary btn-lg px-4">
+                    <i class="bi bi-box-arrow-in-right me-2"></i> Iniciar Sesión
+                </a>
+                <a href="/registro" class="btn btn-outline-primary btn-lg px-4">
+                    <i class="bi bi-person-plus me-2"></i> Registrarse
+                </a>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <img src="https://whaticket.com/wp-content/uploads/2023/05/Consejos-para-enviar-presupuestos-o-cotizaciones-por-Whatsapp.jpg.webp"
+                 class="img-fluid rounded-3 shadow"
+                 alt="Dashboard de cotizaciones"
+                 style="max-height: 400px; object-fit: cover;">
+        </div>
+    </div>
+
+    <!-- Características Principales -->
+    <div class="row py-5">
+        <div class="col-12 text-center mb-5">
+            <h2 class="fw-bold">Funcionalidades clave</h2>
+            <p class="lead text-muted">Todo lo que necesitas para gestionar tus cotizaciones</p>
+        </div>
+
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body text-center p-4">
+                    <div class="icon-feature bg-primary bg-opacity-10 text-primary rounded-circle p-3 mb-3 mx-auto" style="width: 80px; height: 80px;">
+                        <i class="bi bi-file-earmark-text fs-3"></i>
+                    </div>
+                    <h4>Creación Intuitiva</h4>
+                    <p class="text-muted">Genera cotizaciones profesionales en minutos con plantillas personalizables.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body text-center p-4">
+                    <div class="icon-feature bg-success bg-opacity-10 text-success rounded-circle p-3 mb-3 mx-auto" style="width: 80px; height: 80px;">
+                        <i class="bi bi-graph-up fs-3"></i>
+                    </div>
+                    <h4>Seguimiento en Tiempo Real</h4>
+                    <p class="text-muted">Monitorea el estado de cada cotización y recibe notificaciones de cambios.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body text-center p-4">
+                    <div class="icon-feature bg-info bg-opacity-10 text-info rounded-circle p-3 mb-3 mx-auto" style="width: 80px; height: 80px;">
+                        <i class="bi bi-cloud-arrow-down fs-3"></i>
+                    </div>
+                    <h4>Exportación Profesional</h4>
+                    <p class="text-muted">Descarga en PDF o comparte directamente con tus clientes.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Funcionalidades por rol -->
+    <div class="row py-5">
+        <div class="col-12 text-center mb-5">
+            <h2 class="fw-bold">Funcionalidades por tipo de usuario</h2>
+            <p class="lead text-muted">Descubre lo que puedes hacer según tu rol</p>
+        </div>
+
+        <!-- Rol Administrador -->
+        <div class="col-md-6 mb-4">
+            <div class="card h-100 shadow border-primary">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0"><i class="bi bi-shield-lock"></i> Funciones para Administradores</h3>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <i class="bi bi-star-fill text-warning fs-3 me-2"></i>
+                        <h5 class="mb-0">Gestión Completa del Sistema</h5>
+                    </div>
+
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item">
+                            <i class="bi bi-check-square-fill text-success me-2"></i>
+                            <strong>Gestión de Clientes</strong> - Crear y administrar clientes
+                        </li>
+                        <li class="list-group-item">
+                            <i class="bi bi-check-square-fill text-success me-2"></i>
+                            <strong>Catálogo de Productos</strong> - Registrar y actualizar productos
+                        </li>
+                        <li class="list-group-item">
+                            <i class="bi bi-check-square-fill text-success me-2"></i>
+                            <strong>Creación de Cotizaciones</strong> - Elaborar nuevas cotizaciones
+                        </li>
+                        <li class="list-group-item">
+                            <i class="bi bi-check-square-fill text-success me-2"></i>
+                            <strong>Reportes y Estadísticas</strong> - Generar análisis de datos
+                        </li>
+                        <li class="list-group-item">
+                            <i class="bi bi-check-square-fill text-success me-2"></i>
+                            <strong>Administración de Usuarios</strong> - Gestionar roles y permisos
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Rol Standard -->
+        <div class="col-md-6 mb-4">
+            <div class="card h-100 shadow border-success">
+                <div class="card-header bg-success text-white">
+                    <h3 class="mb-0"><i class="bi bi-person-check"></i> Funciones para Usuarios Estándar</h3>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <i class="bi bi-person-fill text-info fs-3 me-2"></i>
+                        <h5 class="mb-0">Gestión de Cotizaciones</h5>
+                    </div>
+
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item">
+                            <i class="bi bi-check-square-fill text-success me-2"></i>
+                            <strong>Seguimiento de Cotizaciones</strong> - Ver estado y actualizaciones
+                        </li>
+                        <li class="list-group-item">
+                            <i class="bi bi-check-square-fill text-success me-2"></i>
+                            <strong>Descarga de Documentos</strong> - Generar PDF de cotizaciones
+                        </li>
+                        <li class="list-group-item">
+                            <i class="bi bi-check-square-fill text-success me-2"></i>
+                            <strong>Historial Completo</strong> - Acceder a todo tu historial
+                        </li>
+                        <li class="list-group-item">
+                            <i class="bi bi-check-square-fill text-success me-2"></i>
+                            <strong>Notificaciones</strong> - Recibir actualizaciones por correo
+                        </li>
+                        <li class="list-group-item">
+                            <i class="bi bi-check-square-fill text-success me-2"></i>
+                            <strong>Gestión de Perfil</strong> - Actualizar tu información personal
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Proceso de trabajo -->
+    <div class="row py-5 align-items-center">
+        <div class="col-lg-6 order-lg-2 mb-4 mb-lg-0">
+            <h2 class="fw-bold mb-4">¿Cómo funciona?</h2>
+
+            <div class="card bg-light border-0 shadow-sm mb-3">
+                <div class="card-body">
+                    <div class="d-flex">
+                        <div class="me-4 text-primary">
+                            <i class="bi bi-1-circle fs-2"></i>
+                        </div>
+                        <div>
+                            <h5>Registro sencillo</h5>
+                            <p class="text-muted mb-0">Crea tu cuenta en menos de 2 minutos.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card bg-light border-0 shadow-sm mb-3">
+                <div class="card-body">
+                    <div class="d-flex">
+                        <div class="me-4 text-primary">
+                            <i class="bi bi-2-circle fs-2"></i>
+                        </div>
+                        <div>
+                            <h5>Configura tu perfil</h5>
+                            <p class="text-muted mb-0">Agrega tu información y preferencias.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card bg-light border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex">
+                        <div class="me-4 text-primary">
+                            <i class="bi bi-3-circle fs-2"></i>
+                        </div>
+                        <div>
+                            <h5>Comienza a cotizar</h5>
+                            <p class="text-muted mb-0">Crea tu primera cotización en minutos.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6 order-lg-1">
+            <div class="ratio ratio-16x9 shadow rounded-3 overflow-hidden">
+                <img src="https://www.techsmith.es/wp-content/uploads/2022/10/blog_snagit_user-documentation_1500x1100-1.png"
+                     class="img-fluid"
+                     alt="Demo del sistema">
+            </div>
+        </div>
+    </div>
+
+    <!-- CTA Final -->
+    <div class="row py-5">
+        <div class="col-12 text-center">
+            <div class="card bg-primary text-white shadow-lg">
+                <div class="card-body py-5">
+                    <h2 class="display-5 fw-bold mb-4">¿Listo para comenzar?</h2>
+                    <p class="lead mb-4">Regístrate ahora y descubre cómo podemos transformar tu proceso de cotizaciones</p>
+                    <a href="/registro" class="btn btn-light btn-lg px-4">
+                        <i class="bi bi-person-plus me-2"></i> Crear Cuenta Gratis
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .card {
+        transition: transform 0.3s, box-shadow 0.3s;
+    }
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
+    }
+    .list-group-item {
+        border: none;
+        padding: 0.75rem 0.25rem;
+        background-color: transparent;
+    }
+    .icon-feature {
+        transition: transform 0.3s;
+    }
+    .card:hover .icon-feature {
+        transform: scale(1.1);
+    }
+    .bg-primary {
+        background-color: #0d6efd !important;
+    }
+    .border-primary {
+        border-color: #0d6efd !important;
+    }
+</style>
+{% endblock %}

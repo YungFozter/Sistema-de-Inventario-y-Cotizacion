@@ -1,0 +1,11 @@
+.venv
+.idea
+.vscode
+__pycache__
+*.pyc
+.env
+database/
+respaldo/
+test_*.py
+test_*.pdf
+test_*.html

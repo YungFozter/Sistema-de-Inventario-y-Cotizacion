@@ -1,0 +1,160 @@
+{% extends 'shared/layout.html' %}
+
+{% block titulo %}Dashboard{% endblock %}
+
+{% block contenido %}
+<div class="container mt-4">
+    {% if session.user_rol in ['admin', 'superAdmin'] %}
+        <!-- Contenido para administradores SIN el banner duplicado -->
+        {% include 'admin_dashboard.html' %}
+    {% else %}
+        <!-- Dashboard para Usuarios Standard CON el banner -->
+        <div class="row">
+            <!-- Bienvenida y Resumen SOLO para standard -->
+            <div class="col-12 mb-4">
+                <div class="card border-0 bg-primary bg-opacity-10">
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col-md-8">
+                                <h2 class="fw-bold">Bienvenido, {{ nombre }}</h2>
+                                <p class="lead mb-0">Aquí puedes gestionar todas tus cotizaciones</p>
+                            </div>
+                            <div class="col-md-4 text-md-end">
+                                <span class="badge bg-primary rounded-pill p-2">
+                                    <i class="bi bi-person-check me-1"></i> Usuario Standard
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6 mb-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-header bg-white border-0">
+                        <h5 class="mb-0"><i class="bi bi-file-earmark-text me-2 text-primary"></i> Mis Cotizaciones</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="list-group list-group-flush">
+                            <a href="/cotizaciones/standard" class="list-group-item list-group-item-action">
+                                <i class="bi bi-list-check me-2"></i> Ver todas mis cotizaciones
+                            </a>
+                            <a href="/perfil" class="list-group-item list-group-item-action">
+                                <i class="bi bi-person-gear me-2"></i> Editar mi perfil
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Acciones Rápidas -->
+            <div class="col-md-6 mb-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-header bg-white border-0">
+                        <h5 class="mb-0"><i class="bi bi-lightning me-2 text-warning"></i> Acciones Rápidas</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-grid gap-2">
+                            <a href="{{ url_for('nueva_cotizacion') }}" class="btn btn-outline-primary text-start py-3">
+                                <i class="bi bi-plus-circle me-2"></i> Crear Nueva Cotización
+                            </a>
+                            <a href="{{ url_for('standard_cotizaciones') }}" class="btn btn-outline-success text-start py-3">
+                                <i class="bi bi-list-check me-2"></i> Ver Mis Cotizaciones
+                            </a>
+                            {% if ultima_cotizacion_id %}
+                            <a href="{{ url_for('vista_previa_cotizacion', id=ultima_cotizacion_id) }}"
+                               class="btn btn-outline-info text-start py-3">
+                                <i class="bi bi-eye me-2"></i> Ver Última Cotización
+                            </a>
+                            <a href="{{ url_for('pdf_cotizacion', id=ultima_cotizacion_id) }}"
+                               class="btn btn-outline-secondary text-start py-3">
+                                <i class="bi bi-download me-2"></i> Descargar Última
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Resumen de Cotizaciones -->
+            <div class="col-md-6 mb-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-header bg-white border-0 d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="bi bi-file-earmark-text me-2 text-primary"></i> Mis Cotizaciones</h5>
+                        <span class="badge bg-primary rounded-pill">{{ total_cotizaciones_usuario }}</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="list-group list-group-flush">
+                            {% for estado in estados_cotizaciones %}
+                            <div class="list-group-item border-0 px-0 py-2 d-flex justify-content-between align-items-center">
+                                <div>
+                                    <i class="bi
+                                        {% if estado.estado == 'Aprobada' %}bi-check-circle-fill text-success
+                                        {% elif estado.estado == 'Pendiente' %}bi-hourglass-split text-warning
+                                        {% elif estado.estado == 'Rechazada' %}bi-x-circle-fill text-danger
+                                        {% else %}bi-file-earmark-text text-primary{% endif %} me-2"></i>
+                                    {{ estado.estado }}
+                                </div>
+                                <span class="badge bg-light text-dark rounded-pill">{{ estado.cantidad }}</span>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Últimas Actividades -->
+            <div class="col-12 mb-4">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-white border-0">
+                        <h5 class="mb-0"><i class="bi bi-clock-history me-2 text-info"></i> Actividad Reciente</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Fecha</th>
+                                        <th>Cotización</th>
+                                        <th>Cliente</th>
+                                        <th>Estado</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for actividad in actividades_recientes %}
+                                    <tr>
+                                        <td>{{ actividad.fecha|date('%d/%m/%Y %H:%M') }}</td>
+                                        <td>#{{ actividad.id }}</td>
+                                        <td>{{ actividad.cliente }}</td>
+                                        <td>
+                                            <span class="badge
+                                                {% if actividad.estado == 'Aprobada' %}bg-success
+                                                {% elif actividad.estado == 'Pendiente' %}bg-warning text-dark
+                                                {% elif actividad.estado == 'Rechazada' %}bg-danger
+                                                {% else %}bg-secondary{% endif %}">
+                                                {{ actividad.estado }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <a href="{{ url_for('vista_previa_cotizacion', id=actividad.id) }}"
+                                               class="btn btn-sm btn-outline-primary" title="Ver">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
+                                            <a href="{{ url_for('pdf_cotizacion', id=actividad.id) }}"
+                                               class="btn btn-sm btn-outline-secondary" title="Descargar">
+                                                <i class="bi bi-download"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

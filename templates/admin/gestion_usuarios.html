@@ -1,0 +1,320 @@
+{% extends 'shared/layout.html' %}
+
+{% block titulo %}Gestión de Usuarios{% endblock %}
+
+{% block contenido %}
+<div class="container mt-4">
+    <div class="card shadow">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+            <h3 class="mb-0"><i class="bi bi-people-fill"></i> Gestión de Usuarios</h3>
+            <button class="btn btn-light btn-sm" data-bs-toggle="modal" data-bs-target="#usuarioModal" id="nuevoUsuarioBtn">
+                <i class="bi bi-plus-circle"></i> Nuevo Usuario
+            </button>
+        </div>
+
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>ID</th>
+                            <th>Nombre</th>
+                            <th>Correo</th>
+                            <th>Teléfono</th>
+                            <th>Rol</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for usuario in usuarios %}
+                        <tr>
+                            <td>{{ usuario.id }}</td>
+                            <td>{{ usuario.nombre }}</td>
+                            <td>{{ usuario.correo }}</td>
+                            <td>{{ usuario.telefono or '-' }}</td>
+                            <td>
+                                <span class="badge bg-{% if usuario.rol == 'admin' %}danger{% else %}primary{% endif %}">
+                                    {{ usuario.rol|capitalize }}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="badge bg-{% if usuario.activo %}success{% else %}secondary{% endif %}">
+                                    {{ 'Activo' if usuario.activo else 'Inactivo' }}
+                                </span>
+                            </td>
+                            <td>
+                                <div class="btn-group btn-group-sm" role="group">
+                                    <button class="btn btn-outline-warning"
+                                            onclick="editarUsuario({{ usuario.id }})"
+                                            title="Editar">
+                                        <i class="bi bi-pencil"></i>
+                                    </button>
+                                    {% if usuario.id != session.user_id %}
+                                    <button class="btn btn-outline-{% if usuario.activo %}danger{% else %}success{% endif %}"
+                                            onclick="cambiarEstadoUsuario({{ usuario.id }}, {{ usuario.activo }})"
+                                            title="{% if usuario.activo %}Desactivar{% else %}Activar{% endif %}">
+                                        <i class="bi bi-{% if usuario.activo %}x-circle{% else %}check-circle{% endif %}"></i>
+                                    </button>
+                                    <button class="btn btn-outline-primary"
+                                            onclick="cambiarRolUsuario({{ usuario.id }}, '{{ usuario.rol }}')"
+                                            title="Cambiar Rol">
+                                        <i class="bi bi-arrow-repeat"></i>
+                                    </button>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="7" class="text-center">No se encontraron usuarios</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para nuevo/editar usuario -->
+<div class="modal fade" id="usuarioModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalTitle">Nuevo Usuario</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="usuarioForm" onsubmit="guardarUsuario(event)">
+                <div class="modal-body">
+                    <input type="hidden" id="usuarioId" name="id">
+                    <div class="mb-3">
+                        <label class="form-label">Nombre completo *</label>
+                        <input type="text" class="form-control" id="nombre" name="nombre" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Correo electrónico *</label>
+                        <input type="email" class="form-control" id="correo" name="correo" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Teléfono</label>
+                        <input type="tel" class="form-control" id="telefono" name="telefono">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Rol *</label>
+                        <select class="form-select" id="rol" name="rol" required>
+                            <option value="standard">Usuario Estándar</option>
+                            <option value="admin">Administrador</option>
+                        </select>
+                    </div>
+                    <div class="mb-3" id="passwordSection">
+                        <label class="form-label">Contraseña *</label>
+                        <input type="password" class="form-control" id="passwordField" name="contrasena" required>
+                        <div class="form-text">Mínimo 8 caracteres</div>
+                    </div>
+                    <div class="mb-3" id="confirmPasswordSection">
+                        <label class="form-label">Confirmar contraseña *</label>
+                        <input type="password" class="form-control" id="confirmPasswordField" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para cambiar rol -->
+<div class="modal fade" id="rolModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">Cambiar Rol de Usuario</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="usuarioRolId">
+                <label class="form-label">Selecciona el nuevo rol:</label>
+                <select class="form-select" id="nuevoRol">
+                    <option value="admin">Administrador</option>
+                    <option value="standard">Usuario Estándar</option>
+                </select>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="confirmarCambioRol()">Guardar Cambio</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Función para editar usuario
+function editarUsuario(id) {
+    fetch(`/admin/usuarios/${id}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                alert(data.error);
+                return;
+            }
+
+            document.getElementById('modalTitle').textContent = 'Editar Usuario';
+            document.getElementById('usuarioId').value = data.id;
+            document.getElementById('nombre').value = data.nombre;
+            document.getElementById('correo').value = data.correo;
+            document.getElementById('telefono').value = data.telefono || '';
+            document.getElementById('rol').value = data.rol;
+
+            // Para edición, la contraseña no es obligatoria
+            document.getElementById('passwordField').removeAttribute('required');
+            document.getElementById('confirmPasswordField').removeAttribute('required');
+            document.getElementById('passwordField').placeholder = 'Nueva contraseña (opcional)';
+
+            const modal = new bootstrap.Modal(document.getElementById('usuarioModal'));
+            modal.show();
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error al cargar los datos del usuario');
+        });
+}
+
+// Función para cambiar estado de usuario
+function cambiarEstadoUsuario(id, estadoActual) {
+    const nuevoEstado = estadoActual ? 0 : 1;
+    const esSuperadmin = {{ 'true' if session.get('user_rol') == 'superadmin' else 'false' }};
+
+    if (confirm(`¿Estás seguro de querer ${estadoActual ? 'desactivar' : 'activar'} este usuario?`)) {
+        fetch(`/admin/usuarios/${id}/estado${esSuperadmin ? '-super' : '-admin'}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ activo: nuevoEstado })
+        })
+        .then(response => {
+            if (!response.ok) throw new Error('Error en la respuesta');
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert(data.error || 'Error al cambiar estado');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error al comunicarse con el servidor');
+        });
+    }
+}
+
+// Función para abrir modal de cambio de rol
+function cambiarRolUsuario(id, rolActual) {
+    document.getElementById('usuarioRolId').value = id;
+    document.getElementById('nuevoRol').value = rolActual;
+
+    const modal = new bootstrap.Modal(document.getElementById('rolModal'));
+    modal.show();
+}
+
+// Función para confirmar cambio de rol
+function confirmarCambioRol() {
+    const id = document.getElementById('usuarioRolId').value;
+    const nuevoRol = document.getElementById('nuevoRol').value;
+
+    fetch(`/admin/usuarios/${id}/rol`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ rol: nuevoRol })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert('Error al cambiar el rol del usuario');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error al cambiar el rol del usuario');
+    });
+}
+
+// Función para guardar usuario (nuevo o edición)
+function guardarUsuario(event) {
+    event.preventDefault();
+
+    const formData = {
+        nombre: document.getElementById('nombre').value,
+        correo: document.getElementById('correo').value,
+        telefono: document.getElementById('telefono').value,
+        rol: document.getElementById('rol').value
+    };
+
+    const password = document.getElementById('passwordField').value;
+    if (password) {
+        formData.contrasena = password;
+        const confirmPassword = document.getElementById('confirmPasswordField').value;
+
+        if (password !== confirmPassword) {
+            alert('Las contraseñas no coinciden');
+            return;
+        }
+
+        if (password.length < 8) {
+            alert('La contraseña debe tener al menos 8 caracteres');
+            return;
+        }
+    } else if (!document.getElementById('usuarioId').value) {
+        // Solo requerir contraseña para nuevos usuarios
+        alert('La contraseña es obligatoria para nuevos usuarios');
+        return;
+    }
+
+    const id = document.getElementById('usuarioId').value;
+    const url = id ? `/admin/usuarios/${id}` : '/admin/usuarios';
+    const method = id ? 'PUT' : 'POST';
+
+    fetch(url, {
+        method: method,
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.error) {
+            alert(data.error);
+        } else {
+            location.reload();
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error al guardar el usuario');
+    });
+}
+
+// Configurar modal para nuevo usuario
+document.getElementById('nuevoUsuarioBtn').addEventListener('click', function() {
+    document.getElementById('modalTitle').textContent = 'Nuevo Usuario';
+    document.getElementById('usuarioForm').reset();
+    document.getElementById('usuarioId').value = '';
+    document.getElementById('passwordField').setAttribute('required', '');
+    document.getElementById('confirmPasswordField').setAttribute('required', '');
+    document.getElementById('passwordField').placeholder = '';
+});
+</script>
+{% endblock %}

@@ -1,0 +1,92 @@
+{% extends 'shared/layout.html' %}
+
+{% block titulo %}Registro de Usuario{% endblock %}
+
+{% block contenido %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="text-center">Crear cuenta nueva</h3>
+                </div>
+
+                <div class="card-body">
+                    <form action="/registro" method="post">
+                        <div class="mb-3">
+                            <label class="form-label">Tipo de Usuario</label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="rol" id="rol_standard" value="standard" checked>
+                                <label class="form-check-label" for="rol_standard">Usuario Standard</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="rol" id="rol_admin" value="admin">
+                                <label class="form-check-label" for="rol_admin">Administrador</label>
+                            </div>
+                        </div>
+
+                        <!-- Campo PIN (visible solo si selecciona "admin") -->
+                        <div class="mb-3" id="pin_admin_container" style="display: none;">
+                            <label class="form-label">PIN de Administrador</label>
+                            <input type="password" name="pin_admin" class="form-control" placeholder="Ingresa el PIN">
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Nombre completo</label>
+                            <input type="text" name="nombre" class="form-control" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Correo electrónico</label>
+                            <input type="email" name="correo" class="form-control" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Teléfono</label>
+                            <input type="tel" name="telefono" class="form-control">
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Contraseña</label>
+                            <input type="password" name="contrasena" class="form-control" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Confirmar contraseña</label>
+                            <input type="password" name="confirmar_contrasena" class="form-control" required>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">Registrarse</button>
+                            <a href="/" class="btn btn-outline-secondary">Cancelar</a>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="card-footer text-center">
+                    <small>¿Ya tienes una cuenta? <a href="/login">Inicia sesión</a></small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const rolAdmin = document.getElementById('rol_admin');
+    const rolStandard = document.getElementById('rol_standard');
+    const pinContainer = document.getElementById('pin_admin_container');
+
+    rolAdmin.addEventListener('change', function() {
+        if (this.checked) {
+            pinContainer.style.display = 'block';
+        }
+    });
+
+    rolStandard.addEventListener('change', function() {
+        if (this.checked) {
+            pinContainer.style.display = 'none';
+        }
+    });
+});
+</script>
+{% endblock %}

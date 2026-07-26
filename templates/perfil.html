@@ -1,0 +1,62 @@
+{% extends 'shared/layout.html' %}
+
+{% block titulo %}Mi Perfil{% endblock %}
+
+{% block contenido %}
+<div class="d-flex flex-column min-vh-100">
+    <div class="container mt-4 flex-grow-1">
+    <!-- Mostrar mensajes flash -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+            <h3><i class="bi bi-person-circle"></i> Mi Perfil</h3>
+        </div>
+        <div class="card-body">
+            <form method="post" action="{{ url_for('perfil') }}">
+                <div class="row g-3">
+                    <!-- Nombre -->
+                    <div class="col-md-6">
+                        <label class="form-label">Nombre Completo</label>
+                        <input type="text" class="form-control" name="nombre"
+                               value="{{ usuario.nombre if usuario else '' }}" required>
+                    </div>
+
+                    <!-- Correo -->
+                    <div class="col-md-6">
+                        <label class="form-label">Correo Electrónico</label>
+                        <input type="email" class="form-control" name="correo"
+                               value="{{ usuario.correo if usuario else '' }}" required>
+                    </div>
+
+                    <!-- Teléfono -->
+                    <div class="col-md-6">
+                        <label class="form-label">Teléfono</label>
+                        <input type="tel" class="form-control" name="telefono"
+                               value="{{ usuario.telefono if usuario else '' }}">
+                    </div>
+
+                    <!-- Botones -->
+                    <div class="col-12 mt-4">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-save"></i> Guardar Cambios
+                        </button>
+                        <a href="{{ url_for('dashboard') }}" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left"></i> Cancelar
+                        </a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

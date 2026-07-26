@@ -1,0 +1,249 @@
+{% extends 'shared/layout.html' %}
+
+{% block titulo %}Dashboard Admin{% endblock %}
+
+{% block contenido %}
+<div class="container mt-4">
+    <!-- Encabezado limpio -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="text-center">
+                <h1 class="fw-bold">Bienvenido, {{ session.user_nombre }}</h1>
+                <p class="lead">Panel de control completo del sistema</p>
+                <span class="badge bg-primary">Administrador</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sección de módulos -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h4 class="mb-4">Módulos Principales</h4>
+                    <div class="row text-center">
+                        <div class="col-md-3 mb-3">
+                            <a href="{{ url_for('clientes') }}" class="btn btn-primary w-100 py-3">
+                                <i class="bi bi-people-fill fs-2 d-block mb-2"></i>
+                                CLIENTES
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <a href="{{ url_for('productos') }}" class="btn btn-success w-100 py-3">
+                                <i class="bi bi-box-seam fs-2 d-block mb-2"></i>
+                                PRODUCTOS
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <a href="{{ url_for('gestion_cotizaciones') }}" class="btn btn-warning w-100 py-3">
+                                <i class="bi bi-file-earmark-text fs-2 d-block mb-2"></i>
+                                COTIZACIONES
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <a href="{{ url_for('historial_usuarios') }}" class="btn btn-info w-100 py-3">
+                                <i class="bi bi-person-lines-fill fs-2 d-block mb-2"></i>
+                                USUARIOS
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Acciones rápidas -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h4 class="mb-4">Acciones Rápidas</h4>
+                    <div class="row">
+                        <div class="col-md-3 mb-3">
+                            <a href="{{ url_for('clientes') }}" class="btn btn-outline-primary w-100">
+                                <i class="bi bi-plus-circle"></i> Nuevo Cliente
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <a href="{{ url_for('productos') }}" class="btn btn-outline-success w-100">
+                                <i class="bi bi-plus-square"></i> Agregar Producto
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <a href="{{ url_for('gestion_cotizaciones') }}" class="btn btn-outline-warning w-100">
+                                <i class="bi bi-file-earmark-plus"></i> Crear Cotización
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <a href="{{ url_for('registro') }}" class="btn btn-outline-info w-100">
+                                <i class="bi bi-person-plus"></i> Registrar Usuario
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+    <!-- Última Actividad -->
+    <div class="row">
+        <div class="col-lg-8 mb-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-header bg-white border-0">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="bi bi-clock-history text-primary me-2"></i> Actividad Reciente</h5>
+                        <a href="{{ url_for('gestion_cotizaciones') }}" class="btn btn-sm btn-outline-primary">Ver Todas</a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Fecha</th>
+                                    <th>Cotización</th>
+                                    <th>Cliente</th>
+                                    <th>Total</th>
+                                    <th>Estado</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for actividad in actividades_recientes %}
+                                <tr>
+                                    <td>{{ actividad.fecha|date('%d/%m/%Y %H:%M') }}</td>
+                                    <td>#{{ actividad.id }}</td>
+                                    <td>{{ actividad.cliente }}</td>
+                                    <td>Bs {{ "%.2f"|format(actividad.total) }}</td>
+                                    <td>
+                                        <span class="badge 
+                                            {% if actividad.estado|lower == 'aprobada' %}bg-success
+                                            {% elif actividad.estado|lower == 'pendiente' %}bg-warning text-dark
+                                            {% elif actividad.estado|lower == 'rechazada' %}bg-danger
+                                            {% else %}bg-secondary{% endif %}">
+                                            {{ actividad.estado }}
+                                        </span>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Estadísticas -->
+        <div class="col-lg-4 mb-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-header bg-white border-0 pb-2 pt-2">
+                    <h5 class="mb-1" style="font-size:1.1rem;"><i class="bi bi-bar-chart-line text-success me-2"></i> Estadísticas</h5>
+                </div>
+                <div class="card-body pt-2 pb-2">
+                    <div>
+                        <div class="accordion" id="accordionEstados">
+                            <div class="accordion-item">
+                                <h2 class="accordion-header" id="headingAprobadas">
+                                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseAprobadas" aria-expanded="true" aria-controls="collapseAprobadas">
+                                        <span class="badge bg-success me-2">Aprobadas</span> ({{ cotizaciones_aprobadas }})
+                                    </button>
+                                </h2>
+                                <div id="collapseAprobadas" class="accordion-collapse collapse show" aria-labelledby="headingAprobadas" data-bs-parent="#accordionEstados">
+                                    <div class="accordion-body p-0">
+                                        <table class="table table-sm mb-0">
+                                            <thead><tr><th>ID</th><th>Cliente</th><th>Fecha</th><th>Total</th></tr></thead>
+                                            <tbody>
+                                            {% for c in cotizaciones_estado.aprobadas %}
+                                            <tr><td>#{{ c.id }}</td><td>{{ c.cliente }}</td><td>{{ c.fecha|date('%d/%m/%Y') }}</td><td>Bs {{ '%.2f'|format(c.total) }}</td></tr>
+                                            {% else %}
+                                            <tr><td colspan="4" class="text-center text-muted">Sin cotizaciones aprobadas</td></tr>
+                                            {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="accordion-item">
+                                <h2 class="accordion-header" id="headingPendientes">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapsePendientes" aria-expanded="false" aria-controls="collapsePendientes">
+                                        <span class="badge bg-warning text-dark me-2">Pendientes</span> ({{ cotizaciones_pendientes }})
+                                    </button>
+                                </h2>
+                                <div id="collapsePendientes" class="accordion-collapse collapse" aria-labelledby="headingPendientes" data-bs-parent="#accordionEstados">
+                                    <div class="accordion-body p-0">
+                                        <table class="table table-sm mb-0">
+                                            <thead><tr><th>ID</th><th>Cliente</th><th>Fecha</th><th>Total</th></tr></thead>
+                                            <tbody>
+                                            {% for c in cotizaciones_estado.pendientes %}
+                                            <tr><td>#{{ c.id }}</td><td>{{ c.cliente }}</td><td>{{ c.fecha|date('%d/%m/%Y') }}</td><td>Bs {{ '%.2f'|format(c.total) }}</td></tr>
+                                            {% else %}
+                                            <tr><td colspan="4" class="text-center text-muted">Sin cotizaciones pendientes</td></tr>
+                                            {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="accordion-item">
+                                <h2 class="accordion-header" id="headingRechazadas">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseRechazadas" aria-expanded="false" aria-controls="collapseRechazadas">
+                                        <span class="badge bg-danger me-2">Rechazadas</span> ({{ cotizaciones_rechazadas }})
+                                    </button>
+                                </h2>
+                                <div id="collapseRechazadas" class="accordion-collapse collapse" aria-labelledby="headingRechazadas" data-bs-parent="#accordionEstados">
+                                    <div class="accordion-body p-0">
+                                        <table class="table table-sm mb-0">
+                                            <thead><tr><th>ID</th><th>Cliente</th><th>Fecha</th><th>Total</th></tr></thead>
+                                            <tbody>
+                                            {% for c in cotizaciones_estado.rechazadas %}
+                                            <tr><td>#{{ c.id }}</td><td>{{ c.cliente }}</td><td>{{ c.fecha|date('%d/%m/%Y') }}</td><td>Bs {{ '%.2f'|format(c.total) }}</td></tr>
+                                            {% else %}
+                                            <tr><td colspan="4" class="text-center text-muted">Sin cotizaciones rechazadas</td></tr>
+                                            {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+<!-- Scripts para gráficos -->
+{% block scripts %}
+<!-- Scripts limpios: se eliminó Chart.js porque ya no se usa en el dashboard -->
+{% endblock %}
+
+<style>
+    .action-card {
+        transition: all 0.3s ease;
+        border: 1px solid rgba(0,0,0,0.05);
+    }
+    .action-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    .icon-lg {
+        width: 60px;
+        height: 60px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto;
+    }
+    .icon-shape {
+        width: 48px;
+        height: 48px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .chart-container {
+        position: relative;
+    }
+</style>

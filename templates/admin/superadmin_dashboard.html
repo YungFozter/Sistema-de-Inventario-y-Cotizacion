@@ -1,0 +1,71 @@
+{% extends 'shared/layout.html' %}
+
+{% block contenido %}
+<div class="container">
+    <h1 class="text-primary">Panel de SuperAdmin</h1>
+    <p class="text-muted">Acceso completo al sistema y gestión de administradores</p>
+
+    <!-- Tarjetas de Funciones Exclusivas -->
+    <div class="row mt-4">
+        <!-- Gestión de Usuarios -->
+        <div class="col-md-4 mb-4">
+            <div class="card border-primary h-100">
+                <div class="card-header bg-primary text-white">
+                    <i class="bi bi-people-fill me-2"></i> Gestionar Usuarios
+                </div>
+                <div class="card-body">
+                    <h5 class="card-title">Administrar Roles</h5>
+                    <p class="card-text">
+                        Crea, modifica y elimina administradores y usuarios estándar
+                    </p>
+                </div>
+                <div class="card-footer bg-transparent">
+                    <a href="/admin/usuarios" class="btn btn-outline-primary w-100">
+                        Acceder <i class="bi bi-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Clientes Globales -->
+        <div class="col-md-4 mb-4">
+            <div class="card border-success h-100">
+                <div class="card-header bg-success text-white">
+                    <i class="bi bi-building me-2"></i> Clientes Globales
+                </div>
+                <div class="card-body">
+                    <h5 class="card-title">Acceso Completo</h5>
+                    <p class="card-text">
+                        Visualiza y gestiona todos los clientes del sistema
+                    </p>
+                </div>
+                <div class="card-footer bg-transparent">
+                    <a href="/clientes" class="btn btn-outline-success w-100">
+                        Ver Clientes <i class="bi bi-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Historial de Auditoría -->
+        <div class="col-md-4 mb-4">
+            <div class="card border-warning h-100">
+                <div class="card-header bg-warning text-dark">
+                    <i class="bi bi-clock-history me-2"></i> Historial de Auditoría
+                </div>
+                <div class="card-body">
+                    <h5 class="card-title">Registro de Actividades</h5>
+                    <p class="card-text">
+                        Revisa todas las acciones realizadas en el sistema
+                    </p>
+                </div>
+                <div class="card-footer bg-transparent">
+                    <a href="/admin/historial-usuarios" class="btn btn-outline-warning w-100">
+                        Ver Historial <i class="bi bi-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <title>COTIZACIÓN DE VENTAS</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        body {
+            font-size: 10pt;
+            line-height: 1.4;
+            padding: 0;
+            margin: 0;
+            color: #333;
+            position: relative;
+        }
+
+        .body-with-background {
+            position: relative;
+            min-height: 100vh;
+            width: 100%;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .background-image {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 1;
+            object-fit: cover;
+            object-position: center center;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+            filter: none;
+        }
+
+        /* Pseudo-elemento temporalmente desactivado para debugging
+        .body-with-background::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: inherit;
+            clip-path: polygon(0 0, 90% 0, 100% 10%, 100% 100%, 10% 100%, 0 90%);
+            z-index: -1;
+            opacity: 0.6;
+        }
+        */
+        .body-with-background .container {
+            position: relative;
+            z-index: 1;
+            background: transparent;
+            padding: 8px;
+            margin: 6px;
+            border-radius: 5px;
+        }
+
+        .container {
+            padding: 8px;
+            margin: 0 4px;
+            max-width: 100%;
+        }
+
+        .body-with-background table {
+            background: transparent;
+            border: 1px solid rgba(44, 62, 80, 0.3);
+        }
+
+        .body-with-background th {
+            background: transparent !important;
+            border-bottom: 1px solid rgba(44, 62, 80, 0.3);
+            color: #2c3e50;
+        }
+
+        .body-with-background td {
+            border-bottom: 1px solid rgba(44, 62, 80, 0.2);
+            background: transparent;
+        }
+
+        .body-with-background .cliente-info,
+        .body-with-background .datos-cotizacion,
+        .body-with-background .totales-container,
+        .body-with-background .fecha-cotizacion {
+            background: transparent;
+            padding: 8px;
+            margin: 5px 0;
+            border-radius: 3px;
+            border: 1px solid rgba(44, 62, 80, 0.2);
+        }
+
+        .header-container {
+            position: relative;
+            margin-bottom: 25px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #2c3e50;
+            height: 60px;
+            /* Reducido ya que no hay logo */
+        }
+
+        /* LOGO ANULADO - Estilos comentados
+        .logo {
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: auto;
+        }
+        .logo img {
+                max-width: 257px;
+                height: auto;
+                max-height: 154px;
+        }
+        */
+        .header-center {
+            position: static;
+            transform: none;
+            width: 100%;
+            text-align: center;
+            padding-top: 10px;
+        }
+
+        .header-center h1 {
+            font-size: 16pt;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 5px;
+            letter-spacing: 1px;
+            white-space: nowrap;
+        }
+
+        .header-center h2 {
+            font-size: 13pt;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 0;
+            padding-bottom: 8px;
+        }
+
+        .section-title {
+            font-weight: 600;
+            font-size: 11pt;
+            color: #2c3e50;
+            margin: 20px 0 10px;
+            padding-bottom: 5px;
+            border-bottom: 1px solid #e0e0e0;
+            letter-spacing: 0.5px;
+        }
+
+        .client-data-container {
+            background-color: transparent;
+            border-radius: 4px;
+            padding: 15px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(44, 62, 80, 0.2);
+        }
+
+        .client-data-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px 25px;
+        }
+
+        .data-row {
+            display: flex;
+            align-items: center;
+            min-height: 25px;
+        }
+
+        .data-label {
+            font-weight: 600;
+            color: #2c3e50;
+            min-width: 140px;
+            display: inline-block;
+        }
+
+        .data-value {
+            flex-grow: 1;
+            padding: 5px 0;
+            color: #444;
+        }
+
+        .conditions-container {
+            display: flex;
+            justify-content: space-between;
+            margin: 20px 0;
+            padding: 15px;
+            background-color: transparent;
+            border-radius: 4px;
+            border: 1px solid rgba(44, 62, 80, 0.2);
+        }
+
+        .condition-item {
+            display: flex;
+            align-items: center;
+        }
+
+        .condition-label {
+            font-weight: 600;
+            color: #2c3e50;
+            min-width: 120px;
+        }
+
+        .highlight-value {
+            font-weight: 500;
+            color: #2c3e50;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 15px;
+            font-size: 8pt;
+        }
+
+        th,
+        td {
+            border: 1px solid #ddd;
+            padding: 6px 5px;
+            text-align: center;
+        }
+
+        th {
+            background-color: #2c3e50;
+            font-weight: 600;
+        }
+
+        .text-left {
+            text-align: left;
+            padding-left: 8px !important;
+            color: black;
+        }
+
+        .text-right {
+            text-align: right;
+            padding-right: 8px !important;
+        }
+
+        .dashed-line {
+            border-top: 1px dashed #aaa;
+            margin: 15px 0;
+        }
+
+        .totales-section {
+            margin-top: 0 !important;
+            font-size: 9pt;
+            padding-top: 0 !important;
+        }
+
+        .totales-table {
+            width: 100%;
+            margin-top: 5px;
+            border-collapse: collapse;
+        }
+
+        .totales-table td {
+            padding: 4px 0;
+        }
+
+        .totales-table tr:last-child td {
+            border-top: 1px solid #2c3e50;
+            font-weight: 600;
+            padding-top: 6px;
+        }
+
+        .monto-letras {
+            margin: 4px 0 4px !important;
+            line-height: 1.4;
+            font-style: italic;
+            padding: 6px;
+            background-color: transparent;
+            border-left: 2px solid rgba(44, 62, 80, 0.3);
+        }
+
+        .firma-section {
+            margin-top: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            /* centrar verticalmente firma y fecha */
+        }
+
+        .firma-container {
+            text-align: center;
+            width: 200px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            /* asegurar centrado vertical del bloque de firma */
+        }
+
+        .firma-line {
+            border-top: 1px solid #2c3e50;
+            width: 80%;
+            margin: 0 auto;
+            padding-top: 6px;
+            /* reducir espacio vertical para alinear con la fecha */
+            box-sizing: border-box;
+        }
+
+        .firma-text {
+            font-size: 9pt;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .fecha-cotizacion {
+            text-align: right;
+            font-size: 9pt;
+            margin-top: 0;
+            color: #2c3e50;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            justify-content: center;
+            gap: 8px;
+            height: auto;
+        }
+
+        /* Configuración de páginas y contenedores */
+        .page {
+            margin: 0;
+            padding: 0;
+            page-break-after: auto;
+            position: relative;
+        }
+
+        /* Estilos para manejo de páginas y tablas */
+        .page-break {
+            page-break-before: always;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Control de elementos en página */
+        tr {
+            page-break-inside: avoid;
+        }
+
+        thead {
+            display: table-header-group;
+        }
+
+        /* Estilos específicos para la tabla de productos */
+        .productos-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 0 !important;
+            page-break-inside: avoid;
+            table-layout: fixed;
+            /* distribuir ancho entre columnas */
+            word-wrap: break-word;
+        }
+
+        /* Sección de totales */
+        .totales-section {
+            page-break-before: auto;
+            page-break-inside: avoid;
+            margin-top: 0 !important;
+            padding-top: 0 !important;
+        }
+
+        /* Contenido de última página */
+        .last-page-content {
+            page-break-before: auto;
+            page-break-inside: avoid;
+            page-break-after: avoid;
+            padding-top: 4px !important;
+        }
+
+
+        /* Ajustes para tabla de productos */
+        .productos-table {
+            margin-bottom: 0;
+        }
+
+        /* Bordes y estilos más marcados para la tabla de productos */
+        .productos-table th,
+        .productos-table td {
+            border: 1px solid #000 !important;
+            color: #000000;
+            padding: 6px 4px;
+            /* reducir padding horizontal para ganar anchura útil */
+        }
+
+        /* Quitar color de fondo del encabezado de la tabla de productos (pantalla y PDF) */
+        .productos-table thead th {
+            background-color: transparent !important;
+            color: #000000 !important;
+            font-weight: 600;
+        }
+
+        /* Forzar colores en impresión/PDF: fondo blanco, texto y bordes negros */
+        @media print {
+
+            .productos-table th,
+            .productos-table td {
+                background-color: #ffffff !important;
+                color: #000000 !important;
+                border: 1px solid #000000 !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+
+            .productos-table th {
+                background-color: #ffffff !important;
+            }
+        }
+
+        /* Contenedor para totales y monto literal */
+        .totales-section {
+            page-break-before: auto;
+            page-break-inside: avoid;
+            margin-top: 10px;
+        }
+
+        /* Mantener los totales juntos */
+        .totales-container {
+            page-break-inside: avoid;
+        }
+
+        /* Estilo para la última página */
+        .last-page-content {
+            position: relative;
+            margin-top: auto;
+        }
+
+        /* Ajuste para el espaciado de la tabla */
+        table {
+            margin-bottom: 0;
+        }
+
+        /* Contenido después del salto de página */
+        .page-break+table {
+            margin-top: 10px;
+        }
+
+        /* Ajuste para cada página */
+        .page {
+            padding: 20px;
+            position: relative;
+        }
+
+        /* ESTILOS ADAPTATIVOS */
+        @media print,
+        screen and (max-width: 768px) {
+            body {
+                font-size: 12px;
+            }
+
+            .header-container {
+                height: auto;
+                padding-top: 10px;
+                padding-bottom: 15px;
+            }
+
+            /* LOGO ANULADO - Estilos comentados
+            .logo {
+                position: static;
+                transform: none;
+                display: block;
+                text-align: left;
+                margin-bottom: 15px;
+            }
+            
+            .logo img {
+                max-width: 150px;
+                max-height: 80px;
+            }
+            */
+
+            .header-center {
+                position: static;
+                transform: none;
+                display: block;
+                text-align: center;
+                width: 100%;
+            }
+
+            .product-table th,
+            .product-table td {
+                padding: 0.3rem;
+                font-size: 0.8rem;
+            }
+        }
+
+        /* Eliminado @media print para que el logo conserve el tamaño definido en .logo img al generar PDF */
+    </style>
+</head>
+<body{% if fondo_base64 %} class="body-with-background" {% endif %}>
+    {% if fondo_base64 %}
+    <img src="{{ fondo_base64 }}" class="background-image" alt="Fondo">
+    {% endif %}
+    <div class="container">
+        <!-- ENCABEZADO SIN LOGO - ANULADO -->
+        <div class="header-container">
+            <!-- Logo anulado por solicitud del usuario -->
+            <div class="header-center">
+                <h1>PRESUPUESTO ELECTRICO</h1>
+            </div>
+        </div>
+
+        <!-- SECCIÓN DATOS CLIENTES -->
+        <div class="section-title">DATOS CLIENTES</div>
+        <div class="client-data-container">
+            <div class="client-data-grid">
+                <div class="data-row">
+                    <span class="data-label">CLIENTE/EMPRESA:</span>
+                    <span class="data-value highlight-value">{{ cliente.nombre if cliente.nombre else "S/N" }}</span>
+                </div>
+                <div class="data-row">
+                    <span class="data-label">E-MAIL:</span>
+                    <span class="data-value">{{ cliente.email if cliente.email else "S/N" }}</span>
+                </div>
+                <div class="data-row">
+                    <span class="data-label">SOLICITUD N°:</span>
+                    <span class="data-value highlight-value">{{ cotizacion.solicitud_numero }}</span>
+                </div>
+                <div class="data-row">
+                    <span class="data-label">TELÉFONO:</span>
+                    <span class="data-value">{{ cliente.telefono if cliente.telefono else "S/N" }}</span>
+                </div>
+                <div class="data-row">
+                    <span class="data-label">NIT:</span>
+                    <span class="data-value highlight-value">{{ cliente.nit if cliente.nit else "S/N" }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- TABLA DE PRODUCTOS -->
+        <div class="page">
+            <table class="productos-table">
+                <thead>
+                    <tr>
+                        <th width="3%">#</th>
+                        <th width="9%">Código</th>
+                        <th width="35%">Descripción</th>
+                        <th width="12%">Marca</th>
+                        <th width="8%">Cantidad</th>
+                        <th width="8%">U/M</th>
+                        <th width="12%">Precio</th>
+                        <th width="13%">Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for producto in productos %}
+                    <tr>
+                        <td>{{ loop.index }}</td>
+                        <td>{{ producto.codigo }}</td>
+                        <td class="text-left">{{ producto.descripcion }}</td>
+                        <td>{{ producto.marca }}</td>
+                        <td>{{ producto.cantidad }}</td>
+                        <td>{{ producto.um }}</td>
+                        <td class="text-right">Bs {{ "{:,.2f}".format(producto.precio_unitario) if
+                            producto.precio_unitario is not none else "0.00" }}</td>
+                        <td class="text-right">Bs {{ "{:,.2f}".format(producto.subtotal) if producto.subtotal is not
+                            none else "0.00" }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Sección de totales y monto literal (siempre al final) -->
+        <div class="totales-section last-page-content">
+            <div class="dashed-line"></div>
+            <div class="monto-letras">
+                <strong>SON:</strong> {{ total_letras }}
+            </div>
+
+            <table class="totales-table">
+                <tr>
+                    <td style="text-align: left;">Subtotal Bruto</td>
+                    <td style="text-align: right;">BS {{ "{:,.2f}".format(subtotal) if subtotal is not none else "0.00"
+                        }}</td>
+                </tr>
+                {% if descuento_porcentaje and descuento_porcentaje|float > 0 %}
+                <tr>
+                    <td style="text-align: left; color: #dc3545; font-weight: 600;">Descuento Comercial ({{
+                        "{:,.2f}".format(descuento_porcentaje|float) }}%)</td>
+                    <td style="text-align: right; color: #dc3545; font-weight: 600;">-BS {{
+                        "{:,.2f}".format(monto_descuento) if monto_descuento is not none else "0.00" }}</td>
+                </tr>
+                {% endif %}
+                <tr>
+                    <td style="text-align: left; font-weight: bold; font-size: 10pt;">Total Final</td>
+                    <td style="text-align: right; font-weight: bold; font-size: 10pt; color: #2c3e50;">BS {{
+                        "{:,.2f}".format(total) if total is not none else "0.00" }}</td>
+                </tr>
+            </table>
+        </div>
+
+        <!-- SECCIÓN RESPONSABLE -->
+        <div class="section-title">RESPONSABLE</div>
+        <div style="margin-bottom: 20px;">
+            <div class="data-row">
+                <span class="data-label">NOMBRE:</span>
+                <span class="data-value">{{ usuario.nombre if usuario and usuario.nombre else usuario_sesion }}</span>
+            </div>
+            <div class="data-row">
+                <span class="data-label">TELÉFONO:</span>
+                <span class="data-value">{{ usuario.telefono if usuario and usuario.telefono else "S/N" }}</span>
+            </div>
+            <div class="data-row">
+                <span class="data-label">E-MAIL:</span>
+                <span class="data-value">{{ usuario.email if usuario and usuario.email else "S/N" }}</span>
+            </div>
+        </div>
+
+        <!-- NUEVA SECCIÓN CONDICIONES -->
+        <div class="section-title">CONDICIONES</div>
+        <div class="conditions-container">
+            <div class="condition-item">
+                <span class="condition-label">TIEMPO DE VALIDEZ:</span>
+                <span class="data-value">1 Día</span>
+            </div>
+            <div class="condition-item">
+                <span class="condition-label">PLAZO DE ENTREGA:</span>
+                <span class="data-value">De acuerdo a la existencia</span>
+            </div>
+        </div>
+
+        <!-- SECCIÓN FIRMA -->
+        <div class="firma-section">
+            <div class="firma-container">
+                <div class="firma-line"></div>
+                <div class="firma-text">FIRMA RESPONSABLE</div>
+            </div>
+
+            <div class="fecha-cotizacion">
+                <div><strong>FECHA DE COTIZACIÓN:</strong></div>
+                <div>{{ cotizacion.fecha }}</div>
+            </div>
+        </div>
+    </div> <!-- Cierre del div container -->
+    </body>
+
+</html>

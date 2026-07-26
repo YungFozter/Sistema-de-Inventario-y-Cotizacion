@@ -1,0 +1,63 @@
+{% extends 'shared/layout.html' %}
+
+{% block titulo %}Detalle de Cotización{% endblock %}
+
+{% block contenido %}
+<div class="container mt-4">
+
+  <h2 class="mb-4">Detalle de Cotización</h2>
+
+  <div class="mb-3">
+    <p><strong>ID Cotización:</strong> {{ cotizacion[0] }}</p>
+    <p><strong>Cliente:</strong> {{ cotizacion[1] }}</p>
+    <p><strong>Fecha:</strong> {{ cotizacion[2] }}</p>
+    <p><strong>Total:</strong> Bs {{ "%.2f"|format(cotizacion[3]) }}</p>
+  </div>
+
+  <h4>Productos Incluidos</h4>
+  <div class="table-responsive">
+    <table class="table table-bordered table-striped mt-3">
+      <thead class="table-dark">
+        <tr>
+          <th>Empresa</th>
+          <th>Código</th>
+          <th>Descripción</th>
+          <th>Marca</th>
+          <th>TM</th>
+          <th>UM</th>
+          <th>Cantidad</th>
+          <th>Precio Unitario</th>
+          <th>Subtotal</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for p in productos %}
+        <tr>
+          <td>{{ p[0] }}</td>
+          <td>{{ p[1] }}</td>
+          <td>{{ p[2] }}</td>
+          <td>{{ p[3] }}</td>
+          <td>{{ p[4] }}</td>
+          <td>{{ p[5] }}</td>
+          <td>{{ p[6] }}</td>
+          <td>Bs {{ "%.2f"|format(p[7]) }}</td>
+          <td>Bs {{ "%.2f"|format(p[8]) }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+<!-- Botones corregidos usando cotizacion[0] -->
+  <a href="{{ url_for('vista_previa_cotizacion', id=cotizacion[0]) }}"
+    class="btn btn-primary mt-3"
+    target="_blank">
+    Ver Vista Previa PDF
+  </a>
+
+  <a href="/cotizaciones/pdf/{{ cotizacion[0] }}" class="btn btn-info mt-3">Descargar PDF</a>
+  <a href="/cotizaciones" class="btn btn-secondary mt-3">⬅ Volver a Cotizaciones</a>
+
+</div>
+{% endblock %}
+

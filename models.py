@@ -23,7 +23,7 @@ def crear_tablas():
         # Tabla de logs/auditoría
         cursor.execute(f'''
             CREATE TABLE IF NOT EXISTS logs (
-                id {"SERIAL" if is_postgres else "INTEGER PRIMARY KEY AUTOINCREMENT"},
+                id {"SERIAL PRIMARY KEY" if is_postgres else "INTEGER PRIMARY KEY AUTOINCREMENT"},
                 usuario_id INTEGER,
                 accion TEXT NOT NULL,
                 detalle TEXT,
@@ -35,7 +35,7 @@ def crear_tablas():
         # Tabla de clientes/usuarios
         cursor.execute(f'''
             CREATE TABLE IF NOT EXISTS clientes (
-                id {"SERIAL" if is_postgres else "INTEGER PRIMARY KEY AUTOINCREMENT"},
+                id {"SERIAL PRIMARY KEY" if is_postgres else "INTEGER PRIMARY KEY AUTOINCREMENT"},
                 nombre TEXT NOT NULL,
                 nit TEXT,
                 codigo_cliente TEXT,
@@ -55,7 +55,7 @@ def crear_tablas():
         # Tabla de categorías
         cursor.execute(f'''
             CREATE TABLE IF NOT EXISTS categorias (
-                id {"SERIAL" if is_postgres else "INTEGER PRIMARY KEY AUTOINCREMENT"},
+                id {"SERIAL PRIMARY KEY" if is_postgres else "INTEGER PRIMARY KEY AUTOINCREMENT"},
                 nombre TEXT NOT NULL UNIQUE,
                 descripcion TEXT,
                 fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -66,7 +66,7 @@ def crear_tablas():
         # Tabla de productos
         cursor.execute(f'''
             CREATE TABLE IF NOT EXISTS productos (
-                id {"SERIAL" if is_postgres else "INTEGER PRIMARY KEY AUTOINCREMENT"},
+                id {"SERIAL PRIMARY KEY" if is_postgres else "INTEGER PRIMARY KEY AUTOINCREMENT"},
                 empresa TEXT NOT NULL,
                 codigo TEXT NOT NULL,
                 descripcion TEXT,
@@ -89,7 +89,7 @@ def crear_tablas():
         # Tabla de cotizaciones
         cursor.execute(f'''
             CREATE TABLE IF NOT EXISTS cotizaciones (
-                id {"SERIAL" if is_postgres else "INTEGER PRIMARY KEY AUTOINCREMENT"},
+                id {"SERIAL PRIMARY KEY" if is_postgres else "INTEGER PRIMARY KEY AUTOINCREMENT"},
                 cliente_id INTEGER,
                 creador_id INTEGER,
                 codigo TEXT,
@@ -107,7 +107,7 @@ def crear_tablas():
         # Tabla de productos en cotizaciones
         cursor.execute(f'''
             CREATE TABLE IF NOT EXISTS cotizacion_productos (
-                id {"SERIAL" if is_postgres else "INTEGER PRIMARY KEY AUTOINCREMENT"},
+                id {"SERIAL PRIMARY KEY" if is_postgres else "INTEGER PRIMARY KEY AUTOINCREMENT"},
                 cotizacion_id INTEGER,
                 producto_id INTEGER,
                 cantidad INTEGER,
@@ -122,7 +122,7 @@ def crear_tablas():
         # Tabla de importaciones desde PDF
         cursor.execute(f'''
             CREATE TABLE IF NOT EXISTS importaciones_pdf (
-                id {"SERIAL" if is_postgres else "INTEGER PRIMARY KEY AUTOINCREMENT"},
+                id {"SERIAL PRIMARY KEY" if is_postgres else "INTEGER PRIMARY KEY AUTOINCREMENT"},
                 nombre_importacion TEXT NOT NULL,
                 fecha_importacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 usuario_id INTEGER,
@@ -135,7 +135,7 @@ def crear_tablas():
         # Tabla de items extraídos de PDF
         cursor.execute(f'''
             CREATE TABLE IF NOT EXISTS items_importados_temp (
-                id {"SERIAL" if is_postgres else "INTEGER PRIMARY KEY AUTOINCREMENT"},
+                id {"SERIAL PRIMARY KEY" if is_postgres else "INTEGER PRIMARY KEY AUTOINCREMENT"},
                 importacion_id INTEGER NOT NULL,
                 codigo TEXT,
                 descripcion TEXT,

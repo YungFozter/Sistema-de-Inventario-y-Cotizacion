@@ -268,6 +268,9 @@ def migrar_clientes_existentes():
 
 def migrar_productos_categorias():
     """Agregar columna categoria_id a la tabla productos si no existe"""
+    if bool(os.environ.get('DATABASE_URL') and os.environ.get('DATABASE_URL').startswith('postgres')):
+        return
+
     try:
         conexion = get_db_connection()
         cursor = conexion.cursor()

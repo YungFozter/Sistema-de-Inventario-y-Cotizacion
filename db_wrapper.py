@@ -67,8 +67,6 @@ class PostgresCursorWrapper:
         import re
         query = re.sub(r'\bactivo\s*=\s*1\b', 'activo = TRUE', query, flags=re.IGNORECASE)
         query = re.sub(r'\bactivo\s*=\s*0\b', 'activo = FALSE', query, flags=re.IGNORECASE)
-        query = re.sub(r'\bes_importado\s*=\s*1\b', 'es_importado = TRUE', query, flags=re.IGNORECASE)
-        query = re.sub(r'\bes_importado\s*=\s*0\b', 'es_importado = FALSE', query, flags=re.IGNORECASE)
         query = re.sub(r'\bregistrado\s*=\s*1\b', 'registrado = TRUE', query, flags=re.IGNORECASE)
         query = re.sub(r'\bregistrado\s*=\s*0\b', 'registrado = FALSE', query, flags=re.IGNORECASE)
         

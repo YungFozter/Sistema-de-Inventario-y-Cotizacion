@@ -21,6 +21,16 @@ class PostgresConnectionWrapper:
         from psycopg2.extras import DictCursor
         self.cursor_factory = DictCursor
 
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        if exc_type:
+            self.rollback()
+        else:
+            self.commit()
+        self.close()
+
     def cursor(self):
         return PostgresCursorWrapper(self.conn.cursor(cursor_factory=self.cursor_factory))
 

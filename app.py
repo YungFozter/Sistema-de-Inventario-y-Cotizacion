@@ -38,17 +38,7 @@ app.logger.setLevel(logging.INFO)
 # Database connection pool
 db_lock = Lock()
 
-@contextmanager
-def get_db_connection():
-    """Obtiene una conexión a SQLite con timeout"""
-    conn = None
-    try:
-        conn = get_db_connection()
-        conn.row_factory = sqlite3.Row  # Para acceder a las columnas por nombre
-        yield conn
-    finally:
-        if conn:
-            conn.close()
+
 
 # Configuración de variables
 

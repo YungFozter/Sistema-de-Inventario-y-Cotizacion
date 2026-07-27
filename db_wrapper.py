@@ -61,6 +61,16 @@ class PostgresCursorWrapper:
         # Reemplazar ? por %s de manera segura
         if params is not None:
             query = query.replace('?', '%s')
+            
+        # Parche de compatibilidad: SQLite usa 1/0 para booleanos, Postgres usa TRUE/FALSE
+        # Corregir activo = 1/0, es_importado = 1/0, registrado = 1/0
+        import re
+        query = re.sub(r'\bactivo\s*=\s*1\b', 'activo = TRUE', query, flags=re.IGNORECASE)
+        query = re.sub(r'\bactivo\s*=\s*0\b', 'activo = FALSE', query, flags=re.IGNORECASE)
+        query = re.sub(r'\bes_importado\s*=\s*1\b', 'es_importado = TRUE', query, flags=re.IGNORECASE)
+        query = re.sub(r'\bes_importado\s*=\s*0\b', 'es_importado = FALSE', query, flags=re.IGNORECASE)
+        query = re.sub(r'\bregistrado\s*=\s*1\b', 'registrado = TRUE', query, flags=re.IGNORECASE)
+        query = re.sub(r'\bregistrado\s*=\s*0\b', 'registrado = FALSE', query, flags=re.IGNORECASE)
         
         # Ejecutar
         if params is not None:

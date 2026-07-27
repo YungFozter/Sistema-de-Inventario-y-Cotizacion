@@ -21,6 +21,14 @@ class PostgresConnectionWrapper:
         from psycopg2.extras import DictCursor
         self.cursor_factory = DictCursor
 
+    @property
+    def row_factory(self):
+        return None
+
+    @row_factory.setter
+    def row_factory(self, value):
+        pass
+
     def __enter__(self):
         return self
 

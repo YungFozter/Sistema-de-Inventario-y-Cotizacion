@@ -1,256 +1,443 @@
 {% extends 'shared/layout.html' %}
 
-{% block titulo %}Sistema de Gestión de Cotizaciones{% endblock %}
+{% block titulo %}Sistema Premium de Cotizaciones{% endblock %}
+
+{% block styles %}
+{{ super() }}
+<!-- Google Fonts: Outfit & Inter -->
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<!-- AOS Animation CSS -->
+<link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+
+<style>
+    /* Tipografía Premium */
+    body {
+        font-family: 'Inter', sans-serif;
+        background-color: #f8fafc;
+        color: #1e293b;
+        overflow-x: hidden;
+    }
+    
+    h1, h2, h3, h4, h5, h6, .display-4, .display-5 {
+        font-family: 'Outfit', sans-serif;
+        letter-spacing: -0.02em;
+    }
+
+    /* Variables Globales */
+    :root {
+        --glass-bg: rgba(255, 255, 255, 0.75);
+        --glass-border: rgba(255, 255, 255, 0.4);
+        --premium-blue: #2563eb;
+        --premium-purple: #7c3aed;
+        --gradient-primary: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+        --gradient-text: linear-gradient(to right, #2563eb, #9333ea);
+    }
+
+    /* Utilidades */
+    .text-gradient {
+        background: var(--gradient-text);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .bg-gradient-premium {
+        background: var(--gradient-primary);
+    }
+
+    .glass-card {
+        background: var(--glass-bg);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid var(--glass-border);
+        border-radius: 24px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.05);
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .glass-card:hover {
+        transform: translateY(-10px) scale(1.02);
+        box-shadow: 0 30px 60px rgba(124, 58, 237, 0.12);
+        border-color: rgba(124, 58, 237, 0.3);
+    }
+
+    /* Animaciones Persistentes (Keyframes) */
+    @keyframes float {
+        0% { transform: translateY(0px); }
+        50% { transform: translateY(-20px); }
+        100% { transform: translateY(0px); }
+    }
+
+    @keyframes pulse-glow {
+        0% { box-shadow: 0 0 0 0 rgba(124, 58, 237, 0.4); }
+        70% { box-shadow: 0 0 0 20px rgba(124, 58, 237, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(124, 58, 237, 0); }
+    }
+
+    @keyframes blob-spin {
+        0% { transform: rotate(0deg) scale(1); }
+        50% { transform: rotate(180deg) scale(1.1); }
+        100% { transform: rotate(360deg) scale(1); }
+    }
+
+    .floating-element {
+        animation: float 6s ease-in-out infinite;
+    }
+    
+    .floating-element-delayed {
+        animation: float 7s ease-in-out infinite;
+        animation-delay: 2s;
+    }
+
+    /* Blobs de Fondo */
+    .bg-blobs {
+        position: absolute;
+        top: 0; left: 0; width: 100%; height: 100%;
+        overflow: hidden;
+        z-index: -1;
+        pointer-events: none;
+    }
+
+    .blob {
+        position: absolute;
+        filter: blur(80px);
+        opacity: 0.5;
+        border-radius: 50%;
+        animation: blob-spin 20s linear infinite;
+    }
+
+    .blob-1 {
+        top: -10%; left: -10%; width: 50vw; height: 50vw;
+        background: rgba(37, 99, 235, 0.3);
+    }
+
+    .blob-2 {
+        bottom: -20%; right: -10%; width: 60vw; height: 60vw;
+        background: rgba(124, 58, 237, 0.25);
+        animation-direction: reverse;
+        animation-duration: 25s;
+    }
+    
+    .blob-3 {
+        top: 40%; left: 30%; width: 40vw; height: 40vw;
+        background: rgba(236, 72, 153, 0.2);
+        animation-delay: -5s;
+    }
+
+    /* Botones Premium */
+    .btn-premium {
+        background: var(--gradient-primary);
+        color: white;
+        border: none;
+        border-radius: 50px;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        padding: 12px 32px;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+        z-index: 1;
+    }
+
+    .btn-premium::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; width: 100%; height: 100%;
+        background: linear-gradient(135deg, #7c3aed 0%, #2563eb 100%);
+        z-index: -1;
+        transition: opacity 0.3s ease;
+        opacity: 0;
+    }
+
+    .btn-premium:hover::before {
+        opacity: 1;
+    }
+
+    .btn-premium:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 20px rgba(124, 58, 237, 0.3);
+        color: white;
+    }
+
+    .btn-outline-premium {
+        background: transparent;
+        color: var(--premium-blue);
+        border: 2px solid var(--premium-blue);
+        border-radius: 50px;
+        font-weight: 600;
+        padding: 10px 30px;
+        transition: all 0.3s ease;
+    }
+
+    .btn-outline-premium:hover {
+        background: var(--premium-blue);
+        color: white;
+        transform: translateY(-3px);
+        box-shadow: 0 10px 20px rgba(37, 99, 235, 0.2);
+    }
+
+    /* Feature Icons */
+    .feature-icon-wrapper {
+        width: 80px; height: 80px;
+        border-radius: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1.5rem;
+        background: linear-gradient(135deg, rgba(255,255,255,0.9), rgba(255,255,255,0.4));
+        box-shadow: inset 0 0 0 1px rgba(255,255,255,0.5), 0 10px 20px rgba(0,0,0,0.05);
+        font-size: 2rem;
+        transition: transform 0.3s ease;
+    }
+
+    .glass-card:hover .feature-icon-wrapper {
+        transform: rotate(10deg) scale(1.1);
+    }
+
+    .hero-image-wrapper {
+        position: relative;
+        border-radius: 30px;
+        padding: 10px;
+        background: linear-gradient(135deg, rgba(255,255,255,0.4), rgba(255,255,255,0.1));
+        backdrop-filter: blur(10px);
+        box-shadow: 0 30px 60px rgba(0,0,0,0.1);
+    }
+    
+    .hero-image-wrapper img {
+        border-radius: 20px;
+        box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+    }
+
+    .step-number {
+        width: 50px; height: 50px;
+        background: var(--gradient-primary);
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        font-weight: bold;
+        box-shadow: 0 10px 20px rgba(37, 99, 235, 0.3);
+    }
+
+    /* Listas y viñetas */
+    .premium-list li {
+        margin-bottom: 15px;
+        font-size: 1.05rem;
+        display: flex;
+        align-items: flex-start;
+    }
+    
+    .premium-list i {
+        background: var(--gradient-primary);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        font-size: 1.25rem;
+        margin-right: 12px;
+        margin-top: 2px;
+    }
+</style>
+{% endblock %}
 
 {% block contenido %}
-<div class="container my-5">
-    <!-- Hero Section -->
-    <div class="row align-items-center py-5">
-        <div class="col-lg-6">
-            <h1 class="display-4 fw-bold mb-4">Simplifica tus cotizaciones con nuestro sistema</h1>
-            <p class="lead mb-4">Una solución completa para crear, gestionar y seguir el estado de tus cotizaciones de manera profesional y eficiente.</p>
-            <div class="d-grid gap-3 d-sm-flex">
-                <a href="/login" class="btn btn-primary btn-lg px-4">
+<!-- Elementos de fondo (Blobs) -->
+<div class="bg-blobs">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+</div>
+
+<div class="container my-4 position-relative" style="z-index: 1;">
+    <!-- HERO SECTION -->
+    <div class="row align-items-center min-vh-75 py-5">
+        <div class="col-lg-6 mb-5 mb-lg-0 text-center text-lg-start" data-aos="fade-right" data-aos-duration="1000">
+            <div class="badge bg-white text-primary px-3 py-2 rounded-pill shadow-sm mb-4 fw-bold" style="border: 1px solid rgba(37, 99, 235, 0.2);">
+                <i class="bi bi-stars me-1 text-warning"></i> La Nueva Generación
+            </div>
+            <h1 class="display-3 fw-black mb-4 lh-sm text-dark" style="font-weight: 900;">
+                Eleva tus ventas con <br/>
+                <span class="text-gradient">Cotizaciones Premium</span>
+            </h1>
+            <p class="lead mb-5 text-secondary" style="font-size: 1.25rem; max-width: 90%;">
+                Una plataforma inteligente, fluida y espectacular para diseñar, rastrear y cerrar propuestas comerciales en tiempo récord.
+            </p>
+            <div class="d-flex flex-column flex-sm-row gap-3 justify-content-center justify-content-lg-start">
+                <a href="/registro" class="btn btn-premium btn-lg">
+                    Comenzar Gratis <i class="bi bi-arrow-right ms-2"></i>
+                </a>
+                <a href="/login" class="btn btn-outline-premium btn-lg">
                     <i class="bi bi-box-arrow-in-right me-2"></i> Iniciar Sesión
                 </a>
-                <a href="/registro" class="btn btn-outline-primary btn-lg px-4">
-                    <i class="bi bi-person-plus me-2"></i> Registrarse
-                </a>
             </div>
-        </div>
-        <div class="col-lg-6">
-            <img src="https://whaticket.com/wp-content/uploads/2023/05/Consejos-para-enviar-presupuestos-o-cotizaciones-por-Whatsapp.jpg.webp"
-                 class="img-fluid rounded-3 shadow"
-                 alt="Dashboard de cotizaciones"
-                 style="max-height: 400px; object-fit: cover;">
-        </div>
-    </div>
-
-    <!-- Características Principales -->
-    <div class="row py-5">
-        <div class="col-12 text-center mb-5">
-            <h2 class="fw-bold">Funcionalidades clave</h2>
-            <p class="lead text-muted">Todo lo que necesitas para gestionar tus cotizaciones</p>
-        </div>
-
-        <div class="col-md-4 mb-4">
-            <div class="card h-100 border-0 shadow-sm">
-                <div class="card-body text-center p-4">
-                    <div class="icon-feature bg-primary bg-opacity-10 text-primary rounded-circle p-3 mb-3 mx-auto" style="width: 80px; height: 80px;">
-                        <i class="bi bi-file-earmark-text fs-3"></i>
-                    </div>
-                    <h4>Creación Intuitiva</h4>
-                    <p class="text-muted">Genera cotizaciones profesionales en minutos con plantillas personalizables.</p>
+            
+            <div class="mt-5 d-flex align-items-center justify-content-center justify-content-lg-start gap-4 opacity-75">
+                <div class="d-flex align-items-center">
+                    <i class="bi bi-shield-check fs-4 text-success me-2"></i> 
+                    <span class="fw-semibold">100% Seguro</span>
+                </div>
+                <div class="d-flex align-items-center">
+                    <i class="bi bi-lightning-charge fs-4 text-warning me-2"></i> 
+                    <span class="fw-semibold">Ultra Rápido</span>
                 </div>
             </div>
         </div>
-
-        <div class="col-md-4 mb-4">
-            <div class="card h-100 border-0 shadow-sm">
-                <div class="card-body text-center p-4">
-                    <div class="icon-feature bg-success bg-opacity-10 text-success rounded-circle p-3 mb-3 mx-auto" style="width: 80px; height: 80px;">
-                        <i class="bi bi-graph-up fs-3"></i>
+        
+        <div class="col-lg-6" data-aos="fade-left" data-aos-duration="1200" data-aos-delay="200">
+            <div class="hero-image-wrapper floating-element">
+                <!-- Usamos una imagen de muestra impactante (puedes reemplazarla con capturas reales) -->
+                <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=2070&auto=format&fit=crop" 
+                     class="img-fluid w-100" alt="Dashboard Analítico" style="object-fit: cover; aspect-ratio: 4/3;">
+                
+                <!-- Floating Badge -->
+                <div class="position-absolute glass-card px-4 py-3 floating-element-delayed" style="bottom: -20px; left: -20px; animation-duration: 5s;">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="bg-success rounded-circle p-2 text-white">
+                            <i class="bi bi-graph-up-arrow fs-4"></i>
+                        </div>
+                        <div>
+                            <p class="mb-0 text-muted fs-7 fw-bold text-uppercase">Cierre de Ventas</p>
+                            <h4 class="mb-0 fw-bold">+45%</h4>
+                        </div>
                     </div>
-                    <h4>Seguimiento en Tiempo Real</h4>
-                    <p class="text-muted">Monitorea el estado de cada cotización y recibe notificaciones de cambios.</p>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-4 mb-4">
-            <div class="card h-100 border-0 shadow-sm">
-                <div class="card-body text-center p-4">
-                    <div class="icon-feature bg-info bg-opacity-10 text-info rounded-circle p-3 mb-3 mx-auto" style="width: 80px; height: 80px;">
-                        <i class="bi bi-cloud-arrow-down fs-3"></i>
-                    </div>
-                    <h4>Exportación Profesional</h4>
-                    <p class="text-muted">Descarga en PDF o comparte directamente con tus clientes.</p>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Funcionalidades por rol -->
-    <div class="row py-5">
-        <div class="col-12 text-center mb-5">
-            <h2 class="fw-bold">Funcionalidades por tipo de usuario</h2>
-            <p class="lead text-muted">Descubre lo que puedes hacer según tu rol</p>
+    <!-- CARACTERÍSTICAS PRINCIPALES -->
+    <div class="py-5 mt-5">
+        <div class="text-center mb-5" data-aos="fade-up">
+            <h6 class="text-primary fw-bold text-uppercase tracking-wider">Potencia Absoluta</h6>
+            <h2 class="display-5 fw-bold text-dark">Todo lo que tu equipo necesita</h2>
         </div>
 
-        <!-- Rol Administrador -->
-        <div class="col-md-6 mb-4">
-            <div class="card h-100 shadow border-primary">
-                <div class="card-header bg-primary text-white">
-                    <h3 class="mb-0"><i class="bi bi-shield-lock"></i> Funciones para Administradores</h3>
-                </div>
-                <div class="card-body">
-                    <div class="d-flex align-items-center mb-3">
-                        <i class="bi bi-star-fill text-warning fs-3 me-2"></i>
-                        <h5 class="mb-0">Gestión Completa del Sistema</h5>
+        <div class="row g-4 mt-3">
+            <!-- Feature 1 -->
+            <div class="col-md-4" data-aos="fade-up" data-aos-delay="100">
+                <div class="glass-card p-5 h-100 text-center">
+                    <div class="feature-icon-wrapper text-primary">
+                        <i class="bi bi-magic"></i>
                     </div>
-
-                    <ul class="list-group list-group-flush">
-                        <li class="list-group-item">
-                            <i class="bi bi-check-square-fill text-success me-2"></i>
-                            <strong>Gestión de Clientes</strong> - Crear y administrar clientes
-                        </li>
-                        <li class="list-group-item">
-                            <i class="bi bi-check-square-fill text-success me-2"></i>
-                            <strong>Catálogo de Productos</strong> - Registrar y actualizar productos
-                        </li>
-                        <li class="list-group-item">
-                            <i class="bi bi-check-square-fill text-success me-2"></i>
-                            <strong>Creación de Cotizaciones</strong> - Elaborar nuevas cotizaciones
-                        </li>
-                        <li class="list-group-item">
-                            <i class="bi bi-check-square-fill text-success me-2"></i>
-                            <strong>Reportes y Estadísticas</strong> - Generar análisis de datos
-                        </li>
-                        <li class="list-group-item">
-                            <i class="bi bi-check-square-fill text-success me-2"></i>
-                            <strong>Administración de Usuarios</strong> - Gestionar roles y permisos
-                        </li>
-                    </ul>
+                    <h3 class="h4 fw-bold mb-3">Creación Intuitiva</h3>
+                    <p class="text-secondary mb-0">
+                        Genera documentos impecables en segundos con nuestro constructor inteligente. Olvídate del Excel.
+                    </p>
+                </div>
+            </div>
+            
+            <!-- Feature 2 -->
+            <div class="col-md-4" data-aos="fade-up" data-aos-delay="200">
+                <div class="glass-card p-5 h-100 text-center">
+                    <div class="feature-icon-wrapper text-success">
+                        <i class="bi bi-radar"></i>
+                    </div>
+                    <h3 class="h4 fw-bold mb-3">Rastreo en Vivo</h3>
+                    <p class="text-secondary mb-0">
+                        Monitorea quién abre tus cotizaciones, qué productos interesan más y cuándo hacer seguimiento.
+                    </p>
+                </div>
+            </div>
+            
+            <!-- Feature 3 -->
+            <div class="col-md-4" data-aos="fade-up" data-aos-delay="300">
+                <div class="glass-card p-5 h-100 text-center">
+                    <div class="feature-icon-wrapper text-info">
+                        <i class="bi bi-file-pdf"></i>
+                    </div>
+                    <h3 class="h4 fw-bold mb-3">Exportación PDF</h3>
+                    <p class="text-secondary mb-0">
+                        Documentos PDF generados instantáneamente con la identidad visual de tu marca, listos para enviar.
+                    </p>
                 </div>
             </div>
         </div>
+    </div>
 
-        <!-- Rol Standard -->
-        <div class="col-md-6 mb-4">
-            <div class="card h-100 shadow border-success">
-                <div class="card-header bg-success text-white">
-                    <h3 class="mb-0"><i class="bi bi-person-check"></i> Funciones para Usuarios Estándar</h3>
-                </div>
-                <div class="card-body">
-                    <div class="d-flex align-items-center mb-3">
-                        <i class="bi bi-person-fill text-info fs-3 me-2"></i>
-                        <h5 class="mb-0">Gestión de Cotizaciones</h5>
+    <!-- PANELES POR ROL -->
+    <div class="py-5 mt-5">
+        <div class="row align-items-center g-5">
+            <!-- Texto Izquierda -->
+            <div class="col-lg-5" data-aos="fade-right">
+                <h2 class="display-5 fw-bold mb-4">Adaptable a cada miembro de tu equipo</h2>
+                <p class="lead text-secondary mb-4">
+                    Asigna roles específicos para mantener la información segura y organizada, permitiendo que cada usuario se enfoque en lo que mejor sabe hacer.
+                </p>
+                
+                <div class="d-flex align-items-center gap-3 mb-4">
+                    <div class="bg-primary bg-opacity-10 text-primary p-3 rounded-circle">
+                        <i class="bi bi-shield-lock fs-3"></i>
                     </div>
-
-                    <ul class="list-group list-group-flush">
-                        <li class="list-group-item">
-                            <i class="bi bi-check-square-fill text-success me-2"></i>
-                            <strong>Seguimiento de Cotizaciones</strong> - Ver estado y actualizaciones
-                        </li>
-                        <li class="list-group-item">
-                            <i class="bi bi-check-square-fill text-success me-2"></i>
-                            <strong>Descarga de Documentos</strong> - Generar PDF de cotizaciones
-                        </li>
-                        <li class="list-group-item">
-                            <i class="bi bi-check-square-fill text-success me-2"></i>
-                            <strong>Historial Completo</strong> - Acceder a todo tu historial
-                        </li>
-                        <li class="list-group-item">
-                            <i class="bi bi-check-square-fill text-success me-2"></i>
-                            <strong>Notificaciones</strong> - Recibir actualizaciones por correo
-                        </li>
-                        <li class="list-group-item">
-                            <i class="bi bi-check-square-fill text-success me-2"></i>
-                            <strong>Gestión de Perfil</strong> - Actualizar tu información personal
-                        </li>
+                    <div>
+                        <h5 class="fw-bold mb-1">Administradores</h5>
+                        <p class="text-muted mb-0 small">Control total de productos, reportes globales y usuarios.</p>
+                    </div>
+                </div>
+                
+                <div class="d-flex align-items-center gap-3">
+                    <div class="bg-success bg-opacity-10 text-success p-3 rounded-circle">
+                        <i class="bi bi-person-workspace fs-3"></i>
+                    </div>
+                    <div>
+                        <h5 class="fw-bold mb-1">Vendedores (Estándar)</h5>
+                        <p class="text-muted mb-0 small">Acceso exclusivo a sus propias cotizaciones y cartera de clientes.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Imagen/Mockup Derecha -->
+            <div class="col-lg-7" data-aos="fade-left" data-aos-delay="200">
+                <div class="glass-card p-4 p-md-5">
+                    <h4 class="fw-bold mb-4 text-center">Capacidades del Administrador</h4>
+                    <ul class="list-unstyled premium-list">
+                        <li><i class="bi bi-check-circle-fill"></i> Importación masiva de productos (Archivos y Texto)</li>
+                        <li><i class="bi bi-check-circle-fill"></i> Analíticas de rendimiento de ventas de toda la empresa</li>
+                        <li><i class="bi bi-check-circle-fill"></i> Gestión centralizada de bases de datos de clientes</li>
+                        <li><i class="bi bi-check-circle-fill"></i> Control de permisos y estados de cuentas</li>
+                        <li><i class="bi bi-check-circle-fill"></i> Modificación global de listas de precios</li>
                     </ul>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Proceso de trabajo -->
-    <div class="row py-5 align-items-center">
-        <div class="col-lg-6 order-lg-2 mb-4 mb-lg-0">
-            <h2 class="fw-bold mb-4">¿Cómo funciona?</h2>
-
-            <div class="card bg-light border-0 shadow-sm mb-3">
-                <div class="card-body">
-                    <div class="d-flex">
-                        <div class="me-4 text-primary">
-                            <i class="bi bi-1-circle fs-2"></i>
-                        </div>
-                        <div>
-                            <h5>Registro sencillo</h5>
-                            <p class="text-muted mb-0">Crea tu cuenta en menos de 2 minutos.</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="card bg-light border-0 shadow-sm mb-3">
-                <div class="card-body">
-                    <div class="d-flex">
-                        <div class="me-4 text-primary">
-                            <i class="bi bi-2-circle fs-2"></i>
-                        </div>
-                        <div>
-                            <h5>Configura tu perfil</h5>
-                            <p class="text-muted mb-0">Agrega tu información y preferencias.</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="card bg-light border-0 shadow-sm">
-                <div class="card-body">
-                    <div class="d-flex">
-                        <div class="me-4 text-primary">
-                            <i class="bi bi-3-circle fs-2"></i>
-                        </div>
-                        <div>
-                            <h5>Comienza a cotizar</h5>
-                            <p class="text-muted mb-0">Crea tu primera cotización en minutos.</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-lg-6 order-lg-1">
-            <div class="ratio ratio-16x9 shadow rounded-3 overflow-hidden">
-                <img src="https://www.techsmith.es/wp-content/uploads/2022/10/blog_snagit_user-documentation_1500x1100-1.png"
-                     class="img-fluid"
-                     alt="Demo del sistema">
-            </div>
-        </div>
-    </div>
-
-    <!-- CTA Final -->
-    <div class="row py-5">
-        <div class="col-12 text-center">
-            <div class="card bg-primary text-white shadow-lg">
-                <div class="card-body py-5">
-                    <h2 class="display-5 fw-bold mb-4">¿Listo para comenzar?</h2>
-                    <p class="lead mb-4">Regístrate ahora y descubre cómo podemos transformar tu proceso de cotizaciones</p>
-                    <a href="/registro" class="btn btn-light btn-lg px-4">
-                        <i class="bi bi-person-plus me-2"></i> Crear Cuenta Gratis
+    <!-- CTA FINAL -->
+    <div class="py-5 mt-4 mb-5" data-aos="zoom-in" data-aos-duration="800">
+        <div class="bg-gradient-premium rounded-4 p-5 text-center text-white position-relative overflow-hidden shadow-lg" style="border: 1px solid rgba(255,255,255,0.2);">
+            
+            <!-- Decoraciones del CTA -->
+            <div class="position-absolute top-0 start-0 w-100 h-100 opacity-25" style="background-image: radial-gradient(circle at 20% 150%, rgba(255,255,255,0.8) 0%, transparent 50%); z-index: 0;"></div>
+            
+            <div class="position-relative" style="z-index: 1;">
+                <i class="bi bi-rocket-takeoff display-3 mb-3 d-block opacity-75 floating-element"></i>
+                <h2 class="display-4 fw-black mb-4" style="font-family: 'Outfit';">Comienza a transformar tus ventas hoy</h2>
+                <p class="lead mb-5 opacity-75" style="max-width: 600px; margin: 0 auto;">
+                    Únete a las empresas que ya han reducido un 60% el tiempo invertido en la creación de propuestas comerciales.
+                </p>
+                <div class="d-flex justify-content-center gap-3">
+                    <a href="/registro" class="btn btn-light btn-lg px-5 py-3 fw-bold rounded-pill text-primary" style="box-shadow: 0 10px 20px rgba(0,0,0,0.2);">
+                        Crear Cuenta Gratis
                     </a>
                 </div>
             </div>
         </div>
     </div>
 </div>
+{% endblock %}
 
-<style>
-    .card {
-        transition: transform 0.3s, box-shadow 0.3s;
-    }
-    .card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
-    }
-    .list-group-item {
-        border: none;
-        padding: 0.75rem 0.25rem;
-        background-color: transparent;
-    }
-    .icon-feature {
-        transition: transform 0.3s;
-    }
-    .card:hover .icon-feature {
-        transform: scale(1.1);
-    }
-    .bg-primary {
-        background-color: #0d6efd !important;
-    }
-    .border-primary {
-        border-color: #0d6efd !important;
-    }
-</style>
+{% block scripts %}
+{{ super() }}
+<!-- AOS Animation JS -->
+<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Inicializar animaciones de scroll
+        AOS.init({
+            once: true,           // Si las animaciones deben ocurrir solo la primera vez que se hace scroll
+            offset: 50,           // Offset (en px) desde el elemento de activación original
+            duration: 800,        // Valores de 0 a 3000, con pasos de 50ms
+            easing: 'ease-out-cubic', // Easing predeterminado para las animaciones AOS
+        });
+    });
+</script>
 {% endblock %}

@@ -996,8 +996,23 @@ def clientes():
             conexion = get_db_connection()
             cursor = conexion.cursor()
 
-            # Validar que el código de cliente no se repita (si se ingresó alguno)
-            if codigo_cliente:
+            # Generar código de cliente automático si no se ingresó uno
+            if not codigo_cliente:
+                cursor.execute("SELECT codigo_cliente FROM clientes WHERE codigo_cliente LIKE 'CLI-%'")
+                codigos = cursor.fetchall()
+                max_num = 0
+                for row in codigos:
+                    codigo = row[0]
+                    if codigo:
+                        try:
+                            num = int(codigo.split('-')[1])
+                            if num > max_num:
+                                max_num = num
+                        except (ValueError, IndexError):
+                            pass
+                codigo_cliente = f"CLI-{max_num + 1:04d}"
+            else:
+                # Validar que el código de cliente no se repita (si se ingresó alguno manualmente)
                 cursor.execute('SELECT id FROM clientes WHERE codigo_cliente = ?', (codigo_cliente,))
                 if cursor.fetchone():
                     flash('El código de cliente ya está registrado. Usa uno diferente.', 'danger')

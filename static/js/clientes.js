@@ -1,9 +1,4 @@
-// Generar código de cliente
-document.getElementById('btnGenerarCodigo')?.addEventListener('click', function() {
-    const prefijo = 'CLT-' + new Date().getFullYear().toString().slice(-2);
-    const random = Math.floor(1000 + Math.random() * 9000);
-    document.querySelector('[name="codigo_cliente"]').value = `${prefijo}-${random}`;
-});
+// La generación de código de cliente ahora es automática en el backend (app.py)
 
 // Validación de formulario
 const form = document.getElementById('clienteForm');

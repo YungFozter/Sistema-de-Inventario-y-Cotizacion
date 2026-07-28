@@ -149,6 +149,18 @@ def crear_tablas():
             ){";" if is_postgres else ""}
         ''')
 
+        # Tabla de pines de administrador
+        cursor.execute(f'''
+            CREATE TABLE IF NOT EXISTS pines_admin (
+                id {"SERIAL PRIMARY KEY" if is_postgres else "INTEGER PRIMARY KEY AUTOINCREMENT"},
+                pin TEXT NOT NULL UNIQUE,
+                usado {"BOOLEAN DEFAULT FALSE" if is_postgres else "BOOLEAN DEFAULT 0"},
+                creado_en TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                usado_por INTEGER,
+                FOREIGN KEY (usado_por) REFERENCES clientes(id)
+            ){";" if is_postgres else ""}
+        ''')
+
         # Insertar categorías por defecto
         categorias_defecto = [
             ('Electrónica', 'Equipos y componentes electrónicos'),

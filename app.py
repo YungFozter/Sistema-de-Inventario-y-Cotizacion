@@ -9,6 +9,8 @@ import time
 import base64
 import json
 import sqlite3
+import random
+import string
 from db_wrapper import get_db_connection
 from sqlite3 import connect  # Esta es la importación que faltaba
 from markupsafe import Markup
@@ -762,22 +764,48 @@ def registro():
         if contrasena != confirmar_contrasena:
             return "Las contraseñas no coinciden", 400
 
-        # Lógica para superadmin (si es admin y PIN correcto)
-        if rol == 'admin' and pin_admin == "YungFozter":
-            rol = 'superadmin'  # ¡Aquí se actualiza el rol!
-        elif rol == 'admin' and pin_admin == "Enrique":
-            rol = 'admin'  # Mantener rol de admin
+        conexion = get_db_connection()
+        cursor = conexion.cursor()
+
+        # Validar PIN si el rol es admin
+        pin_id_usado = None
+        if rol == 'admin':
+            if not pin_admin:
+                conexion.close()
+                flash('El PIN de Administrador es obligatorio', 'danger')
+                return redirect(url_for('registro'))
+                
+            cursor.execute('SELECT id, usado FROM pines_admin WHERE pin = ?', (pin_admin,))
+            pin_record = cursor.fetchone()
+            
+            if not pin_record or pin_record[1]:
+                conexion.close()
+                flash('PIN inválido o ya utilizado. Adquiere una suscripción para obtener uno nuevo.', 'danger')
+                return redirect(url_for('registro'))
+            
+            pin_id_usado = pin_record[0]
 
         # Guardar en la base de datos
         contrasena_hash = generate_password_hash(contrasena)
-        conexion = get_db_connection()
-        cursor = conexion.cursor()
-        cursor.execute('''
-            INSERT INTO clientes (nombre, correo, telefono, contrasena, rol)
-            VALUES (?, ?, ?, ?, ?)
-        ''', (nombre, correo, telefono, contrasena_hash, rol))
-        conexion.commit()
-        conexion.close()
+        
+        try:
+            cursor.execute('''
+                INSERT INTO clientes (nombre, correo, telefono, contrasena, rol)
+                VALUES (?, ?, ?, ?, ?)
+            ''', (nombre, correo, telefono, contrasena_hash, rol))
+            nuevo_usuario_id = cursor.lastrowid
+            
+            # Quemar el PIN
+            if pin_id_usado:
+                cursor.execute('UPDATE pines_admin SET usado = 1, usado_por = ? WHERE id = ?', (nuevo_usuario_id, pin_id_usado))
+                
+            conexion.commit()
+        except sqlite3.IntegrityError:
+            conexion.rollback()
+            flash('El correo electrónico ya está registrado', 'danger')
+            return redirect(url_for('registro'))
+        finally:
+            conexion.close()
 
         return redirect(url_for('login'))
 
@@ -3134,6 +3162,45 @@ def test_fondo():
             print(f"Error al cargar imagen: {e}")
     
     return render_template('test_fondo.html', fondo_base64=fondo_base64)
+
+@app.route('/suscripcion')
+def suscripcion():
+    # Renderizar la landing page de suscripción
+    return render_template('autenticacion/suscripcion.html')
+
+@app.route('/admin/pines', methods=['GET', 'POST'])
+@login_required
+def gestion_pines():
+    if session.get('user_rol') != 'superadmin':
+        flash('Acceso denegado. Solo el superadmin puede gestionar PINs.', 'danger')
+        return redirect(url_for('index'))
+
+    conexion = get_db_connection()
+    conexion.row_factory = sqlite3.Row
+    cursor = conexion.cursor()
+
+    if request.method == 'POST':
+        # Generar un nuevo PIN de 8 caracteres alfanuméricos en mayúsculas
+        caracteres = string.ascii_uppercase + string.digits
+        nuevo_pin = ''.join(random.choice(caracteres) for _ in range(8))
+        
+        try:
+            cursor.execute('INSERT INTO pines_admin (pin) VALUES (?)', (nuevo_pin,))
+            conexion.commit()
+            flash(f'Nuevo PIN generado: {nuevo_pin}', 'success')
+        except sqlite3.IntegrityError:
+            flash('Error al generar el PIN (colisión). Intenta de nuevo.', 'danger')
+
+    cursor.execute('''
+        SELECT p.*, c.nombre as usado_por_nombre 
+        FROM pines_admin p 
+        LEFT JOIN clientes c ON p.usado_por = c.id 
+        ORDER BY p.creado_en DESC
+    ''')
+    pines = cursor.fetchall()
+    conexion.close()
+
+    return render_template('admin/pines.html', pines=pines)
 
 # SIEMPRE AL FINAL
 if __name__ == '__main__':

@@ -1,0 +1,56 @@
+{% extends 'shared/layout.html' %}
+
+{% block titulo %}Suscripción Administrador{% endblock %}
+
+{% block contenido %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 text-center mb-5 fade-up-enter">
+            <h1 class="display-5 fw-bold" style="color: var(--dark);">Lleva tu negocio al siguiente nivel</h1>
+            <p class="lead text-muted">Obtén tu PIN de Administrador y desbloquea el control total de tu sistema de cotizaciones.</p>
+        </div>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5 fade-up-enter delay-100">
+            <div class="card border-0 rounded-4 shadow-sm h-100" style="background: linear-gradient(135deg, #ffffff, #f8f9fa);">
+                <div class="card-body p-5 text-center">
+                    <div class="badge bg-primary text-white mb-3 py-2 px-3 rounded-pill" style="font-size: 0.9rem; background: var(--secondary) !important;">
+                        Plan Administrador
+                    </div>
+                    <h2 class="display-4 fw-bold mb-3" style="color: var(--primary);">$XX<span class="fs-5 text-muted fw-normal">/mes</span></h2>
+                    
+                    <ul class="list-unstyled text-start mb-4 mt-4">
+                        <li class="mb-3"><i class="bi bi-check-circle-fill text-success me-2"></i> Creación de usuarios vendedores ilimitados</li>
+                        <li class="mb-3"><i class="bi bi-check-circle-fill text-success me-2"></i> Gestión total del catálogo de productos</li>
+                        <li class="mb-3"><i class="bi bi-check-circle-fill text-success me-2"></i> Reportes globales de cotizaciones</li>
+                        <li class="mb-3"><i class="bi bi-check-circle-fill text-success me-2"></i> Personalización de márgenes y descuentos</li>
+                        <li class="mb-3"><i class="bi bi-check-circle-fill text-success me-2"></i> Soporte técnico prioritario</li>
+                    </ul>
+
+                    <hr class="my-4">
+
+                    <h5 class="fw-bold mb-3">¿Cómo obtener tu PIN?</h5>
+                    <p class="text-muted small mb-4">Escanea el código QR para realizar el pago de tu suscripción. Luego, envía el comprobante vía WhatsApp para recibir tu PIN de acceso.</p>
+                    
+                    <!-- Código QR Placeholder -->
+                    <div class="bg-white p-3 rounded-3 d-inline-block shadow-sm mb-4 border">
+                        <i class="bi bi-qr-code" style="font-size: 8rem; color: var(--dark);"></i>
+                        <p class="mb-0 fw-bold mt-2 text-muted">Billetera / Banco</p>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <!-- Reemplaza [INSERTE_NUMERO_AQUI] con el número real -->
+                        <a href="https://wa.me/591XXXXXXXX?text=Hola,%20acabo%20de%20realizar%20el%20pago%20para%20mi%20suscripci%C3%B3n%20mensual%20como%20Administrador.%20Adjunto%20mi%20comprobante." target="_blank" class="btn btn-success btn-lg fw-bold rounded-3" style="background-color: #25D366; border-color: #25D366;">
+                            <i class="bi bi-whatsapp me-2"></i> Enviar Comprobante
+                        </a>
+                        <a href="/registro" class="btn btn-light mt-2 text-muted fw-semibold">
+                            Ya tengo un PIN
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

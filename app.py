@@ -1022,11 +1022,11 @@ def clientes():
             cursor.execute('''
                 INSERT INTO clientes (
                     nombre, nit, codigo_cliente, telefono, referencia, 
-                    tipo_cliente, creador_id
-                ) VALUES (?, ?, ?, ?, ?, ?, ?)
+                    tipo_cliente, creador_id, rol
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
             ''', (
                 razon_social, nit, codigo_cliente, telefono,
-                referencia, tipo_cliente, session['user_id']
+                referencia, tipo_cliente, session['user_id'], 'cliente'
             ))
 
             conexion.commit()
@@ -1054,12 +1054,12 @@ def clientes():
 
         # Consulta base diferente para superadmin
         if session.get('user_rol') == 'superadmin':
-            count_query = 'SELECT COUNT(*) FROM clientes WHERE 1=1'
-            query = 'SELECT * FROM clientes WHERE 1=1'
+            count_query = "SELECT COUNT(*) FROM clientes WHERE rol = 'cliente'"
+            query = "SELECT * FROM clientes WHERE rol = 'cliente'"
             params = []
         else:
-            count_query = 'SELECT COUNT(*) FROM clientes WHERE creador_id = ?'
-            query = 'SELECT * FROM clientes WHERE creador_id = ?'
+            count_query = "SELECT COUNT(*) FROM clientes WHERE creador_id = ? AND rol = 'cliente'"
+            query = "SELECT * FROM clientes WHERE creador_id = ? AND rol = 'cliente'"
             params = [session['user_id']]
 
         if busqueda:
@@ -1123,12 +1123,12 @@ def editar_cliente(id):
     conexion = get_db_connection()
     cursor = conexion.cursor()
 
-    # Verificar que el cliente pertenece al admin actual
-    cursor.execute('SELECT creador_id FROM clientes WHERE id = ?', (id,))
+    # Verificar que el cliente pertenece al admin actual o es superadmin, y que sea realmente un cliente
+    cursor.execute("SELECT creador_id FROM clientes WHERE id = ? AND rol = 'cliente'", (id,))
     cliente = cursor.fetchone()
 
-    if not cliente or cliente[0] != session['user_id']:
-        flash('No tienes permisos para editar este cliente', 'danger')
+    if not cliente or (cliente[0] != session['user_id'] and session.get('user_rol') != 'superadmin'):
+        flash('No tienes permisos para editar este cliente, o no existe.', 'danger')
         return redirect(url_for('clientes'))
 
 
@@ -1156,7 +1156,7 @@ def editar_cliente(id):
         return redirect('/clientes')
 
     # GET - Mostrar formulario de edición
-    cursor.execute('SELECT * FROM clientes WHERE id = ?', (id,))
+    cursor.execute("SELECT * FROM clientes WHERE id = ? AND rol = 'cliente'", (id,))
     cliente = cursor.fetchone()
     conexion.close()
 
@@ -1179,12 +1179,12 @@ def eliminar_cliente(id):
     conexion = get_db_connection()
     cursor = conexion.cursor()
 
-    # Verificar que el cliente pertenece al admin actual
-    cursor.execute('SELECT creador_id FROM clientes WHERE id = ?', (id,))
+    # Verificar que el cliente pertenece al admin actual o es superadmin, y que sea realmente un cliente
+    cursor.execute("SELECT creador_id, nombre FROM clientes WHERE id = ? AND rol = 'cliente'", (id,))
     cliente = cursor.fetchone()
 
-    if not cliente or cliente[0] != session['user_id']:
-        flash('No tienes permisos para eliminar este cliente', 'danger')
+    if not cliente or (cliente[0] != session['user_id'] and session.get('user_rol') != 'superadmin'):
+        flash('No tienes permisos para eliminar este cliente, o no existe.', 'danger')
         return redirect(url_for('clientes'))
 
     # Registrar antes de eliminar
@@ -1674,10 +1674,10 @@ def productos():
         with get_db_connection() as conexion:
             cursor = conexion.cursor()
             if session.get('user_rol') == 'superadmin':
-                cursor.execute("SELECT id, nombre FROM clientes ORDER BY nombre")
+                cursor.execute("SELECT id, nombre FROM clientes WHERE rol = 'cliente' ORDER BY nombre")
             else:
-                cursor.execute("SELECT id, nombre FROM clientes WHERE creador_id = ? OR id = ? ORDER BY nombre", 
-                               (session['user_id'], session['user_id']))
+                cursor.execute("SELECT id, nombre FROM clientes WHERE creador_id = ? AND rol = 'cliente' ORDER BY nombre", 
+                               (session['user_id'],))
             clientes = cursor.fetchall()
     except Exception:
         clientes = []
@@ -2129,14 +2129,16 @@ def gestion_cotizaciones():
         page_cliente = int(request.args.get('page_cliente', 1))
         offset_cliente = (page_cliente - 1) * clientes_per_page
         if session.get('user_rol') == 'superadmin':
-            cursor.execute("SELECT COUNT(*) FROM clientes")
+            cursor.execute("SELECT COUNT(*) FROM clientes WHERE rol = 'cliente'")
             total_clientes = cursor.fetchone()[0]
-            cursor.execute("SELECT * FROM clientes ORDER BY nombre LIMIT ? OFFSET ?", (clientes_per_page, offset_cliente))
+            cursor.execute("SELECT * FROM clientes WHERE rol = 'cliente' ORDER BY nombre LIMIT ? OFFSET ?", 
+                           (clientes_per_page, offset_cliente))
         else:
-            cursor.execute("SELECT COUNT(*) FROM clientes WHERE creador_id = ? OR id = ?", (session['user_id'], session['user_id']))
+            cursor.execute("SELECT COUNT(*) FROM clientes WHERE creador_id = ? AND rol = 'cliente'", 
+                           (session['user_id'],))
             total_clientes = cursor.fetchone()[0]
-            cursor.execute("SELECT * FROM clientes WHERE creador_id = ? OR id = ? ORDER BY nombre LIMIT ? OFFSET ?", 
-                           (session['user_id'], session['user_id'], clientes_per_page, offset_cliente))
+            cursor.execute("SELECT * FROM clientes WHERE creador_id = ? AND rol = 'cliente' ORDER BY nombre LIMIT ? OFFSET ?", 
+                           (session['user_id'], clientes_per_page, offset_cliente))
     clientes = cursor.fetchall()
     total_pages_clientes = (total_clientes + clientes_per_page - 1) // clientes_per_page
 
@@ -2459,7 +2461,7 @@ def gestion_usuarios():
         cursor.execute('''
             SELECT id, nombre, correo, telefono, rol, activo 
             FROM clientes
-            WHERE id != ?
+            WHERE id != ? AND rol IN ('admin', 'superadmin', 'standard')
             ORDER BY nombre
         ''', (session['user_id'],))
         usuarios = cursor.fetchall()

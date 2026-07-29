@@ -1,0 +1,115 @@
+{% extends 'shared/layout.html' %}
+
+{% block titulo %}Panel de Control SaaS{% endblock %}
+
+{% block contenido %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4 fade-up-enter">
+        <div>
+            <h2 class="fw-bold mb-1" style="color: var(--dark);">
+                <i class="bi bi-globe text-primary"></i> SaaS Control Center
+            </h2>
+            <p class="text-muted mb-0">Vista global del rendimiento y adopción de la plataforma.</p>
+        </div>
+    </div>
+
+    <!-- Métricas SaaS -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-4 fade-up-enter delay-100">
+            <div class="card stat-card bg-primary text-white h-100 shadow-sm border-0 rounded-4" style="background: linear-gradient(135deg, var(--primary), #1e40af) !important;">
+                <div class="card-body p-4 d-flex align-items-center">
+                    <div class="rounded-circle bg-white bg-opacity-25 p-3 me-4 d-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                        <i class="bi bi-briefcase-fill fs-3"></i>
+                    </div>
+                    <div>
+                        <h6 class="text-white-50 text-uppercase fw-bold mb-1" style="letter-spacing: 1px; font-size: 0.8rem;">Cuentas Admin (Negocios)</h6>
+                        <h2 class="display-5 fw-bold mb-0">{{ total_admins }}</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 fade-up-enter delay-200">
+            <div class="card stat-card bg-success text-white h-100 shadow-sm border-0 rounded-4" style="background: linear-gradient(135deg, var(--secondary), #047857) !important;">
+                <div class="card-body p-4 d-flex align-items-center">
+                    <div class="rounded-circle bg-white bg-opacity-25 p-3 me-4 d-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                        <i class="bi bi-people-fill fs-3"></i>
+                    </div>
+                    <div>
+                        <h6 class="text-white-50 text-uppercase fw-bold mb-1" style="letter-spacing: 1px; font-size: 0.8rem;">Vendedores Activos</h6>
+                        <h2 class="display-5 fw-bold mb-0">{{ total_vendors }}</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 fade-up-enter delay-300">
+            <div class="card stat-card bg-info text-white h-100 shadow-sm border-0 rounded-4" style="background: linear-gradient(135deg, #0ea5e9, #0284c7) !important;">
+                <div class="card-body p-4 d-flex align-items-center">
+                    <div class="rounded-circle bg-white bg-opacity-25 p-3 me-4 d-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                        <i class="bi bi-file-earmark-text-fill fs-3"></i>
+                    </div>
+                    <div>
+                        <h6 class="text-white-50 text-uppercase fw-bold mb-1" style="letter-spacing: 1px; font-size: 0.8rem;">Cotizaciones Globales</h6>
+                        <h2 class="display-5 fw-bold mb-0">{{ total_cotizaciones }}</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Actividad Reciente -->
+    <div class="card border-0 shadow-sm rounded-4 fade-up-enter delay-400">
+        <div class="card-header bg-white border-bottom-0 pt-4 pb-0 px-4">
+            <h5 class="fw-bold"><i class="bi bi-activity text-primary me-2"></i> Flujo de Cotizaciones Globales (Top 10 Recientes)</h5>
+        </div>
+        <div class="card-body p-0 mt-3">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="bg-light">
+                        <tr>
+                            <th class="border-0 px-4 py-3" style="border-top-left-radius: var(--radius-lg);">ID</th>
+                            <th class="border-0 py-3">Fecha</th>
+                            <th class="border-0 py-3">Cliente Final</th>
+                            <th class="border-0 py-3">Emitido Por (Vendedor/Admin)</th>
+                            <th class="border-0 py-3">Monto</th>
+                            <th class="border-0 px-4 py-3 text-end" style="border-top-right-radius: var(--radius-lg);">Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for cot in cotizaciones %}
+                        <tr>
+                            <td class="px-4 py-3 fw-bold text-muted">#{{ cot.id }}</td>
+                            <td class="py-3">{{ cot.fecha[:10] }}</td>
+                            <td class="py-3 fw-semibold text-dark">{{ cot.cliente }}</td>
+                            <td class="py-3">
+                                {% if cot.vendedor %}
+                                    <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary-subtle px-2 py-1"><i class="bi bi-person me-1"></i> {{ cot.vendedor }}</span>
+                                {% else %}
+                                    <span class="text-muted fst-italic">Desconocido</span>
+                                {% endif %}
+                            </td>
+                            <td class="py-3 fw-bold text-success">${{ "{:,.2f}".format(cot.total) }}</td>
+                            <td class="px-4 py-3 text-end">
+                                {% if cot.estado == 'Aprobada' %}
+                                    <span class="badge bg-success rounded-pill px-3 py-2"><i class="bi bi-check-circle me-1"></i> Aprobada</span>
+                                {% elif cot.estado == 'Rechazada' %}
+                                    <span class="badge bg-danger rounded-pill px-3 py-2"><i class="bi bi-x-circle me-1"></i> Rechazada</span>
+                                {% else %}
+                                    <span class="badge bg-warning text-dark rounded-pill px-3 py-2"><i class="bi bi-clock-history me-1"></i> Pendiente</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="6" class="text-center py-5 text-muted">
+                                <i class="bi bi-inbox fs-1 d-block mb-3 opacity-50"></i>
+                                Todavía no hay cotizaciones generadas en la plataforma.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

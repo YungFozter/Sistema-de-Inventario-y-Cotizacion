@@ -21,9 +21,10 @@
                             <th>Nombre</th>
                             <th>Correo</th>
                             <th>Teléfono</th>
-                            <th>Rol</th>
+                            <th>Rol / Vendedores</th>
+                            <th>Última Conexión</th>
                             <th>Estado</th>
-                            <th>Acciones</th>
+                            <th>Acciones (Kill-Switch)</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -34,13 +35,19 @@
                             <td>{{ usuario.correo }}</td>
                             <td>{{ usuario.telefono or '-' }}</td>
                             <td>
-                                <span class="badge bg-{% if usuario.rol == 'admin' %}danger{% else %}primary{% endif %}">
+                                <span class="badge bg-{% if usuario.rol == 'admin' %}danger{% elif usuario.rol == 'superadmin' %}dark{% else %}primary{% endif %} mb-1">
                                     {{ usuario.rol|capitalize }}
                                 </span>
+                                {% if usuario.rol == 'admin' %}
+                                <br><small class="text-muted"><i class="bi bi-people"></i> {{ usuario.vendedores_count }} vendedores</small>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <small class="text-muted">{{ usuario.ultima_conexion[:16] if usuario.ultima_conexion else 'Nunca' }}</small>
                             </td>
                             <td>
                                 <span class="badge bg-{% if usuario.activo %}success{% else %}secondary{% endif %}">
-                                    {{ 'Activo' if usuario.activo else 'Inactivo' }}
+                                    {{ 'Activo' if usuario.activo else 'Suspendido' }}
                                 </span>
                             </td>
                             <td>
@@ -51,10 +58,10 @@
                                         <i class="bi bi-pencil"></i>
                                     </button>
                                     {% if usuario.id != session.user_id %}
-                                    <button class="btn btn-outline-{% if usuario.activo %}danger{% else %}success{% endif %}"
+                                    <button class="btn btn-{% if usuario.activo %}danger{% else %}success{% endif %}"
                                             onclick="cambiarEstadoUsuario({{ usuario.id }}, {{ usuario.activo }})"
-                                            title="{% if usuario.activo %}Desactivar{% else %}Activar{% endif %}">
-                                        <i class="bi bi-{% if usuario.activo %}x-circle{% else %}check-circle{% endif %}"></i>
+                                            title="{% if usuario.activo %}Suspender Acceso (Kill-Switch){% else %}Reactivar Acceso{% endif %}">
+                                        <i class="bi bi-power"></i>
                                     </button>
                                     <button class="btn btn-outline-primary"
                                             onclick="cambiarRolUsuario({{ usuario.id }}, '{{ usuario.rol }}')"

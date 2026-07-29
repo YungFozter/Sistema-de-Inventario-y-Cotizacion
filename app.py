@@ -825,28 +825,37 @@ def login():
 
         # Conexión a DB
         conexion = get_db_connection()
+        conexion.row_factory = sqlite3.Row
         cursor = conexion.cursor()
-        cursor.execute('SELECT * FROM clientes WHERE correo = ?', (correo,))
+        
+        # Obtener el cliente y el estado de su creador
+        cursor.execute('''
+            SELECT c.*, creador.activo as creador_activo 
+            FROM clientes c 
+            LEFT JOIN clientes creador ON c.creador_id = creador.id 
+            WHERE c.correo = ?
+        ''', (correo,))
         cliente = cursor.fetchone()
-        conexion.close()
 
-        if cliente and check_password_hash(cliente[7], contrasena):
-            rol = cliente[8]  # Índice 8 corresponde al campo 'rol'
+        if cliente and check_password_hash(cliente['contrasena'], contrasena):
+            
+            # 1. Verificar si la cuenta está activa
+            if not cliente['activo']:
+                conexion.close()
+                error = 'Tu cuenta ha sido suspendida.'
+                return render_template('autenticacion/login.html', error=error, tipo=tipo_login)
+                
+            # 2. Verificar el Kill-Switch (si el Administrador padre está inactivo, bloquear a los vendedores)
+            if cliente['creador_id'] and cliente['creador_activo'] == 0:
+                conexion.close()
+                error = 'La suscripción del Administrador principal ha expirado o fue suspendida. Por favor, contacta a tu superior.'
+                return render_template('autenticacion/login.html', error=error, tipo=tipo_login)
 
-            # Lógica para roles de administrador
-            if tipo_login == 'admin':
-                if pin_admin == "YungFozter":
-                    rol = 'superadmin'
-                elif pin_admin == "Enrique":
-                    # Permitir acceso de admin a cualquier usuario con PIN correcto
-                    rol = 'admin'
-                else:
-                    error = 'PIN de administrador incorrecto'
-                    return render_template('autenticacion/login.html', error=error, tipo=tipo_login)
+            rol = cliente['rol']
 
             # Registrar login exitoso
             registrar_log(
-                usuario_id=cliente[0],
+                usuario_id=cliente['id'],
                 accion="login_exitoso",
                 detalle={
                     "ip": request.remote_addr,
@@ -855,23 +864,29 @@ def login():
                 }
             )
 
+            # Actualizar ultima_conexion
+            cursor.execute('UPDATE clientes SET ultima_conexion = CURRENT_TIMESTAMP WHERE id = ?', (cliente['id'],))
+            conexion.commit()
+            conexion.close()
+
             # Guardar sesión
-            session['user_id'] = cliente[0]
-            session['user_nombre'] = cliente[1]
+            session['user_id'] = cliente['id']
+            session['user_nombre'] = cliente['nombre']
             session['user_rol'] = rol
-            session['user_email'] = cliente[6]
+            session['user_email'] = cliente['correo']
 
             # Redirigir según el rol
             if rol == 'superadmin':
-                return redirect(url_for('admin_panel'))
+                return redirect(url_for('dashboard')) 
             elif rol == 'admin':
                 return redirect(url_for('dashboard'))
             elif rol == 'standard':
-                return redirect(url_for('standard_dashboard'))  # Redirigir a dashboard de Standard
+                return redirect(url_for('standard_dashboard'))
             else:
-                return redirect(url_for('index'))  # Rol desconocido
+                return redirect(url_for('index'))
 
         else:
+            conexion.close()
             error = 'Credenciales incorrectas'
 
     return render_template('autenticacion/login.html', error=error, tipo=tipo_login)
@@ -899,7 +914,40 @@ def dashboard():
     if user_rol == 'standard':
         return redirect(url_for('standard_dashboard'))
 
-    # Conexión a BD solo para admins/superadmins
+    if user_rol == 'superadmin':
+        conexion = get_db_connection()
+        conexion.row_factory = sqlite3.Row
+        cursor = conexion.cursor()
+        
+        # --- MÉTRICAS SAAS PARA SUPERADMIN ---
+        cursor.execute("SELECT COUNT(*) FROM clientes WHERE rol = 'admin'")
+        total_admins = cursor.fetchone()[0]
+
+        cursor.execute("SELECT COUNT(*) FROM clientes WHERE rol = 'standard'")
+        total_vendors = cursor.fetchone()[0]
+
+        cursor.execute("SELECT COUNT(*) FROM cotizaciones")
+        total_cotizaciones = cursor.fetchone()[0]
+        
+        # Cotizaciones recientes globales (viendo quién la hizo)
+        cursor.execute('''
+            SELECT c.id, c.fecha, cli.nombre as cliente, v.nombre as vendedor, c.total, c.estado
+            FROM cotizaciones c
+            JOIN clientes cli ON c.cliente_id = cli.id
+            LEFT JOIN clientes v ON c.creador_id = v.id
+            ORDER BY c.fecha DESC LIMIT 10
+        ''')
+        cotizaciones = cursor.fetchall()
+        conexion.close()
+        
+        return render_template('admin/dashboard_superadmin.html',
+            total_admins=total_admins,
+            total_vendors=total_vendors,
+            total_cotizaciones=total_cotizaciones,
+            cotizaciones=cotizaciones
+        )
+
+    # Conexión a BD solo para admins
 
     conexion = get_db_connection()
     conexion.row_factory = sqlite3.Row
@@ -2476,6 +2524,23 @@ def ver_cotizacion(id):
         conexion.close()
 
 
+@app.route('/admin/logs')
+@superadmin_required
+@login_required
+def auditoria_logs():
+    conexion = get_db_connection()
+    conexion.row_factory = sqlite3.Row
+    cursor = conexion.cursor()
+    cursor.execute('''
+        SELECT l.*, c.nombre, c.rol 
+        FROM logs l
+        JOIN clientes c ON l.usuario_id = c.id
+        ORDER BY l.fecha DESC LIMIT 200
+    ''')
+    logs_data = cursor.fetchall()
+    conexion.close()
+    return render_template('admin/logs.html', logs=logs_data)
+
 # Ruta para gestión de usuarios (solo superadmin)
 @app.route('/admin/usuarios')
 @superadmin_required
@@ -2483,14 +2548,23 @@ def ver_cotizacion(id):
 def gestion_usuarios():
     try:
         conexion = get_db_connection()
+        conexion.row_factory = sqlite3.Row
         cursor = conexion.cursor()
 
-        # Obtener todos los usuarios excepto superadmin actual
+        # Obtener todos los usuarios excepto superadmin actual, agregando el conteo de vendedores
         cursor.execute('''
-            SELECT id, nombre, correo, telefono, rol, activo 
-            FROM clientes
-            WHERE id != ? AND rol IN ('admin', 'superadmin', 'standard')
-            ORDER BY nombre
+            SELECT 
+                u.id, 
+                u.nombre, 
+                u.correo, 
+                u.telefono, 
+                u.rol, 
+                u.activo,
+                u.ultima_conexion,
+                (SELECT COUNT(*) FROM clientes v WHERE v.creador_id = u.id AND v.rol = 'standard') as vendedores_count
+            FROM clientes u
+            WHERE u.id != ? AND u.rol IN ('admin', 'superadmin', 'standard')
+            ORDER BY u.rol ASC, u.nombre ASC
         ''', (session['user_id'],))
         usuarios = cursor.fetchall()
         conexion.close()

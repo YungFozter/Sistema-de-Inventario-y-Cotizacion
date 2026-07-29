@@ -34,6 +34,7 @@ def crear_tablas():
                 rol TEXT NOT NULL DEFAULT 'standard',
                 tipo_cliente TEXT DEFAULT 'normal',
                 fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                ultima_conexion TIMESTAMP,
                 activo {"BOOLEAN DEFAULT TRUE" if is_postgres else "BOOLEAN DEFAULT 1"},
                 creador_id INTEGER,
                 FOREIGN KEY (creador_id) REFERENCES clientes(id)

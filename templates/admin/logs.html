@@ -1,0 +1,95 @@
+{% extends 'shared/layout.html' %}
+
+{% block titulo %}Auditoría Global (Logs){% endblock %}
+
+{% block contenido %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4 fade-up-enter">
+        <div>
+            <h2 class="fw-bold mb-1" style="color: var(--dark);">
+                <i class="bi bi-shield-check text-primary"></i> Auditoría Global (Logs)
+            </h2>
+            <p class="text-muted mb-0">Monitorea la actividad reciente de tus clientes y administradores.</p>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm rounded-4 fade-up-enter delay-100">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="bg-light">
+                        <tr>
+                            <th class="border-0 px-4 py-3" style="border-top-left-radius: var(--radius-lg);">Fecha y Hora</th>
+                            <th class="border-0 py-3">Usuario (Rol)</th>
+                            <th class="border-0 py-3">Acción</th>
+                            <th class="border-0 px-4 py-3 text-end" style="border-top-right-radius: var(--radius-lg);">Detalles</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for log in logs %}
+                        <tr>
+                            <td class="px-4 py-3 text-muted">
+                                <small><i class="bi bi-clock me-1"></i> {{ log.fecha[:16] }}</small>
+                            </td>
+                            <td class="py-3">
+                                <div class="fw-bold text-dark">{{ log.nombre }}</div>
+                                <span class="badge bg-{% if log.rol == 'admin' %}danger{% elif log.rol == 'superadmin' %}dark{% else %}primary{% endif %} mt-1" style="font-size: 0.7rem;">
+                                    {{ log.rol|capitalize }}
+                                </span>
+                            </td>
+                            <td class="py-3">
+                                {% if log.accion == 'login_exitoso' %}
+                                    <span class="badge bg-success bg-opacity-10 text-success border border-success-subtle"><i class="bi bi-box-arrow-in-right me-1"></i> Inicio de Sesión</span>
+                                {% elif log.accion == 'cotizacion_creada' %}
+                                    <span class="badge bg-primary bg-opacity-10 text-primary border border-primary-subtle"><i class="bi bi-file-earmark-plus me-1"></i> Cotización Creada</span>
+                                {% elif log.accion == 'usuario_creado' %}
+                                    <span class="badge bg-info bg-opacity-10 text-info border border-info-subtle"><i class="bi bi-person-plus me-1"></i> Usuario Creado</span>
+                                {% else %}
+                                    <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary-subtle"><i class="bi bi-activity me-1"></i> {{ log.accion }}</span>
+                                {% endif %}
+                            </td>
+                            <td class="px-4 py-3 text-end">
+                                {% if log.detalle %}
+                                    <button class="btn btn-sm btn-outline-secondary rounded-circle" data-bs-toggle="modal" data-bs-target="#detalleModal{{ log.id }}" title="Ver Detalles">
+                                        <i class="bi bi-info-circle"></i>
+                                    </button>
+
+                                    <!-- Modal de Detalles -->
+                                    <div class="modal fade text-start" id="detalleModal{{ log.id }}" tabindex="-1" aria-hidden="true">
+                                        <div class="modal-dialog modal-dialog-centered">
+                                            <div class="modal-content rounded-4 border-0 shadow">
+                                                <div class="modal-header border-bottom-0 pb-0">
+                                                    <h5 class="modal-title fw-bold text-primary"><i class="bi bi-journal-code me-2"></i> Detalles de Auditoría</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <div class="bg-light p-3 rounded-3 font-monospace small" style="overflow-wrap: break-word;">
+                                                        {{ log.detalle }}
+                                                    </div>
+                                                </div>
+                                                <div class="modal-footer border-top-0 pt-0">
+                                                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cerrar</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% else %}
+                                    <span class="text-muted fst-italic small">-</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="4" class="text-center py-5 text-muted">
+                                <i class="bi bi-inbox fs-1 d-block mb-3 opacity-50"></i>
+                                No hay registros de actividad todavía.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

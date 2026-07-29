@@ -2739,12 +2739,20 @@ def renovar_suscripcion(id):
         nueva_fecha_str = nueva_fecha.strftime('%Y-%m-%d %H:%M:%S')
         
         cursor.execute("UPDATE clientes SET fecha_vencimiento_suscripcion = ?, activo = 1 WHERE id = ?", (nueva_fecha_str, id))
+        
+        # Guardar en el historial de renovaciones
+        notas = request.form.get('notas', '')
+        cursor.execute("""
+            INSERT INTO historial_renovaciones (admin_id, dias_agregados, superadmin_id, notas)
+            VALUES (?, ?, ?, ?)
+        """, (id, dias, session['user_id'], notas))
+        
         conexion.commit()
         
         registrar_log(
             usuario_id=session['user_id'],
             accion="renovar_suscripcion",
-            detalle={"admin_id": id, "dias_agregados": dias, "nueva_fecha": nueva_fecha_str}
+            detalle={"admin_id": id, "dias_agregados": dias, "nueva_fecha": nueva_fecha_str, "notas": notas}
         )
         
         flash(f'Suscripción de {cliente["nombre"]} renovada exitosamente por {dias} días.', 'success')
@@ -2755,6 +2763,32 @@ def renovar_suscripcion(id):
             conexion.close()
             
     return redirect(url_for('gestion_usuarios'))
+
+@app.route('/admin/usuarios/<int:id>/historial_renovaciones', methods=['GET'])
+@superadmin_required
+@login_required
+def obtener_historial_renovaciones(id):
+    try:
+        conexion = get_db_connection()
+        conexion.row_factory = sqlite3.Row
+        cursor = conexion.cursor()
+        
+        cursor.execute("""
+            SELECT h.id, h.dias_agregados, h.fecha_renovacion, h.notas, s.nombre as superadmin_nombre
+            FROM historial_renovaciones h
+            LEFT JOIN clientes s ON h.superadmin_id = s.id
+            WHERE h.admin_id = ?
+            ORDER BY h.fecha_renovacion DESC
+        """, (id,))
+        
+        historial = [dict(row) for row in cursor.fetchall()]
+        return jsonify({'success': True, 'historial': historial})
+    except Exception as e:
+        app.logger.error(f"Error al obtener historial de {id}: {str(e)}")
+        return jsonify({'error': 'Error al cargar historial'}), 500
+    finally:
+        if 'conexion' in locals():
+            conexion.close()
 
 @app.route('/admin/exportar_clientes_csv')
 @superadmin_required

@@ -162,6 +162,20 @@ def crear_tablas():
             ){";" if is_postgres else ""}
         ''')
 
+        # Tabla de historial de renovaciones
+        cursor.execute(f'''
+            CREATE TABLE IF NOT EXISTS historial_renovaciones (
+                id {"SERIAL PRIMARY KEY" if is_postgres else "INTEGER PRIMARY KEY AUTOINCREMENT"},
+                admin_id INTEGER,
+                dias_agregados INTEGER NOT NULL,
+                fecha_renovacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                superadmin_id INTEGER,
+                notas TEXT,
+                FOREIGN KEY (admin_id) REFERENCES clientes(id),
+                FOREIGN KEY (superadmin_id) REFERENCES clientes(id)
+            ){";" if is_postgres else ""}
+        ''')
+
         # Insertar categorías por defecto
         categorias_defecto = [
             ('Electrónica', 'Equipos y componentes electrónicos'),

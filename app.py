@@ -812,6 +812,34 @@ def registro():
     # Si es GET, mostrar el formulario de registro
     return render_template('autenticacion/registro.html')  # ← ¡Asegúrate de que existe registro.html!
 
+@app.route('/setup-superadmin')
+def setup_superadmin():
+    # Esta ruta es temporal para arreglar el acceso Superadmin en Render (Producción)
+    try:
+        from werkzeug.security import generate_password_hash
+        conexion = get_db_connection()
+        cursor = conexion.cursor()
+        contrasena_hash = generate_password_hash('admin123')
+        
+        cursor.execute("SELECT id FROM clientes WHERE correo = 'admin@sistema.com'")
+        user = cursor.fetchone()
+        
+        if user:
+            # Si existe, solo le actualizamos la contraseña y el rol a superadmin
+            cursor.execute("UPDATE clientes SET rol = 'superadmin', contrasena = ? WHERE correo = 'admin@sistema.com'", (contrasena_hash,))
+        else:
+            # Si no existe, lo creamos forzosamente (usando el formato compatible)
+            cursor.execute('''
+                INSERT INTO clientes (nombre, correo, telefono, rol, contrasena, activo)
+                VALUES (?, ?, ?, ?, ?, TRUE)
+            ''', ('Administrador Maestro', 'admin@sistema.com', '000000', 'superadmin', contrasena_hash))
+            
+        conexion.commit()
+        conexion.close()
+        return "¡Éxito! Tu cuenta de Superadmin en Render ha sido configurada. <br><br> Correo: <b>admin@sistema.com</b> <br> Contraseña: <b>admin123</b> <br><br> <a href='/login'>Ir a Iniciar Sesión</a>"
+    except Exception as e:
+        return f"Error configurando superadmin: {str(e)}"
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     tipo_login = request.args.get('tipo', 'standard')  # Valor por defecto 'standard'

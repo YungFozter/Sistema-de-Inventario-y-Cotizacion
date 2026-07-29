@@ -43,7 +43,7 @@
                                 {% endif %}
                             </td>
                             <td>
-                                <small class="text-muted">{{ usuario.ultima_conexion[:16] if usuario.ultima_conexion else 'Nunca' }}</small>
+                                <small class="text-muted">{{ (usuario.ultima_conexion | date('%Y-%m-%d %H:%M')) if usuario.ultima_conexion else 'Nunca' }}</small>
                             </td>
                             <td>
                                 <span class="badge bg-{% if usuario.activo %}success{% else %}secondary{% endif %}">

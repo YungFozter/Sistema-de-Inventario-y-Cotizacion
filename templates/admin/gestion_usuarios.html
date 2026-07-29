@@ -3,100 +3,115 @@
 {% block titulo %}Gestión de Usuarios{% endblock %}
 
 {% block contenido %}
-<div class="container mt-4">
-    <div class="card shadow">
-        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-            <h3 class="mb-0"><i class="bi bi-people-fill"></i> Gestión de Usuarios</h3>
-            <div>
-                {% if session.user_rol == 'superadmin' %}
-                <a href="{{ url_for('exportar_clientes_csv') }}" class="btn btn-success btn-sm me-2">
-                    <i class="bi bi-file-earmark-excel"></i> Exportar CSV
-                </a>
-                {% endif %}
-                <button class="btn btn-light btn-sm" data-bs-toggle="modal" data-bs-target="#usuarioModal" id="nuevoUsuarioBtn">
-                    <i class="bi bi-plus-circle"></i> Nuevo Usuario
-                </button>
-            </div>
+<div class="container-fluid py-4 px-lg-5">
+    <div class="d-flex justify-content-between align-items-center mb-4 fade-up-enter">
+        <div>
+            <h2 class="fw-bold mb-1" style="color: var(--dark);">
+                <i class="bi bi-people-fill text-primary"></i> Gestión de Usuarios
+            </h2>
+            <p class="text-muted mb-0">Administra todos los clientes, vendedores y sus suscripciones.</p>
         </div>
+        <div>
+            {% if session.user_rol == 'superadmin' %}
+            <a href="{{ url_for('exportar_clientes_csv') }}" class="btn btn-outline-success rounded-pill px-4 me-2 shadow-sm">
+                <i class="bi bi-file-earmark-excel"></i> Exportar CSV
+            </a>
+            {% endif %}
+            <button class="btn btn-primary rounded-pill px-4 shadow-sm" data-bs-toggle="modal" data-bs-target="#usuarioModal" id="nuevoUsuarioBtn">
+                <i class="bi bi-plus-circle"></i> Nuevo Usuario
+            </button>
+        </div>
+    </div>
 
-        <div class="card-body">
+    <div class="card border-0 shadow-sm rounded-4 fade-up-enter delay-100">
+        <div class="card-body p-0 mt-3">
             <div class="table-responsive">
-                <table class="table table-striped table-hover">
-                    <thead class="table-dark">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="bg-light">
                         <tr>
-                            <th>ID</th>
-                            <th>Nombre</th>
-                            <th>Correo</th>
-                            <th>Teléfono</th>
-                            <th>Rol / Vendedores</th>
-                            <th>Última Conexión</th>
-                            <th>Estado</th>
-                            <th>Acciones (Kill-Switch)</th>
+                            <th class="border-0 px-4 py-3" style="border-top-left-radius: var(--radius-lg);">ID</th>
+                            <th class="border-0 py-3">Nombre</th>
+                            <th class="border-0 py-3">Correo</th>
+                            <th class="border-0 py-3">Teléfono</th>
+                            <th class="border-0 py-3">Rol / Vendedores</th>
+                            <th class="border-0 py-3">Últ. Conexión / Vencimiento</th>
+                            <th class="border-0 py-3 text-center">Estado</th>
+                            <th class="border-0 px-4 py-3 text-end" style="border-top-right-radius: var(--radius-lg);">Acciones (Kill-Switch)</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for usuario in usuarios %}
-                        <tr>
-                            <td>{{ usuario.id }}</td>
-                            <td>{{ usuario.nombre }}</td>
-                            <td>{{ usuario.correo }}</td>
-                            <td>{{ usuario.telefono or '-' }}</td>
-                            <td>
-                                <span class="badge bg-{% if usuario.rol == 'admin' %}danger{% elif usuario.rol == 'superadmin' %}dark{% else %}primary{% endif %} mb-1">
-                                    {{ usuario.rol|capitalize }}
-                                </span>
+                        <tr class="align-middle">
+                            <td class="px-4 py-3 fw-bold text-muted">#{{ usuario.id }}</td>
+                            <td class="py-3 fw-semibold text-dark">{{ usuario.nombre }}</td>
+                            <td class="py-3 text-muted">{{ usuario.correo }}</td>
+                            <td class="py-3 text-muted">{{ usuario.telefono or '-' }}</td>
+                            <td class="py-3">
                                 {% if usuario.rol == 'admin' %}
-                                <br><small class="text-muted"><i class="bi bi-people"></i> {{ usuario.vendedores_count }} vendedores</small>
+                                    <span class="badge bg-danger bg-opacity-10 text-danger border border-danger-subtle px-2 py-1 mb-1">
+                                        Administrador
+                                    </span>
+                                    <br><small class="text-muted"><i class="bi bi-people"></i> {{ usuario.vendedores_count }} vendedores</small>
+                                {% elif usuario.rol == 'superadmin' %}
+                                    <span class="badge bg-dark bg-opacity-10 text-dark border border-dark-subtle px-2 py-1 mb-1">
+                                        Superadmin
+                                    </span>
+                                {% else %}
+                                    <span class="badge bg-primary bg-opacity-10 text-primary border border-primary-subtle px-2 py-1 mb-1">
+                                        Estándar
+                                    </span>
                                 {% endif %}
                             </td>
-                            <td>
+                            <td class="py-3">
                                 {% if usuario.rol == 'admin' %}
                                     {% if usuario.dias_restantes is not none %}
-                                        <span class="badge bg-{{ usuario.estado_color }} text-white mb-1">
+                                        <span class="badge bg-{{ usuario.estado_color }} {% if usuario.estado_color == 'warning' %}text-dark{% else %}text-white{% endif %} rounded-pill px-3 py-1 mb-1 shadow-sm">
                                             {% if usuario.dias_restantes > 0 %}
-                                                Quedan {{ usuario.dias_restantes }} días
+                                                <i class="bi bi-clock-history me-1"></i> Quedan {{ usuario.dias_restantes }} días
                                             {% elif usuario.dias_restantes == 0 %}
-                                                Vence hoy
+                                                <i class="bi bi-exclamation-triangle me-1"></i> Vence hoy
                                             {% else %}
-                                                Vencida (hace {{ usuario.dias_restantes|abs }} días)
+                                                <i class="bi bi-x-circle me-1"></i> Vencida (hace {{ usuario.dias_restantes|abs }} días)
                                             {% endif %}
                                         </span>
-                                        <br><small class="text-muted" style="font-size: 0.7rem;">Vence: {{ usuario.fecha_vencimiento_suscripcion | date('%Y-%m-%d') }}</small>
+                                        <br><small class="text-muted fw-semibold" style="font-size: 0.75rem;">Vence: {{ usuario.fecha_vencimiento_suscripcion | date('%Y-%m-%d') }}</small>
                                     {% else %}
-                                        <span class="badge bg-secondary mb-1">Sin suscripción</span>
+                                        <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary-subtle px-2 py-1 mb-1">Sin suscripción</span>
                                     {% endif %}
                                 {% else %}
-                                    <small class="text-muted">Últ: {{ (usuario.ultima_conexion | date('%Y-%m-%d %H:%M')) if usuario.ultima_conexion else 'Nunca' }}</small>
+                                    <small class="text-muted fw-semibold"><i class="bi bi-box-arrow-in-right me-1"></i> Últ: {{ (usuario.ultima_conexion | date('%Y-%m-%d %H:%M')) if usuario.ultima_conexion else 'Nunca' }}</small>
                                 {% endif %}
                             </td>
-                            <td>
-                                <span class="badge bg-{% if usuario.activo %}success{% else %}secondary{% endif %}">
-                                    {{ 'Activo' if usuario.activo else 'Suspendido' }}
-                                </span>
+                            <td class="py-3 text-center">
+                                {% if usuario.activo %}
+                                    <span class="badge bg-success bg-opacity-10 text-success border border-success-subtle px-3 py-2 rounded-pill"><i class="bi bi-check-circle-fill me-1"></i> Activo</span>
+                                {% else %}
+                                    <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary-subtle px-3 py-2 rounded-pill"><i class="bi bi-dash-circle-fill me-1"></i> Suspendido</span>
+                                {% endif %}
                             </td>
-                            <td>
-                                <div class="btn-group btn-group-sm" role="group">
+                            <td class="px-4 py-3 text-end">
+                                <div class="btn-group shadow-sm" role="group" style="border-radius: var(--radius-md); overflow: hidden;">
                                     {% if usuario.rol == 'admin' and session.user_rol == 'superadmin' %}
-                                    <button class="btn btn-outline-success"
+                                    <button class="btn btn-light text-success border-end border-light-subtle btn-sm"
                                             onclick="abrirRenovarModal({{ usuario.id }}, '{{ usuario.nombre }}')"
-                                            title="Renovar Suscripción">
+                                            title="Renovar Suscripción" data-bs-toggle="tooltip">
                                         <i class="bi bi-currency-dollar"></i>
                                     </button>
                                     {% endif %}
-                                    <button class="btn btn-outline-warning"
+                                    <button class="btn btn-light text-warning border-end border-light-subtle btn-sm"
                                             onclick="editarUsuario({{ usuario.id }})"
-                                            title="Editar">
-                                        <i class="bi bi-pencil"></i>
+                                            title="Editar" data-bs-toggle="tooltip">
+                                        <i class="bi bi-pencil-fill"></i>
                                     </button>
                                     {% if usuario.id != session.user_id %}
-                                    <button class="btn btn-{% if usuario.activo %}danger{% else %}success{% endif %}"
+                                    <button class="btn btn-light text-{% if usuario.activo %}danger{% else %}success{% endif %} border-end border-light-subtle btn-sm"
                                             onclick="cambiarEstadoUsuario({{ usuario.id }}, {{ usuario.activo }})"
-                                            title="{% if usuario.activo %}Suspender Acceso (Kill-Switch){% else %}Reactivar Acceso{% endif %}">
+                                            title="{% if usuario.activo %}Suspender Acceso (Kill-Switch){% else %}Reactivar Acceso{% endif %}" data-bs-toggle="tooltip">
                                         <i class="bi bi-power"></i>
                                     </button>
-                                    <button class="btn btn-outline-primary"
+                                    <button class="btn btn-light text-primary btn-sm"
                                             onclick="cambiarRolUsuario({{ usuario.id }}, '{{ usuario.rol }}')"
-                                            title="Cambiar Rol">
+                                            title="Cambiar Rol" data-bs-toggle="tooltip">
                                         <i class="bi bi-arrow-repeat"></i>
                                     </button>
                                     {% endif %}
@@ -105,7 +120,10 @@
                         </tr>
                         {% else %}
                         <tr>
-                            <td colspan="7" class="text-center">No se encontraron usuarios</td>
+                            <td colspan="8" class="text-center py-5 text-muted">
+                                <i class="bi bi-inbox fs-1 d-block mb-3 opacity-50"></i>
+                                No se encontraron usuarios en la plataforma.
+                            </td>
                         </tr>
                         {% endfor %}
                     </tbody>

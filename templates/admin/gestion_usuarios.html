@@ -25,8 +25,31 @@
 
     <div class="card border-0 shadow-sm rounded-4 fade-up-enter delay-100">
         <div class="card-body p-0 mt-3">
+            <!-- Search Filters -->
+            <div class="px-4 py-3 border-bottom border-light-subtle bg-light bg-opacity-50">
+                <div class="row g-2 align-items-center">
+                    <div class="col-md-3">
+                        <select class="form-select border-0 shadow-sm rounded-pill px-3 py-2" id="filtroCampo">
+                            <option value="todos">Todos los campos</option>
+                            <option value="0">ID</option>
+                            <option value="1">Nombre</option>
+                            <option value="2">Correo</option>
+                            <option value="3">Teléfono</option>
+                        </select>
+                    </div>
+                    <div class="col-md-9">
+                        <div class="input-group shadow-sm rounded-pill overflow-hidden bg-white">
+                            <span class="input-group-text bg-transparent border-0 ps-4 pe-2 text-muted">
+                                <i class="bi bi-search"></i>
+                            </span>
+                            <input type="text" class="form-control border-0 shadow-none px-2 py-2" id="filtroTexto" placeholder="Buscar usuario por ID, nombre, correo o teléfono..." onkeyup="filtrarUsuarios()">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
             <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0">
+                <table class="table table-hover align-middle mb-0" id="tablaUsuarios">
                     <thead class="bg-light">
                         <tr>
                             <th class="border-0 px-4 py-3" style="border-top-left-radius: var(--radius-lg);">ID</th>
@@ -119,7 +142,7 @@
                             </td>
                         </tr>
                         {% else %}
-                        <tr>
+                        <tr class="no-results-row">
                             <td colspan="8" class="text-center py-5 text-muted">
                                 <i class="bi bi-inbox fs-1 d-block mb-3 opacity-50"></i>
                                 No se encontraron usuarios en la plataforma.
@@ -407,5 +430,60 @@ document.getElementById('nuevoUsuarioBtn').addEventListener('click', function() 
     document.getElementById('confirmPasswordField').setAttribute('required', '');
     document.getElementById('passwordField').placeholder = '';
 });
+
+// Sistema de filtrado/búsqueda
+function filtrarUsuarios() {
+    const campo = document.getElementById('filtroCampo').value;
+    const texto = document.getElementById('filtroTexto').value.toLowerCase();
+    const filas = document.querySelectorAll('#tablaUsuarios tbody tr:not(.no-results-row)');
+    
+    let encontrados = 0;
+    
+    filas.forEach(fila => {
+        let mostrar = false;
+        
+        if (campo === 'todos') {
+            // Verificar columnas 0 (ID), 1 (Nombre), 2 (Correo), 3 (Teléfono)
+            for (let i = 0; i <= 3; i++) {
+                if (fila.cells[i] && fila.cells[i].textContent.toLowerCase().includes(texto)) {
+                    mostrar = true;
+                    break;
+                }
+            }
+        } else {
+            const index = parseInt(campo);
+            if (fila.cells[index] && fila.cells[index].textContent.toLowerCase().includes(texto)) {
+                mostrar = true;
+            }
+        }
+        
+        fila.style.display = mostrar ? '' : 'none';
+        if (mostrar) encontrados++;
+    });
+
+    // Manejar mensaje de "no hay resultados"
+    let noResultsRow = document.getElementById('noResultsSearchRow');
+    if (encontrados === 0 && texto !== '') {
+        if (!noResultsRow) {
+            const tbody = document.querySelector('#tablaUsuarios tbody');
+            noResultsRow = document.createElement('tr');
+            noResultsRow.id = 'noResultsSearchRow';
+            noResultsRow.className = 'no-results-row';
+            noResultsRow.innerHTML = `<td colspan="8" class="text-center py-5 text-muted">
+                <i class="bi bi-search fs-1 d-block mb-3 opacity-50"></i>
+                <p class="mb-0">No se encontraron coincidencias para <strong>"${texto}"</strong>.</p>
+            </td>`;
+            tbody.appendChild(noResultsRow);
+        } else {
+            noResultsRow.style.display = '';
+            noResultsRow.querySelector('strong').textContent = `"${document.getElementById('filtroTexto').value}"`;
+        }
+    } else if (noResultsRow) {
+        noResultsRow.style.display = 'none';
+    }
+}
+
+// Escuchar cambios en el selector para re-filtrar
+document.getElementById('filtroCampo').addEventListener('change', filtrarUsuarios);
 </script>
 {% endblock %}

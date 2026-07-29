@@ -18,6 +18,7 @@ from threading import Lock
 from contextlib import contextmanager
 from models import (
     crear_tablas, registrar_log, migrar_clientes_existentes, migrar_productos_categorias,
+    migrar_columna_ultima_conexion,
     guardar_importacion_pdf, obtener_importaciones_pdf, obtener_importacion_por_id, registrar_productos_seleccionados,
     eliminar_importacion_pdf
 )
@@ -52,6 +53,7 @@ with app.app_context():
     crear_tablas()
     migrar_clientes_existentes()
     migrar_productos_categorias()
+    migrar_columna_ultima_conexion()
 
 # Añadir filtro 'date' para Jinja2
 @app.template_filter('date')

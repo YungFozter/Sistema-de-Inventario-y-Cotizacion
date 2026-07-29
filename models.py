@@ -508,3 +508,26 @@ def eliminar_importacion_pdf(importacion_id):
         conexion.close()
 
 
+def migrar_columna_ultima_conexion():
+    """Agrega la columna ultima_conexion a la tabla clientes si no existe."""
+    try:
+        conexion = get_db_connection()
+        cursor = conexion.cursor()
+        
+        if is_postgres:
+            cursor.execute("SELECT column_name FROM information_schema.columns WHERE table_name='clientes' AND column_name='ultima_conexion'")
+            if not cursor.fetchone():
+                print("[INFO] Agregando columna ultima_conexion en Postgres...")
+                cursor.execute("ALTER TABLE clientes ADD COLUMN ultima_conexion TIMESTAMP")
+                conexion.commit()
+        else:
+            cursor.execute("PRAGMA table_info(clientes)")
+            columnas = [col[1] for col in cursor.fetchall()]
+            if 'ultima_conexion' not in columnas:
+                print("[INFO] Agregando columna ultima_conexion en SQLite...")
+                cursor.execute("ALTER TABLE clientes ADD COLUMN ultima_conexion TIMESTAMP")
+                conexion.commit()
+    except Exception as e:
+        print(f"Error en migrar_columna_ultima_conexion: {e}")
+    finally:
+        conexion.close()

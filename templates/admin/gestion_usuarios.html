@@ -7,9 +7,16 @@
     <div class="card shadow">
         <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
             <h3 class="mb-0"><i class="bi bi-people-fill"></i> Gestión de Usuarios</h3>
-            <button class="btn btn-light btn-sm" data-bs-toggle="modal" data-bs-target="#usuarioModal" id="nuevoUsuarioBtn">
-                <i class="bi bi-plus-circle"></i> Nuevo Usuario
-            </button>
+            <div>
+                {% if session.user_rol == 'superadmin' %}
+                <a href="{{ url_for('exportar_clientes_csv') }}" class="btn btn-success btn-sm me-2">
+                    <i class="bi bi-file-earmark-excel"></i> Exportar CSV
+                </a>
+                {% endif %}
+                <button class="btn btn-light btn-sm" data-bs-toggle="modal" data-bs-target="#usuarioModal" id="nuevoUsuarioBtn">
+                    <i class="bi bi-plus-circle"></i> Nuevo Usuario
+                </button>
+            </div>
         </div>
 
         <div class="card-body">
@@ -43,7 +50,24 @@
                                 {% endif %}
                             </td>
                             <td>
-                                <small class="text-muted">{{ (usuario.ultima_conexion | date('%Y-%m-%d %H:%M')) if usuario.ultima_conexion else 'Nunca' }}</small>
+                                {% if usuario.rol == 'admin' %}
+                                    {% if usuario.dias_restantes is not none %}
+                                        <span class="badge bg-{{ usuario.estado_color }} text-white mb-1">
+                                            {% if usuario.dias_restantes > 0 %}
+                                                Quedan {{ usuario.dias_restantes }} días
+                                            {% elif usuario.dias_restantes == 0 %}
+                                                Vence hoy
+                                            {% else %}
+                                                Vencida (hace {{ usuario.dias_restantes|abs }} días)
+                                            {% endif %}
+                                        </span>
+                                        <br><small class="text-muted" style="font-size: 0.7rem;">Vence: {{ usuario.fecha_vencimiento_suscripcion | date('%Y-%m-%d') }}</small>
+                                    {% else %}
+                                        <span class="badge bg-secondary mb-1">Sin suscripción</span>
+                                    {% endif %}
+                                {% else %}
+                                    <small class="text-muted">Últ: {{ (usuario.ultima_conexion | date('%Y-%m-%d %H:%M')) if usuario.ultima_conexion else 'Nunca' }}</small>
+                                {% endif %}
                             </td>
                             <td>
                                 <span class="badge bg-{% if usuario.activo %}success{% else %}secondary{% endif %}">
@@ -52,6 +76,13 @@
                             </td>
                             <td>
                                 <div class="btn-group btn-group-sm" role="group">
+                                    {% if usuario.rol == 'admin' and session.user_rol == 'superadmin' %}
+                                    <button class="btn btn-outline-success"
+                                            onclick="abrirRenovarModal({{ usuario.id }}, '{{ usuario.nombre }}')"
+                                            title="Renovar Suscripción">
+                                        <i class="bi bi-currency-dollar"></i>
+                                    </button>
+                                    {% endif %}
                                     <button class="btn btn-outline-warning"
                                             onclick="editarUsuario({{ usuario.id }})"
                                             title="Editar">
@@ -157,10 +188,45 @@
     </div>
 </div>
 
+<!-- Modal para Renovar Suscripción -->
+<div class="modal fade" id="renovarModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title"><i class="bi bi-currency-dollar"></i> Renovar Suscripción</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="formRenovar" method="POST" action="">
+                <div class="modal-body">
+                    <p>Renovando suscripción para: <strong id="renovarNombre"></strong></p>
+                    <label class="form-label">Días a agregar:</label>
+                    <select class="form-select" name="dias" required>
+                        <option value="30">1 Mes (30 días)</option>
+                        <option value="90">3 Meses (90 días)</option>
+                        <option value="180">6 Meses (180 días)</option>
+                        <option value="365">1 Año (365 días)</option>
+                    </select>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-success">Renovar Ahora</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 {% endblock %}
 
 {% block scripts %}
 <script>
+function abrirRenovarModal(id, nombre) {
+    document.getElementById('renovarNombre').textContent = nombre;
+    document.getElementById('formRenovar').action = `/admin/renovar_suscripcion/${id}`;
+    
+    const modal = new bootstrap.Modal(document.getElementById('renovarModal'));
+    modal.show();
+}
 // Función para editar usuario
 function editarUsuario(id) {
     fetch(`/admin/usuarios/${id}`)

@@ -18,7 +18,7 @@ from threading import Lock
 from contextlib import contextmanager
 from models import (
     crear_tablas, registrar_log, migrar_clientes_existentes, migrar_productos_categorias,
-    migrar_columna_ultima_conexion,
+    migrar_columnas_nuevas_clientes,
     guardar_importacion_pdf, obtener_importaciones_pdf, obtener_importacion_por_id, registrar_productos_seleccionados,
     eliminar_importacion_pdf
 )
@@ -53,7 +53,7 @@ with app.app_context():
     crear_tablas()
     migrar_clientes_existentes()
     migrar_productos_categorias()
-    migrar_columna_ultima_conexion()
+    migrar_columnas_nuevas_clientes()
 
 # Añadir filtro 'date' para Jinja2
 @app.template_filter('date')
@@ -790,11 +790,16 @@ def registro():
         # Guardar en la base de datos
         contrasena_hash = generate_password_hash(contrasena)
         
+        from datetime import datetime, timedelta
+        fecha_vencimiento = None
+        if rol == 'admin':
+            fecha_vencimiento = (datetime.now() + timedelta(days=30)).strftime('%Y-%m-%d %H:%M:%S')
+            
         try:
             cursor.execute('''
-                INSERT INTO clientes (nombre, correo, telefono, contrasena, rol)
-                VALUES (?, ?, ?, ?, ?)
-            ''', (nombre, correo, telefono, contrasena_hash, rol))
+                INSERT INTO clientes (nombre, correo, telefono, contrasena, rol, fecha_vencimiento_suscripcion)
+                VALUES (?, ?, ?, ?, ?, ?)
+            ''', (nombre, correo, telefono, contrasena_hash, rol, fecha_vencimiento))
             nuevo_usuario_id = cursor.lastrowid
             
             # Quemar el PIN
@@ -860,7 +865,7 @@ def login():
         
         # Obtener el cliente y el estado de su creador
         cursor.execute('''
-            SELECT c.*, creador.activo as creador_activo 
+            SELECT c.*, creador.activo as creador_activo, creador.fecha_vencimiento_suscripcion as creador_fecha_vencimiento
             FROM clientes c 
             LEFT JOIN clientes creador ON c.creador_id = creador.id 
             WHERE c.correo = ?
@@ -878,8 +883,28 @@ def login():
             # 2. Verificar el Kill-Switch (si el Administrador padre está inactivo, bloquear a los vendedores)
             if cliente['creador_id'] and cliente['creador_activo'] == 0:
                 conexion.close()
-                error = 'La suscripción del Administrador principal ha expirado o fue suspendida. Por favor, contacta a tu superior.'
+                error = 'La suscripción del Administrador principal ha sido suspendida. Por favor, contacta a tu superior.'
                 return render_template('autenticacion/login.html', error=error, tipo=tipo_login)
+
+            # 3. Verificar si la suscripción venció (Para Admins o Vendedores)
+            from datetime import datetime
+            ahora = datetime.now()
+
+            if cliente['rol'] == 'admin' and cliente['fecha_vencimiento_suscripcion']:
+                vence_str = str(cliente['fecha_vencimiento_suscripcion']).split('.')[0]
+                vence = datetime.strptime(vence_str, '%Y-%m-%d %H:%M:%S')
+                if ahora > vence:
+                    conexion.close()
+                    error = 'Tu suscripción ha vencido. Por favor, contacta a soporte para renovarla.'
+                    return render_template('autenticacion/login.html', error=error, tipo=tipo_login)
+                    
+            if cliente['creador_id'] and cliente['creador_fecha_vencimiento']:
+                vence_str = str(cliente['creador_fecha_vencimiento']).split('.')[0]
+                vence = datetime.strptime(vence_str, '%Y-%m-%d %H:%M:%S')
+                if ahora > vence:
+                    conexion.close()
+                    error = 'La suscripción del Administrador principal ha vencido. Por favor, contacta a tu superior.'
+                    return render_template('autenticacion/login.html', error=error, tipo=tipo_login)
 
             rol = cliente['rol']
 
@@ -2591,13 +2616,39 @@ def gestion_usuarios():
                 u.rol, 
                 u.activo,
                 u.ultima_conexion,
+                u.fecha_vencimiento_suscripcion,
                 (SELECT COUNT(*) FROM clientes v WHERE v.creador_id = u.id AND v.rol = 'standard') as vendedores_count
             FROM clientes u
             WHERE u.id != ? AND u.rol IN ('admin', 'superadmin', 'standard')
             ORDER BY u.rol ASC, u.nombre ASC
         ''', (session['user_id'],))
-        usuarios = cursor.fetchall()
+        usuarios_db = cursor.fetchall()
         conexion.close()
+        
+        from datetime import datetime
+        ahora = datetime.now()
+        usuarios = []
+        for u_db in usuarios_db:
+            u = dict(u_db)
+            u['dias_restantes'] = None
+            u['estado_color'] = 'secondary'
+            
+            if u['rol'] == 'admin' and u.get('fecha_vencimiento_suscripcion'):
+                vence_str = str(u['fecha_vencimiento_suscripcion']).split('.')[0]
+                try:
+                    vence_date = datetime.strptime(vence_str, '%Y-%m-%d %H:%M:%S')
+                    delta = (vence_date - ahora).days
+                    u['dias_restantes'] = delta
+                    if delta > 5:
+                        u['estado_color'] = 'success'
+                    elif delta >= 0:
+                        u['estado_color'] = 'warning'
+                    else:
+                        u['estado_color'] = 'danger'
+                except ValueError:
+                    pass
+            
+            usuarios.append(u)
 
         # Crear diccionario de filtros para evitar errores en la plantilla
         filtros = {
@@ -2615,6 +2666,102 @@ def gestion_usuarios():
         flash('Error al cargar la gestión de usuarios', 'danger')
         return redirect(url_for('admin_panel'))
 
+@app.route('/admin/renovar_suscripcion/<int:id>', methods=['POST'])
+@superadmin_required
+@login_required
+def renovar_suscripcion(id):
+    try:
+        dias = int(request.form.get('dias', 30))
+        conexion = get_db_connection()
+        conexion.row_factory = sqlite3.Row
+        cursor = conexion.cursor()
+        
+        cursor.execute("SELECT nombre, fecha_vencimiento_suscripcion FROM clientes WHERE id = ?", (id,))
+        cliente = cursor.fetchone()
+        
+        if not cliente:
+            flash('Administrador no encontrado', 'danger')
+            return redirect(url_for('gestion_usuarios'))
+            
+        from datetime import datetime, timedelta
+        ahora = datetime.now()
+        
+        # Parse existing date if any
+        vence_actual = None
+        if cliente['fecha_vencimiento_suscripcion']:
+            vence_str = str(cliente['fecha_vencimiento_suscripcion']).split('.')[0]
+            vence_actual = datetime.strptime(vence_str, '%Y-%m-%d %H:%M:%S')
+            
+        # Si ya tiene fecha, sumamos los días a la fecha actual o a la de vencimiento si es futura
+        if vence_actual:
+            base_fecha = vence_actual if vence_actual > ahora else ahora
+            nueva_fecha = base_fecha + timedelta(days=dias)
+        else:
+            nueva_fecha = ahora + timedelta(days=dias)
+            
+        nueva_fecha_str = nueva_fecha.strftime('%Y-%m-%d %H:%M:%S')
+        
+        cursor.execute("UPDATE clientes SET fecha_vencimiento_suscripcion = ?, activo = 1 WHERE id = ?", (nueva_fecha_str, id))
+        conexion.commit()
+        
+        registrar_log(
+            usuario_id=session['user_id'],
+            accion="renovar_suscripcion",
+            detalle={"admin_id": id, "dias_agregados": dias, "nueva_fecha": nueva_fecha_str}
+        )
+        
+        flash(f'Suscripción de {cliente["nombre"]} renovada exitosamente por {dias} días.', 'success')
+    except Exception as e:
+        flash(f'Error al renovar suscripción: {e}', 'danger')
+    finally:
+        if 'conexion' in locals():
+            conexion.close()
+            
+    return redirect(url_for('gestion_usuarios'))
+
+@app.route('/admin/exportar_clientes_csv')
+@superadmin_required
+@login_required
+def exportar_clientes_csv():
+    try:
+        conexion = get_db_connection()
+        conexion.row_factory = sqlite3.Row
+        cursor = conexion.cursor()
+        cursor.execute('''
+            SELECT c.id, c.nombre, c.correo, c.telefono, c.rol, c.activo, c.fecha_vencimiento_suscripcion,
+            (SELECT COUNT(*) FROM clientes v WHERE v.creador_id = c.id AND v.rol = 'standard') as vendedores
+            FROM clientes c
+            WHERE c.rol = 'admin'
+            ORDER BY c.id ASC
+        ''')
+        admins = cursor.fetchall()
+        conexion.close()
+        
+        from flask import Response
+        import csv
+        import io
+        
+        output = io.StringIO()
+        writer = csv.writer(output)
+        writer.writerow(['ID', 'Nombre', 'Correo', 'Telefono', 'Vendedores', 'Estado', 'Vencimiento'])
+        
+        for row in admins:
+            activo_str = 'Activo' if row['activo'] else 'Suspendido'
+            vence = str(row['fecha_vencimiento_suscripcion']).split('.')[0] if row['fecha_vencimiento_suscripcion'] else 'Sin suscripcion'
+            writer.writerow([
+                row['id'], row['nombre'], row['correo'], row['telefono'] or '',
+                row['vendedores'], activo_str, vence
+            ])
+            
+        return Response(
+            output.getvalue(),
+            mimetype="text/csv",
+            headers={"Content-Disposition": "attachment;filename=administradores_saas.csv"}
+        )
+    except Exception as e:
+        app.logger.error(f"Error exportando CSV: {str(e)}")
+        flash('Error al generar el archivo CSV', 'danger')
+        return redirect(url_for('gestion_usuarios'))
 
 # --- Modificar ruta de cotizaciones para usuarios Standard ---
 @app.route('/cotizaciones/standard', endpoint='cotizaciones_standard', methods=['GET'])

@@ -508,8 +508,8 @@ def eliminar_importacion_pdf(importacion_id):
         conexion.close()
 
 
-def migrar_columna_ultima_conexion():
-    """Agrega la columna ultima_conexion a la tabla clientes si no existe."""
+def migrar_columnas_nuevas_clientes():
+    """Agrega nuevas columnas a la tabla clientes si no existen."""
     try:
         conexion = get_db_connection()
         cursor = conexion.cursor()
@@ -517,19 +517,32 @@ def migrar_columna_ultima_conexion():
         is_postgres = bool(os.environ.get('DATABASE_URL') and os.environ.get('DATABASE_URL').startswith('postgres'))
         
         if is_postgres:
-            cursor.execute("SELECT column_name FROM information_schema.columns WHERE table_name='clientes' AND column_name='ultima_conexion'")
-            if not cursor.fetchone():
+            cursor.execute("SELECT column_name FROM information_schema.columns WHERE table_name='clientes'")
+            columnas_existentes = [col[0] for col in cursor.fetchall()]
+            
+            if 'ultima_conexion' not in columnas_existentes:
                 print("[INFO] Agregando columna ultima_conexion en Postgres...")
                 cursor.execute("ALTER TABLE clientes ADD COLUMN ultima_conexion TIMESTAMP")
+                conexion.commit()
+                
+            if 'fecha_vencimiento_suscripcion' not in columnas_existentes:
+                print("[INFO] Agregando columna fecha_vencimiento_suscripcion en Postgres...")
+                cursor.execute("ALTER TABLE clientes ADD COLUMN fecha_vencimiento_suscripcion TIMESTAMP")
                 conexion.commit()
         else:
             cursor.execute("PRAGMA table_info(clientes)")
             columnas = [col[1] for col in cursor.fetchall()]
+            
             if 'ultima_conexion' not in columnas:
                 print("[INFO] Agregando columna ultima_conexion en SQLite...")
                 cursor.execute("ALTER TABLE clientes ADD COLUMN ultima_conexion TIMESTAMP")
                 conexion.commit()
+                
+            if 'fecha_vencimiento_suscripcion' not in columnas:
+                print("[INFO] Agregando columna fecha_vencimiento_suscripcion en SQLite...")
+                cursor.execute("ALTER TABLE clientes ADD COLUMN fecha_vencimiento_suscripcion TIMESTAMP")
+                conexion.commit()
     except Exception as e:
-        print(f"Error en migrar_columna_ultima_conexion: {e}")
+        print(f"Error en migrar_columnas_nuevas_clientes: {e}")
     finally:
         conexion.close()

@@ -514,6 +514,8 @@ def migrar_columna_ultima_conexion():
         conexion = get_db_connection()
         cursor = conexion.cursor()
         
+        is_postgres = bool(os.environ.get('DATABASE_URL') and os.environ.get('DATABASE_URL').startswith('postgres'))
+        
         if is_postgres:
             cursor.execute("SELECT column_name FROM information_schema.columns WHERE table_name='clientes' AND column_name='ultima_conexion'")
             if not cursor.fetchone():

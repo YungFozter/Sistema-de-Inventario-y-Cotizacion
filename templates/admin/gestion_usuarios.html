@@ -282,7 +282,7 @@ function cambiarEstadoUsuario(id, estadoActual) {
     const esSuperadmin = {{ 'true' if session.get('user_rol') == 'superadmin' else 'false' }};
 
     if (confirm(`¿Estás seguro de querer ${estadoActual ? 'desactivar' : 'activar'} este usuario?`)) {
-        fetch(`/admin/usuarios/${id}/estado${esSuperadmin ? '-super' : '-admin'}`, {
+        fetch(`/admin/usuarios/${id}/estado`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',

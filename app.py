@@ -576,8 +576,8 @@ def crear_usuario():
 @login_required
 def actualizar_usuario(id):
     try:
-        data = request.form
-        nombre = data['nombre']
+        data = request.get_json() if request.is_json else request.form
+        nombre = data.get('nombre')
         correo = data['correo']
         telefono = data.get('telefono', '')
         rol = data['rol']
@@ -635,6 +635,43 @@ def actualizar_usuario(id):
         app.logger.error(f"Error al actualizar usuario {id}: {str(e)}")
         return jsonify({'error': 'Error del servidor'}), 500
 
+
+@app.route('/admin/usuarios/<int:id>/rol', methods=['PUT'])
+@superadmin_required
+@login_required
+def cambiar_rol_usuario(id):
+    # Validar que no sea el usuario actual
+    if id == session['user_id']:
+        return jsonify({'error': 'No puedes cambiar tu propio rol'}), 400
+
+    data = request.get_json() if request.is_json else request.form
+    nuevo_rol = data.get('rol')
+
+    if nuevo_rol not in ['admin', 'standard']:
+        return jsonify({'error': 'Rol no válido'}), 400
+
+    try:
+        conexion = get_db_connection()
+        cursor = conexion.cursor()
+        cursor.execute("UPDATE clientes SET rol = ? WHERE id = ?", (nuevo_rol, id))
+        conexion.commit()
+
+        registrar_log(
+            usuario_id=session['user_id'],
+            accion="cambio_rol_usuario",
+            detalle={
+                "usuario_afectado": id,
+                "nuevo_rol": nuevo_rol
+            }
+        )
+
+        return jsonify({'success': True})
+    except Exception as e:
+        app.logger.error(f"Error al cambiar rol: {str(e)}")
+        return jsonify({'error': 'Error interno'}), 500
+    finally:
+        if 'conexion' in locals():
+            conexion.close()
 
 @app.route('/admin/usuarios/<int:id>/estado', methods=['PUT'])
 @login_required

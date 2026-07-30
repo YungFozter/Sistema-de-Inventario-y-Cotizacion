@@ -543,7 +543,7 @@
                 </div>
                 <div class="data-row">
                     <span class="data-label">NIT:</span>
-                    <span class="data-value highlight-value">{{ cliente.nit if cliente.nit else "S/N" }}</span>
+                    <span class="data-value highlight-value">{% if cliente.nit and cliente.nit.strip() and cliente.nit.strip() not in ['S/N', 'S/A'] %}{{ cliente.nit }}{% else %}S/A{% endif %}</span>
                 </div>
             </div>
         </div>

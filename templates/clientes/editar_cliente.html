@@ -20,9 +20,9 @@
                     </div>
 
                     <div class="mb-3">
-                        <label for="nit" class="form-label">NIT/CI</label>
+                        <label for="nit" class="form-label">NIT/CI <small class="text-muted">(Opcional)</small></label>
                         <input type="text" class="form-control" id="nit" name="nit"
-                               value="{{ cliente[2] }}" required>
+                               value="{{ cliente[2] if cliente[2] and cliente[2] != 'S/A' else '' }}" placeholder="S/A">
                     </div>
                 </div>
 

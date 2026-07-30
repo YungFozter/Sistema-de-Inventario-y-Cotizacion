@@ -23,16 +23,16 @@
                     <div class="invalid-feedback">Por favor ingrese el nombre o razón social</div>
                 </div>
 
-                <!-- NIT/CI con validación -->
+                <!-- NIT/CI (Opcional) -->
                 <div class="col-md-6">
-                    <label class="form-label">NIT/CI <span class="text-danger">*</span></label>
+                    <label class="form-label">NIT/CI <small class="text-muted">(Opcional)</small></label>
                     <div class="input-group">
-                        <input type="text" name="nit" class="form-control" required pattern="[0-9]{7,10}">
+                        <input type="text" name="nit" class="form-control" placeholder="Dejar en blanco para S/A">
                         <button class="btn btn-outline-secondary" type="button" id="btnValidarNit">
                             <i class="bi bi-check-circle"></i> Validar
                         </button>
                     </div>
-                    <div class="invalid-feedback">Formato: 7-10 dígitos sin guiones</div>
+                    <small class="text-muted">Si se deja en blanco se registrará como S/A (Sin Asignar).</small>
                 </div>
 
                 <!-- Código de Cliente generado automático -->

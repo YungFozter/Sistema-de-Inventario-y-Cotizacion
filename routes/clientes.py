@@ -41,7 +41,9 @@ def register_routes(app):
             try:
                 # Obtener datos del formulario
                 razon_social = request.form.get('razon_social', '').strip()
-                nit = request.form.get('nit', 'S/N').strip()
+                nit = request.form.get('nit', '').strip()
+                if not nit:
+                    nit = 'S/A'
                 codigo_cliente = request.form.get('codigo_cliente', '').strip()
                 telefono = request.form.get('telefono', '').strip()
                 referencia = request.form.get('referencia', '').strip()
@@ -194,11 +196,13 @@ def register_routes(app):
 
         if request.method == 'POST':
             # Obtener datos del formulario
-            nombre = request.form['nombre']
-            nit = request.form['nit']
-            codigo_cliente = request.form.get('codigo_cliente', '')
-            telefono = request.form.get('telefono', '')
-            referencia = request.form.get('referencia', '')
+            nombre = request.form.get('nombre', '').strip()
+            nit = request.form.get('nit', '').strip()
+            if not nit:
+                nit = 'S/A'
+            codigo_cliente = request.form.get('codigo_cliente', '').strip()
+            telefono = request.form.get('telefono', '').strip()
+            referencia = request.form.get('referencia', '').strip()
 
             # Actualizar en la base de datos (permitir cambiar el código de cliente)
             cursor.execute('''

@@ -1326,24 +1326,65 @@ function actualizarListaCategorias() {
     mostrarAlertaGestion('Lista actualizada correctamente', 'info');
 }
 
-// Mostrar alerta en el modal de gestión
+// Mostrar alerta con efecto barrido en la esquina inferior derecha
 function mostrarAlertaGestion(mensaje, tipo) {
-    const alert = document.getElementById('alertGestion');
-    if (!alert) return;
+    let container = document.getElementById('toastContainerGlobal');
+    if (!container) {
+        container = document.createElement('div');
+        container.id = 'toastContainerGlobal';
+        container.style.cssText = 'position: fixed; bottom: 24px; right: 24px; z-index: 11000; max-width: 400px; display: flex; flex-direction: column; gap: 10px; pointer-events: none;';
+        document.body.appendChild(container);
+    }
 
-    let iconClass = 'bi-info-circle-fill';
-    if (tipo === 'success') iconClass = 'bi-check-circle-fill';
-    if (tipo === 'danger') iconClass = 'bi-exclamation-triangle-fill';
-    if (tipo === 'warning') iconClass = 'bi-exclamation-circle-fill';
+    const toast = document.createElement('div');
+    let bgClass = 'bg-primary text-white';
+    let icon = 'bi-info-circle-fill';
 
-    alert.className = `alert alert-${tipo} mb-3 shadow-sm border fw-bold d-flex align-items-center`;
-    alert.innerHTML = `<i class="bi ${iconClass} me-2 fs-5"></i> <span>${mensaje}</span>`;
-    alert.style.display = 'flex';
-    alert.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    if (tipo === 'success') { bgClass = 'bg-success text-white'; icon = 'bi-check-circle-fill'; }
+    if (tipo === 'danger') { bgClass = 'bg-danger text-white'; icon = 'bi-exclamation-triangle-fill'; }
+    if (tipo === 'warning') { bgClass = 'bg-warning text-dark'; icon = 'bi-exclamation-circle-fill'; }
+    if (tipo === 'info') { bgClass = 'bg-info text-white'; icon = 'bi-info-circle-fill'; }
 
-    if (window.alertGestionTimeout) clearTimeout(window.alertGestionTimeout);
-    window.alertGestionTimeout = setTimeout(() => {
-        alert.style.display = 'none';
+    toast.className = `${bgClass} p-3 rounded-3 shadow-lg d-flex align-items-center justify-content-between border`;
+    toast.style.cssText = `
+        pointer-events: auto;
+        transform: translateX(120%);
+        transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.4s ease;
+        opacity: 0;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.3) !important;
+    `;
+
+    const closeBtnColor = (tipo === 'warning') ? 'btn-close' : 'btn-close btn-close-white';
+
+    toast.innerHTML = `
+        <div class="d-flex align-items-center me-3">
+            <i class="bi ${icon} fs-4 me-2 flex-shrink-0"></i>
+            <span class="fw-bold text-wrap" style="font-size: 0.95rem;">${mensaje}</span>
+        </div>
+        <button type="button" class="${closeBtnColor} ms-2 flex-shrink-0" aria-label="Close"></button>
+    `;
+
+    toast.querySelector('.btn-close').addEventListener('click', function() {
+        toast.style.transform = 'translateX(120%)';
+        toast.style.opacity = '0';
+        setTimeout(() => toast.remove(), 400);
+    });
+
+    container.appendChild(toast);
+
+    // Activar barrido de entrada
+    requestAnimationFrame(() => {
+        toast.style.transform = 'translateX(0)';
+        toast.style.opacity = '1';
+    });
+
+    // Ocultar con barrido de salida tras 5 segundos
+    setTimeout(() => {
+        if (toast.parentNode) {
+            toast.style.transform = 'translateX(120%)';
+            toast.style.opacity = '0';
+            setTimeout(() => { if (toast.parentNode) toast.remove(); }, 400);
+        }
     }, 5000);
 }
 

@@ -136,12 +136,12 @@
 
             <!-- CONTROLES: CONMUTADOR DE VISTA [ ☰ Tabla | ▦ Tarjetas 3D ] & BÚSQUEDA -->
             <div class="d-flex align-items-center gap-3 flex-wrap">
-                <div class="btn-group p-1 bg-white bg-opacity-25 rounded-pill border border-white border-opacity-50" role="group" aria-label="Conmutador de Vista">
-                    <button type="button" class="btn btn-sm btn-light text-primary rounded-pill px-3 fw-bold active shadow-sm" id="btnVistaTabla" onclick="cambiarVistaClientes('tabla')">
-                        <i class="bi bi-list-ul me-1"></i> Tabla
+                <div class="view-toggle-wrapper" aria-label="Conmutador de Vista">
+                    <button type="button" class="view-toggle-btn active" id="btnVistaTabla" onclick="cambiarVistaClientes('tabla')">
+                        <i class="bi bi-list-ul"></i> Tabla
                     </button>
-                    <button type="button" class="btn btn-sm btn-outline-light rounded-pill px-3 fw-bold" id="btnVistaTarjetas" onclick="cambiarVistaClientes('tarjetas')">
-                        <i class="bi bi-grid-3x3-gap-fill me-1"></i> Tarjetas 3D
+                    <button type="button" class="view-toggle-btn" id="btnVistaTarjetas" onclick="cambiarVistaClientes('tarjetas')">
+                        <i class="bi bi-grid-3x3-gap-fill"></i> Tarjetas 3D
                     </button>
                 </div>
 
@@ -433,8 +433,8 @@ function cambiarVistaClientes(vista) {
         tablaContainer.style.display = 'none';
         tarjetasContainer.style.display = 'block';
 
-        btnTabla.className = 'btn btn-sm btn-outline-light rounded-pill px-3 fw-bold';
-        btnTarjetas.className = 'btn btn-sm btn-light text-primary rounded-pill px-3 fw-bold active shadow-sm';
+        btnTabla.classList.remove('active');
+        btnTarjetas.classList.add('active');
 
         // Re-disparar animación de cascada para tarjetas 3D
         tarjetasContainer.querySelectorAll('.stagger-item').forEach(el => {
@@ -446,8 +446,8 @@ function cambiarVistaClientes(vista) {
         tarjetasContainer.style.display = 'none';
         tablaContainer.style.display = 'block';
 
-        btnTarjetas.className = 'btn btn-sm btn-outline-light rounded-pill px-3 fw-bold';
-        btnTabla.className = 'btn btn-sm btn-light text-primary rounded-pill px-3 fw-bold active shadow-sm';
+        btnTarjetas.classList.remove('active');
+        btnTabla.classList.add('active');
 
         // Re-disparar animación de cascada para tabla
         tablaContainer.querySelectorAll('.stagger-item').forEach(el => {

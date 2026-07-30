@@ -103,7 +103,12 @@ def register_routes(app):
         # Paginación independiente para ambas tablas
         page_reg = request.args.get('page_reg', request.args.get('page', 1, type=int), type=int)
         page_imp = request.args.get('page_imp', 1, type=int)
-        per_page = 5
+        try:
+            per_page = int(request.args.get('per_page', 5))
+        except (ValueError, TypeError):
+            per_page = 5
+        if per_page not in [5, 15, 30]:
+            per_page = 5
 
         columnas_nombres = []
         try:
@@ -206,6 +211,20 @@ def register_routes(app):
             'total_pages': total_pages_imp,
             'total_items': total_importados
         }
+
+        if request.args.get('ajax') == '1':
+            html_registrados = render_template(
+                'productos/_tabla_registrados.html',
+                productos_registrados=productos_registrados,
+                pagination_reg=pagination_reg,
+                pagination_imp=pagination_imp,
+                filtros=filtros
+            )
+            return jsonify({
+                'success': True,
+                'html_registrados': html_registrados,
+                'pagination_reg': pagination_reg
+            })
 
         # Obtener clientes para el modal de PDF Directo y empresas para Superadmin
         clientes = []

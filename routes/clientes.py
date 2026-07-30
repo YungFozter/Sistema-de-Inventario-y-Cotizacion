@@ -32,6 +32,30 @@ import logging
 from utils.decorators import login_required, superadmin_required, admin_required, standard_required
 from utils.helpers import format_date, aplicar_fondos_por_pagina, generar_pdf_margenes_dinamicos
 
+def generar_codigo_cliente_unico(cursor):
+    """
+    Genera un código secuencial sin saltos (rellenando huecos de clientes eliminados)
+    y garantizando cero duplicados. Formato: CLI-0001, CLI-0002, etc.
+    """
+    cursor.execute("SELECT codigo_cliente FROM clientes WHERE rol = 'cliente' AND codigo_cliente LIKE 'CLI-%'")
+    rows = cursor.fetchall()
+    usados = set()
+    for row in rows:
+        cod = row[0]
+        if cod:
+            try:
+                parts = cod.split('-')
+                if len(parts) >= 2 and parts[1].isdigit():
+                    usados.add(int(parts[1]))
+            except (ValueError, IndexError):
+                pass
+
+    num = 1
+    while num in usados:
+        num += 1
+
+    return f"CLI-{num:04d}"
+
 def register_routes(app):
     @app.route('/clientes', methods=['GET', 'POST'])
     @login_required
@@ -59,26 +83,14 @@ def register_routes(app):
                 conexion = get_db_connection()
                 cursor = conexion.cursor()
 
-                # Generar código de cliente automático si no se ingresó uno
+                # Generar código de cliente automático sin saltos y sin duplicados
                 if not codigo_cliente:
-                    cursor.execute("SELECT codigo_cliente FROM clientes WHERE codigo_cliente LIKE 'CLI-%'")
-                    codigos = cursor.fetchall()
-                    max_num = 0
-                    for row in codigos:
-                        codigo = row[0]
-                        if codigo:
-                            try:
-                                num = int(codigo.split('-')[1])
-                                if num > max_num:
-                                    max_num = num
-                            except (ValueError, IndexError):
-                                pass
-                    codigo_cliente = f"CLI-{max_num + 1:04d}"
+                    codigo_cliente = generar_codigo_cliente_unico(cursor)
                 else:
-                    # Validar que el código de cliente no se repita (si se ingresó alguno manualmente)
-                    cursor.execute('SELECT id FROM clientes WHERE codigo_cliente = ?', (codigo_cliente,))
+                    # Validar que el código de cliente no se repita
+                    cursor.execute("SELECT id FROM clientes WHERE codigo_cliente = ? AND rol = 'cliente'", (codigo_cliente,))
                     if cursor.fetchone():
-                        flash('El código de cliente ya está registrado. Usa uno diferente.', 'danger')
+                        flash(f'El código de cliente "{codigo_cliente}" ya está registrado. Usa uno diferente.', 'danger')
                         conexion.close()
                         return redirect(url_for('clientes'))
 
@@ -204,7 +216,16 @@ def register_routes(app):
             telefono = request.form.get('telefono', '').strip()
             referencia = request.form.get('referencia', '').strip()
 
-            # Actualizar en la base de datos (permitir cambiar el código de cliente)
+            if not codigo_cliente:
+                codigo_cliente = generar_codigo_cliente_unico(cursor)
+            else:
+                cursor.execute("SELECT id FROM clientes WHERE codigo_cliente = ? AND id != ? AND rol = 'cliente'", (codigo_cliente, id))
+                if cursor.fetchone():
+                    flash(f'El código de cliente "{codigo_cliente}" ya pertenece a otro cliente.', 'danger')
+                    conexion.close()
+                    return redirect(url_for('editar_cliente', id=id))
+
+            # Actualizar en la base de datos
             cursor.execute('''
                 UPDATE clientes SET 
                     nombre = ?,
@@ -217,6 +238,7 @@ def register_routes(app):
 
             conexion.commit()
             conexion.close()
+            flash('Cliente actualizado correctamente', 'success')
             return redirect('/clientes')
 
         # GET - Mostrar formulario de edición

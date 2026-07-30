@@ -715,23 +715,23 @@ function seleccionarEmpresaSuperadmin(valor) {
             </div>
           </div>
 
-          <div class="table-responsive border rounded" style="max-height: 420px;">
-            <table class="table table-hover table-striped align-middle mb-0" id="tablaItemsExtraidos">
-              <thead class="table-dark sticky-top">
+          <div class="table-responsive border rounded-3 shadow-sm" style="max-height: 520px; overflow-y: auto;">
+            <table class="table table-hover table-striped align-middle mb-0" id="tablaItemsExtraidos" style="min-width: 1050px;">
+              <thead class="table-dark sticky-top" style="z-index: 10;">
                 <tr>
-                  <th style="width: 40px;" class="text-center">#</th>
-                  <th style="width: 120px;">Código</th>
-                  <th>Descripción</th>
-                  <th style="width: 110px;">Marca</th>
-                  <th style="width: 80px;">U/M</th>
-                  <th style="width: 90px;" class="text-center">Cantidad</th>
-                  <th style="width: 120px;" class="text-end">P/Unit (Bs)</th>
-                  <th style="width: 120px;" class="text-end">Subtotal (Bs)</th>
+                  <th style="width: 45px;" class="text-center">#</th>
+                  <th style="width: 140px;">Código</th>
+                  <th style="min-width: 360px;">Descripción (Multilínea Completa)</th>
+                  <th style="width: 130px;">Marca</th>
+                  <th style="width: 90px;" class="text-center">U/M</th>
+                  <th style="width: 100px;" class="text-center">Cantidad</th>
+                  <th style="width: 130px;" class="text-end">P/Unit (Bs)</th>
+                  <th style="width: 135px;" class="text-end">Subtotal (Bs)</th>
                   <th style="width: 50px;" class="text-center"><i class="bi bi-trash"></i></th>
                 </tr>
               </thead>
               <tbody id="tbodyItemsExtraidos">
-                <!-- Se cargará dinámicamente con inputs editables -->
+                <!-- Se cargará dinámicamente con inputs y textareas editables -->
               </tbody>
             </table>
           </div>
@@ -1625,6 +1625,12 @@ function procesarTextoPegadoUI() {
 
 
 
+function autoAjustarTextarea(el) {
+    if (!el) return;
+    el.style.height = 'auto';
+    el.style.height = Math.max(46, el.scrollHeight + 4) + 'px';
+}
+
 function renderTablaItemsImportados() {
     const tbody = document.getElementById('tbodyItemsExtraidos');
     tbody.innerHTML = '';
@@ -1648,34 +1654,37 @@ function renderTablaItemsImportados() {
         }
 
         const tr = document.createElement('tr');
+        tr.className = item.selected ? '' : 'opacity-50 bg-light';
         tr.innerHTML = `
-            <td class="text-center">
+            <td class="text-center align-middle">
                 <input class="form-check-input" type="checkbox" ${item.selected ? 'checked' : ''} onchange="toggleItemSeleccionado(${idx}, this.checked)">
             </td>
-            <td>
-                <input type="text" class="form-control form-control-sm" value="${escapeHtml(item.codigo || '')}" onchange="actualizarItemCampo(${idx}, 'codigo', this.value)">
+            <td class="align-middle">
+                <input type="text" class="form-control form-control-sm font-monospace fw-bold text-primary border-secondary-subtle" value="${escapeHtml(item.codigo || '')}" onchange="actualizarItemCampo(${idx}, 'codigo', this.value)" style="border-radius: 6px;">
             </td>
-            <td>
-                <input type="text" class="form-control form-control-sm" value="${escapeHtml(item.descripcion || '')}" onchange="actualizarItemCampo(${idx}, 'descripcion', this.value)">
+            <td class="align-middle">
+                <textarea class="form-control form-control-sm fw-semibold text-dark border-secondary-subtle auto-expand-desc" rows="2" style="min-height: 46px; max-height: 180px; font-size: 0.88rem; line-height: 1.35; resize: vertical; border-radius: 6px; background-color: #fcfcfc;" onchange="actualizarItemCampo(${idx}, 'descripcion', this.value)" oninput="autoAjustarTextarea(this)">${escapeHtml(item.descripcion || '')}</textarea>
             </td>
-            <td>
-                <input type="text" class="form-control form-control-sm" value="${escapeHtml(item.marca || '')}" onchange="actualizarItemCampo(${idx}, 'marca', this.value)">
+            <td class="align-middle">
+                <input type="text" class="form-control form-control-sm fw-medium border-secondary-subtle" value="${escapeHtml(item.marca || '')}" onchange="actualizarItemCampo(${idx}, 'marca', this.value)" style="border-radius: 6px;">
             </td>
-            <td>
-                <input type="text" class="form-control form-control-sm" value="${escapeHtml(item.um || 'Pza')}" onchange="actualizarItemCampo(${idx}, 'um', this.value)">
+            <td class="align-middle">
+                <input type="text" class="form-control form-control-sm text-center fw-bold border-secondary-subtle" value="${escapeHtml(item.um || 'Pza')}" onchange="actualizarItemCampo(${idx}, 'um', this.value)" style="border-radius: 6px;">
             </td>
-            <td>
-                <input type="number" step="any" class="form-control form-control-sm text-center fw-bold text-primary" value="${cant}" onchange="actualizarItemCantidad(${idx}, parseFloat(this.value) || 1)">
+            <td class="align-middle">
+                <input type="number" step="any" class="form-control form-control-sm text-center fw-bold text-primary border-secondary-subtle" value="${cant}" onchange="actualizarItemCantidad(${idx}, parseFloat(this.value) || 1)" style="border-radius: 6px;">
             </td>
-            <td>
-                <input type="number" step="any" class="form-control form-control-sm text-end" value="${pu}" onchange="actualizarItemPrecio(${idx}, parseFloat(this.value) || 0)">
+            <td class="align-middle">
+                <input type="number" step="any" class="form-control form-control-sm text-end fw-bold border-secondary-subtle" value="${pu}" onchange="actualizarItemPrecio(${idx}, parseFloat(this.value) || 0)" style="border-radius: 6px;">
             </td>
-            <td class="text-end fw-bold text-success">
-                Bs ${ptotal.toFixed(2)}
+            <td class="text-end align-middle">
+                <span class="badge bg-success-subtle text-success border border-success-subtle fs-6 px-2 py-1 fw-bold">
+                    Bs ${ptotal.toFixed(2)}
+                </span>
             </td>
-            <td class="text-center">
-                <button type="button" class="btn btn-sm btn-outline-danger border-0" title="Eliminar fila" onclick="eliminarItemImportado(${idx})">
-                    <i class="bi bi-trash-fill"></i>
+            <td class="text-center align-middle">
+                <button type="button" class="btn btn-sm btn-outline-danger border-0 rounded-circle" title="Eliminar fila" onclick="eliminarItemImportado(${idx})">
+                    <i class="bi bi-trash-fill fs-6"></i>
                 </button>
             </td>
         `;
@@ -1685,6 +1694,10 @@ function renderTablaItemsImportados() {
     document.getElementById('secPrevisualizacionImport').style.display = 'block';
     document.getElementById('footerBotonesImport').style.display = 'block';
     actualizarContadorItems(subtotalGeneral);
+
+    setTimeout(() => {
+        document.querySelectorAll('#tbodyItemsExtraidos .auto-expand-desc').forEach(el => autoAjustarTextarea(el));
+    }, 15);
 }
 
 function escapeHtml(str) {

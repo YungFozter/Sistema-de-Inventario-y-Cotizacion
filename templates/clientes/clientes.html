@@ -7,106 +7,156 @@
 {% endblock %}
 
 {% block contenido %}
-<div class="container mt-4">
-    <!-- Formulario Mejorado -->
-    <div class="card shadow-sm mb-5">
-        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-            <h3 class="mb-0"><i class="bi bi-person-plus"></i> Registrar Cliente</h3>
-            <span class="badge bg-light text-dark">Total: {{ clientes|length }}</span>
+<div class="container-fluid py-4 animate-fade-in">
+    <!-- BANNER DE REGISTRO DE CLIENTE (PRO UI) -->
+    <div class="card pro-card mb-5">
+        <div class="card-header card-header-gradient d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center">
+                <div class="rounded-circle bg-white text-primary p-3 me-3 d-flex align-items-center justify-content-center shadow-sm" style="width: 48px; height: 48px;">
+                    <i class="bi bi-person-plus-fill fs-4"></i>
+                </div>
+                <div>
+                    <h3 class="fw-bold mb-0 text-white">Registrar Nuevo Cliente</h3>
+                    <small class="text-white-50">Gestiona y guarda tus clientes comerciales para la emision de cotizaciones.</small>
+                </div>
+            </div>
+            <span class="badge bg-white text-primary fs-6 px-3 py-2 rounded-pill shadow-sm">
+                <i class="bi bi-people me-1"></i> Total: {{ pagination.total_items }}
+            </span>
         </div>
-        <div class="card-body">
+        <div class="card-body p-4">
             <form id="clienteForm" action="/clientes" method="post" class="row g-3 needs-validation" novalidate>
                 <!-- Nombre/Razón Social -->
                 <div class="col-md-6">
-                    <label class="form-label">Nombre/Razón Social <span class="text-danger">*</span></label>
-                    <input type="text" name="razon_social" class="form-control" required>
-                    <div class="invalid-feedback">Por favor ingrese el nombre o razón social</div>
+                    <label class="form-label fw-semibold text-dark">
+                        <i class="bi bi-building text-primary me-1"></i> Nombre / Razón Social <span class="text-danger">*</span>
+                    </label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-light border-end-0"><i class="bi bi-person text-muted"></i></span>
+                        <input type="text" name="razon_social" class="form-control border-start-0 pro-form-control" placeholder="Ej: Constructora Santa Cruz S.R.L." required>
+                    </div>
+                    <div class="invalid-feedback">Por favor ingrese el nombre o razón social.</div>
                 </div>
 
                 <!-- NIT/CI (Opcional) -->
                 <div class="col-md-6">
-                    <label class="form-label">NIT/CI <small class="text-muted">(Opcional)</small></label>
+                    <label class="form-label fw-semibold text-dark">
+                        <i class="bi bi-card-heading text-primary me-1"></i> NIT / CI <small class="text-muted">(Opcional)</small>
+                    </label>
                     <div class="input-group">
-                        <input type="text" name="nit" class="form-control" placeholder="Dejar en blanco para S/A">
-                        <button class="btn btn-outline-secondary" type="button" id="btnValidarNit">
-                            <i class="bi bi-check-circle"></i> Validar
+                        <span class="input-group-text bg-light border-end-0"><i class="bi bi-file-text text-muted"></i></span>
+                        <input type="text" name="nit" class="form-control border-start-0 pro-form-control" placeholder="Dejar en blanco para S/A">
+                        <button class="btn btn-outline-primary fw-semibold" type="button" id="btnValidarNit">
+                            <i class="bi bi-shield-check me-1"></i> Validar
                         </button>
                     </div>
-                    <small class="text-muted">Si se deja en blanco se registrará como S/A (Sin Asignar).</small>
+                    <small class="text-muted d-block mt-1">Si se deja en blanco se registrará como <strong>S/A (Sin Asignar)</strong>.</small>
                 </div>
 
                 <!-- Código de Cliente generado automático -->
                 <div class="col-md-4">
-                    <label class="form-label">Código de Cliente</label>
-                    <input type="text" name="codigo_cliente" class="form-control bg-light" id="codigoCliente" placeholder="Autogenerado al guardar" readonly>
-                    <small class="text-muted">Asignado de forma automática y secuencial.</small>
+                    <label class="form-label fw-semibold text-dark">
+                        <i class="bi bi-hash text-primary me-1"></i> Código de Cliente
+                    </label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-light border-end-0"><i class="bi bi-qr-code text-muted"></i></span>
+                        <input type="text" name="codigo_cliente" class="form-control border-start-0 bg-light text-primary fw-bold" id="codigoCliente" placeholder="Autogenerado al guardar" readonly>
+                    </div>
+                    <small class="text-muted">Secuencial automático (reutiliza huecos borrados).</small>
                 </div>
 
-                <!-- Teléfono con máscara -->
+                <!-- Teléfono/Contacto -->
                 <div class="col-md-4">
-                    <label class="form-label">Teléfono/Contacto <span class="text-danger">*</span></label>
-                    <input type="tel" name="telefono" class="form-control" required pattern="[0-9]{7,8}">
-                    <div class="invalid-feedback">Ingrese un teléfono válido (7-8 dígitos)</div>
+                    <label class="form-label fw-semibold text-dark">
+                        <i class="bi bi-telephone-fill text-primary me-1"></i> Teléfono / Contacto <span class="text-danger">*</span>
+                    </label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-light border-end-0"><i class="bi bi-telephone text-muted"></i></span>
+                        <input type="tel" name="telefono" class="form-control border-start-0 pro-form-control" placeholder="Ej: 70012345" required pattern="[0-9]{7,8}">
+                    </div>
+                    <div class="invalid-feedback">Ingrese un teléfono válido (7-8 dígitos).</div>
                 </div>
 
                 <!-- Tipo de Cliente -->
                 <div class="col-md-4">
-                    <label class="form-label">Tipo de Cliente</label>
-                    <select class="form-select" name="tipo_cliente">
-                        <option value="normal">Normal</option>
-                        <option value="frecuente">Frecuente</option>
-                        <option value="corporativo">Corporativo</option>
-                    </select>
+                    <label class="form-label fw-semibold text-dark">
+                        <i class="bi bi-star-fill text-primary me-1"></i> Tipo de Cliente
+                    </label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-light border-end-0"><i class="bi bi-tag text-muted"></i></span>
+                        <select class="form-select border-start-0 pro-form-select fw-semibold" name="tipo_cliente">
+                            <option value="normal">👤 Normal</option>
+                            <option value="frecuente">⭐ Frecuente</option>
+                            <option value="corporativo">🏢 Corporativo</option>
+                        </select>
+                    </div>
                 </div>
 
-                <!-- Referencia con sugerencias -->
+                <!-- Referencia interno -->
                 <div class="col-12">
-                    <label class="form-label">Referencia (interno)</label>
-                    <input type="text" name="referencia" class="form-control" list="referenciasSugeridas">
+                    <label class="form-label fw-semibold text-dark">
+                        <i class="bi bi-bookmark-fill text-primary me-1"></i> Referencia Interna <small class="text-muted">(Opcional)</small>
+                    </label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-light border-end-0"><i class="bi bi-info-square text-muted"></i></span>
+                        <input type="text" name="referencia" class="form-control border-start-0 pro-form-control" list="referenciasSugeridas" placeholder="Ej: Recomendado por Gerencia / CLT-2026">
+                    </div>
                     <datalist id="referenciasSugeridas">
                         <option value="A1B2C3">
                         <option value="XYZ-001">
-                        <option value="CLT-2023">
+                        <option value="CLT-2026">
                     </datalist>
-                    <small class="text-muted">Código interno para seguimiento</small>
+                    <small class="text-muted">Código o nota interna para seguimiento comercial.</small>
                 </div>
 
-                <div class="col-12">
-                    <button type="submit" class="btn btn-primary">
-                        <i class="bi bi-save"></i> Guardar
+                <div class="col-12 d-flex gap-2 pt-2">
+                    <button type="submit" class="btn btn-primary px-4 py-2 rounded-3 shadow-sm btn-pro-action fw-bold">
+                        <i class="bi bi-check-circle-fill me-1"></i> Guardar Cliente
                     </button>
-                    <button type="reset" class="btn btn-outline-secondary">
-                        <i class="bi bi-eraser"></i> Limpiar
+                    <button type="reset" class="btn btn-outline-secondary px-4 py-2 rounded-3 btn-pro-action">
+                        <i class="bi bi-eraser-fill me-1"></i> Limpiar Campos
                     </button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- Tabla Mejorada -->
-    <div class="card shadow-sm">
-        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-            <h3 class="mb-0">
-                <i class="bi bi-people-fill"></i> Clientes Registrados
-                <span class="badge bg-light text-dark">Total: {{ pagination.total_items }} | Página {{ pagination.page }} de {{ pagination.total_pages }}</span>
-            </h3>
-            <form method="get" action="{{ url_for('clientes') }}" class="input-group" style="width: 300px;">
-                <input type="text" class="form-control" placeholder="Buscar cliente..."
-                    name="buscar" value="{{ request.args.get('buscar', '') }}">
-                <button class="btn btn-light" type="submit">
+    <!-- TABLA DE CLIENTES REGISTRADOS (PRO UI) -->
+    <div class="card pro-card">
+        <div class="card-header card-header-gradient d-flex justify-content-between align-items-center flex-wrap gap-3">
+            <div class="d-flex align-items-center">
+                <div class="rounded-circle bg-white text-primary p-3 me-3 d-flex align-items-center justify-content-center shadow-sm" style="width: 44px; height: 44px;">
+                    <i class="bi bi-people-fill fs-4"></i>
+                </div>
+                <div>
+                    <h4 class="fw-bold mb-0 text-white">Clientes Registrados</h4>
+                    <small class="text-white-50">Página {{ pagination.page }} de {{ pagination.total_pages }} | Mostrando {{ clientes|length }} cliente(s)</small>
+                </div>
+            </div>
+            
+            <form method="get" action="{{ url_for('clientes') }}" class="input-group shadow-sm" style="max-width: 340px;">
+                <input type="text" class="form-control border-0" placeholder="Buscar por nombre, NIT, código..."
+                    name="buscar" value="{{ request.args.get('buscar', '') }}" id="buscarClienteInput">
+                <button class="btn btn-light text-primary fw-bold px-3 border-0" type="submit">
                     <i class="bi bi-search"></i>
                 </button>
+                {% if request.args.get('buscar') %}
+                <a href="{{ url_for('clientes') }}" class="btn btn-outline-light" title="Limpiar búsqueda">
+                    <i class="bi bi-x-circle-fill"></i>
+                </a>
+                {% endif %}
             </form>
         </div>
-    <div class="card-body">
-        {% if clientes %}
-            <div class="table-responsive">
-                <table class="table table-striped table-hover" id="tablaClientes">
-                    <thead class="table-dark">
+        
+        <div class="card-body p-0">
+            {% if clientes %}
+            <div class="table-responsive pro-table-container">
+                <table class="table table-hover align-middle mb-0 pro-table" id="tablaClientes">
+                    <thead>
                         <tr>
-                            <th>#</th>
-                            <th>Nombre/Razón Social</th>
-                            <th>NIT/CI</th>
+                            <th class="ps-4" style="width: 60px;">#</th>
+                            <th>Nombre / Razón Social</th>
+                            <th>NIT / CI</th>
                             <th>Código</th>
                             <th>Teléfono</th>
                             <th>Tipo</th>
@@ -114,101 +164,172 @@
                             {% if session.user_rol == 'superadmin' %}
                             <th>Creador</th>
                             {% endif %}
-                            <th>Acciones</th>
+                            <th class="text-end pe-4" style="width: 140px;">Acciones</th>
                         </tr>
                     </thead>
-
                     <tbody>
                         {% for c in clientes %}
                         <tr>
-                            <td>{{ (pagination.page - 1) * pagination.per_page + loop.index }}</td>
-                            <td>{{ c[1] }}</td>
-                            <td>{{ c[2] if c[2] else 'S/N' }}</td>
+                            <td class="ps-4 fw-bold text-muted">{{ (pagination.page - 1) * pagination.per_page + loop.index }}</td>
+                            <td>
+                                <div class="fw-bold text-dark fs-6">{{ c[1] }}</div>
+                            </td>
+                            <td>
+                                {% if c[2] and c[2] not in ('S/N', 'S/A') %}
+                                <span class="badge bg-light text-dark border px-2 py-1"><i class="bi bi-card-text me-1 text-muted"></i>{{ c[2] }}</span>
+                                {% else %}
+                                <span class="badge bg-secondary bg-opacity-25 text-secondary border px-2 py-1">S/A</span>
+                                {% endif %}
+                            </td>
                             <td>
                                 {% if c[3] %}
-                                <span class="badge bg-primary rounded-pill">{{ c[3] }}</span>
+                                <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 px-2 py-1 rounded-pill fw-bold">{{ c[3] }}</span>
                                 {% else %}
                                 <span class="badge bg-secondary rounded-pill">Pendiente</span>
                                 {% endif %}
                             </td>
-                            <td>{{ c[4] if c[4] else '-' }}</td>
                             <td>
-                                <span class="badge
-                                    {% if c[6] == 'frecuente' %}bg-warning
-                                    {% elif c[6] == 'corporativo' %}bg-info
-                                    {% else %}bg-light text-dark{% endif %}">
-                                    {{ c[6]|capitalize if c[6] else 'Normal' }}
+                                {% if c[4] %}
+                                <a href="tel:{{ c[4] }}" class="text-decoration-none text-dark"><i class="bi bi-telephone text-success me-1"></i>{{ c[4] }}</a>
+                                {% else %}
+                                <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <span class="badge px-3 py-2 rounded-pill
+                                    {% if c[6] == 'frecuente' %}badge-tipo-frecuente
+                                    {% elif c[6] == 'corporativo' %}badge-tipo-corporativo
+                                    {% else %}badge-tipo-normal{% endif %}">
+                                    {% if c[6] == 'frecuente' %}⭐ Frecuente
+                                    {% elif c[6] == 'corporativo' %}🏢 Corporativo
+                                    {% else %}👤 Normal{% endif %}
                                 </span>
                             </td>
-                            <td>{{ c[5] if c[5] else '-' }}</td>
+                            <td>
+                                {% if c[5] and c[5] != '-' %}
+                                <span class="small text-muted"><i class="bi bi-bookmark me-1"></i>{{ c[5] }}</span>
+                                {% else %}
+                                <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
                             {% if session.user_rol == 'superadmin' %}
                             <td>
                                 {% if c.creador_id %}
-                                <span class="badge bg-secondary">{{ c.creador_id }}</span>
+                                <span class="badge bg-dark bg-opacity-10 text-dark border px-2 py-1"><i class="bi bi-person-gear me-1"></i>ID {{ c.creador_id }}</span>
                                 {% else %}
-                                <span class="badge bg-warning">Sistema</span>
+                                <span class="badge bg-warning bg-opacity-25 text-dark border border-warning px-2 py-1">Sistema</span>
                                 {% endif %}
                             </td>
                             {% endif %}
-                            <td class="client-actions">
-                                <a href="/clientes/editar/{{ c[0] }}" class="btn btn-sm btn-warning" title="Editar">
-                                    <i class="bi bi-pencil"></i>
-                                </a>
-                                <a href="/clientes/eliminar/{{ c[0] }}" class="btn btn-sm btn-danger"
-                                title="Eliminar" onclick="return confirm('¿Eliminar este cliente?')">
-                                    <i class="bi bi-trash"></i>
-                                </a>
-                                <button class="btn btn-sm btn-info" title="Detalles">
-                                    <i class="bi bi-eye"></i>
-                                </button>
+                            <td class="text-end pe-4">
+                                <div class="btn-group shadow-sm rounded-3">
+                                    <button type="button" class="btn btn-sm btn-outline-info btn-pro-action" 
+                                            onclick="verDetallesCliente('{{ c[0] }}', '{{ c[1]|e }}', '{{ c[2]|e }}', '{{ c[3]|e }}', '{{ c[4]|e }}', '{{ c[6]|e }}', '{{ c[5]|e }}')" 
+                                            title="Ver Detalles">
+                                        <i class="bi bi-eye-fill"></i>
+                                    </button>
+                                    <a href="/clientes/editar/{{ c[0] }}" class="btn btn-sm btn-outline-warning btn-pro-action" title="Editar Cliente">
+                                        <i class="bi bi-pencil-fill"></i>
+                                    </a>
+                                    <a href="/clientes/eliminar/{{ c[0] }}" class="btn btn-sm btn-outline-danger btn-pro-action" 
+                                       title="Eliminar Cliente" onclick="return confirm('¿Está seguro de eliminar este cliente?')">
+                                        <i class="bi bi-trash-fill"></i>
+                                    </a>
+                                </div>
                             </td>
                         </tr>
                         {% endfor %}
                     </tbody>
                 </table>
-                
-                <!-- Sistema de Paginación -->
-                <nav aria-label="Navegación de páginas" class="mt-4">
-                    <ul class="pagination justify-content-center">
-                        <!-- Botón Anterior -->
+            </div>
+
+            <!-- Paginación Pro -->
+            {% if pagination.total_pages > 1 %}
+            <div class="card-footer bg-light border-0 py-3">
+                <nav aria-label="Navegación de clientes">
+                    <ul class="pagination pagination-sm justify-content-center mb-0">
                         <li class="page-item {% if pagination.page == 1 %}disabled{% endif %}">
-                            <a class="page-link" href="{{ url_for('clientes', page=pagination.page-1, buscar=request.args.get('buscar', '')) }}" aria-label="Anterior">
-                                <span aria-hidden="true">&laquo; Anterior</span>
+                            <a class="page-link rounded-start-3" href="{{ url_for('clientes', page=pagination.page-1, buscar=request.args.get('buscar', '')) }}">
+                                <i class="bi bi-chevron-left me-1"></i> Anterior
                             </a>
                         </li>
-                        
-                        <!-- Páginas numeradas -->
+
                         {% for i in range(1, pagination.total_pages + 1) %}
                             {% if i == pagination.page %}
-                                <li class="page-item active">
-                                    <span class="page-link">{{ i }}</span>
-                                </li>
+                                <li class="page-item active"><span class="page-link fw-bold">{{ i }}</span></li>
                             {% elif i >= pagination.page - 2 and i <= pagination.page + 2 or i == 1 or i == pagination.total_pages %}
-                                <li class="page-item">
-                                    <a class="page-link" href="{{ url_for('clientes', page=i, buscar=request.args.get('buscar', '')) }}">{{ i }}</a>
-                                </li>
+                                <li class="page-item"><a class="page-link" href="{{ url_for('clientes', page=i, buscar=request.args.get('buscar', '')) }}">{{ i }}</a></li>
                             {% elif i == pagination.page - 3 or i == pagination.page + 3 %}
-                                <li class="page-item disabled">
-                                    <span class="page-link">...</span>
-                                </li>
+                                <li class="page-item disabled"><span class="page-link">...</span></li>
                             {% endif %}
                         {% endfor %}
-                        
-                        <!-- Botón Siguiente -->
+
                         <li class="page-item {% if pagination.page == pagination.total_pages %}disabled{% endif %}">
-                            <a class="page-link" href="{{ url_for('clientes', page=pagination.page+1, buscar=request.args.get('buscar', '')) }}" aria-label="Siguiente">
-                                <span aria-hidden="true">Siguiente &raquo;</span>
+                            <a class="page-link rounded-end-3" href="{{ url_for('clientes', page=pagination.page+1, buscar=request.args.get('buscar', '')) }}">
+                                Siguiente <i class="bi bi-chevron-right ms-1"></i>
                             </a>
                         </li>
                     </ul>
                 </nav>
-                
-            </div>
-            {% else %}
-            <div class="alert alert-info">
-                <i class="bi bi-info-circle"></i> No hay clientes registrados todavía.
             </div>
             {% endif %}
+
+            {% else %}
+            <div class="p-5 text-center">
+                <div class="rounded-circle bg-primary bg-opacity-10 text-primary mx-auto p-4 d-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
+                    <i class="bi bi-people fs-1"></i>
+                </div>
+                <h5 class="fw-bold text-dark">No se encontraron clientes</h5>
+                <p class="text-muted mb-0">Registra un nuevo cliente con el formulario superior o limpia el filtro de búsqueda.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- MODAL DE DETALLES DE CLIENTE -->
+<div class="modal fade" id="modalDetallesCliente" tabindex="-1" aria-labelledby="modalDetallesClienteLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-4">
+            <div class="modal-header card-header-gradient rounded-top-4">
+                <h5 class="modal-title fw-bold text-white" id="modalDetallesClienteLabel">
+                    <i class="bi bi-person-vcard-fill me-2"></i> Detalles del Cliente
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="text-center mb-4">
+                    <div class="rounded-circle bg-primary bg-opacity-10 text-primary p-3 mx-auto mb-2 d-flex align-items-center justify-content-center" style="width: 64px; height: 64px;">
+                        <i class="bi bi-building fs-2"></i>
+                    </div>
+                    <h4 class="fw-bold text-dark mb-1" id="detNombre">--</h4>
+                    <span class="badge bg-primary rounded-pill px-3 py-2 fw-bold" id="detCodigo">--</span>
+                </div>
+
+                <div class="list-group list-group-flush rounded-3 border">
+                    <div class="list-group-item d-flex justify-content-between align-items-center py-3">
+                        <span class="text-muted"><i class="bi bi-card-heading me-2 text-primary"></i>NIT / CI:</span>
+                        <strong class="text-dark" id="detNit">--</strong>
+                    </div>
+                    <div class="list-group-item d-flex justify-content-between align-items-center py-3">
+                        <span class="text-muted"><i class="bi bi-telephone me-2 text-primary"></i>Teléfono:</span>
+                        <strong class="text-dark" id="detTelefono">--</strong>
+                    </div>
+                    <div class="list-group-item d-flex justify-content-between align-items-center py-3">
+                        <span class="text-muted"><i class="bi bi-tag me-2 text-primary"></i>Tipo:</span>
+                        <span id="detTipo">--</span>
+                    </div>
+                    <div class="list-group-item d-flex justify-content-between align-items-center py-3">
+                        <span class="text-muted"><i class="bi bi-bookmark me-2 text-primary"></i>Referencia:</span>
+                        <strong class="text-dark" id="detReferencia">--</strong>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-secondary px-4 rounded-3" data-bs-dismiss="modal">
+                    <i class="bi bi-x-circle me-1"></i> Cerrar
+                </button>
+            </div>
         </div>
     </div>
 </div>
@@ -217,19 +338,23 @@
 {% block scripts %}
 <script src="{{ url_for('static', filename='js/clientes.js') }}"></script>
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const buscarInput = document.getElementById('buscarCliente');
-    const tabla = document.getElementById('tablaClientes');
-    const filas = tabla.querySelectorAll('tbody tr');
+function verDetallesCliente(id, nombre, nit, codigo, telefono, tipo, referencia) {
+    document.getElementById('detNombre').textContent = nombre || 'Sin Nombre';
+    document.getElementById('detCodigo').textContent = codigo || 'CLI-----';
+    document.getElementById('detNit').textContent = nit || 'S/A';
+    document.getElementById('detTelefono').textContent = telefono || 'Sin Teléfono';
+    document.getElementById('detReferencia').textContent = referencia || 'Sin Referencia';
 
-    buscarInput.addEventListener('input', function() {
-        const termino = this.value.toLowerCase();
+    const detTipo = document.getElementById('detTipo');
+    let badgeClass = 'badge bg-secondary rounded-pill px-3 py-2';
+    let label = 'Normal';
+    if (tipo === 'frecuente') { badgeClass = 'badge badge-tipo-frecuente rounded-pill px-3 py-2'; label = '⭐ Frecuente'; }
+    if (tipo === 'corporativo') { badgeClass = 'badge badge-tipo-corporativo rounded-pill px-3 py-2'; label = '🏢 Corporativo'; }
+    detTipo.className = badgeClass;
+    detTipo.textContent = label;
 
-        filas.forEach(function(fila) {
-            const textoFila = fila.textContent.toLowerCase();
-            fila.style.display = textoFila.includes(termino) ? '' : 'none';
-        });
-    });
-});
+    const modal = new bootstrap.Modal(document.getElementById('modalDetallesCliente'));
+    modal.show();
+}
 </script>
 {% endblock %}

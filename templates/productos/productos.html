@@ -520,6 +520,7 @@ function seleccionarEmpresaSuperadmin(valor) {
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
+        <div id="alertGestion" class="alert mb-3 shadow-sm border" style="display: none;"></div>
         <div class="row">
           <!-- Sección para agregar nueva categoría -->
           <div class="col-md-12 mb-4">
@@ -553,8 +554,6 @@ function seleccionarEmpresaSuperadmin(valor) {
             </div>
           </div>
         </div>
-        
-        <div id="alertGestion" class="alert" style="display: none;"></div>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
@@ -1330,11 +1329,20 @@ function actualizarListaCategorias() {
 // Mostrar alerta en el modal de gestión
 function mostrarAlertaGestion(mensaje, tipo) {
     const alert = document.getElementById('alertGestion');
-    alert.className = `alert alert-${tipo}`;
-    alert.textContent = mensaje;
-    alert.style.display = 'block';
-    
-    setTimeout(() => {
+    if (!alert) return;
+
+    let iconClass = 'bi-info-circle-fill';
+    if (tipo === 'success') iconClass = 'bi-check-circle-fill';
+    if (tipo === 'danger') iconClass = 'bi-exclamation-triangle-fill';
+    if (tipo === 'warning') iconClass = 'bi-exclamation-circle-fill';
+
+    alert.className = `alert alert-${tipo} mb-3 shadow-sm border fw-bold d-flex align-items-center`;
+    alert.innerHTML = `<i class="bi ${iconClass} me-2 fs-5"></i> <span>${mensaje}</span>`;
+    alert.style.display = 'flex';
+    alert.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+    if (window.alertGestionTimeout) clearTimeout(window.alertGestionTimeout);
+    window.alertGestionTimeout = setTimeout(() => {
         alert.style.display = 'none';
     }, 5000);
 }

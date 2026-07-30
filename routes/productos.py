@@ -389,7 +389,7 @@ def register_routes(app):
     def api_crear_categoria():
         """API para crear una nueva categoría"""
         try:
-            data = request.get_json()
+            data = request.get_json() or {}
             nombre = data.get('nombre', '').strip()
             descripcion = data.get('descripcion', '').strip()
         
@@ -399,11 +399,24 @@ def register_routes(app):
             conexion = get_db_connection()
             cursor = conexion.cursor()
         
-            # Verificar si la categoría ya existe
-            cursor.execute("SELECT id FROM categorias WHERE nombre = ? AND activo = 1", (nombre,))
-            if cursor.fetchone():
-                conexion.close()
-                return jsonify({'success': False, 'message': 'Ya existe una categoría con ese nombre'})
+            # Verificar si la categoría ya existe (activa o inactiva)
+            cursor.execute("SELECT id, activo FROM categorias WHERE LOWER(nombre) = LOWER(?)", (nombre,))
+            existente = cursor.fetchone()
+
+            if existente:
+                cat_id, activo = existente[0], existente[1]
+                if activo:
+                    conexion.close()
+                    return jsonify({'success': False, 'message': f'Ya existe una categoría con el nombre "{nombre}"'})
+                else:
+                    # Reactivar categoría borrada lógicamente
+                    cursor.execute(
+                        "UPDATE categorias SET activo = 1, descripcion = ? WHERE id = ?",
+                        (descripcion, cat_id)
+                    )
+                    conexion.commit()
+                    conexion.close()
+                    return jsonify({'success': True, 'categoria_id': cat_id, 'message': f'Categoría "{nombre}" reactivada exitosamente'})
         
             # Crear la nueva categoría
             cursor.execute(
@@ -414,7 +427,7 @@ def register_routes(app):
             conexion.commit()
             conexion.close()
         
-            return jsonify({'success': True, 'categoria_id': categoria_id, 'message': 'Categoría creada exitosamente'})
+            return jsonify({'success': True, 'categoria_id': categoria_id, 'message': f'Categoría "{nombre}" creada exitosamente'})
         
         except Exception as e:
             return jsonify({'success': False, 'message': f'Error al crear la categoría: {str(e)}'})

@@ -1,11 +1,49 @@
-// La generación de código de cliente ahora es automática en el backend (app.py)
+// Validación de formulario y botón Validar NIT
 
-// Validación de formulario
-const form = document.getElementById('clienteForm');
-form?.addEventListener('submit', function(e) {
-    if (!form.checkValidity()) {
-        e.preventDefault();
-        e.stopPropagation();
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('clienteForm');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            if (!form.checkValidity()) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+            form.classList.add('was-validated');
+        }, false);
     }
-    form.classList.add('was-validated');
-}, false);
+
+    const btnValidarNit = document.getElementById('btnValidarNit');
+    const nitInput = document.querySelector('input[name="nit"]');
+
+    if (btnValidarNit && nitInput) {
+        btnValidarNit.addEventListener('click', function() {
+            const nit = nitInput.value.trim();
+
+            let feedbackEl = document.getElementById('nitFeedbackMsg');
+            if (!feedbackEl) {
+                feedbackEl = document.createElement('div');
+                feedbackEl.id = 'nitFeedbackMsg';
+                feedbackEl.className = 'mt-2 small fw-bold';
+                nitInput.closest('.col-md-6').appendChild(feedbackEl);
+            }
+
+            fetch('/api/validar-nit?nit=' + encodeURIComponent(nit))
+                .then(response => response.json())
+                .then(data => {
+                    if (data.vacio) {
+                        feedbackEl.className = 'mt-2 small text-info fw-bold';
+                        feedbackEl.innerHTML = '<i class="bi bi-info-circle"></i> ' + data.mensaje;
+                    } else if (data.valido) {
+                        feedbackEl.className = 'mt-2 small text-success fw-bold';
+                        feedbackEl.innerHTML = '<i class="bi bi-check-circle-fill"></i> ' + data.mensaje;
+                    } else {
+                        feedbackEl.className = 'mt-2 small text-danger fw-bold';
+                        feedbackEl.innerHTML = '<i class="bi bi-exclamation-triangle-fill"></i> ' + data.mensaje;
+                    }
+                })
+                .catch(err => {
+                    console.error('Error al validar NIT:', err);
+                });
+        });
+    }
+});

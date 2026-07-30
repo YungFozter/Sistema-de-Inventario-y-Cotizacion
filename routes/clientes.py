@@ -289,3 +289,32 @@ def register_routes(app):
         flash('Cliente eliminado correctamente', 'success')
         return redirect('/clientes')
 
+    @app.route('/api/validar-nit')
+    @login_required
+    def api_validar_nit():
+        nit = request.args.get('nit', '').strip()
+        if not nit:
+            return jsonify({
+                'valido': True,
+                'vacio': True,
+                'mensaje': 'Campo en blanco: se guardará automáticamente como S/A (Sin Asignar).'
+            })
+
+        conexion = get_db_connection()
+        cursor = conexion.cursor()
+        cursor.execute("SELECT id, nombre FROM clientes WHERE nit = ? AND nit NOT IN ('S/A', 'S/N') AND rol = 'cliente'", (nit,))
+        existente = cursor.fetchone()
+        conexion.close()
+
+        if existente:
+            return jsonify({
+                'valido': False,
+                'mensaje': f'El NIT/CI "{nit}" ya está registrado a nombre de: "{existente[1]}".'
+            })
+
+        return jsonify({
+            'valido': True,
+            'vacio': False,
+            'mensaje': f'El NIT/CI "{nit}" está disponible para registrar.'
+        })
+

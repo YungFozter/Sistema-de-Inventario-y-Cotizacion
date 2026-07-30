@@ -6,9 +6,9 @@ __pycache__/
 .env
 database/
 respaldo/
-test_*.py
-test_*.pdf
-test_*.html
+/test_*.py
+/test_*.pdf
+/test_*.html
 *.sqlite3
 scratch/
 test_out.txt

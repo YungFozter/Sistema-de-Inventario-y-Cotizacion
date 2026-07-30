@@ -1,0 +1,135 @@
+{% extends 'shared/layout.html' %}
+
+{% block contenido %}
+<div class="container mt-4 mb-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="text-primary fw-bold mb-1">
+                <i class="bi bi-database-fill-gear me-2"></i>Gestión de Respaldos
+            </h2>
+            <p class="text-muted mb-0">Crea, descarga y restaura copias de seguridad de la base de datos.</p>
+        </div>
+        <div>
+            <a href="/admin" class="btn btn-outline-secondary me-2">
+                <i class="bi bi-arrow-left me-1"></i> Volver al Panel
+            </a>
+            <form action="/admin/respaldos/crear" method="POST" class="d-inline">
+                <button type="submit" class="btn btn-primary shadow-sm" onclick="return confirm('¿Desea generar un nuevo respaldo de la base de datos ahora?');">
+                    <i class="bi bi-plus-circle me-1"></i> Generar Nuevo Respaldo
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Múltiples Tarjetas de Estadísticas -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm bg-primary text-white">
+                <div class="card-body p-3 d-flex align-items-center">
+                    <div class="rounded-circle bg-white bg-opacity-25 p-3 me-3 d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                        <i class="bi bi-archive-fill fs-4"></i>
+                    </div>
+                    <div>
+                        <h6 class="card-subtitle opacity-75 mb-1">Total de Respaldos</h6>
+                        <h4 class="card-title mb-0 font-weight-bold">{{ backups|length }}</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm bg-info text-white">
+                <div class="card-body p-3 d-flex align-items-center">
+                    <div class="rounded-circle bg-white bg-opacity-25 p-3 me-3 d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                        <i class="bi bi-hdd-stack-fill fs-4"></i>
+                    </div>
+                    <div>
+                        <h6 class="card-subtitle opacity-75 mb-1">Espacio Ocupado</h6>
+                        <h4 class="card-title mb-0 font-weight-bold">{{ total_mb }} MB</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm bg-success text-white">
+                <div class="card-body p-3 d-flex align-items-center">
+                    <div class="rounded-circle bg-white bg-opacity-25 p-3 me-3 d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                        <i class="bi bi-shield-check fs-4"></i>
+                    </div>
+                    <div>
+                        <h6 class="card-subtitle opacity-75 mb-1">Estado de Seguridad</h6>
+                        <h4 class="card-title mb-0 font-weight-bold">Protegido</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabla de Respaldos -->
+    <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white py-3 border-bottom">
+            <h5 class="card-title mb-0 text-secondary">
+                <i class="bi bi-list-task me-2"></i>Historial de Archivos de Respaldo
+            </h5>
+        </div>
+        <div class="card-body p-0">
+            {% if backups %}
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="ps-4">Nombre del Archivo</th>
+                            <th>Fecha de Creación</th>
+                            <th>Tamaño</th>
+                            <th class="text-end pe-4">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for backup in backups %}
+                        <tr>
+                            <td class="ps-4">
+                                <span class="fw-semibold text-dark">
+                                    <i class="bi bi-file-earmark-zip text-primary me-2 fs-5"></i>
+                                    {{ backup.filename }}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="badge bg-light text-dark border">
+                                    <i class="bi bi-clock me-1"></i>{{ backup.created_at }}
+                                </span>
+                            </td>
+                            <td>{{ backup.size_mb }} MB</td>
+                            <td class="text-end pe-4">
+                                <div class="btn-group" role="group">
+                                    <a href="/admin/respaldos/descargar/{{ backup.filename }}" class="btn btn-sm btn-outline-success" title="Descargar Respaldo">
+                                        <i class="bi bi-download"></i> Descargar
+                                    </a>
+                                    
+                                    <form action="/admin/respaldos/restaurar/{{ backup.filename }}" method="POST" class="d-inline">
+                                        <button type="submit" class="btn btn-sm btn-outline-warning" title="Restaurar Base de Datos" onclick="return confirm('⚠️ ADVERTENCIA: Se restaurará la base de datos a esta versión. Se creará automáticamente un respaldo previo. ¿Desea continuar?');">
+                                            <i class="bi bi-arrow-counterclockwise"></i> Restaurar
+                                        </button>
+                                    </form>
+
+                                    <form action="/admin/respaldos/eliminar/{{ backup.filename }}" method="POST" class="d-inline">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Eliminar Respaldo" onclick="return confirm('¿Está seguro de eliminar de forma permanente el respaldo {{ backup.filename }}?');">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center py-5">
+                <i class="bi bi-inbox text-muted fs-1 d-block mb-3"></i>
+                <h5 class="text-muted">No hay respaldos guardados.</h5>
+                <p class="text-muted mb-3">Haz clic en el botón superior para generar tu primer respaldo de seguridad.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

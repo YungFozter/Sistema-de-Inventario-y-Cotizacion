@@ -1,4 +1,4 @@
-from flask import Flask, flash, render_template, request, redirect, session, url_for, make_response, jsonify
+from flask import Flask, flash, render_template, request, redirect, session, url_for, make_response, jsonify, send_from_directory
 from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
 import pdfkit
@@ -31,6 +31,7 @@ from PIL import Image
 import logging
 from utils.decorators import login_required, superadmin_required, admin_required, standard_required
 from utils.helpers import format_date, aplicar_fondos_por_pagina, generar_pdf_margenes_dinamicos
+from utils.backup import crear_backup, listar_backups, eliminar_backup, restaurar_backup, get_backup_dir
 
 def register_routes(app):
     @app.route('/admin')
@@ -615,6 +616,70 @@ def register_routes(app):
             app.logger.error(f"Error al obtener usuario {id}: {str(e)}")
             return jsonify({'error': 'Error del servidor'}), 500
     
+    @app.route('/admin/respaldos')
+    @superadmin_required
+    @login_required
+    def gestion_respaldos():
+        try:
+            backups = listar_backups()
+            total_bytes = sum(b['size_bytes'] for b in backups)
+            total_mb = round(total_bytes / (1024 * 1024), 2)
+            return render_template('admin/respaldos.html', backups=backups, total_mb=total_mb)
+        except Exception as e:
+            flash(f"Error al cargar el panel de respaldos: {str(e)}", 'danger')
+            return redirect(url_for('admin_panel'))
+
+    @app.route('/admin/respaldos/crear', methods=['POST'])
+    @superadmin_required
+    @login_required
+    def crear_respaldo_route():
+        try:
+            filename, _ = crear_backup()
+            registrar_log(session.get('user_id'), "CREAR_RESPALDO", f"Respaldo creado: {filename}")
+            flash(f"Respaldo '{filename}' creado exitosamente.", 'success')
+        except Exception as e:
+            flash(f"Error al generar el respaldo: {str(e)}", 'danger')
+        return redirect(url_for('gestion_respaldos'))
+
+    @app.route('/admin/respaldos/descargar/<filename>')
+    @superadmin_required
+    @login_required
+    def descargar_respaldo(filename):
+        try:
+            safe_filename = os.path.basename(filename)
+            backup_dir = get_backup_dir()
+            registrar_log(session.get('user_id'), "DESCARGAR_RESPALDO", f"Respaldo descargado: {safe_filename}")
+            return send_from_directory(backup_dir, safe_filename, as_attachment=True)
+        except Exception as e:
+            flash(f"Error al descargar el respaldo: {str(e)}", 'danger')
+            return redirect(url_for('gestion_respaldos'))
+
+    @app.route('/admin/respaldos/eliminar/<filename>', methods=['POST'])
+    @superadmin_required
+    @login_required
+    def eliminar_respaldo_route(filename):
+        try:
+            safe_filename = os.path.basename(filename)
+            eliminar_backup(safe_filename)
+            registrar_log(session.get('user_id'), "ELIMINAR_RESPALDO", f"Respaldo eliminado: {safe_filename}")
+            flash(f"Respaldo '{safe_filename}' eliminado correctamente.", 'success')
+        except Exception as e:
+            flash(f"Error al eliminar el respaldo: {str(e)}", 'danger')
+        return redirect(url_for('gestion_respaldos'))
+
+    @app.route('/admin/respaldos/restaurar/<filename>', methods=['POST'])
+    @superadmin_required
+    @login_required
+    def restaurar_respaldo_route(filename):
+        try:
+            safe_filename = os.path.basename(filename)
+            restaurar_backup(safe_filename)
+            registrar_log(session.get('user_id'), "RESTAURAR_RESPALDO", f"Sistema restaurado a la versión: {safe_filename}")
+            flash(f"Sistema restaurado exitosamente a la versión '{safe_filename}'. Se generó un respaldo automático previo.", 'warning')
+        except Exception as e:
+            flash(f"Error al restaurar el respaldo: {str(e)}", 'danger')
+        return redirect(url_for('gestion_respaldos'))
+
     @app.context_processor
     def inject_now():
         return {'now': datetime.now()}

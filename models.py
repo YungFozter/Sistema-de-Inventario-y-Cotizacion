@@ -600,3 +600,98 @@ def migrar_columnas_nuevas_clientes():
         print(f"Error en migrar_columnas_nuevas_clientes: {e}")
     finally:
         conexion.close()
+
+
+# =============================================
+# FUNCIONES DE CONFIGURACIÓN DE PDF ("MI PDF")
+# =============================================
+
+def obtener_configuracion_pdf(usuario_id):
+    """Obtiene la configuración de PDF para un usuario o retorna valores por defecto"""
+    try:
+        with get_db_connection() as conexion:
+            cursor = conexion.cursor()
+            cursor.execute("SELECT * FROM configuracion_pdf WHERE usuario_id = ?", (usuario_id,))
+            row = cursor.fetchone()
+            if row:
+                col_names = [col[0] for col in cursor.description]
+                return dict(zip(col_names, row))
+    except Exception as e:
+        print(f"Error obteniendo configuracion_pdf: {e}")
+    
+    return {
+        'tipo_hoja': 'A4',
+        'color_tema': '#0d6efd',
+        'titulo_documento': 'COTIZACIÓN DE VENTAS',
+        'empresa_nombre': '',
+        'nit_emisor': '',
+        'telefono': '',
+        'correo': '',
+        'direccion': '',
+        'terminos_condiciones': '1. Validez de la oferta: 15 días.\n2. Precios incluyen impuestos de ley.\n3. Tiempo de entrega a convenir.',
+        'nota_pie': '¡Gracias por su preferencia!',
+        'logo_path': '',
+        'firma_path': ''
+    }
+
+def guardar_configuracion_pdf(usuario_id, datos):
+    """Guarda o actualiza la configuración de PDF para un usuario"""
+    try:
+        with get_db_connection() as conexion:
+            cursor = conexion.cursor()
+            cursor.execute("SELECT COUNT(*) FROM configuracion_pdf WHERE usuario_id = ?", (usuario_id,))
+            existe = cursor.fetchone()[0] > 0
+
+            if existe:
+                cursor.execute('''
+                    UPDATE configuracion_pdf SET
+                        tipo_hoja = ?,
+                        color_tema = ?,
+                        titulo_documento = ?,
+                        empresa_nombre = ?,
+                        nit_emisor = ?,
+                        telefono = ?,
+                        correo = ?,
+                        direccion = ?,
+                        terminos_condiciones = ?,
+                        nota_pie = ?,
+                        fecha_actualizacion = CURRENT_TIMESTAMP
+                    WHERE usuario_id = ?
+                ''', (
+                    datos.get('tipo_hoja', 'A4'),
+                    datos.get('color_tema', '#0d6efd'),
+                    datos.get('titulo_documento', 'COTIZACIÓN DE VENTAS'),
+                    datos.get('empresa_nombre', ''),
+                    datos.get('nit_emisor', ''),
+                    datos.get('telefono', ''),
+                    datos.get('correo', ''),
+                    datos.get('direccion', ''),
+                    datos.get('terminos_condiciones', ''),
+                    datos.get('nota_pie', ''),
+                    usuario_id
+                ))
+            else:
+                cursor.execute('''
+                    INSERT INTO configuracion_pdf (
+                        usuario_id, tipo_hoja, color_tema, titulo_documento,
+                        empresa_nombre, nit_emisor, telefono, correo, direccion,
+                        terminos_condiciones, nota_pie
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ''', (
+                    usuario_id,
+                    datos.get('tipo_hoja', 'A4'),
+                    datos.get('color_tema', '#0d6efd'),
+                    datos.get('titulo_documento', 'COTIZACIÓN DE VENTAS'),
+                    datos.get('empresa_nombre', ''),
+                    datos.get('nit_emisor', ''),
+                    datos.get('telefono', ''),
+                    datos.get('correo', ''),
+                    datos.get('direccion', ''),
+                    datos.get('terminos_condiciones', ''),
+                    datos.get('nota_pie', '')
+                ))
+            conexion.commit()
+            return True
+    except Exception as e:
+        print(f"Error guardando configuracion_pdf: {e}")
+        return False

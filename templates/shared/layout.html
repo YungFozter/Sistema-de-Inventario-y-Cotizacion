@@ -261,10 +261,20 @@
                                 <i class="bi bi-file-earmark-text"></i> Cotizaciones
                             </a>
                         </li>
+                        <li>
+                            <a class="dropdown-item" href="/mi-pdf">
+                                <i class="bi bi-file-earmark-pdf-fill text-danger"></i> MI PDF
+                            </a>
+                        </li>
                         {% elif session.get('user_rol') == 'standard' %}
                         <li>
                             <a class="dropdown-item" href="/standard/standard_cotizaciones">
                                 <i class="bi bi-list-check"></i> Mis Cotizaciones
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" href="/mi-pdf">
+                                <i class="bi bi-file-earmark-pdf-fill text-danger"></i> MI PDF
                             </a>
                         </li>
                         {% endif %}
@@ -372,6 +382,10 @@
                 Mis Cotizaciones
             </a>
             {% endif %}
+            <a href="/mi-pdf" class="mobile-menu-item">
+                <i class="bi bi-file-earmark-pdf-fill text-danger"></i>
+                MI PDF
+            </a>
         </div>
 
         <div class="mobile-menu-divider"></div>

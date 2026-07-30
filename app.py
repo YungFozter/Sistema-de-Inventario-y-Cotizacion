@@ -68,6 +68,7 @@ from routes.clientes import register_routes as init_clientes
 from routes.productos import register_routes as init_productos
 from routes.cotizaciones import register_routes as init_cotizaciones
 from routes.core import register_routes as init_core
+from routes.mi_pdf import register_mi_pdf_routes as init_mi_pdf
 
 init_auth(app)
 init_admin(app)
@@ -75,6 +76,7 @@ init_clientes(app)
 init_productos(app)
 init_cotizaciones(app)
 init_core(app)
+init_mi_pdf(app)
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)

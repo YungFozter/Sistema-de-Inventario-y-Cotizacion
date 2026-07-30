@@ -3,6 +3,11 @@ import urllib.parse
 import sqlite3
 
 def get_db_connection(timeout=30):
+    if os.environ.get('TESTING_DB'):
+        conn = sqlite3.connect(os.environ.get('TESTING_DB'), timeout=timeout)
+        conn.row_factory = sqlite3.Row
+        return conn
+
     database_url = os.environ.get('DATABASE_URL')
     if database_url and database_url.startswith('postgres'):
         import psycopg2

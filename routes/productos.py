@@ -400,7 +400,7 @@ def register_routes(app):
         
             # Crear la nueva categoría
             cursor.execute(
-                "INSERT INTO categorias (nombre, descripcion, activo) VALUES (?, ?, 1) RETURNING id",
+                "INSERT INTO categorias (nombre, descripcion, activo) VALUES (?, ?, 1)",
                 (nombre, descripcion)
             )
             categoria_id = cursor.lastrowid

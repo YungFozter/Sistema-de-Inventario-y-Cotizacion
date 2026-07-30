@@ -9,3 +9,6 @@ respaldo/
 test_*.py
 test_*.pdf
 test_*.html
+*.sqlite3
+scratch/
+test_out.txt

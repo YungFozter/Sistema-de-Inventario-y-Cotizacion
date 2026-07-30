@@ -87,12 +87,6 @@ def crear_tablas():
             ){";" if is_postgres else ""}
         ''')
 
-        # Limpiar espacios en blanco y tabulaciones en el nombre de empresa de productos
-        try:
-            cursor.execute("UPDATE productos SET empresa = TRIM(REPLACE(empresa, char(9), '')) WHERE empresa IS NOT NULL")
-        except Exception:
-            pass
-
         # Tabla de cotizaciones
         cursor.execute(f'''
             CREATE TABLE IF NOT EXISTS cotizaciones (
@@ -209,6 +203,16 @@ def crear_tablas():
                 )
 
         conexion.commit()
+
+        # Sanitizar nombres de empresas (seguro en PostgreSQL y SQLite)
+        try:
+            if is_postgres:
+                cursor.execute("UPDATE productos SET empresa = TRIM(REGEXP_REPLACE(empresa, E'[\\t\\r\\n]+', '', 'g')) WHERE empresa IS NOT NULL")
+            else:
+                cursor.execute("UPDATE productos SET empresa = TRIM(REPLACE(empresa, char(9), '')) WHERE empresa IS NOT NULL")
+            conexion.commit()
+        except Exception as err_clean:
+            print(f"[WARN] No se pudo limpiar empresa: {str(err_clean)}")
         
         print("[OK] Tablas creadas/verificadas correctamente.")
     except Exception as e:

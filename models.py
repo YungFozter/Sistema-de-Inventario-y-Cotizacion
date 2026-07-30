@@ -35,6 +35,7 @@ def crear_tablas():
                 tipo_cliente TEXT DEFAULT 'normal',
                 fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 ultima_conexion TIMESTAMP,
+                session_token TEXT,
                 activo {"BOOLEAN DEFAULT TRUE" if is_postgres else "BOOLEAN DEFAULT 1"},
                 creador_id INTEGER,
                 FOREIGN KEY (creador_id) REFERENCES clientes(id)
@@ -553,6 +554,11 @@ def migrar_columnas_nuevas_clientes():
                 print("[INFO] Agregando columna fecha_vencimiento_suscripcion en Postgres...")
                 cursor.execute("ALTER TABLE clientes ADD COLUMN fecha_vencimiento_suscripcion TIMESTAMP")
                 conexion.commit()
+
+            if 'session_token' not in columnas_existentes:
+                print("[INFO] Agregando columna session_token en Postgres...")
+                cursor.execute("ALTER TABLE clientes ADD COLUMN session_token TEXT")
+                conexion.commit()
         else:
             cursor.execute("PRAGMA table_info(clientes)")
             columnas = [col[1] for col in cursor.fetchall()]
@@ -565,6 +571,11 @@ def migrar_columnas_nuevas_clientes():
             if 'fecha_vencimiento_suscripcion' not in columnas:
                 print("[INFO] Agregando columna fecha_vencimiento_suscripcion en SQLite...")
                 cursor.execute("ALTER TABLE clientes ADD COLUMN fecha_vencimiento_suscripcion TIMESTAMP")
+                conexion.commit()
+
+            if 'session_token' not in columnas:
+                print("[INFO] Agregando columna session_token en SQLite...")
+                cursor.execute("ALTER TABLE clientes ADD COLUMN session_token TEXT")
                 conexion.commit()
     except Exception as e:
         print(f"Error en migrar_columnas_nuevas_clientes: {e}")

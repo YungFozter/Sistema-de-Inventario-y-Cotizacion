@@ -27,10 +27,7 @@ import io
 from PyPDF2 import PdfReader, PdfWriter
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter
-from PIL import Image
-import logging
-from utils.decorators import login_required, superadmin_required, admin_required, standard_required
-from utils.helpers import format_date, aplicar_fondos_por_pagina, generar_pdf_margenes_dinamicos
+import uuid
 
 def register_routes(app):
     @app.route('/registro', methods=['GET', 'POST'])
@@ -173,8 +170,11 @@ def register_routes(app):
                     }
                 )
 
-                # Actualizar ultima_conexion
-                cursor.execute('UPDATE clientes SET ultima_conexion = CURRENT_TIMESTAMP WHERE id = ?', (cliente['id'],))
+                # Generar nuevo token único de sesión activa
+                session_token = uuid.uuid4().hex
+
+                # Actualizar ultima_conexion y session_token
+                cursor.execute('UPDATE clientes SET ultima_conexion = CURRENT_TIMESTAMP, session_token = ? WHERE id = ?', (session_token, cliente['id']))
                 conexion.commit()
                 conexion.close()
 
@@ -183,6 +183,7 @@ def register_routes(app):
                 session['user_nombre'] = cliente['nombre']
                 session['user_rol'] = rol
                 session['user_email'] = cliente['correo']
+                session['session_token'] = session_token
 
                 # Redirigir según el rol
                 if rol == 'superadmin':
@@ -202,10 +203,19 @@ def register_routes(app):
 
     @app.route('/logout')
     def logout():
-        session.pop('user_id', None)
-        session.pop('user_nombre', None)
-        session.pop('user_rol', None)
-        return redirect('/')
+        user_id = session.get('user_id')
+        if user_id:
+            try:
+                conexion = get_db_connection()
+                cursor = conexion.cursor()
+                cursor.execute("UPDATE clientes SET session_token = NULL WHERE id = ?", (user_id,))
+                conexion.commit()
+                conexion.close()
+            except Exception:
+                pass
+        session.clear()
+        flash('Has cerrado sesión exitosamente', 'info')
+        return redirect('/login')
 
     @app.route('/setup-superadmin')
     def setup_superadmin():

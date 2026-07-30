@@ -4,10 +4,10 @@
 
 /* Glassmorphism Panel Esmerilado */
 .glass-panel {
-    background: rgba(255, 255, 255, 0.75);
+    background: rgba(255, 255, 255, 0.85);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(255, 255, 255, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.6);
     border-radius: 1.25rem;
     box-shadow: 0 15px 35px rgba(31, 38, 135, 0.08), 0 5px 15px rgba(0, 0, 0, 0.04);
     transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
@@ -20,7 +20,7 @@
 
 /* Glassmorphism Header */
 .glass-header {
-    background: linear-gradient(135deg, rgba(13, 110, 253, 0.9), rgba(10, 88, 202, 0.98));
+    background: linear-gradient(135deg, rgba(13, 110, 253, 0.92), rgba(10, 88, 202, 0.98));
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     color: #ffffff;
@@ -32,11 +32,11 @@
 @keyframes staggerCascade {
     from {
         opacity: 0;
-        transform: translateY(24px) scale(0.97);
+        transform: translateY(24px);
     }
     to {
         opacity: 1;
-        transform: translateY(0) scale(1);
+        transform: translateY(0);
     }
 }
 
@@ -45,26 +45,26 @@
     animation: staggerCascade 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-/* Tarjeta de Cliente 3D (Grid View) */
+/* Tarjeta de Cliente 3D (Grid View - Ultra Sharp Crisp Text) */
 .client-3d-card {
-    background: rgba(255, 255, 255, 0.85);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.6);
+    background: #ffffff;
+    border: 1px solid rgba(13, 110, 253, 0.12);
     border-radius: 1rem;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
-    transition: transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.35s ease;
-    transform-style: preserve-3d;
-    perspective: 1000px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease, border-color 0.25s ease;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
 }
 
 .client-3d-card:hover {
-    transform: translateY(-8px) rotateX(3deg) scale(1.02);
-    box-shadow: 0 20px 40px rgba(13, 110, 253, 0.15);
-    border-color: rgba(13, 110, 253, 0.3);
+    transform: translateY(-6px);
+    box-shadow: 0 16px 35px rgba(13, 110, 253, 0.18), 0 0 0 2px rgba(13, 110, 253, 0.3);
+    border-color: rgba(13, 110, 253, 0.4);
 }
 
-/* Avatar con efecto de elevación 3D */
+/* Avatar con elevación limpia sin desenfoque */
 .avatar-3d {
     background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%);
     color: #ffffff;
@@ -75,11 +75,11 @@
     align-items: center;
     justify-content: center;
     box-shadow: 0 8px 16px rgba(13, 110, 253, 0.3);
-    transition: transform 0.3s ease;
+    transition: transform 0.25s ease;
 }
 
 .client-3d-card:hover .avatar-3d {
-    transform: scale(1.1) translateZ(15px);
+    transform: scale(1.08);
 }
 
 /* Badges personalizados */

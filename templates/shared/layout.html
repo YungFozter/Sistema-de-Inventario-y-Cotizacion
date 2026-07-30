@@ -286,6 +286,11 @@
                                 <i class="bi bi-shield-check text-info"></i> Auditoría Global
                             </a>
                         </li>
+                        <li>
+                            <a class="dropdown-item" href="/admin/respaldos">
+                                <i class="bi bi-database-fill-gear text-warning"></i> Respaldos de BD
+                            </a>
+                        </li>
                         {% endif %}
                         <!-- FIN AÑADIDO -->
 
@@ -326,7 +331,7 @@
         <!-- Menú para usuarios autenticados -->
         <div class="mobile-menu-section">
             <div class="mobile-menu-title">Navegación</div>
-            {% if session.get('user_rol') in ['admin', 'superAdmin'] %}
+            {% if session.get('user_rol') in ['admin', 'superadmin'] %}
             <a href="/dashboard" class="mobile-menu-item">
                 <i class="bi bi-speedometer2"></i>
                 Dashboard
@@ -343,6 +348,24 @@
                 <i class="bi bi-file-earmark-text"></i>
                 Cotizaciones
             </a>
+            {% if session.get('user_rol') == 'superadmin' %}
+            <a href="/admin/usuarios" class="mobile-menu-item">
+                <i class="bi bi-people-fill"></i>
+                Gestionar Usuarios
+            </a>
+            <a href="/admin/pines" class="mobile-menu-item">
+                <i class="bi bi-key-fill"></i>
+                Gestión de PINs
+            </a>
+            <a href="/admin/logs" class="mobile-menu-item">
+                <i class="bi bi-shield-check"></i>
+                Auditoría Global
+            </a>
+            <a href="/admin/respaldos" class="mobile-menu-item">
+                <i class="bi bi-database-fill-gear"></i>
+                Respaldos de BD
+            </a>
+            {% endif %}
             {% elif session.get('user_rol') == 'standard' %}
             <a href="/standard_cotizaciones" class="mobile-menu-item">
                 <i class="bi bi-list-check"></i>

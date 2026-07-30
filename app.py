@@ -5,6 +5,10 @@ from datetime import datetime
 from db_wrapper import get_db_connection
 from models import crear_tablas, migrar_columnas_nuevas_clientes
 
+import logging
+for _log_name in ['pdfminer', 'pdfminer.pdfinterp', 'pdfminer.pdfpage', 'pdfminer.converter', 'pdfminer.layout', 'PyPDF2', 'pypdf', 'pdfplumber']:
+    logging.getLogger(_log_name).setLevel(logging.ERROR)
+
 app = Flask(__name__)
 app.secret_key = 'tu_clave_secreta_aqui'
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024

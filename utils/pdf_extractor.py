@@ -1,7 +1,12 @@
 import os
 import re
-import pdfplumber
+import logging
 from io import BytesIO
+
+for _log_name in ['pdfminer', 'pdfminer.pdfinterp', 'pdfminer.pdfpage', 'pdfminer.converter', 'pdfminer.layout', 'PyPDF2', 'pypdf', 'pdfplumber']:
+    logging.getLogger(_log_name).setLevel(logging.ERROR)
+
+import pdfplumber
 
 class PDFProductExtractor:
     """

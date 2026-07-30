@@ -377,12 +377,26 @@ def guardar_importacion_pdf(nombre_importacion, items, usuario_id=None):
         if cursor.fetchone()[0] > 0:
             nombre_importacion = f"{nombre_importacion} ({now_dt.strftime('%H:%M:%S')})"
 
-        cursor.execute('''
-            INSERT INTO importaciones_pdf (nombre_importacion, usuario_id, total_items, estado)
-            VALUES (?, ?, ?, ?)
-        ''', (nombre_importacion, usuario_id, len(items), 'guardado'))
-        
-        importacion_id = cursor.lastrowid
+        is_postgres = bool(os.environ.get('DATABASE_URL') and os.environ.get('DATABASE_URL').startswith('postgres'))
+        if is_postgres:
+            cursor.execute('''
+                INSERT INTO importaciones_pdf (nombre_importacion, usuario_id, total_items, estado)
+                VALUES (?, ?, ?, ?) RETURNING id
+            ''', (nombre_importacion, usuario_id, len(items), 'guardado'))
+            row = cursor.fetchone()
+            importacion_id = row[0] if row else getattr(cursor, 'lastrowid', None)
+        else:
+            cursor.execute('''
+                INSERT INTO importaciones_pdf (nombre_importacion, usuario_id, total_items, estado)
+                VALUES (?, ?, ?, ?)
+            ''', (nombre_importacion, usuario_id, len(items), 'guardado'))
+            importacion_id = cursor.lastrowid
+
+        if not importacion_id:
+            cursor.execute('SELECT id FROM importaciones_pdf WHERE nombre_importacion = ? ORDER BY id DESC LIMIT 1', (nombre_importacion,))
+            row = cursor.fetchone()
+            if row:
+                importacion_id = row[0]
 
         for item in items:
             try:

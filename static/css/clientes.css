@@ -1,83 +1,90 @@
 /* =============================================
-   CLIENTES - PRO UI STYLING & ANIMATIONS
+   CLIENTES - GLASSMORPHISM, 3D CARDS & STAGGERED ANIMATIONS
    ============================================= */
 
-/* Animación de entrada suave */
-@keyframes fadeInUp {
+/* Glassmorphism Panel Esmerilado */
+.glass-panel {
+    background: rgba(255, 255, 255, 0.75);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    border-radius: 1.25rem;
+    box-shadow: 0 15px 35px rgba(31, 38, 135, 0.08), 0 5px 15px rgba(0, 0, 0, 0.04);
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    overflow: hidden;
+}
+
+.glass-panel:hover {
+    box-shadow: 0 20px 40px rgba(31, 38, 135, 0.12), 0 8px 20px rgba(0, 0, 0, 0.06);
+}
+
+/* Glassmorphism Header */
+.glass-header {
+    background: linear-gradient(135deg, rgba(13, 110, 253, 0.9), rgba(10, 88, 202, 0.98));
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    color: #ffffff;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 1.25rem 1.75rem;
+}
+
+/* Animación Escalonada en Cascada */
+@keyframes staggerCascade {
     from {
         opacity: 0;
-        transform: translateY(15px);
+        transform: translateY(24px) scale(0.97);
     }
     to {
         opacity: 1;
-        transform: translateY(0);
+        transform: translateY(0) scale(1);
     }
 }
 
-.animate-fade-in {
-    animation: fadeInUp 0.4s ease-out forwards;
+.stagger-item {
+    opacity: 0;
+    animation: staggerCascade 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-/* Tarjetas Pro con elevación */
-.pro-card {
-    border: none;
+/* Tarjeta de Cliente 3D (Grid View) */
+.client-3d-card {
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.6);
     border-radius: 1rem;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-    transition: transform 0.25s ease, box-shadow 0.25s ease;
-    overflow: hidden;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+    transition: transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.35s ease;
+    transform-style: preserve-3d;
+    perspective: 1000px;
 }
 
-.pro-card:hover {
-    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.12);
+.client-3d-card:hover {
+    transform: translateY(-8px) rotateX(3deg) scale(1.02);
+    box-shadow: 0 20px 40px rgba(13, 110, 253, 0.15);
+    border-color: rgba(13, 110, 253, 0.3);
 }
 
-/* Encabezado con degradado moderno */
-.card-header-gradient {
+/* Avatar con efecto de elevación 3D */
+.avatar-3d {
     background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%);
     color: #ffffff;
-    border-bottom: none;
-    padding: 1.25rem 1.5rem;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 8px 16px rgba(13, 110, 253, 0.3);
+    transition: transform 0.3s ease;
 }
 
-/* Inputs con foco brillante */
-.pro-form-control:focus, .pro-form-select:focus {
-    border-color: #0d6efd;
-    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.18);
+.client-3d-card:hover .avatar-3d {
+    transform: scale(1.1) translateZ(15px);
 }
 
-/* Tablas Pro */
-.pro-table-container {
-    border-radius: 0.75rem;
-    overflow: hidden;
-}
-
-.pro-table thead {
-    background: linear-gradient(135deg, #212529 0%, #343a40 100%);
-    color: #ffffff;
-}
-
-.pro-table tbody tr {
-    transition: background-color 0.2s ease, transform 0.15s ease;
-}
-
-.pro-table tbody tr:hover {
-    background-color: rgba(13, 110, 253, 0.04) !important;
-}
-
-/* Botones con escala al hacer hover */
-.btn-pro-action {
-    transition: transform 0.15s ease, box-shadow 0.15s ease;
-    border-radius: 0.5rem;
-}
-
-.btn-pro-action:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
-}
-
-/* Badges personalizados de Tipo de Cliente */
+/* Badges personalizados */
 .badge-tipo-normal {
-    background-color: #e9ecef;
+    background-color: #f1f3f5;
     color: #495057;
     font-weight: 600;
 }
@@ -94,8 +101,26 @@
     font-weight: 600;
 }
 
-/* Contenedor de la tabla */
+/* Botones Pro */
+.btn-pro-action {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.btn-pro-action:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Estilos de Tabla */
 .table-responsive {
     max-height: 520px;
     overflow-y: auto;
+}
+
+.pro-table tbody tr {
+    transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.pro-table tbody tr:hover {
+    background-color: rgba(13, 110, 253, 0.05) !important;
 }

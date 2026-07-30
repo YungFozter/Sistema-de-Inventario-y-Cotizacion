@@ -207,7 +207,9 @@ def register_routes(app):
             'total_items': total_importados
         }
 
-        # Obtener clientes para el modal de PDF Directo
+        # Obtener clientes para el modal de PDF Directo y empresas para Superadmin
+        clientes = []
+        lista_empresas = []
         try:
             with get_db_connection() as conexion:
                 cursor = conexion.cursor()
@@ -217,8 +219,12 @@ def register_routes(app):
                     cursor.execute("SELECT id, nombre FROM clientes WHERE creador_id = ? AND rol = 'cliente' ORDER BY nombre", 
                                    (session['user_id'],))
                 clientes = cursor.fetchall()
+
+                cursor.execute("SELECT DISTINCT empresa FROM productos WHERE empresa IS NOT NULL AND empresa != '' ORDER BY empresa")
+                lista_empresas = [row[0] for row in cursor.fetchall()]
         except Exception:
             clientes = []
+            lista_empresas = []
 
         return render_template(
             'productos/productos.html',
@@ -231,7 +237,8 @@ def register_routes(app):
             pagination_reg=pagination_reg,
             pagination_imp=pagination_imp,
             tab_activa=tab_activa,
-            clientes=clientes
+            clientes=clientes,
+            lista_empresas=lista_empresas
         )
 
     @app.route('/productos/editar/<int:id>', methods=['GET', 'POST'])

@@ -419,6 +419,57 @@ def register_routes(app):
         except Exception as e:
             return jsonify({'success': False, 'message': f'Error al crear la categoría: {str(e)}'})
 
+    @app.route('/api/categorias/<int:categoria_id>', methods=['PUT', 'POST'])
+    @login_required
+    @admin_required
+    def api_editar_categoria(categoria_id):
+        """API para editar una categoría existente"""
+        try:
+            data = request.get_json() or {}
+            nombre = data.get('nombre', '').strip()
+            descripcion = data.get('descripcion', '').strip()
+
+            if not nombre:
+                return jsonify({'success': False, 'message': 'El nombre de la categoría es requerido'})
+
+            conexion = get_db_connection()
+            cursor = conexion.cursor()
+
+            # Verificar si la categoría existe
+            cursor.execute("SELECT id FROM categorias WHERE id = ? AND activo = 1", (categoria_id,))
+            if not cursor.fetchone():
+                conexion.close()
+                return jsonify({'success': False, 'message': 'Categoría no encontrada'})
+
+            # Verificar si otra categoría activa ya tiene ese mismo nombre
+            cursor.execute("SELECT id FROM categorias WHERE nombre = ? AND id != ? AND activo = 1", (nombre, categoria_id))
+            if cursor.fetchone():
+                conexion.close()
+                return jsonify({'success': False, 'message': 'Ya existe otra categoría con ese nombre'})
+
+            # Actualizar la categoría
+            cursor.execute(
+                "UPDATE categorias SET nombre = ?, descripcion = ? WHERE id = ?",
+                (nombre, descripcion, categoria_id)
+            )
+
+            # También actualizar el campo desnormalizado en productos si aplica
+            try:
+                cursor.execute(
+                    "UPDATE productos SET categoria = ? WHERE categoria_id = ?",
+                    (nombre, categoria_id)
+                )
+            except Exception:
+                pass
+
+            conexion.commit()
+            conexion.close()
+
+            return jsonify({'success': True, 'message': 'Categoría actualizada exitosamente'})
+
+        except Exception as e:
+            return jsonify({'success': False, 'message': f'Error al actualizar la categoría: {str(e)}'})
+
     @app.route('/api/categorias/<int:categoria_id>', methods=['DELETE'])
     @login_required
     @admin_required

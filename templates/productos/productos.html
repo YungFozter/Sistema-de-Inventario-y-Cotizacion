@@ -1125,19 +1125,23 @@ function mostrarListaCategorias(categorias) {
     
     let html = '';
     categorias.forEach((categoria, index) => {
-        // Agregar efecto de "recién agregado" para la primera categoría si se acaba de agregar
         const esNueva = index === 0 && window.ultimaCategoriaAgregada === categoria.nombre;
         const claseNueva = esNueva ? 'bg-success bg-opacity-10 border-success' : '';
-        
+        const safeNombre = (categoria.nombre || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+        const safeDesc = (categoria.descripcion || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+
         html += `
-            <div class="d-flex justify-content-between align-items-center border-bottom py-2 ${claseNueva}" ${esNueva ? 'id="categoria-nueva"' : ''}>
+            <div class="d-flex justify-content-between align-items-center border-bottom py-2 ${claseNueva}" id="cat-row-${categoria.id}">
                 <div>
                     <strong>${categoria.nombre}</strong>
                     ${esNueva ? '<span class="badge bg-success ms-2">¡Nueva!</span>' : ''}
                     ${categoria.descripcion ? `<br><small class="text-muted">${categoria.descripcion}</small>` : ''}
                 </div>
-                <div>
-                    <button class="btn btn-sm btn-outline-danger" onclick="eliminarCategoria(${categoria.id}, '${categoria.nombre}')" title="Eliminar categoría">
+                <div class="d-flex gap-1">
+                    <button class="btn btn-sm btn-outline-primary" onclick="mostrarFormularioEditarCategoria(${categoria.id}, '${safeNombre}', '${safeDesc}')" title="Editar categoría">
+                        <i class="bi bi-pencil"></i>
+                    </button>
+                    <button class="btn btn-sm btn-outline-danger" onclick="eliminarCategoria(${categoria.id}, '${safeNombre}')" title="Eliminar categoría">
                         <i class="bi bi-trash"></i>
                     </button>
                 </div>
@@ -1160,6 +1164,67 @@ function mostrarListaCategorias(categorias) {
             }, 3000);
         }
     }
+}
+
+// Editar categoría (Mostrar formulario inline)
+function mostrarFormularioEditarCategoria(id, nombreActual, descActual) {
+    const row = document.getElementById(`cat-row-${id}`);
+    if (!row) return;
+
+    row.innerHTML = `
+        <div class="w-100 p-2 bg-light rounded border border-primary">
+            <div class="row g-2 align-items-center">
+                <div class="col-md-5">
+                    <input type="text" class="form-control form-control-sm" id="edit-nombre-${id}" value="${nombreActual}" placeholder="Nombre categoría">
+                </div>
+                <div class="col-md-4">
+                    <input type="text" class="form-control form-control-sm" id="edit-desc-${id}" value="${descActual}" placeholder="Descripción (opcional)">
+                </div>
+                <div class="col-md-3 d-flex gap-1">
+                    <button class="btn btn-sm btn-success flex-grow-1" onclick="guardarEdicionCategoria(${id})">
+                        <i class="bi bi-check-lg"></i> Guardar
+                    </button>
+                    <button class="btn btn-sm btn-outline-secondary" onclick="cargarListaCategorias()">
+                        <i class="bi bi-x-lg"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+function guardarEdicionCategoria(id) {
+    const nombreInput = document.getElementById(`edit-nombre-${id}`);
+    const descInput = document.getElementById(`edit-desc-${id}`);
+    if (!nombreInput) return;
+
+    const nombre = nombreInput.value.trim();
+    const descripcion = descInput ? descInput.value.trim() : '';
+
+    if (!nombre) {
+        mostrarAlertaGestion('El nombre de la categoría no puede estar vacío', 'danger');
+        return;
+    }
+
+    fetch(`/api/categorias/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nombre: nombre, descripcion: descripcion })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            mostrarAlertaGestion(data.message, 'success');
+            cargarListaCategorias();
+            cargarCategorias(); // Actualizar el select del modal de registro
+        } else {
+            mostrarAlertaGestion(data.message, 'danger');
+        }
+    })
+    .catch(error => {
+        console.error('Error al actualizar categoría:', error);
+        mostrarAlertaGestion('Error al actualizar la categoría', 'danger');
+    });
 }
 
 // Eliminar categoría

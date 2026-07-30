@@ -4,24 +4,42 @@ from db_wrapper import get_db_connection
 def test_crud_categorias(client, admin_user):
     client.post('/login', data={'correo': admin_user['email'], 'contrasena': admin_user['password']})
 
-    # Crear Categoría
+    # 1. Crear Categoría (CREATE)
     resp_crear = client.post('/api/categorias', json={
-        'nombre': 'CatTest',
-        'descripcion': 'DescTest'
+        'nombre': 'CatTestCRUD',
+        'descripcion': 'DescInicial'
     })
     assert resp_crear.status_code == 200
     cat_id = resp_crear.get_json()['categoria_id']
 
-    # Obtener Categorías
+    # 2. Obtener Categorías (READ)
     resp_listar = client.get('/api/categorias')
     assert resp_listar.status_code == 200
     data = resp_listar.get_json()
-    assert any(c['id'] == cat_id and c['nombre'] == 'CatTest' for c in data)
+    assert any(c['id'] == cat_id and c['nombre'] == 'CatTestCRUD' for c in data)
 
-    # Eliminar Categoría
+    # 3. Editar Categoría (UPDATE)
+    resp_editar = client.put(f'/api/categorias/{cat_id}', json={
+        'nombre': 'CatTestEditada',
+        'descripcion': 'DescActualizada'
+    })
+    assert resp_editar.status_code == 200
+    assert resp_editar.get_json()['success'] is True
+
+    # Verificar que se actualizó en la BD
+    resp_listar2 = client.get('/api/categorias')
+    assert resp_listar2.status_code == 200
+    data2 = resp_listar2.get_json()
+    assert any(c['id'] == cat_id and c['nombre'] == 'CatTestEditada' and c['descripcion'] == 'DescActualizada' for c in data2)
+
+    # 4. Eliminar Categoría (DELETE)
     resp_eliminar = client.delete(f'/api/categorias/{cat_id}')
     assert resp_eliminar.status_code == 200
     assert resp_eliminar.get_json()['success'] is True
+
+    # Verificar eliminación
+    resp_listar3 = client.get('/api/categorias')
+    assert not any(c['id'] == cat_id for c in resp_listar3.get_json())
 
 def test_crud_productos(client, admin_user):
     client.post('/login', data={'correo': admin_user['email'], 'contrasena': admin_user['password']})

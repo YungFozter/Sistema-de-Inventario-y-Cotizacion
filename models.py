@@ -385,6 +385,11 @@ def guardar_importacion_pdf(nombre_importacion, items, usuario_id=None):
         importacion_id = cursor.lastrowid
 
         for item in items:
+            try:
+                pu = float(item.get('precio_unitario', 0.0) or 0.0)
+            except (ValueError, TypeError):
+                pu = 0.0
+
             cursor.execute('''
                 INSERT INTO items_importados_temp (importacion_id, codigo, descripcion, marca, um, precio_unitario)
                 VALUES (?, ?, ?, ?, ?, ?)
@@ -394,7 +399,7 @@ def guardar_importacion_pdf(nombre_importacion, items, usuario_id=None):
                 item.get('descripcion', ''),
                 item.get('marca', ''),
                 item.get('um', 'Pza'),
-                float(item.get('precio_unitario', 0.0) or 0.0)
+                pu
             ))
 
         conexion.commit()

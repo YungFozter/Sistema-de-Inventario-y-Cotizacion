@@ -29,6 +29,8 @@ from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter
 from PIL import Image
 import logging
+logging.getLogger("PyPDF2").setLevel(logging.ERROR)
+logging.getLogger("pypdf").setLevel(logging.ERROR)
 
 @app.template_filter('date')
 def format_date(value, format='%d/%m/%Y'):
@@ -220,13 +222,16 @@ def aplicar_fondos_por_pagina(pdf_bytes):
             
             # Combinar fondo con contenido
             try:
-                background_page.merge_page(page)
-                pdf_writer.add_page(background_page)
+                page.merge_page(background_page)
+                pdf_writer.add_page(page)
                 app.logger.info(f"✓ Página {page_num + 1} procesada y agregada exitosamente")
             except Exception as e:
-                app.logger.error(f"ERROR al combinar página {page_num + 1}: {e}")
-                # Si hay error, agregar la página original sin fondo
-                pdf_writer.add_page(page)
+                try:
+                    background_page.merge_page(page)
+                    pdf_writer.add_page(background_page)
+                except Exception as e2:
+                    app.logger.error(f"ERROR al combinar página {page_num + 1}: {e2}")
+                    pdf_writer.add_page(page)
         
         app.logger.info("Generando PDF final...")
         

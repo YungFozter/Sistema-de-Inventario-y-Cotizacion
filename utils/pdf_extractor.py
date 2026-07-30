@@ -119,14 +119,29 @@ class PDFProductExtractor:
         raw_products = []
 
         for b in blocks:
-            full_text = ' '.join(b)
-            
-            m = re.match(r'^(?:\d{1,3}[\.\s]+)?([A-Za-z0-9\-\.\_\/]{2,25})\s+(.+)$', full_text)
-            if not m:
-                continue
+            # b es una lista de líneas pertenecientes al mismo bloque/producto
+            main_line = b[0]
+            extra_lines = b[1:] if len(b) > 1 else []
 
-            cod, rest = m.groups()
-            
+            # Extraer sufijo de descripción envuelta (líneas secundarias que no contengan metadatos o precios)
+            extra_desc_clean = []
+            for el in extra_lines:
+                if not cls._is_document_metadata(el) and not re.search(r'bs|usd|\$|\d+[\.,]\d{2}', el.lower()):
+                    extra_desc_clean.append(el)
+            extra_desc_suffix = (" " + " ".join(extra_desc_clean)) if extra_desc_clean else ""
+
+            m = re.match(r'^(?:\d{1,3}[\.\s]+)?([A-Za-z0-9\-\.\_\/]{2,25})\s+(.+)$', main_line)
+            if not m:
+                # Intentar con full_text si main_line sola no hizo match
+                full_text = ' '.join(b)
+                m = re.match(r'^(?:\d{1,3}[\.\s]+)?([A-Za-z0-9\-\.\_\/]{2,25})\s+(.+)$', full_text)
+                if not m:
+                    continue
+                cod, rest = m.groups()
+                extra_desc_suffix = ""
+            else:
+                cod, rest = m.groups()
+
             if cod.lower() in ['banco', 'son', 'subtotal', 'total', 'cliente', 'nit']:
                 continue
 
@@ -166,17 +181,17 @@ class PDFProductExtractor:
 
                 if len(before_um) >= 2:
                     marca_val = before_um[-1]
-                    desc_val = " ".join(before_um[:-1])
+                    desc_val = " ".join(before_um[:-1]) + extra_desc_suffix
                 elif len(before_um) == 1:
-                    desc_val = before_um[0]
+                    desc_val = before_um[0] + extra_desc_suffix
                     marca_val = ""
                 else:
-                    desc_val = ""
+                    desc_val = extra_desc_suffix.strip()
                     marca_val = ""
 
                 raw_products.append({
                     'codigo': cod,
-                    'descripcion': desc_val,
+                    'descripcion': desc_val.strip(),
                     'marca': marca_val,
                     'um': um_val,
                     'cantidad': cantidad_val,
@@ -263,10 +278,22 @@ class PDFProductExtractor:
             lines = []
             with pdfplumber.open(pdf_file) as pdf:
                 for page in pdf.pages:
-                    text = page.extract_text(layout=False) or ""
-                    for l in text.split('\n'):
-                        if l.strip():
-                            lines.append(l.strip())
+                    # 1. Probar extracción estructurada de tablas si existen (preserva celdas multilínea uniendo con espacios)
+                    tables = page.extract_tables()
+                    if tables:
+                        for table in tables:
+                            for row in table:
+                                if not row:
+                                    continue
+                                cleaned_cells = [re.sub(r'\s+', ' ', str(cell).strip()) for cell in row if cell is not None and str(cell).strip()]
+                                if cleaned_cells:
+                                    lines.append(" ".join(cleaned_cells))
+                    else:
+                        # 2. Si no hay tablas vectoriales, usar extract_text
+                        text = page.extract_text(layout=False) or ""
+                        for l in text.split('\n'):
+                            if l.strip():
+                                lines.append(l.strip())
 
             return cls.parse_raw_lines(lines, consolidar_duplicados=consolidar_duplicados)
         except Exception as e:

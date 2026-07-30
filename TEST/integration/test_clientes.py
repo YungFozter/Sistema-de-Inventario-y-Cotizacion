@@ -86,3 +86,22 @@ def test_codigo_cliente_sin_saltos_ni_duplicados(client, admin_user):
     num4 = int(c4.split('-')[1])
     assert num4 == num2
     conn.close()
+
+def test_nit_y_telefono_opcionales_default_sa(client, admin_user):
+    client.post('/login', data={'correo': admin_user['email'], 'contrasena': admin_user['password']})
+
+    # Crear cliente dejando nit y telefono en blanco (deben guardarse como 'S/A')
+    resp = client.post('/clientes', data={
+        'razon_social': 'Cliente Sin Nit Ni Telefono',
+        'nit': '',
+        'telefono': ''
+    })
+    assert resp.status_code == 302
+
+    conn = get_db_connection()
+    c = conn.execute("SELECT nit, telefono FROM clientes WHERE nombre = ?", ('Cliente Sin Nit Ni Telefono',)).fetchone()
+    conn.close()
+
+    assert c is not None
+    assert c['nit'] == 'S/A'
+    assert c['telefono'] == 'S/A'

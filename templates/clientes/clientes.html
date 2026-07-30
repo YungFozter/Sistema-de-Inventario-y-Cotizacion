@@ -65,16 +65,16 @@
                     <small class="text-muted">Secuencial automático (reutiliza huecos borrados).</small>
                 </div>
 
-                <!-- Teléfono/Contacto -->
+                <!-- Teléfono/Contacto (Opcional) -->
                 <div class="col-md-4">
                     <label class="form-label fw-semibold text-dark">
-                        <i class="bi bi-telephone-fill text-primary me-1"></i> Teléfono / Contacto <span class="text-danger">*</span>
+                        <i class="bi bi-telephone-fill text-primary me-1"></i> Teléfono / Contacto <small class="text-muted">(Opcional)</small>
                     </label>
                     <div class="input-group">
                         <span class="input-group-text bg-white border-end-0"><i class="bi bi-telephone text-muted"></i></span>
-                        <input type="tel" name="telefono" class="form-control border-start-0 shadow-none" placeholder="Ej: 70012345" required pattern="[0-9]{7,8}">
+                        <input type="tel" name="telefono" class="form-control border-start-0 shadow-none" placeholder="Dejar en blanco para S/A">
                     </div>
-                    <div class="invalid-feedback">Ingrese un teléfono válido (7-8 dígitos).</div>
+                    <small class="text-muted d-block mt-1">Si se deja en blanco se registrará como <strong>S/A (Sin Asignar)</strong>.</small>
                 </div>
 
                 <!-- Tipo de Cliente -->

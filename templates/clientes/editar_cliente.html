@@ -35,9 +35,9 @@
                     </div>
 
                     <div class="mb-3">
-                        <label for="telefono" class="form-label">Teléfono/Contacto</label>
+                        <label for="telefono" class="form-label">Teléfono/Contacto <small class="text-muted">(Opcional)</small></label>
                         <input type="text" class="form-control" id="telefono" name="telefono"
-                               value="{{ cliente[4] }}">
+                               value="{{ cliente[4] if cliente[4] and cliente[4] != 'S/A' else '' }}" placeholder="S/A">
                     </div>
                 </div>
 

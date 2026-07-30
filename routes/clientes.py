@@ -70,6 +70,8 @@ def register_routes(app):
                     nit = 'S/A'
                 codigo_cliente = request.form.get('codigo_cliente', '').strip()
                 telefono = request.form.get('telefono', '').strip()
+                if not telefono:
+                    telefono = 'S/A'
                 referencia = request.form.get('referencia', '').strip()
                 tipo_cliente = request.form.get('tipo_cliente', 'normal').strip()
 
@@ -214,6 +216,8 @@ def register_routes(app):
                 nit = 'S/A'
             codigo_cliente = request.form.get('codigo_cliente', '').strip()
             telefono = request.form.get('telefono', '').strip()
+            if not telefono:
+                telefono = 'S/A'
             referencia = request.form.get('referencia', '').strip()
 
             if not codigo_cliente:

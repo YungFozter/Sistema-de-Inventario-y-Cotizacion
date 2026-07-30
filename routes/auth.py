@@ -173,10 +173,20 @@ def register_routes(app):
                 # Generar nuevo token único de sesión activa
                 session_token = uuid.uuid4().hex
 
-                # Actualizar ultima_conexion y session_token
-                cursor.execute('UPDATE clientes SET ultima_conexion = CURRENT_TIMESTAMP, session_token = ? WHERE id = ?', (session_token, cliente['id']))
-                conexion.commit()
-                conexion.close()
+                # Actualizar ultima_conexion y session_token de forma segura
+                try:
+                    cursor.execute('UPDATE clientes SET ultima_conexion = CURRENT_TIMESTAMP, session_token = ? WHERE id = ?', (session_token, cliente['id']))
+                    conexion.commit()
+                except Exception as err_tok:
+                    print(f"[WARN] Error actualizando session_token: {err_tok}")
+                    conexion.rollback()
+                    try:
+                        cursor.execute('UPDATE clientes SET ultima_conexion = CURRENT_TIMESTAMP WHERE id = ?', (cliente['id'],))
+                        conexion.commit()
+                    except Exception:
+                        pass
+                finally:
+                    conexion.close()
 
                 # Guardar sesión
                 session['user_id'] = cliente['id']

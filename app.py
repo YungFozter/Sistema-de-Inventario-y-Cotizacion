@@ -3,7 +3,7 @@ import os
 import sqlite3
 from datetime import datetime
 from db_wrapper import get_db_connection
-from models import crear_tablas
+from models import crear_tablas, migrar_columnas_nuevas_clientes
 
 app = Flask(__name__)
 app.secret_key = 'tu_clave_secreta_aqui'
@@ -19,6 +19,7 @@ def inicializar_base_datos():
     
     conexion = get_db_connection()
     crear_tablas()
+    migrar_columnas_nuevas_clientes()
     conexion.close()
 
 inicializar_base_datos()

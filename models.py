@@ -87,6 +87,12 @@ def crear_tablas():
             ){";" if is_postgres else ""}
         ''')
 
+        # Limpiar espacios en blanco y tabulaciones en el nombre de empresa de productos
+        try:
+            cursor.execute("UPDATE productos SET empresa = TRIM(REPLACE(empresa, char(9), '')) WHERE empresa IS NOT NULL")
+        except Exception:
+            pass
+
         # Tabla de cotizaciones
         cursor.execute(f'''
             CREATE TABLE IF NOT EXISTS cotizaciones (

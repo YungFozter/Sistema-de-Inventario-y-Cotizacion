@@ -17,14 +17,43 @@
                 <small class="text-muted">Filtra el catálogo para ver aisladamente los productos de cada cliente Admin.</small>
             </div>
         </div>
-        <form method="get" action="/productos" class="d-flex align-items-center gap-2">
+        
+        <form id="formEmpresaSuperadmin" method="get" action="/productos" class="d-flex align-items-center gap-2">
             <input type="hidden" name="tab" value="{{ tab_activa }}">
-            <select name="empresa" class="form-select border-primary fw-bold text-dark shadow-sm" onchange="this.form.submit()" style="min-width: 280px;">
-                <option value="">🏢 Todas las Empresas (Vista Global)</option>
-                {% for emp in lista_empresas %}
-                <option value="{{ emp }}" {% if filtros.empresa == emp %}selected{% endif %}>🏢 {{ emp }}</option>
-                {% endfor %}
-            </select>
+            <input type="hidden" name="empresa" id="empresaSelectInput" value="{{ filtros.empresa }}">
+
+            <div class="dropdown">
+                <button class="btn btn-white border-primary dropdown-toggle fw-bold text-dark shadow-sm bg-white d-flex align-items-center justify-content-between" 
+                        type="button" id="dropdownEmpresaBtn" data-bs-toggle="dropdown" aria-expanded="false" style="min-width: 290px; max-width: 380px;">
+                    <span class="text-truncate me-2">
+                        <i class="bi bi-building text-primary me-2"></i>
+                        {% if filtros.empresa %}{{ filtros.empresa }}{% else %}Todas las Empresas (Vista Global){% endif %}
+                    </span>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end shadow-lg rounded-3 border-primary border-opacity-25 py-2" 
+                    aria-labelledby="dropdownEmpresaBtn" 
+                    style="max-height: 340px; overflow-y: auto; min-width: 300px;">
+                    
+                    <li>
+                        <a class="dropdown-item py-2 fw-bold {% if not filtros.empresa %}active bg-primary{% endif %}" 
+                           href="javascript:void(0)" onclick="seleccionarEmpresaSuperadmin('')">
+                            🏢 Todas las Empresas (Vista Global)
+                        </a>
+                    </li>
+                    <li><hr class="dropdown-divider"></li>
+
+                    {% for emp in lista_empresas %}
+                    <li>
+                        <a class="dropdown-item py-2 d-flex align-items-center justify-content-between {% if filtros.empresa == emp %}active bg-primary text-white{% endif %}" 
+                           href="javascript:void(0)" onclick="seleccionarEmpresaSuperadmin('{{ emp|e }}')">
+                            <span>🏢 {{ emp }}</span>
+                            {% if filtros.empresa == emp %}<i class="bi bi-check-lg ms-2"></i>{% endif %}
+                        </a>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+
             {% if filtros.empresa %}
             <a href="/productos" class="btn btn-outline-danger shadow-sm" title="Quitar filtro de empresa">
                 <i class="bi bi-x-circle-fill"></i> Ver Todos
@@ -33,6 +62,13 @@
         </form>
     </div>
 </div>
+
+<script>
+function seleccionarEmpresaSuperadmin(valor) {
+    document.getElementById('empresaSelectInput').value = valor;
+    document.getElementById('formEmpresaSuperadmin').submit();
+}
+</script>
 {% endif %}
 
 <!-- Formulario de Búsqueda -->

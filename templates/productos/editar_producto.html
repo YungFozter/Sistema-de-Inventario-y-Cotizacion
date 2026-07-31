@@ -54,7 +54,7 @@
                             <option value="">Sin categoría</option>
                             {% for categoria in categorias %}
                                 <option value="{{ categoria[0] }}" 
-                                    {% if producto|length > 11 and producto[11] == categoria[0] %}selected{% endif %}>
+                                    {% if producto['categoria_id'] == categoria[0] %}selected{% endif %}>
                                     {{ categoria[1] }}
                                 </option>
                             {% endfor %}

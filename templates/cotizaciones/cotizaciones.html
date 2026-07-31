@@ -222,7 +222,8 @@
                 this.dataset.productoId,
                 this.dataset.productoCodigo,
                 this.dataset.productoDescripcion,
-                this.dataset.productoPrecio
+                this.dataset.productoPrecio,
+                this.dataset.stockDisponible
               );
             });
           });
@@ -366,7 +367,8 @@
                   this.dataset.productoId,
                   this.dataset.productoCodigo,
                   this.dataset.productoDescripcion,
-                  this.dataset.productoPrecio
+                  this.dataset.productoPrecio,
+                  this.dataset.stockDisponible
                 );
               });
             });
@@ -570,17 +572,31 @@
   }
 
   // Función para agregar producto
-  function agregarAlCarrito(id, codigo, descripcion, precio) {
-    let cantidad = prompt(`¿Cuántas unidades de ${codigo} desea agregar?`, "1");
+  function agregarAlCarrito(id, codigo, descripcion, precio, stockDisponible) {
+    let cantidad = prompt(`¿Cuántas unidades de ${codigo} desea agregar? (Disp: ${stockDisponible})`, "1");
     if (cantidad === null) return;
     cantidad = parseInt(cantidad);
     if (isNaN(cantidad) || cantidad < 1) {
       alert('Cantidad inválida');
       return;
     }
-
-    // Verificar si ya existe el producto
+    
+    // Validar stock disponible
+    stockDisponible = parseFloat(stockDisponible);
+    const isAdmin = {{ 'true' if session.get('user_rol') == 'superadmin' else 'false' }};
+    
+    // Obtener cantidad que ya está en el carrito
+    let cantidadEnCarrito = 0;
     const existe = productosSeleccionados.find(p => p.id === id);
+    if (existe) {
+      cantidadEnCarrito = existe.cantidad;
+    }
+    
+    if (!isAdmin && (cantidad + cantidadEnCarrito) > stockDisponible) {
+      alert(`No puedes agregar esa cantidad. Stock disponible: ${stockDisponible}, Ya en carrito: ${cantidadEnCarrito}`);
+      return;
+    }
+
     if (existe) {
       existe.cantidad += cantidad;
       actualizarProductoEnDOM(existe);
@@ -772,7 +788,8 @@
           this.dataset.productoId,
           this.dataset.productoCodigo,
           this.dataset.productoDescripcion,
-          this.dataset.productoPrecio
+          this.dataset.productoPrecio,
+          this.dataset.stockDisponible
         );
       });
     });

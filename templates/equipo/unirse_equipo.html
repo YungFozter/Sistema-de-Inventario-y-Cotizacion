@@ -1,0 +1,93 @@
+{% extends 'shared/layout.html' %}
+
+{% block titulo %}Unirse al Equipo{% endblock %}
+
+{% block contenido %}
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-md-7 col-lg-6">
+            <div class="card shadow-lg border-0 rounded-4">
+                <div class="card-header bg-primary text-white text-center py-4 rounded-top-4">
+                    <i class="bi bi-people-fill display-3 d-block mb-2"></i>
+                    <h3 class="fw-bold mb-0">Invitación al Equipo</h3>
+                </div>
+                <div class="card-body p-4 text-center">
+                    {% if invitacion_valida %}
+                        <div class="mb-4">
+                            <h4 class="fw-bold text-dark mb-2">{{ admin_nombre }}</h4>
+                            <p class="text-muted fs-6">Te ha invitado a formar parte de su equipo de trabajo y fuerza de ventas en la plataforma.</p>
+                            <span class="badge bg-info text-white px-3 py-2 fs-6 rounded-pill">
+                                <i class="bi bi-shield-check me-1"></i>Organización de {{ admin_nombre }}
+                            </span>
+                        </div>
+
+                        <hr class="my-4">
+
+                        {% if session.get('user_id') %}
+                            {% if esta_vinculado %}
+                                <div class="alert alert-success border-0 shadow-sm mb-4">
+                                    <i class="bi bi-check-circle-fill me-2 fs-5"></i>
+                                    <strong>¡Ya perteneces a este equipo!</strong>
+                                    <p class="small mb-0 mt-1">Puedes acceder directamente al Chat General y Pizarra de Tareas.</p>
+                                </div>
+                                <a href="{{ url_for('vista_equipo') }}" class="btn btn-success btn-lg w-100 fw-bold">
+                                    <i class="bi bi-kanban me-2"></i>Ir al Módulo de Equipo
+                                </a>
+                            {% elif solicitud_existente %}
+                                <div class="alert alert-warning border-0 shadow-sm mb-4 text-start">
+                                    <div class="d-flex align-items-center mb-2">
+                                        <i class="bi bi-clock-history me-2 fs-4 text-warning"></i>
+                                        <h6 class="fw-bold mb-0">Solicitud Enviada (Pendiente)</h6>
+                                    </div>
+                                    <p class="small mb-0">
+                                        Tu solicitud de ingreso fue enviada el <strong>{{ solicitud_existente.fecha_solicitud }}</strong>.
+                                        El Administrador <strong>{{ admin_nombre }}</strong> debe aprobar tu acceso desde su panel.
+                                    </p>
+                                </div>
+                                <a href="{{ url_for('gestion_cotizaciones') }}" class="btn btn-outline-secondary w-100">
+                                    Volver al Inicio
+                                </a>
+                            {% else %}
+                                <div class="alert alert-light border shadow-sm mb-4 text-start">
+                                    <p class="small mb-1 text-muted">Iniciaste sesión como:</p>
+                                    <h6 class="fw-bold mb-0 text-primary">{{ session.get('user_nombre') }} ({{ session.get('user_email') }})</h6>
+                                </div>
+
+                                <form action="{{ url_for('enviar_solicitud_ingreso') }}" method="POST">
+                                    <input type="hidden" name="token" value="{{ token }}">
+                                    <button type="submit" class="btn btn-primary btn-lg w-100 fw-bold shadow">
+                                        <i class="bi bi-send-fill me-2"></i>Enviar Solicitud de Ingreso
+                                    </button>
+                                </form>
+                            {% endif %}
+                        {% else %}
+                            <div class="alert alert-info border-0 shadow-sm mb-4 text-start">
+                                <i class="bi bi-info-circle-fill me-2"></i>
+                                Debes iniciar sesión o registrarte para enviar tu solicitud de ingreso.
+                            </div>
+                            <div class="d-grid gap-2">
+                                <a href="{{ url_for('login') }}?next={{ request.full_path }}" class="btn btn-primary btn-lg fw-bold">
+                                    <i class="bi bi-box-arrow-in-right me-2"></i>Iniciar Sesión
+                                </a>
+                                <a href="{{ url_for('registro') }}" class="btn btn-outline-secondary">
+                                    Crear Cuenta Nueva
+                                </a>
+                            </div>
+                        {% endif %}
+
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="bi bi-exclamation-triangle-fill text-danger display-1 d-block mb-3"></i>
+                            <h4 class="fw-bold text-danger mb-2">Enlace de Invitación Inválido o Expirado</h4>
+                            <p class="text-muted mb-4">El código de invitación no existe, ha caducado o ya superó su límite de usos.</p>
+                            <a href="{{ url_for('gestion_cotizaciones') }}" class="btn btn-secondary">
+                                Volver al Inicio
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

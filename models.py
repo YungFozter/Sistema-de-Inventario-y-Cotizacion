@@ -713,6 +713,31 @@ def migrar_tablas_equipo():
             ){";" if is_postgres else ""}
         ''')
 
+        cursor.execute(f'''
+            CREATE TABLE IF NOT EXISTS equipo_invitaciones (
+                id {"SERIAL PRIMARY KEY" if is_postgres else "INTEGER PRIMARY KEY AUTOINCREMENT"},
+                admin_id INTEGER NOT NULL,
+                token TEXT NOT NULL UNIQUE,
+                tipo_expiracion TEXT DEFAULT 'uso_unico',
+                usos_restantes INTEGER DEFAULT 1,
+                fecha_expiracion TIMESTAMP,
+                fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (admin_id) REFERENCES clientes(id)
+            ){";" if is_postgres else ""}
+        ''')
+
+        cursor.execute(f'''
+            CREATE TABLE IF NOT EXISTS equipo_solicitudes (
+                id {"SERIAL PRIMARY KEY" if is_postgres else "INTEGER PRIMARY KEY AUTOINCREMENT"},
+                admin_id INTEGER NOT NULL,
+                empleado_id INTEGER NOT NULL,
+                estado TEXT DEFAULT 'pendiente',
+                fecha_solicitud TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (admin_id) REFERENCES clientes(id),
+                FOREIGN KEY (empleado_id) REFERENCES clientes(id)
+            ){";" if is_postgres else ""}
+        ''')
+
         conexion.commit()
     except Exception as e:
         print(f"[ERROR] Error al migrar tablas de equipo: {e}")

@@ -3,9 +3,12 @@
 {% block titulo %}Módulo de Equipo & Pizarra de Tareas{% endblock %}
 
 {% block contenido %}
+<!-- Incluir biblioteca ligera para QR en el cliente -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
 <div class="container-fluid mt-3 px-4">
     <!-- Encabezado del Módulo -->
-    <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+    <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom flex-wrap gap-2">
         <div>
             <h2 class="fw-bold text-primary mb-1">
                 <i class="bi bi-kanban me-2"></i>Equipo, Chat & Pizarra de Tareas
@@ -13,13 +16,65 @@
             <p class="text-muted mb-0">Coordinación de trabajo, anuncios generales y seguimiento de tareas en tiempo real.</p>
         </div>
         {% if session.user_rol in ['admin', 'superadmin'] %}
-        <div>
+        <div class="d-flex gap-2 flex-wrap">
+            <button class="btn btn-success shadow-sm fw-bold" data-bs-toggle="modal" data-bs-target="#modalWhatsApp">
+                <i class="bi bi-whatsapp me-1"></i> Invitar por WhatsApp
+            </button>
+            <button class="btn btn-dark shadow-sm fw-bold" data-bs-toggle="modal" data-bs-target="#modalQR" onclick="generarQRModal()">
+                <i class="bi bi-qr-code me-1"></i> Generar QR de Invitación
+            </button>
             <button class="btn btn-primary shadow-sm fw-bold" data-bs-toggle="modal" data-bs-target="#modalNuevaTarea">
                 <i class="bi bi-plus-circle me-1"></i> Nueva Tarea
             </button>
         </div>
         {% endif %}
     </div>
+
+    <!-- Sección de Solicitudes de Ingreso Pendientes (Solo Admin) -->
+    {% if session.user_rol in ['admin', 'superadmin'] and solicitudes_pendientes %}
+    <div class="alert alert-warning border-0 shadow-sm rounded-3 mb-4 p-3 border-start border-4 border-warning">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+            <h5 class="fw-bold mb-0 text-dark">
+                <i class="bi bi-person-exclamation me-2 text-warning"></i>Solicitudes de Ingreso Pendientes
+            </h5>
+            <span class="badge bg-warning text-dark fs-6">{{ solicitudes_pendientes|length }} Pendiente(s)</span>
+        </div>
+        <p class="small text-muted mb-3">Los siguientes empleados abrieron tu enlace/QR de invitación y han solicitado unirse a tu equipo:</p>
+        
+        <div class="row g-3">
+            {% for sol in solicitudes_pendientes %}
+            <div class="col-md-6 col-lg-4" id="solitud-card-{{ sol.id }}">
+                <div class="card border-0 shadow-sm bg-white rounded-3">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center mb-2">
+                            <div class="avatar bg-primary bg-opacity-10 text-primary rounded-circle p-2 me-2">
+                                <i class="bi bi-person-fill fs-4"></i>
+                            </div>
+                            <div>
+                                <h6 class="fw-bold mb-0 text-dark">{{ sol.empleado_nombre }}</h6>
+                                <small class="text-muted d-block">{{ sol.empleado_correo }}</small>
+                            </div>
+                        </div>
+                        <div class="small text-muted mb-3">
+                            <i class="bi bi-telephone me-1"></i>{{ sol.empleado_telefono or 'Sin teléfono' }}
+                            <br>
+                            <i class="bi bi-clock me-1"></i>Solicitado el {{ sol.fecha_solicitud }}
+                        </div>
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-success btn-sm w-100 fw-bold" onclick="aprobarSolicitud({{ sol.id }})">
+                                <i class="bi bi-check-circle-fill me-1"></i> Aprobar
+                            </button>
+                            <button class="btn btn-outline-danger btn-sm w-100" onclick="rechazarSolicitud({{ sol.id }})">
+                                <i class="bi bi-x-circle me-1"></i> Rechazar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
 
     <div class="row g-4">
         <!-- COLUMNA IZQUIERDA: Pizarra de Tareas -->
@@ -284,16 +339,210 @@
         </div>
     </div>
 </div>
+
+<!-- Modal Invitar por WhatsApp -->
+<div class="modal fade" id="modalWhatsApp" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title fw-bold"><i class="bi bi-whatsapp me-2"></i>Invitar Empleado por WhatsApp</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label for="wa-telefono" class="form-label fw-bold">Número de Teléfono del Empleado <span class="text-danger">*</span></label>
+                    <input type="tel" class="form-control" id="wa-telefono" placeholder="Ej: 59170000000 o 70000000" required>
+                    <small class="form-text text-muted">Ingresa el número con el código de país o directo.</small>
+                </div>
+                <div class="mb-3">
+                    <label for="wa-expiracion" class="form-label fw-bold">Validez del Enlace</label>
+                    <select class="form-select" id="wa-expiracion">
+                        <option value="uso_unico" selected>Uso Único (Caduca al usar 1 vez)</option>
+                        <option value="1_dia">1 Día</option>
+                        <option value="1_semana">1 Semana</option>
+                        <option value="1_mes">1 Mes</option>
+                        <option value="3_meses">3 Meses</option>
+                        <option value="6_meses">6 Meses</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-success fw-bold" onclick="generarYEnviarWhatsApp()">
+                    <i class="bi bi-send-fill me-1"></i> Abrir WhatsApp
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Generar Código QR -->
+<div class="modal fade" id="modalQR" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog text-center">
+        <div class="modal-content">
+            <div class="modal-header bg-dark text-white">
+                <h5 class="modal-title fw-bold"><i class="bi bi-qr-code me-2"></i>Código QR de Invitación al Equipo</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3 text-start">
+                    <label for="qr-expiracion" class="form-label fw-bold">Validez del Código QR</label>
+                    <select class="form-select" id="qr-expiracion" onchange="generarQRModal()">
+                        <option value="uso_unico">Uso Único (1 Solo uso)</option>
+                        <option value="1_dia">1 Día</option>
+                        <option value="1_semana" selected>1 Semana</option>
+                        <option value="1_mes">1 Mes</option>
+                        <option value="3_meses">3 Meses</option>
+                        <option value="6_meses">6 Meses</option>
+                    </select>
+                </div>
+
+                <div class="my-4 d-flex justify-content-center">
+                    <div id="qr-code-container" class="p-3 bg-white border rounded-3 shadow-sm"></div>
+                </div>
+
+                <div class="input-group mb-3">
+                    <input type="text" class="form-control text-center" id="qr-link-text" readonly>
+                </div>
+            </div>
+            <div class="modal-footer justify-content-center flex-wrap gap-2">
+                <button type="button" class="btn btn-outline-primary" onclick="copiarLinkQR()">
+                    <i class="bi bi-clipboard me-1"></i> Copiar Enlace
+                </button>
+                <button type="button" class="btn btn-primary" onclick="descargarImagenQR()">
+                    <i class="bi bi-download me-1"></i> Descargar QR (PNG)
+                </button>
+                <button type="button" class="btn btn-success" onclick="compartirQRWhatsApp()">
+                    <i class="bi bi-whatsapp me-1"></i> Compartir
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
 {% endif %}
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Scroll al final del chat al cargar
     const chatBox = document.getElementById('box-chat-mensajes');
     if (chatBox) {
         chatBox.scrollTop = chatBox.scrollHeight;
     }
 });
+
+let currentQRLink = "";
+
+function generarYEnviarWhatsApp() {
+    const tel = document.getElementById('wa-telefono').value.trim();
+    const exp = document.getElementById('wa-expiracion').value;
+    if (!tel) {
+        alert('Por favor ingresa un número de teléfono válido.');
+        return;
+    }
+
+    const cleanTel = tel.replace(/[^0-9]/g, '');
+
+    fetch('/equipo/invitaciones/crear', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({ 'tipo_expiracion': exp })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            const mensajeWa = `Hola! Te invito a unirte a nuestro equipo de trabajo en el sistema de cotizaciones. Haz clic en el enlace para ingresar: ${data.link_invitacion}`;
+            const waUrl = `https://wa.me/${cleanTel}?text=${encodeURIComponent(mensajeWa)}`;
+            window.open(waUrl, '_blank');
+            bootstrap.Modal.getInstance(document.getElementById('modalWhatsApp')).hide();
+        } else {
+            alert('Error al generar la invitación: ' + data.message);
+        }
+    });
+}
+
+function generarQRModal() {
+    const exp = document.getElementById('qr-expiracion').value;
+    const qrContainer = document.getElementById('qr-code-container');
+    qrContainer.innerHTML = '<div class="spinner-border text-primary" role="status"></div>';
+
+    fetch('/equipo/invitaciones/crear', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({ 'tipo_expiracion': exp })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            currentQRLink = data.link_invitacion;
+            document.getElementById('qr-link-text').value = data.link_invitacion;
+            qrContainer.innerHTML = '';
+            new QRCode(qrContainer, {
+                text: data.link_invitacion,
+                width: 200,
+                height: 200,
+                colorDark : "#0d6efd",
+                colorLight : "#ffffff",
+                correctLevel : QRCode.CorrectLevel.H
+            });
+        } else {
+            alert('Error al generar QR: ' + data.message);
+        }
+    });
+}
+
+function copiarLinkQR() {
+    if (!currentQRLink) return;
+    navigator.clipboard.writeText(currentQRLink).then(() => {
+        alert('¡Enlace de invitación copiado al portapapeles!');
+    });
+}
+
+function descargarImagenQR() {
+    const img = document.querySelector('#qr-code-container img');
+    if (!img) return;
+    const a = document.createElement('a');
+    a.href = img.src;
+    a.download = 'invitacion_equipo_qr.png';
+    a.click();
+}
+
+function compartirQRWhatsApp() {
+    if (!currentQRLink) return;
+    const tel = prompt('Ingresa el número de WhatsApp al que deseas enviar la invitación:');
+    if (!tel) return;
+    const cleanTel = tel.replace(/[^0-9]/g, '');
+    const mensajeWa = `Hola! Te invito a unirte a nuestro equipo de trabajo en la plataforma. Abre este enlace: ${currentQRLink}`;
+    window.open(`https://wa.me/${cleanTel}?text=${encodeURIComponent(mensajeWa)}`, '_blank');
+}
+
+function aprobarSolicitud(id) {
+    if (!confirm('¿Aprobar solicitud e ingresar al empleado a tu equipo?')) return;
+
+    fetch(`/equipo/solicitudes/${id}/aprobar`, { method: 'POST' })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            alert(data.message);
+            location.reload();
+        } else {
+            alert('Error: ' + data.message);
+        }
+    });
+}
+
+function rechazarSolicitud(id) {
+    if (!confirm('¿Rechazar esta solicitud de ingreso?')) return;
+
+    fetch(`/equipo/solicitudes/${id}/rechazar`, { method: 'POST' })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            alert(data.message);
+            location.reload();
+        } else {
+            alert('Error: ' + data.message);
+        }
+    });
+}
 
 function enviarMensaje(e) {
     e.preventDefault();

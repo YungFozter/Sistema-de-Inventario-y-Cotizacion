@@ -240,29 +240,29 @@ function seleccionarEmpresaSuperadmin(valor) {
           <tbody>
             {% for p in productos_importados %}
               <tr>
-                <td data-label="Empresa"><span class="badge bg-success bg-opacity-75">{{ p[1] }}</span></td>
-                <td data-label="Código"><strong>{{ p[2] }}</strong></td>
-                <td data-label="Descripción">{{ p[3] }}</td>
-                <td data-label="Marca">{{ p[4] }}</td>
+                <td data-label="Empresa">{{ p['empresa'] }}</td>
+                <td data-label="Código"><strong>{{ p['codigo'] }}</strong></td>
+                <td data-label="Descripción">{{ p['descripcion'] }}</td>
+                <td data-label="Marca">{{ p['marca'] }}</td>
                 <td data-label="Categoría">
-                  {% if p|length > 14 and p[14] %}
-                    <span class="badge bg-info">{{ p[14] }}</span>
-                  {% elif p|length > 10 and p[10] %}
-                    <span class="badge bg-info">{{ p[10] }}</span>
+                  {% if p['categoria_nombre'] %}
+                    <span class="badge bg-info">{{ p['categoria_nombre'] }}</span>
+                  {% elif p['categoria'] %}
+                    <span class="badge bg-info">{{ p['categoria'] }}</span>
                   {% else %}
                     <span class="text-muted">Sin categoría</span>
                   {% endif %}
                 </td>
-                <td data-label="TM">{{ p[5] }}</td>
-                <td data-label="UM">{{ p[6] }}</td>
-                <td data-label="Cantidad"><span class="badge bg-secondary">{{ p[7] }}</span></td>
-                <td data-label="P/Unitario">Bs {{ "%.2f"|format(p[8]) }}</td>
-                <td data-label="P/Total">Bs {{ "%.2f"|format(p[9]) }}</td>
+                <td data-label="TM">{{ p['tm'] }}</td>
+                <td data-label="UM">{{ p['um'] }}</td>
+                <td data-label="Cantidad">{{ p['cantidad'] }}</td>
+                <td data-label="P/Unitario">Bs {{ "%.2f"|format(p['precio_unitario']) if p['precio_unitario'] is not none else '0.00' }}</td>
+                <td data-label="P/Total">Bs {{ "%.2f"|format(p['precio_total']) if p['precio_total'] is not none else '0.00' }}</td>
                 <td data-label="Acciones">
-                  <a href="/productos/editar/{{ p[0] }}?tab=importados&page_imp={{ pagination_imp.page }}&empresa={{ filtros.empresa }}&codigo={{ filtros.codigo }}&descripcion={{ filtros.descripcion }}&marca={{ filtros.marca }}&categoria={{ filtros.categoria }}" class="btn btn-sm btn-warning" title="Editar">
+                  <a href="/productos/editar/{{ p['id'] }}?tab=importados&page_imp={{ pagination_imp.page }}&per_page={{ pagination_imp.per_page }}&empresa={{ filtros.empresa }}&codigo={{ filtros.codigo }}&descripcion={{ filtros.descripcion }}&marca={{ filtros.marca }}&categoria={{ filtros.categoria }}" class="btn btn-sm btn-warning" title="Editar">
                       <i class="bi bi-pencil"></i>
                   </a>
-                  <a href="/productos/eliminar/{{ p[0] }}" class="btn btn-sm btn-danger"
+                  <a href="/productos/eliminar/{{ p['id'] }}" class="btn btn-sm btn-danger"
                      onclick="return confirm('¿Eliminar este producto importado?')" title="Eliminar">
                       <i class="bi bi-trash"></i>
                   </a>

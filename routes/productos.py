@@ -30,7 +30,19 @@ from reportlab.lib.pagesizes import letter
 from PIL import Image
 import logging
 from utils.decorators import login_required, superadmin_required, admin_required, standard_required
-from utils.helpers import format_date, aplicar_fondos_por_pagina, generar_pdf_margenes_dinamicos
+def _obtener_columnas_productos(cursor):
+    """Devuelve los nombres de las columnas de la tabla productos de forma compatible con SQLite y PostgreSQL"""
+    try:
+        is_pg = bool(os.environ.get('DATABASE_URL') and 'postgres' in os.environ.get('DATABASE_URL'))
+        if is_pg:
+            cursor.execute("SELECT column_name FROM information_schema.columns WHERE table_name = 'productos'")
+            cols = [col[0] for col in cursor.fetchall()]
+            if cols:
+                return cols
+        cursor.execute("PRAGMA table_info(productos)")
+        return [col[1] for col in cursor.fetchall()]
+    except Exception:
+        return ['id', 'empresa', 'codigo', 'descripcion', 'marca', 'tm', 'um', 'cantidad', 'precio_unitario', 'precio_total', 'categoria_id', 'categoria', 'es_importado']
 
 def register_routes(app):
     @app.route('/productos', methods=['GET', 'POST'])
@@ -63,9 +75,7 @@ def register_routes(app):
                     if existe > 0:
                         mensaje_error = f"⚠️ El código '{codigo}' ya existe para la empresa '{empresa}'."
                     else:
-                        cursor.execute("PRAGMA table_info(productos)")
-                        columnas = cursor.fetchall()
-                        columnas_nombres = [col[1] for col in columnas]
+                        columnas_nombres = _obtener_columnas_productos(cursor)
                     
                         categoria_nombre = None
                         if categoria_id:
@@ -114,9 +124,7 @@ def register_routes(app):
         try:
             with get_db_connection() as conexion:
                 cursor = conexion.cursor()
-                cursor.execute("PRAGMA table_info(productos)")
-                columnas = cursor.fetchall()
-                columnas_nombres = [col[1] for col in columnas]
+                columnas_nombres = _obtener_columnas_productos(cursor)
 
             if 'categoria_id' in columnas_nombres:
                 base_query = "SELECT p.*, c.nombre as categoria_nombre FROM productos p LEFT JOIN categorias c ON p.categoria_id = c.id WHERE 1=1"
@@ -297,9 +305,7 @@ def register_routes(app):
                         if resultado:
                             categoria_nombre = resultado[0]
                 
-                    cursor.execute("PRAGMA table_info(productos)")
-                    columnas = cursor.fetchall()
-                    columnas_nombres = [col[1] for col in columnas]
+                    columnas_nombres = _obtener_columnas_productos(cursor)
                 
                     if 'categoria_id' in columnas_nombres:
                         cursor.execute('''

@@ -8,8 +8,9 @@
     .mipdf-container {
         background-color: #f8fafc;
         border-radius: 16px;
-        padding: 2rem;
+        padding: 2.5rem 2rem;
         box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+        position: relative;
     }
 
     .paper-canvas-wrapper {
@@ -17,11 +18,10 @@
         display: flex;
         justify-content: center;
         align-items: flex-start;
-        min-height: 850px;
-        padding: 40px 20px;
+        min-height: 1050px;
+        padding: 50px 20px;
         background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%);
         border-radius: 16px;
-        overflow: hidden;
     }
 
     /* Hoja Dinámica proporcional */
@@ -29,57 +29,48 @@
         background: #ffffff;
         box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(0, 0, 0, 0.05);
         border-radius: 4px;
-        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        transition: all 0.3s ease;
         position: relative;
-        padding: 35px 30px;
+        padding: 35px 35px;
         box-sizing: border-box;
         margin: 0 auto;
         color: #1e293b;
         font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        z-index: 6;
     }
 
     /* Dimensiones de Hojas */
-    .paper-sheet.sheet-a4 {
-        width: 595px;
-        min-height: 842px;
-    }
-
-    .paper-sheet.sheet-carta {
-        width: 612px;
-        min-height: 792px;
-    }
-
-    .paper-sheet.sheet-oficio {
-        width: 612px;
-        min-height: 936px;
-    }
+    .paper-sheet.sheet-a4 { width: 630px; min-height: 890px; }
+    .paper-sheet.sheet-carta { width: 640px; min-height: 830px; }
+    .paper-sheet.sheet-oficio { width: 640px; min-height: 980px; }
 
     /* Tarjetas Flotantes conectadas */
     .floating-card {
         background: #ffffff;
-        border: 2px dashed #0d6efd;
+        border: 2px dashed var(--theme-color, #dc2626);
         border-radius: 12px;
-        padding: 15px 18px;
-        box-shadow: 0 8px 20px rgba(13, 110, 253, 0.12);
+        padding: 14px 16px;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
         position: absolute;
         width: 220px;
         z-index: 10;
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        transition: all 0.25s ease;
         cursor: pointer;
     }
 
-    .floating-card:hover {
-        transform: translateY(-4px) scale(1.02);
-        box-shadow: 0 12px 28px rgba(13, 110, 253, 0.22);
-        border-color: #0b5ed7;
-        background: #f0f7ff;
+    .floating-card:hover, .floating-card.card-highlight-active {
+        transform: translateY(-4px) scale(1.03);
+        box-shadow: 0 12px 28px rgba(220, 38, 38, 0.25);
+        border-style: solid;
+        background: #fff5f5;
     }
 
-    /* Posiciones de Tarjetas Flotantes */
-    .card-pos-header { top: 40px; left: 30px; }
-    .card-pos-client { top: 220px; right: 30px; }
-    .card-pos-table  { top: 440px; left: 30px; }
-    .card-pos-footer { top: 660px; right: 30px; }
+    /* Posiciones de Tarjetas Flotantes en Escritorio */
+    .card-pos-1 { top: 60px; left: 25px; }
+    .card-pos-2 { top: 220px; right: 25px; }
+    .card-pos-3 { top: 400px; left: 25px; }
+    .card-pos-4 { top: 620px; right: 25px; }
+    .card-pos-5 { top: 820px; left: 25px; }
 
     /* Conectores SVG */
     .connector-svg {
@@ -89,99 +80,168 @@
         width: 100%;
         height: 100%;
         pointer-events: none;
-        z-index: 5;
+        z-index: 7;
     }
 
     .connector-path {
-        stroke: #0d6efd;
-        stroke-width: 2;
+        stroke: var(--theme-color, #dc2626);
+        stroke-width: 2.5;
         stroke-dasharray: 6 4;
         fill: none;
-        animation: dash 30s linear infinite;
+        transition: all 0.3s ease;
     }
 
-    @keyframes dash {
-        to { stroke-dashoffset: -1000; }
+    .connector-path.path-active {
+        stroke-width: 3.5;
+        stroke-dasharray: 0;
+        filter: drop-shadow(0 0 4px var(--theme-color, #dc2626));
     }
 
-    /* Secciones de la Hoja Demo */
-    .sheet-header-box {
-        border-bottom: 2px solid var(--theme-color, #0d6efd);
+    /* Resaltado Bidireccional de Secciones */
+    .sheet-section {
+        position: relative;
+        transition: all 0.25s ease;
+        border: 2px transparent dashed;
+        border-radius: 6px;
+        padding: 4px;
+        cursor: pointer;
+    }
+
+    .sheet-section:hover, .sheet-section.section-highlight-active {
+        border-color: var(--theme-color, #dc2626);
+        background-color: rgba(220, 38, 38, 0.03);
+        box-shadow: 0 0 12px rgba(220, 38, 38, 0.15);
+    }
+
+    /* Estilos del Documento */
+    .sheet-header-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+        align-items: flex-start;
+        border-bottom: 2px solid var(--theme-color, #dc2626);
         padding-bottom: 12px;
-        margin-bottom: 20px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
+        margin-bottom: 15px;
     }
 
-    .sheet-title-text {
-        font-size: 1.3rem;
-        font-weight: 700;
-        color: var(--theme-color, #0d6efd);
-        text-transform: uppercase;
+    .logo-container {
+        max-width: 160px;
+        max-height: 60px;
+        object-fit: contain;
+        margin-bottom: 6px;
+    }
+
+    .logo-placeholder {
+        width: 140px;
+        height: 50px;
+        border: 2px dashed #cbd5e1;
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.75rem;
+        color: #64748b;
+        background: #f8fafc;
+        margin-bottom: 6px;
     }
 
     .sheet-client-box {
         background-color: #f8fafc;
         border: 1px solid #e2e8f0;
         border-radius: 6px;
-        padding: 12px;
-        margin-bottom: 20px;
-        font-size: 0.85rem;
+        padding: 10px 14px;
+        margin-bottom: 15px;
+        font-size: 0.82rem;
     }
 
     .sheet-table-demo {
         width: 100%;
         border-collapse: collapse;
-        margin-bottom: 20px;
-        font-size: 0.8rem;
+        margin-bottom: 15px;
+        font-size: 0.78rem;
     }
 
     .sheet-table-demo th {
-        background-color: var(--theme-color, #0d6efd);
+        background-color: var(--theme-color, #dc2626);
         color: white;
         padding: 6px 8px;
         text-align: left;
+        font-weight: 600;
     }
 
     .sheet-table-demo td {
         border-bottom: 1px solid #e2e8f0;
-        padding: 6px 8px;
+        padding: 5px 8px;
     }
 
-    .sheet-footer-box {
-        margin-top: 30px;
+    .totals-box {
         border-top: 1px dashed #cbd5e1;
+        padding-top: 8px;
+        margin-bottom: 15px;
+        font-size: 0.82rem;
+    }
+
+    .monto-literal-strip {
+        font-style: italic;
+        font-weight: 600;
+        color: #334155;
+        border-bottom: 1px dashed #cbd5e1;
+        padding-bottom: 6px;
+        margin-bottom: 10px;
+        font-size: 0.78rem;
+    }
+
+    .responsable-section {
+        margin-bottom: 15px;
+        padding-bottom: 8px;
+        border-bottom: 1px solid #f1f5f9;
+        font-size: 0.8rem;
+    }
+
+    .condiciones-box {
+        border: 1px solid #e2e8f0;
+        background-color: #f8fafc;
+        border-radius: 6px;
+        padding: 8px 12px;
+        margin-bottom: 20px;
+        font-size: 0.78rem;
+    }
+
+    .firmas-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 30px;
+        margin-top: 30px;
         padding-top: 15px;
         font-size: 0.78rem;
-        color: #64748b;
+    }
+
+    .firma-line {
+        border-top: 1px solid #94a3b8;
+        text-align: center;
+        padding-top: 4px;
+        font-weight: 600;
+        color: #475569;
     }
 
     @media (max-width: 1200px) {
-        .floating-card {
-            position: static;
-            width: 100%;
-            margin-bottom: 15px;
-        }
-        .paper-canvas-wrapper {
-            flex-direction: column;
-            align-items: center;
-        }
+        .floating-card { position: static; width: 100%; margin-bottom: 12px; }
+        .paper-canvas-wrapper { flex-direction: column; align-items: center; }
         .connector-svg { display: none; }
     }
 </style>
 
 <div class="container-fluid py-3">
-    <!-- Header de la pantalla -->
+    <!-- Header de la Pantalla -->
     <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
         <div>
-            <h2 class="fw-bold mb-1 text-primary">
-                <i class="bi bi-file-earmark-pdf-fill me-2 text-danger"></i>MI PDF — Personalización de Cotizaciones
+            <h2 class="fw-bold mb-1 text-danger">
+                <i class="bi bi-file-earmark-pdf-fill me-2"></i>MI PDF — Personalización de Cotizaciones
             </h2>
-            <p class="text-muted mb-0">Diseña y personaliza el formato visual de tus cotizaciones impresas y digitales.</p>
+            <p class="text-muted mb-0">Personaliza la identidad visual, datos de la empresa, logo y estructura del PDF.</p>
         </div>
         <div class="d-flex align-items-center gap-2">
-            <button class="btn btn-success fw-bold shadow-sm px-4" onclick="guardarConfiguracionPDF()">
+            <button class="btn btn-success fw-bold shadow-sm px-4 btn-lg" onclick="guardarConfiguracionPDF()">
                 <i class="bi bi-check-circle-fill me-1"></i> Guardar Cambios
             </button>
         </div>
@@ -194,9 +254,9 @@
                 <!-- Selector de Tamaño de Hoja -->
                 <div class="col-md-4 col-lg-3">
                     <label for="selectTipoHoja" class="form-label fw-bold text-dark small mb-1">
-                        <i class="bi bi-file-earmark-aspect-ratio text-primary me-1"></i>Tamaño de Hoja / Papel:
+                        <i class="bi bi-file-earmark-aspect-ratio text-danger me-1"></i>Tamaño de Hoja / Papel:
                     </label>
-                    <select id="selectTipoHoja" class="form-select fw-bold border-primary shadow-sm" onchange="cambiarTipoHoja(this.value)">
+                    <select id="selectTipoHoja" class="form-select fw-bold border-danger shadow-sm" onchange="cambiarTipoHoja(this.value)">
                         <option value="A4" {% if config_pdf.tipo_hoja == 'A4' %}selected{% endif %}>📄 A4 (210 × 297 mm)</option>
                         <option value="Carta" {% if config_pdf.tipo_hoja == 'Carta' %}selected{% endif %}>📄 Carta (216 × 279 mm)</option>
                         <option value="Oficio" {% if config_pdf.tipo_hoja == 'Oficio' %}selected{% endif %}>📄 Oficio (216 × 330 mm)</option>
@@ -209,14 +269,14 @@
                         <i class="bi bi-palette-fill text-danger me-1"></i>Tema de Color Corporativo:
                     </label>
                     <div class="d-flex align-items-center gap-2">
-                        <input type="color" id="inputColorTema" class="form-control form-control-color border-primary" 
-                               value="{{ config_pdf.color_tema or '#0d6efd' }}" title="Elige tu color corporativo" onchange="cambiarColorTema(this.value)">
+                        <input type="color" id="inputColorTema" class="form-control form-control-color border-danger" 
+                               value="{{ config_pdf.color_tema or '#dc2626' }}" title="Elige tu color corporativo" onchange="cambiarColorTema(this.value)">
                         <select id="selectColorPresets" class="form-select fw-bold border-secondary" onchange="cambiarColorTema(this.value)">
-                            <option value="#0d6efd">Azul Corporativo</option>
-                            <option value="#059669">Verde Esmeralda</option>
-                            <option value="#dc2626">Rojo Ejecutivo</option>
-                            <option value="#334155">Gris Elegante</option>
-                            <option value="#7c3aed">Púrpura Premium</option>
+                            <option value="#dc2626" {% if config_pdf.color_tema == '#dc2626' %}selected{% endif %}>Rojo Ejecutivo</option>
+                            <option value="#0d6efd" {% if config_pdf.color_tema == '#0d6efd' %}selected{% endif %}>Azul Corporativo</option>
+                            <option value="#059669" {% if config_pdf.color_tema == '#059669' %}selected{% endif %}>Verde Esmeralda</option>
+                            <option value="#334155" {% if config_pdf.color_tema == '#334155' %}selected{% endif %}>Gris Elegante</option>
+                            <option value="#7c3aed" {% if config_pdf.color_tema == '#7c3aed' %}selected{% endif %}>Púrpura Premium</option>
                         </select>
                     </div>
                 </div>
@@ -232,7 +292,7 @@
                 </div>
 
                 <div class="col-md-12 col-lg-2 text-end">
-                    <span class="badge bg-primary fs-6 px-3 py-2" id="badgeTamanoActual">Hoja: A4</span>
+                    <span class="badge bg-danger fs-6 px-3 py-2" id="badgeTamanoActual">Hoja: A4</span>
                 </div>
             </div>
         </div>
@@ -240,38 +300,48 @@
 
     <!-- Contenedor Principal con Lienzo de Hoja y Tarjetas Flotantes -->
     <div class="mipdf-container">
+        <!-- Capa SVG con Conectores Dinámicos -->
+        <svg id="svgConnectors" class="connector-svg"></svg>
+
         <!-- Tarjetas flotantes versión móvil -->
         <div class="d-lg-none mb-4">
-            <div class="alert alert-info border-primary">
-                <i class="bi bi-info-circle-fill me-1"></i> Presiona sobre las tarjetas a continuación o toca cualquier sección de la hoja para editar sus datos.
+            <div class="alert alert-danger bg-danger bg-opacity-10 border-danger text-dark">
+                <i class="bi bi-info-circle-fill text-danger me-1"></i> Presiona sobre las tarjetas a continuación o toca cualquier sección de la hoja para editar sus datos.
             </div>
             <div class="row g-3">
                 <div class="col-sm-6">
                     <div class="floating-card text-center" onclick="abrirModalEditor('header')">
-                        <i class="bi bi-building fs-3 text-primary"></i>
+                        <i class="bi bi-image fs-3 text-danger"></i>
                         <h6 class="fw-bold mt-2 mb-1">1. Encabezado & Logo</h6>
-                        <small class="text-muted">Razón Social, NIT, Título</small>
+                        <small class="text-muted">Logo, Razón Social, NIT</small>
                     </div>
                 </div>
                 <div class="col-sm-6">
                     <div class="floating-card text-center" onclick="abrirModalEditor('client')">
                         <i class="bi bi-person-lines-fill fs-3 text-success"></i>
                         <h6 class="fw-bold mt-2 mb-1">2. Datos del Cliente</h6>
-                        <small class="text-muted">Cliente, Fecha, Código</small>
+                        <small class="text-muted">Formato destinatario</small>
                     </div>
                 </div>
                 <div class="col-sm-6">
                     <div class="floating-card text-center" onclick="abrirModalEditor('table')">
                         <i class="bi bi-table fs-3 text-warning"></i>
-                        <h6 class="fw-bold mt-2 mb-1">3. Tabla de Productos</h6>
-                        <small class="text-muted">Estilos de Ítems & Precios</small>
+                        <h6 class="fw-bold mt-2 mb-1">3. Tabla de Ítems</h6>
+                        <small class="text-muted">Columnas & Precios</small>
                     </div>
                 </div>
                 <div class="col-sm-6">
-                    <div class="floating-card text-center" onclick="abrirModalEditor('footer')">
-                        <i class="bi bi-card-text fs-3 text-danger"></i>
-                        <h6 class="fw-bold mt-2 mb-1">4. Términos & Pie</h6>
-                        <small class="text-muted">Condiciones, Firma, Nota</small>
+                    <div class="floating-card text-center" onclick="abrirModalEditor('totales_responsable')">
+                        <i class="bi bi-calculator fs-3 text-info"></i>
+                        <h6 class="fw-bold mt-2 mb-1">4. Totales & Responsable</h6>
+                        <small class="text-muted">Descuentos & Vendedor</small>
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="floating-card text-center" onclick="abrirModalEditor('condiciones_firmas')">
+                        <i class="bi bi-pen fs-3 text-primary"></i>
+                        <h6 class="fw-bold mt-2 mb-1">5. Condiciones & Firmas</h6>
+                        <small class="text-muted">Plazos & Firmas dobles</small>
                     </div>
                 </div>
             </div>
@@ -280,19 +350,23 @@
         <!-- Canvas escritorio con tarjetas conectadas flotantes -->
         <div class="paper-canvas-wrapper" id="canvasWrapper">
             
-            <!-- Tarjeta 1: Encabezado -->
-            <div class="floating-card card-pos-header d-none d-lg-block" onclick="abrirModalEditor('header')">
+            <!-- Tarjeta 1: Encabezado & Logo -->
+            <div id="card1" class="floating-card card-pos-1 d-none d-lg-block" 
+                 onclick="abrirModalEditor('header')"
+                 onmouseenter="highlightSync('1', true)" onmouseleave="highlightSync('1', false)">
                 <div class="d-flex align-items-center gap-2">
-                    <i class="bi bi-building fs-3 text-primary"></i>
+                    <i class="bi bi-image fs-3 text-danger"></i>
                     <div>
                         <h6 class="fw-bold mb-0 text-dark">1. Encabezado & Logo</h6>
-                        <small class="text-muted">Emisor, NIT, Título</small>
+                        <small class="text-muted">Logo, Empresa, NIT</small>
                     </div>
                 </div>
             </div>
 
             <!-- Tarjeta 2: Cliente -->
-            <div class="floating-card card-pos-client d-none d-lg-block" onclick="abrirModalEditor('client')">
+            <div id="card2" class="floating-card card-pos-2 d-none d-lg-block" 
+                 onclick="abrirModalEditor('client')"
+                 onmouseenter="highlightSync('2', true)" onmouseleave="highlightSync('2', false)">
                 <div class="d-flex align-items-center gap-2">
                     <i class="bi bi-person-lines-fill fs-3 text-success"></i>
                     <div>
@@ -303,7 +377,9 @@
             </div>
 
             <!-- Tarjeta 3: Tabla -->
-            <div class="floating-card card-pos-table d-none d-lg-block" onclick="abrirModalEditor('table')">
+            <div id="card3" class="floating-card card-pos-3 d-none d-lg-block" 
+                 onclick="abrirModalEditor('table')"
+                 onmouseenter="highlightSync('3', true)" onmouseleave="highlightSync('3', false)">
                 <div class="d-flex align-items-center gap-2">
                     <i class="bi bi-table fs-3 text-warning"></i>
                     <div>
@@ -313,54 +389,90 @@
                 </div>
             </div>
 
-            <!-- Tarjeta 4: Footer -->
-            <div class="floating-card card-pos-footer d-none d-lg-block" onclick="abrirModalEditor('footer')">
+            <!-- Tarjeta 4: Totales & Responsable -->
+            <div id="card4" class="floating-card card-pos-4 d-none d-lg-block" 
+                 onclick="abrirModalEditor('totales_responsable')"
+                 onmouseenter="highlightSync('4', true)" onmouseleave="highlightSync('4', false)">
                 <div class="d-flex align-items-center gap-2">
-                    <i class="bi bi-card-text fs-3 text-danger"></i>
+                    <i class="bi bi-calculator fs-3 text-info"></i>
                     <div>
-                        <h6 class="fw-bold mb-0 text-dark">4. Pie & Términos</h6>
-                        <small class="text-muted">Condiciones & Nota</small>
+                        <h6 class="fw-bold mb-0 text-dark">4. Totales & Responsable</h6>
+                        <small class="text-muted">Montos & Vendedor</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tarjeta 5: Condiciones & Firmas -->
+            <div id="card5" class="floating-card card-pos-5 d-none d-lg-block" 
+                 onclick="abrirModalEditor('condiciones_firmas')"
+                 onmouseenter="highlightSync('5', true)" onmouseleave="highlightSync('5', false)">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="bi bi-pen fs-3 text-primary"></i>
+                    <div>
+                        <h6 class="fw-bold mb-0 text-dark">5. Condiciones & Firmas</h6>
+                        <small class="text-muted">Plazos & Firmas dobles</small>
                     </div>
                 </div>
             </div>
 
             <!-- Hoja de Papel Boceto Canvas -->
-            <div class="paper-sheet sheet-a4" id="paperSheet" style="--theme-color: {{ config_pdf.color_tema or '#0d6efd' }};">
-                <!-- Seccion 1: Encabezado -->
-                <div class="sheet-header-box" onclick="abrirModalEditor('header')" title="Hacer clic para editar Encabezado">
-                    <div>
-                        <div class="fw-bold text-dark fs-5" id="demoNombreEmpresa">
-                            {{ config_pdf.empresa_nombre or 'MI EMPRESA S.R.L.' }}
+            <div class="paper-sheet sheet-a4" id="paperSheet" style="--theme-color: {{ config_pdf.color_tema or '#dc2626' }};">
+                
+                <!-- SECCIÓN 1: Encabezado con Logo Sup Izquierda -->
+                <div id="sec1" class="sheet-section" 
+                     onclick="abrirModalEditor('header')"
+                     onmouseenter="highlightSync('1', true)" onmouseleave="highlightSync('1', false)">
+                    <div class="sheet-header-grid">
+                        <!-- Superior Izquierda: Logo y Datos Emisor -->
+                        <div>
+                            {% if config_pdf.logo_base64 %}
+                                <img id="imgLogoSheet" src="{{ config_pdf.logo_base64 }}" class="logo-container" alt="Logo Empresa">
+                            {% else %}
+                                <div id="imgLogoSheetPlaceholder" class="logo-placeholder">
+                                    <i class="bi bi-cloud-upload me-1"></i> Subir Logo
+                                </div>
+                            {% endif %}
+                            <div class="fw-bold text-dark fs-5" id="demoNombreEmpresa">
+                                {{ config_pdf.empresa_nombre or 'ELECTRORED BOLIVIA S.R.L.' }}
+                            </div>
+                            <div class="text-muted small" id="demoNitEmisor">NIT: {{ config_pdf.nit_emisor or '1029384021' }}</div>
+                            <div class="text-muted small" id="demoDireccionEmisor">{{ config_pdf.direccion or 'Av. Banzer Km 5.5 - Santa Cruz' }}</div>
                         </div>
-                        <small class="text-muted" id="demoNitEmisor">NIT: {{ config_pdf.nit_emisor or '1029384021' }}</small><br>
-                        <small class="text-muted" id="demoDireccionEmisor">{{ config_pdf.direccion or 'Av. Principal #123 - Santa Cruz' }}</small>
-                    </div>
-                    <div class="text-end">
-                        <div class="sheet-title-text" id="demoTituloDocumento">
-                            {{ config_pdf.titulo_documento or 'COTIZACIÓN DE VENTAS' }}
+
+                        <!-- Superior Derecha: Título y Código -->
+                        <div class="text-end">
+                            <div class="fs-4 fw-bold" style="color: var(--theme-color, #dc2626);" id="demoTituloDocumento">
+                                {{ config_pdf.titulo_documento or 'COTIZACIÓN DE VENTAS' }}
+                            </div>
+                            <span class="badge bg-secondary" id="demoCodigoCot">COT-2026-001</span>
                         </div>
-                        <span class="badge bg-secondary" id="demoCodigoCot">COT-2026-001</span>
                     </div>
                 </div>
 
-                <!-- Seccion 2: Datos del Cliente -->
-                <div class="sheet-client-box" onclick="abrirModalEditor('client')" title="Hacer clic para editar datos de Cliente">
-                    <div class="row">
-                        <div class="col-6">
-                            <strong>Cliente:</strong> SANTIAGO MENDOZA SORIA<br>
-                            <strong>NIT / CI:</strong> 8392019 SCZ<br>
-                            <strong>Teléfono:</strong> +591 76543210
-                        </div>
-                        <div class="col-6 text-end">
-                            <strong>Fecha:</strong> 30/07/2026<br>
-                            <strong>Validez:</strong> 15 Días<br>
-                            <strong>Moneda:</strong> Bolivianos (Bs)
+                <!-- SECCIÓN 2: Datos del Cliente -->
+                <div id="sec2" class="sheet-section" 
+                     onclick="abrirModalEditor('client')"
+                     onmouseenter="highlightSync('2', true)" onmouseleave="highlightSync('2', false)">
+                    <div class="sheet-client-box">
+                        <div class="row">
+                            <div class="col-7">
+                                <div><strong>Cliente:</strong> SANTIAGO MENDOZA SORIA</div>
+                                <div><strong>NIT / CI:</strong> 8392019 SCZ</div>
+                                <div><strong>Teléfono:</strong> +591 76543210</div>
+                            </div>
+                            <div class="col-5 text-end">
+                                <div><strong>Fecha:</strong> 30/07/2026</div>
+                                <div><strong>Validez:</strong> 15 Días</div>
+                                <div><strong>Moneda:</strong> Bolivianos (Bs)</div>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Seccion 3: Tabla Demo -->
-                <div onclick="abrirModalEditor('table')" title="Hacer clic para editar estilos de Tabla">
+                <!-- SECCIÓN 3: Tabla de Ítems -->
+                <div id="sec3" class="sheet-section" 
+                     onclick="abrirModalEditor('table')"
+                     onmouseenter="highlightSync('3', true)" onmouseleave="highlightSync('3', false)">
                     <table class="sheet-table-demo">
                         <thead>
                             <tr>
@@ -399,32 +511,74 @@
                             </tr>
                         </tbody>
                     </table>
+                </div>
 
-                    <div class="d-flex justify-content-end mb-3">
-                        <div style="width: 200px;" class="text-end small">
-                            <div><strong>Subtotal:</strong> Bs 1,417.51</div>
-                            <div><strong>Descuento (0%):</strong> Bs 0.00</div>
-                            <div class="fs-6 fw-bold text-primary mt-1 border-top pt-1" style="color: var(--theme-color) !important;">
-                                TOTAL: Bs 1,417.51
+                <!-- SECCIÓN 4: Totales, Monto Literal & Responsable -->
+                <div id="sec4" class="sheet-section" 
+                     onclick="abrirModalEditor('totales_responsable')"
+                     onmouseenter="highlightSync('4', true)" onmouseleave="highlightSync('4', false)">
+                    
+                    <!-- Monto Literal -->
+                    <div class="monto-literal-strip">
+                        <strong>SON:</strong> CIENTO OCHO BOLIVIANOS CON SESENTA Y SIETE CENTAVOS
+                    </div>
+
+                    <!-- Cuadro de Totales -->
+                    <div class="d-flex justify-content-end totals-box">
+                        <div style="width: 250px;" class="text-end">
+                            <div class="d-flex justify-content-between">
+                                <span>Subtotal Bruto:</span>
+                                <strong>Bs 1,417.51</strong>
                             </div>
+                            <div class="d-flex justify-content-between text-danger">
+                                <span>Descuento Comercial (0.00%):</span>
+                                <strong>-Bs 0.00</strong>
+                            </div>
+                            <div class="d-flex justify-content-between fs-6 fw-bold border-top pt-1 mt-1" style="color: var(--theme-color, #dc2626);">
+                                <span>TOTAL FINAL:</span>
+                                <span>Bs 1,417.51</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Datos del Responsable -->
+                    <div class="responsable-section">
+                        <div class="fw-bold text-dark mb-1 small text-uppercase" style="letter-spacing: 0.5px;">RESPONSABLE</div>
+                        <div class="row g-2">
+                            <div class="col-md-4"><strong>NOMBRE:</strong> <span id="demoRespNombre">{{ config_pdf.responsable_nombre or 'Administrador' }}</span></div>
+                            <div class="col-md-4"><strong>TELÉFONO:</strong> <span id="demoRespTelefono">{{ config_pdf.responsable_telefono or '+591 76543210' }}</span></div>
+                            <div class="col-md-4"><strong>E-MAIL:</strong> <span id="demoRespEmail">{{ config_pdf.responsable_email or 'admin@sistema.com' }}</span></div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Seccion 4: Footer y Términos -->
-                <div class="sheet-footer-box" onclick="abrirModalEditor('footer')" title="Hacer clic para editar Términos y Pie">
-                    <div class="fw-bold text-dark mb-1">Términos y Condiciones:</div>
-                    <div id="demoTerminos" style="white-space: pre-line;">
-                        {{ config_pdf.terminos_condiciones or '1. Validez de la oferta: 15 días.\n2. Precios incluyen impuestos de ley.\n3. Tiempo de entrega a convenir.' }}
-                    </div>
+                <!-- SECCIÓN 5: Condiciones & Firmas Dobles -->
+                <div id="sec5" class="sheet-section" 
+                     onclick="abrirModalEditor('condiciones_firmas')"
+                     onmouseenter="highlightSync('5', true)" onmouseleave="highlightSync('5', false)">
                     
-                    <div class="d-flex justify-content-between align-items-end mt-4 pt-3 border-top">
-                        <div class="small fst-italic" id="demoNotaPie">
-                            {{ config_pdf.nota_pie or '¡Gracias por su preferencia!' }}
+                    <!-- Condiciones -->
+                    <div class="condiciones-box">
+                        <div class="fw-bold text-dark mb-1 small text-uppercase">CONDICIONES</div>
+                        <div class="row">
+                            <div class="col-6"><strong>TIEMPO DE VALIDEZ:</strong> 15 Días</div>
+                            <div class="col-6"><strong>PLAZO DE ENTREGA:</strong> <span id="demoPlazoEntrega">{{ config_pdf.plazo_entrega or 'De acuerdo a la existencia / 48 horas' }}</span></div>
                         </div>
-                        <div class="text-center" style="border-top: 1px solid #94a3b8; width: 140px; padding-top: 4px;">
-                            <small class="fw-bold">Firma / Sello</small>
+                    </div>
+
+                    <!-- Doble Área de Firma (Responsable y Cliente) -->
+                    <div class="firmas-grid">
+                        <div class="firma-line">
+                            FIRMA RESPONSABLE
                         </div>
+                        <div class="firma-line">
+                            FIRMA CLIENTE
+                        </div>
+                    </div>
+
+                    <!-- Pie de Página -->
+                    <div class="text-center text-muted small mt-4 pt-2 border-top">
+                        Email: <span id="demoFooterEmail">{{ config_pdf.correo or 'ventas@electrored.bo' }}</span> - <span id="demoFooterCiudad">Santa Cruz - Bolivia</span>
                     </div>
                 </div>
 
@@ -437,59 +591,93 @@
 <div class="modal fade" id="modalEditorPDF" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content border-0 shadow-lg rounded-4">
-            <div class="modal-header bg-primary text-white rounded-top-4">
+            <div class="modal-header bg-danger text-white rounded-top-4">
                 <h5 class="modal-title fw-bold" id="modalEditorTitulo">
-                    <i class="bi bi-pencil-square me-2"></i>Editar Sección de PDF
+                    <i class="bi bi-pencil-square me-2"></i>Editar Sección del PDF
                 </h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body p-4">
-                <!-- Formulario Dinámico -->
                 <form id="formEditorPDF">
-                    <!-- Campos Encabezado -->
+                    
+                    <!-- Sección 1: Encabezado & Logo -->
                     <div id="secFieldsHeader" class="editor-sec">
-                        <h6 class="fw-bold text-primary mb-3"><i class="bi bi-building me-1"></i>Datos de la Empresa Emisora</h6>
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Nombre o Razón Social de la Empresa:</label>
-                            <input type="text" id="editEmpresaNombre" class="form-control" value="{{ config_pdf.empresa_nombre }}" placeholder="Ej: ELECTRORED BOLIVIA S.R.L.">
+                        <h6 class="fw-bold text-danger mb-3"><i class="bi bi-image me-1"></i>1. Logo & Datos de la Empresa Emisora</h6>
+                        
+                        <div class="mb-3 p-3 bg-light rounded border">
+                            <label class="form-label fw-bold">Subir Logo de la Empresa (PNG/JPG):</label>
+                            <input type="file" id="inputLogoFile" class="form-control" accept="image/*" onchange="procesarArchivoLogo(this)">
+                            <small class="text-muted">Recomendado: Imagen con fondo transparente o blanco (Max 2MB).</small>
                         </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Nombre Comercial / Razón Social:</label>
+                            <input type="text" id="editEmpresaNombre" class="form-control" value="{{ config_pdf.empresa_nombre or 'ELECTRORED BOLIVIA S.R.L.' }}">
+                        </div>
+
                         <div class="row g-3 mb-3">
                             <div class="col-md-6">
                                 <label class="form-label fw-bold">NIT / CI del Emisor:</label>
-                                <input type="text" id="editNitEmisor" class="form-control" value="{{ config_pdf.nit_emisor }}" placeholder="Ej: 1029384021">
+                                <input type="text" id="editNitEmisor" class="form-control" value="{{ config_pdf.nit_emisor or '1029384021' }}">
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label fw-bold">Teléfono / WhatsApp:</label>
-                                <input type="text" id="editTelefono" class="form-control" value="{{ config_pdf.telefono }}" placeholder="Ej: +591 76543210">
+                                <label class="form-label fw-bold">Teléfono de la Empresa:</label>
+                                <input type="text" id="editTelefono" class="form-control" value="{{ config_pdf.telefono or '+591 76543210' }}">
                             </div>
                         </div>
+
                         <div class="mb-3">
-                            <label class="form-label fw-bold">Correo Electrónico:</label>
-                            <input type="email" id="editCorreo" class="form-control" value="{{ config_pdf.correo }}" placeholder="Ej: ventas@empresa.com">
+                            <label class="form-label fw-bold">Correo de la Empresa:</label>
+                            <input type="email" id="editCorreo" class="form-control" value="{{ config_pdf.correo or 'ventas@electrored.bo' }}">
                         </div>
+
                         <div class="mb-3">
-                            <label class="form-label fw-bold">Dirección Física / Ciudad:</label>
-                            <input type="text" id="editDireccion" class="form-control" value="{{ config_pdf.direccion }}" placeholder="Ej: Av. Banzer Km 5.5, Santa Cruz">
+                            <label class="form-label fw-bold">Dirección Física & Ciudad:</label>
+                            <input type="text" id="editDireccion" class="form-control" value="{{ config_pdf.direccion or 'Av. Banzer Km 5.5 - Santa Cruz' }}">
                         </div>
                     </div>
 
-                    <!-- Campos Términos & Footer -->
-                    <div id="secFieldsFooter" class="editor-sec">
-                        <h6 class="fw-bold text-danger mb-3"><i class="bi bi-card-text me-1"></i>Términos y Pie de Página</h6>
+                    <!-- Sección 4: Responsable -->
+                    <div id="secFieldsTotalesResponsable" class="editor-sec">
+                        <h6 class="fw-bold text-info mb-3"><i class="bi bi-person-badge me-1"></i>4. Datos del Responsable (Vendedor/Emisor)</h6>
+                        
                         <div class="mb-3">
-                            <label class="form-label fw-bold">Términos y Condiciones Predeterminados:</label>
-                            <textarea id="editTerminos" class="form-control" rows="4">{{ config_pdf.terminos_condiciones }}</textarea>
+                            <label class="form-label fw-bold">Nombre del Responsable:</label>
+                            <input type="text" id="editRespNombre" class="form-control" value="{{ config_pdf.responsable_nombre or 'Administrador' }}">
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Nota de Agradecimiento al Pie:</label>
-                            <input type="text" id="editNotaPie" class="form-control" value="{{ config_pdf.nota_pie }}" placeholder="Ej: ¡Gracias por su preferencia!">
+                        
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Teléfono Directo Responsable:</label>
+                                <input type="text" id="editRespTelefono" class="form-control" value="{{ config_pdf.responsable_telefono or '+591 76543210' }}">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Email Responsable:</label>
+                                <input type="email" id="editRespEmail" class="form-control" value="{{ config_pdf.responsable_email or 'admin@sistema.com' }}">
+                            </div>
                         </div>
                     </div>
+
+                    <!-- Sección 5: Condiciones -->
+                    <div id="secFieldsCondicionesFirmas" class="editor-sec">
+                        <h6 class="fw-bold text-primary mb-3"><i class="bi bi-pen me-1"></i>5. Condiciones Comercial & Plazo de Entrega</h6>
+                        
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Plazo de Entrega:</label>
+                            <input type="text" id="editPlazoEntrega" class="form-control" value="{{ config_pdf.plazo_entrega or 'De acuerdo a la existencia / 48 horas' }}">
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Términos y Condiciones Generales:</label>
+                            <textarea id="editTerminos" class="form-control" rows="4">{{ config_pdf.terminos_condiciones or '1. Validez de la oferta: 15 días.\n2. Precios incluyen impuestos de ley.\n3. Tiempo de entrega a convenir.' }}</textarea>
+                        </div>
+                    </div>
+
                 </form>
             </div>
             <div class="modal-footer bg-light rounded-bottom-4">
                 <button type="button" class="btn btn-secondary fw-bold" data-bs-dismiss="modal">Cancelar</button>
-                <button type="button" class="btn btn-primary fw-bold px-4" onclick="aplicarEdicionModal()">
+                <button type="button" class="btn btn-danger fw-bold px-4" onclick="aplicarEdicionModal()">
                     <i class="bi bi-check-lg me-1"></i> Aplicar Cambios
                 </button>
             </div>
@@ -498,12 +686,17 @@
 </div>
 
 <script>
-    let currentThemeColor = "{{ config_pdf.color_tema or '#0d6efd' }}";
+    let currentThemeColor = "{{ config_pdf.color_tema or '#dc2626' }}";
+    let logoBase64Data = "{{ config_pdf.logo_base64 or '' }}";
     let modalInstance = null;
 
     document.addEventListener('DOMContentLoaded', () => {
         modalInstance = new bootstrap.Modal(document.getElementById('modalEditorPDF'));
         cambiarTipoHoja("{{ config_pdf.tipo_hoja or 'A4' }}");
+        
+        // Trazar conectores SVG
+        setTimeout(trazarConectoresSVG, 300);
+        window.addEventListener('resize', trazarConectoresSVG);
     });
 
     function cambiarTipoHoja(tipo) {
@@ -522,31 +715,120 @@
             sheet.classList.add('sheet-a4');
             badge.innerText = 'Hoja: A4 (210×297 mm)';
         }
+
+        setTimeout(trazarConectoresSVG, 200);
     }
 
     function cambiarColorTema(hexColor) {
         currentThemeColor = hexColor;
         document.getElementById('inputColorTema').value = hexColor;
         document.getElementById('paperSheet').style.setProperty('--theme-color', hexColor);
+        document.querySelectorAll('.connector-path').forEach(p => p.style.stroke = hexColor);
     }
 
     function actualizarTituloHoja(val) {
         document.getElementById('demoTituloDocumento').innerText = val || 'COTIZACIÓN DE VENTAS';
     }
 
+    function highlightSync(id, active) {
+        const card = document.getElementById('card' + id);
+        const sec = document.getElementById('sec' + id);
+        const path = document.getElementById('path' + id);
+
+        if (active) {
+            if (card) card.classList.add('card-highlight-active');
+            if (sec) sec.classList.add('section-highlight-active');
+            if (path) path.classList.add('path-active');
+        } else {
+            if (card) card.classList.remove('card-highlight-active');
+            if (sec) sec.classList.remove('section-highlight-active');
+            if (path) path.classList.remove('path-active');
+        }
+    }
+
+    function trazarConectoresSVG() {
+        const svg = document.getElementById('svgConnectors');
+        const wrapper = document.getElementById('canvasWrapper');
+        if (!svg || !wrapper || window.innerWidth < 1200) return;
+
+        svg.innerHTML = '';
+        const wrapperRect = wrapper.getBoundingClientRect();
+
+        for (let i = 1; i <= 5; i++) {
+            const card = document.getElementById('card' + i);
+            const sec = document.getElementById('sec' + i);
+
+            if (!card || !sec) continue;
+
+            const cardRect = card.getBoundingClientRect();
+            const secRect = sec.getBoundingClientRect();
+
+            // Puntos de origen y destino
+            const isLeft = (i % 2 !== 0); // 1, 3, 5 están a la izquierda
+            
+            const startX = isLeft ? (cardRect.right - wrapperRect.left) : (cardRect.left - wrapperRect.left);
+            const startY = (cardRect.top + cardRect.height / 2) - wrapperRect.top;
+
+            const endX = isLeft ? (secRect.left - wrapperRect.left) : (secRect.right - wrapperRect.left);
+            const endY = (secRect.top + secRect.height / 2) - wrapperRect.top;
+
+            // Ruta Bezier suave
+            const controlOffset = Math.abs(endX - startX) * 0.5;
+            const cp1X = isLeft ? (startX + controlOffset) : (startX - controlOffset);
+            const cp2X = isLeft ? (endX - controlOffset) : (endX + controlOffset);
+
+            const pathD = `M ${startX} ${startY} C ${cp1X} ${startY}, ${cp2X} ${endY}, ${endX} ${endY}`;
+
+            const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            path.setAttribute('id', 'path' + i);
+            path.setAttribute('d', pathD);
+            path.setAttribute('class', 'connector-path');
+            path.style.stroke = currentThemeColor;
+
+            svg.appendChild(path);
+        }
+    }
+
+    function procesarArchivoLogo(input) {
+        if (input.files && input.files[0]) {
+            const file = input.files[0];
+            const reader = new FileReader();
+
+            reader.onload = function(e) {
+                logoBase64Data = e.target.result;
+                
+                // Actualizar previsualización en la hoja
+                let img = document.getElementById('imgLogoSheet');
+                const placeholder = document.getElementById('imgLogoSheetPlaceholder');
+
+                if (!img) {
+                    img = document.createElement('img');
+                    img.id = 'imgLogoSheet';
+                    img.className = 'logo-container';
+                    if (placeholder) placeholder.replaceWith(img);
+                }
+                img.src = logoBase64Data;
+            };
+
+            reader.readAsDataURL(file);
+        }
+    }
+
     function abrirModalEditor(seccion) {
         document.querySelectorAll('.editor-sec').forEach(el => el.style.display = 'none');
         
         if (seccion === 'header') {
-            document.getElementById('modalEditorTitulo').innerText = '1. Editar Encabezado y Datos de Empresa';
+            document.getElementById('modalEditorTitulo').innerText = '1. Editar Logo y Datos de la Empresa';
             document.getElementById('secFieldsHeader').style.display = 'block';
-        } else if (seccion === 'footer') {
-            document.getElementById('modalEditorTitulo').innerText = '4. Editar Términos y Pie de Página';
-            document.getElementById('secFieldsFooter').style.display = 'block';
+        } else if (seccion === 'totales_responsable') {
+            document.getElementById('modalEditorTitulo').innerText = '4. Editar Datos del Responsable';
+            document.getElementById('secFieldsTotalesResponsable').style.display = 'block';
+        } else if (seccion === 'condiciones_firmas') {
+            document.getElementById('modalEditorTitulo').innerText = '5. Editar Condiciones & Plazos';
+            document.getElementById('secFieldsCondicionesFirmas').style.display = 'block';
         } else {
-            document.getElementById('modalEditorTitulo').innerText = 'Editar Datos de PDF';
-            document.getElementById('secFieldsHeader').style.display = 'block';
-            document.getElementById('secFieldsFooter').style.display = 'block';
+            document.getElementById('modalEditorTitulo').innerText = 'Editar Datos del PDF';
+            document.querySelectorAll('.editor-sec').forEach(el => el.style.display = 'block');
         }
 
         modalInstance.show();
@@ -556,14 +838,22 @@
         const emp = document.getElementById('editEmpresaNombre').value;
         const nit = document.getElementById('editNitEmisor').value;
         const dir = document.getElementById('editDireccion').value;
-        const term = document.getElementById('editTerminos').value;
-        const nota = document.getElementById('editNotaPie').value;
+        const correo = document.getElementById('editCorreo').value;
+        
+        const respNom = document.getElementById('editRespNombre').value;
+        const respTel = document.getElementById('editRespTelefono').value;
+        const respMail = document.getElementById('editRespEmail').value;
+        const plazo = document.getElementById('editPlazoEntrega').value;
 
         if (emp) document.getElementById('demoNombreEmpresa').innerText = emp;
         if (nit) document.getElementById('demoNitEmisor').innerText = 'NIT: ' + nit;
         if (dir) document.getElementById('demoDireccionEmisor').innerText = dir;
-        if (term) document.getElementById('demoTerminos').innerText = term;
-        if (nota) document.getElementById('demoNotaPie').innerText = nota;
+        if (correo) document.getElementById('demoFooterEmail').innerText = correo;
+
+        if (respNom) document.getElementById('demoRespNombre').innerText = respNom;
+        if (respTel) document.getElementById('demoRespTelefono').innerText = respTel;
+        if (respMail) document.getElementById('demoRespEmail').innerText = respMail;
+        if (plazo) document.getElementById('demoPlazoEntrega').innerText = plazo;
 
         modalInstance.hide();
     }
@@ -578,8 +868,12 @@
             telefono: document.getElementById('editTelefono').value,
             correo: document.getElementById('editCorreo').value,
             direccion: document.getElementById('editDireccion').value,
+            responsable_nombre: document.getElementById('editRespNombre').value,
+            responsable_telefono: document.getElementById('editRespTelefono').value,
+            responsable_email: document.getElementById('editRespEmail').value,
+            plazo_entrega: document.getElementById('editPlazoEntrega').value,
             terminos_condiciones: document.getElementById('editTerminos').value,
-            nota_pie: document.getElementById('editNotaPie').value
+            logo_base64: logoBase64Data
         };
 
         fetch('/mi-pdf/guardar', {

@@ -615,21 +615,34 @@ def obtener_configuracion_pdf(usuario_id):
             row = cursor.fetchone()
             if row:
                 col_names = [col[0] for col in cursor.description]
-                return dict(zip(col_names, row))
+                res = dict(zip(col_names, row))
+                if not res.get('responsable_nombre'):
+                    cursor.execute("SELECT nombre, telefono, correo FROM clientes WHERE id = ?", (usuario_id,))
+                    u = cursor.fetchone()
+                    if u:
+                        res['responsable_nombre'] = u[0] or 'Administrador'
+                        res['responsable_telefono'] = res.get('responsable_telefono') or u[1] or ''
+                        res['responsable_email'] = res.get('responsable_email') or u[2] or ''
+                return res
     except Exception as e:
         print(f"Error obteniendo configuracion_pdf: {e}")
     
     return {
         'tipo_hoja': 'A4',
-        'color_tema': '#0d6efd',
+        'color_tema': '#dc2626',
         'titulo_documento': 'COTIZACIÓN DE VENTAS',
-        'empresa_nombre': '',
-        'nit_emisor': '',
-        'telefono': '',
-        'correo': '',
-        'direccion': '',
+        'empresa_nombre': 'ELECTRORED BOLIVIA S.R.L.',
+        'nit_emisor': '1029384021',
+        'telefono': '+591 76543210',
+        'correo': 'ventas@electrored.bo',
+        'direccion': 'Av. Banzer Km 5.5 - Santa Cruz',
         'terminos_condiciones': '1. Validez de la oferta: 15 días.\n2. Precios incluyen impuestos de ley.\n3. Tiempo de entrega a convenir.',
         'nota_pie': '¡Gracias por su preferencia!',
+        'responsable_nombre': 'Administrador',
+        'responsable_telefono': '+591 76543210',
+        'responsable_email': 'admin@sistema.com',
+        'plazo_entrega': 'De acuerdo a la existencia / 48 horas',
+        'logo_base64': '',
         'logo_path': '',
         'firma_path': ''
     }
@@ -639,6 +652,27 @@ def guardar_configuracion_pdf(usuario_id, datos):
     try:
         with get_db_connection() as conexion:
             cursor = conexion.cursor()
+
+            # Asegurar que existan las columnas nuevas
+            cursor.execute("PRAGMA table_info(configuracion_pdf)")
+            cols_pdf = [col[1] for col in cursor.fetchall()] if not (os.environ.get('DATABASE_URL') and os.environ.get('DATABASE_URL').startswith('postgres')) else []
+            
+            # Nuevas columnas a añadir en tiempo de ejecución si no existen
+            nuevas_columnas = [
+                ('responsable_nombre', 'TEXT'),
+                ('responsable_telefono', 'TEXT'),
+                ('responsable_email', 'TEXT'),
+                ('plazo_entrega', 'TEXT'),
+                ('logo_base64', 'TEXT')
+            ]
+            for col_n, col_t in nuevas_columnas:
+                if cols_pdf and col_n not in cols_pdf:
+                    try:
+                        cursor.execute(f"ALTER TABLE configuracion_pdf ADD COLUMN {col_n} {col_t}")
+                        conexion.commit()
+                    except Exception:
+                        pass
+
             cursor.execute("SELECT COUNT(*) FROM configuracion_pdf WHERE usuario_id = ?", (usuario_id,))
             existe = cursor.fetchone()[0] > 0
 
@@ -655,11 +689,16 @@ def guardar_configuracion_pdf(usuario_id, datos):
                         direccion = ?,
                         terminos_condiciones = ?,
                         nota_pie = ?,
+                        responsable_nombre = ?,
+                        responsable_telefono = ?,
+                        responsable_email = ?,
+                        plazo_entrega = ?,
+                        logo_base64 = ?,
                         fecha_actualizacion = CURRENT_TIMESTAMP
                     WHERE usuario_id = ?
                 ''', (
                     datos.get('tipo_hoja', 'A4'),
-                    datos.get('color_tema', '#0d6efd'),
+                    datos.get('color_tema', '#dc2626'),
                     datos.get('titulo_documento', 'COTIZACIÓN DE VENTAS'),
                     datos.get('empresa_nombre', ''),
                     datos.get('nit_emisor', ''),
@@ -668,6 +707,11 @@ def guardar_configuracion_pdf(usuario_id, datos):
                     datos.get('direccion', ''),
                     datos.get('terminos_condiciones', ''),
                     datos.get('nota_pie', ''),
+                    datos.get('responsable_nombre', ''),
+                    datos.get('responsable_telefono', ''),
+                    datos.get('responsable_email', ''),
+                    datos.get('plazo_entrega', ''),
+                    datos.get('logo_base64', ''),
                     usuario_id
                 ))
             else:
@@ -675,12 +719,13 @@ def guardar_configuracion_pdf(usuario_id, datos):
                     INSERT INTO configuracion_pdf (
                         usuario_id, tipo_hoja, color_tema, titulo_documento,
                         empresa_nombre, nit_emisor, telefono, correo, direccion,
-                        terminos_condiciones, nota_pie
-                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        terminos_condiciones, nota_pie, responsable_nombre,
+                        responsable_telefono, responsable_email, plazo_entrega, logo_base64
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 ''', (
                     usuario_id,
                     datos.get('tipo_hoja', 'A4'),
-                    datos.get('color_tema', '#0d6efd'),
+                    datos.get('color_tema', '#dc2626'),
                     datos.get('titulo_documento', 'COTIZACIÓN DE VENTAS'),
                     datos.get('empresa_nombre', ''),
                     datos.get('nit_emisor', ''),
@@ -688,7 +733,12 @@ def guardar_configuracion_pdf(usuario_id, datos):
                     datos.get('correo', ''),
                     datos.get('direccion', ''),
                     datos.get('terminos_condiciones', ''),
-                    datos.get('nota_pie', '')
+                    datos.get('nota_pie', ''),
+                    datos.get('responsable_nombre', ''),
+                    datos.get('responsable_telefono', ''),
+                    datos.get('responsable_email', ''),
+                    datos.get('plazo_entrega', ''),
+                    datos.get('logo_base64', '')
                 ))
             conexion.commit()
             return True

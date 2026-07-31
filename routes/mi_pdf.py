@@ -20,7 +20,7 @@ def register_mi_pdf_routes(app):
         
         datos = {
             'tipo_hoja': data.get('tipo_hoja', 'A4'),
-            'color_tema': data.get('color_tema', '#0d6efd'),
+            'color_tema': data.get('color_tema', '#dc2626'),
             'titulo_documento': data.get('titulo_documento', 'COTIZACIÓN DE VENTAS'),
             'empresa_nombre': data.get('empresa_nombre', ''),
             'nit_emisor': data.get('nit_emisor', ''),
@@ -28,7 +28,12 @@ def register_mi_pdf_routes(app):
             'correo': data.get('correo', ''),
             'direccion': data.get('direccion', ''),
             'terminos_condiciones': data.get('terminos_condiciones', ''),
-            'nota_pie': data.get('nota_pie', '')
+            'nota_pie': data.get('nota_pie', ''),
+            'responsable_nombre': data.get('responsable_nombre', ''),
+            'responsable_telefono': data.get('responsable_telefono', ''),
+            'responsable_email': data.get('responsable_email', ''),
+            'plazo_entrega': data.get('plazo_entrega', ''),
+            'logo_base64': data.get('logo_base64', '')
         }
         
         exito = guardar_configuracion_pdf(usuario_id, datos)

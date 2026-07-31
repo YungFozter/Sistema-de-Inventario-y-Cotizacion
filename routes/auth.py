@@ -75,20 +75,30 @@ def register_routes(app):
                 fecha_vencimiento = (datetime.now() + timedelta(days=30)).strftime('%Y-%m-%d %H:%M:%S')
             
             try:
-                cursor.execute('''
+                is_postgres = bool(os.environ.get('DATABASE_URL') and os.environ.get('DATABASE_URL').startswith('postgres'))
+                query_insert = '''
                     INSERT INTO clientes (nombre, correo, telefono, contrasena, rol, fecha_vencimiento_suscripcion)
                     VALUES (?, ?, ?, ?, ?, ?)
-                ''', (nombre, correo, telefono, contrasena_hash, rol, fecha_vencimiento))
+                '''
+                if is_postgres:
+                    query_insert += " RETURNING id"
+
+                cursor.execute(query_insert, (nombre, correo, telefono, contrasena_hash, rol, fecha_vencimiento))
                 nuevo_usuario_id = cursor.lastrowid
-            
-                # Quemar el PIN
+
+                # Quemar el PIN si es admin
                 if pin_id_usado:
                     cursor.execute('UPDATE pines_admin SET usado = 1, usado_por = ? WHERE id = ?', (nuevo_usuario_id, pin_id_usado))
                 
                 conexion.commit()
-            except sqlite3.IntegrityError:
+                flash('¡Cuenta creada exitosamente! Ya puedes iniciar sesión.', 'success')
+            except Exception as e:
                 conexion.rollback()
-                flash('El correo electrónico ya está registrado', 'danger')
+                err_msg = str(e).lower()
+                if 'unique' in err_msg or 'duplicate' in err_msg or 'ya existe' in err_msg or 'correo' in err_msg:
+                    flash('El correo electrónico ya está registrado', 'danger')
+                else:
+                    flash(f'Error al registrar la cuenta: {str(e)}', 'danger')
                 return redirect(url_for('registro'))
             finally:
                 conexion.close()

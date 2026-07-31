@@ -303,6 +303,49 @@
     </div>
 </div>
 
+<!-- Modal Confirmar Eliminación Permanente (Estilizado) -->
+<div class="modal fade" id="modalConfirmarEliminacion" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+            <div class="modal-header bg-danger text-white py-3">
+                <h5 class="modal-title fw-bold">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>¿Eliminar Usuario de Forma Permanente?
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4 text-center">
+                <div class="avatar-lg bg-danger bg-opacity-10 text-danger rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center" style="width: 70px; height: 70px;">
+                    <i class="bi bi-trash3-fill display-5"></i>
+                </div>
+                
+                <h5 class="fw-bold text-dark mb-2" id="deleteUsuarioNombre">Nombre del Usuario</h5>
+                <p class="text-muted small mb-3">Vas a eliminar permanentemente a este usuario y TODA la información asociada en la plataforma:</p>
+
+                <div class="card bg-light border-0 text-start p-3 mb-3 rounded-3">
+                    <ul class="list-unstyled mb-0 small text-secondary">
+                        <li class="mb-1"><i class="bi bi-file-earmark-text text-danger me-2"></i>Cotizaciones y registros de ventas</li>
+                        <li class="mb-1"><i class="bi bi-kanban text-danger me-2"></i>Tareas e instrucciones asignadas</li>
+                        <li class="mb-1"><i class="bi bi-chat-dots text-danger me-2"></i>Historial de chat y notificaciones</li>
+                        <li class="mb-0"><i class="bi bi-shield-lock text-danger me-2"></i>Credenciales de acceso e historial</li>
+                    </ul>
+                </div>
+
+                <div class="alert alert-danger border-0 fw-bold mb-0 py-2">
+                    <i class="bi bi-slash-circle me-1"></i> Esta acción NO se puede deshacer.
+                </div>
+            </div>
+            <div class="modal-footer bg-light py-3 border-top-0 d-flex justify-content-center gap-2">
+                <button type="button" class="btn btn-secondary px-4 fw-semibold rounded-pill" data-bs-dismiss="modal">
+                    Cancelar
+                </button>
+                <button type="button" class="btn btn-danger px-4 fw-bold rounded-pill shadow-sm" id="btnConfirmarEliminacion">
+                    <i class="bi bi-trash-fill me-1"></i> Sí, Eliminar Definitivamente
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 {% endblock %}
 
 {% block scripts %}
@@ -570,30 +613,42 @@ function verHistorialRenovaciones(id, nombre) {
         });
 }
 
-function eliminarUsuarioPermanente(id, nombre) {
-    if (!confirm(`⚠️ ¿ESTÁS ABSOLUTAMENTE SEGURO?\n\nVas a eliminar permanentemente al usuario "${nombre}" y TODA su información asociada (cotizaciones, tareas, historial de chat y notificaciones).\n\nEsta acción NO se puede deshacer.`)) {
-        return;
-    }
+let usuarioIdEliminar = null;
 
-    fetch(`/admin/usuarios/${id}`, {
+function eliminarUsuarioPermanente(id, nombre) {
+    usuarioIdEliminar = id;
+    document.getElementById('deleteUsuarioNombre').textContent = nombre;
+    const modal = new bootstrap.Modal(document.getElementById('modalConfirmarEliminacion'));
+    modal.show();
+}
+
+document.getElementById('btnConfirmarEliminacion').addEventListener('click', function() {
+    if (!usuarioIdEliminar) return;
+
+    const btn = this;
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span> Eliminando...';
+
+    fetch(`/admin/usuarios/${usuarioIdEliminar}`, {
         method: 'DELETE',
-        headers: {
-            'Content-Type': 'application/json'
-        }
+        headers: { 'Content-Type': 'application/json' }
     })
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            alert(data.message);
             location.reload();
         } else {
             alert('Error: ' + data.error);
+            btn.disabled = false;
+            btn.innerHTML = '<i class="bi bi-trash-fill me-1"></i> Sí, Eliminar Definitivamente';
         }
     })
     .catch(error => {
         console.error('Error:', error);
         alert('Error de conexión al eliminar usuario');
+        btn.disabled = false;
+        btn.innerHTML = '<i class="bi bi-trash-fill me-1"></i> Sí, Eliminar Definitivamente';
     });
-}
+});
 </script>
 {% endblock %}

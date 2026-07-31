@@ -131,6 +131,35 @@ def register_routes(app):
         finally:
             conexion.close()
 
+    @app.route('/equipo/chat/obtener', methods=['GET'])
+    @login_required
+    def obtener_mensajes_chat():
+        conexion = get_db_connection()
+        conexion.row_factory = sqlite3.Row
+        cursor = conexion.cursor()
+        try:
+            hace_siete_dias = (obtener_ahora_local() - timedelta(days=7)).strftime("%Y-%m-%d %H:%M:%S")
+            cursor.execute('''
+                SELECT c.id, c.usuario_id, u.nombre as usuario_nombre, u.rol as usuario_rol,
+                       c.mensaje, c.es_fijado, c.fecha
+                FROM equipo_chat c
+                JOIN clientes u ON c.usuario_id = u.id
+                WHERE c.fecha >= ? OR c.es_fijado = TRUE
+                ORDER BY c.fecha ASC
+            ''', (hace_siete_dias,))
+            rows = cursor.fetchall()
+            mensajes = [dict(row) for row in rows]
+            return jsonify({
+                'success': True,
+                'mensajes': mensajes,
+                'current_user_id': session.get('user_id'),
+                'is_admin': session.get('user_rol') in ['admin', 'superadmin']
+            })
+        except Exception as e:
+            return jsonify({'success': False, 'message': str(e)}), 500
+        finally:
+            conexion.close()
+
     @app.route('/equipo/chat/<int:id>/fijar', methods=['POST'])
     @login_required
     def fijar_mensaje_chat(id):

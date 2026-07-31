@@ -546,12 +546,81 @@ function rechazarSolicitud(id) {
     });
 }
 
+let lastChatState = "";
+
+function escapeHtml(text) {
+    if (!text) return "";
+    return text.replace(/&/g, "&amp;")
+               .replace(/</g, "&lt;")
+               .replace(/>/g, "&gt;")
+               .replace(/"/g, "&quot;")
+               .replace(/'/g, "&#039;");
+}
+
+function cargarMensajesChat(forceScroll = false) {
+    fetch('/equipo/chat/obtener')
+    .then(res => res.json())
+    .then(data => {
+        if (!data.success) return;
+
+        const chatBox = document.getElementById('box-chat-mensajes');
+        if (!chatBox) return;
+        const innerWrapper = chatBox.querySelector('.mt-auto');
+        if (!innerWrapper) return;
+
+        const currentState = data.mensajes.map(m => `${m.id}_${m.es_fijado}`).join(',');
+        if (currentState === lastChatState && !forceScroll) return;
+        lastChatState = currentState;
+
+        if (data.mensajes.length === 0) {
+            innerWrapper.innerHTML = `
+                <div class="text-center text-muted my-5">
+                    <i class="bi bi-chat-square-text fs-2 d-block mb-2"></i>
+                    <p class="small mb-0">No hay mensajes recientes en el chat de equipo.</p>
+                </div>
+            `;
+            return;
+        }
+
+        let html = '';
+        data.mensajes.forEach(m => {
+            const esPropio = (m.usuario_id === data.current_user_id);
+            const esAdmin = (m.usuario_rol === 'admin' || m.usuario_rol === 'superadmin');
+
+            html += `
+                <div class="d-flex flex-column ${esPropio ? 'align-items-end' : 'align-items-start'}">
+                    <div class="d-flex align-items-center mb-1 gap-2">
+                        <span class="fw-bold small ${esAdmin ? 'text-danger' : 'text-primary'}">
+                            ${m.usuario_nombre}
+                            ${esAdmin ? '<span class="badge bg-danger ms-1" style="font-size:0.65rem;">Jefe/Admin</span>' : ''}
+                        </span>
+                        <span class="text-muted" style="font-size: 0.7rem;">${m.fecha}</span>
+                        ${data.is_admin ? `
+                        <button class="btn btn-link p-0 text-warning" onclick="fijarMensaje(${m.id})" title="Fijar/Desfijar Anuncio">
+                            <i class="bi bi-pin-angle${m.es_fijado ? '-fill' : ''}"></i>
+                        </button>` : ''}
+                    </div>
+                    <div class="p-2 px-3 rounded-3 shadow-sm style-msg ${esPropio ? 'bg-primary text-white' : 'bg-white text-dark border'}" 
+                         style="max-width: 85%; word-break: break-word;">
+                        ${escapeHtml(m.mensaje)}
+                    </div>
+                </div>
+            `;
+        });
+
+        innerWrapper.innerHTML = html;
+        scrollToBottomChat();
+    })
+    .catch(err => console.error('Error al actualizar chat en tiempo real:', err));
+}
+
 function enviarMensaje(e) {
     e.preventDefault();
     const input = document.getElementById('chat-mensaje-input');
     const mensaje = input.value.trim();
     if (!mensaje) return;
 
+    input.value = ''; // Limpieza instantánea de la caja de texto
     fetch('/equipo/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -560,8 +629,7 @@ function enviarMensaje(e) {
     .then(res => res.json())
     .then(data => {
         if (data.success) {
-            input.value = '';
-            location.reload();
+            cargarMensajesChat(true); // Cargar inmediatamente el nuevo mensaje sin recargar página
         } else {
             alert('Error al enviar mensaje: ' + data.message);
         }
@@ -573,8 +641,11 @@ function fijarMensaje(id) {
     fetch(`/equipo/chat/${id}/fijar`, { method: 'POST' })
     .then(res => res.json())
     .then(data => {
-        if (data.success) location.reload();
-        else alert('Error: ' + data.message);
+        if (data.success) {
+            location.reload(); // Recargar si se fijó un anuncio para actualizar panel superior
+        } else {
+            alert('Error: ' + data.message);
+        }
     });
 }
 
@@ -613,6 +684,8 @@ function scrollToBottomChat() {
 
 document.addEventListener('DOMContentLoaded', function() {
     scrollToBottomChat();
+    // Polling en segundo plano cada 3 segundos para chat en tiempo real
+    setInterval(() => cargarMensajesChat(false), 3000);
 });
 </script>
 {% endblock %}

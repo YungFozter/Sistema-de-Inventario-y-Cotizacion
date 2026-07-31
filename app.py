@@ -18,14 +18,15 @@ builtins.app = app
 
 # Inicializar Base de Datos
 def inicializar_base_datos():
-    if not os.path.exists('database'):
-        os.makedirs('database')
-    
-    conexion = get_db_connection()
-    crear_tablas()
-    migrar_columnas_nuevas_clientes()
-    migrar_esquema_productos()
-    conexion.close()
+    try:
+        if not os.path.exists('database'):
+            os.makedirs('database')
+        
+        crear_tablas()
+        migrar_columnas_nuevas_clientes()
+        migrar_esquema_productos()
+    except Exception as e:
+        print(f"[WARN] No se pudo inicializar/migrar la base de datos en inicio: {e}")
 
 inicializar_base_datos()
 

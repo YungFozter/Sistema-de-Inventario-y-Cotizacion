@@ -322,6 +322,7 @@ def migrar_clientes_existentes():
 
 def migrar_esquema_productos():
     """Agrega columnas faltantes a la tabla productos (categoria_id, stock_reservado)"""
+    conexion = None
     try:
         conexion = get_db_connection()
         cursor = conexion.cursor()
@@ -330,7 +331,13 @@ def migrar_esquema_productos():
         
         if is_postgres:
             cursor.execute("SELECT column_name FROM information_schema.columns WHERE table_name='productos'")
-            columnas_existentes = [col[0] for col in cursor.fetchall()]
+            rows = cursor.fetchall()
+            columnas_existentes = []
+            for col in rows:
+                if isinstance(col, (dict, list, tuple)):
+                    columnas_existentes.append(col[0])
+                else:
+                    columnas_existentes.append(getattr(col, 'column_name', col[0]))
             
             if 'categoria_id' not in columnas_existentes:
                 print("[INFO] Agregando columna categoria_id a la tabla productos (Postgres)...")
@@ -359,10 +366,16 @@ def migrar_esquema_productos():
     except Exception as e:
         print(f"[ERROR] Error en migración de esquema de productos: {str(e)}")
         if conexion:
-            conexion.rollback()
+            try:
+                conexion.rollback()
+            except Exception:
+                pass
     finally:
         if conexion:
-            conexion.close()
+            try:
+                conexion.close()
+            except Exception:
+                pass
 
 
 def inicializar_base_datos():
@@ -591,6 +604,7 @@ def eliminar_importacion_pdf(importacion_id):
 
 def migrar_columnas_nuevas_clientes():
     """Agrega nuevas columnas a la tabla clientes si no existen."""
+    conexion = None
     try:
         conexion = get_db_connection()
         cursor = conexion.cursor()
@@ -599,7 +613,13 @@ def migrar_columnas_nuevas_clientes():
         
         if is_postgres:
             cursor.execute("SELECT column_name FROM information_schema.columns WHERE table_name='clientes'")
-            columnas_existentes = [col[0] for col in cursor.fetchall()]
+            rows = cursor.fetchall()
+            columnas_existentes = []
+            for col in rows:
+                if isinstance(col, (dict, list, tuple)):
+                    columnas_existentes.append(col[0])
+                else:
+                    columnas_existentes.append(getattr(col, 'column_name', col[0]))
             
             if 'ultima_conexion' not in columnas_existentes:
                 print("[INFO] Agregando columna ultima_conexion en Postgres...")
@@ -622,21 +642,29 @@ def migrar_columnas_nuevas_clientes():
             if 'ultima_conexion' not in columnas:
                 print("[INFO] Agregando columna ultima_conexion en SQLite...")
                 cursor.execute("ALTER TABLE clientes ADD COLUMN ultima_conexion TIMESTAMP")
-                conexion.commit()
                 
             if 'fecha_vencimiento_suscripcion' not in columnas:
                 print("[INFO] Agregando columna fecha_vencimiento_suscripcion en SQLite...")
                 cursor.execute("ALTER TABLE clientes ADD COLUMN fecha_vencimiento_suscripcion TIMESTAMP")
-                conexion.commit()
 
             if 'session_token' not in columnas:
                 print("[INFO] Agregando columna session_token en SQLite...")
                 cursor.execute("ALTER TABLE clientes ADD COLUMN session_token TEXT")
-                conexion.commit()
+
+            conexion.commit()
     except Exception as e:
-        print(f"Error en migrar_columnas_nuevas_clientes: {e}")
+        print(f"[ERROR] Error al migrar columnas de clientes: {e}")
+        if conexion:
+            try:
+                conexion.rollback()
+            except Exception:
+                pass
     finally:
-        conexion.close()
+        if conexion:
+            try:
+                conexion.close()
+            except Exception:
+                pass
 
 
 # =============================================

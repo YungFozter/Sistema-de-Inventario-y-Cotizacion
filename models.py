@@ -679,11 +679,27 @@ def migrar_tablas_equipo():
                 completado_por_id INTEGER,
                 fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 fecha_completada TIMESTAMP,
+                fecha_limite TIMESTAMP,
                 FOREIGN KEY (creador_id) REFERENCES clientes(id),
                 FOREIGN KEY (asignado_a) REFERENCES clientes(id),
                 FOREIGN KEY (completado_por_id) REFERENCES clientes(id)
             ){";" if is_postgres else ""}
         ''')
+
+        # Migración de la columna fecha_limite si no existe
+        try:
+            if is_postgres:
+                cursor.execute("SELECT column_name FROM information_schema.columns WHERE table_name='equipo_tareas'")
+                cols = [r[0] for r in cursor.fetchall()]
+                if 'fecha_limite' not in cols:
+                    cursor.execute("ALTER TABLE equipo_tareas ADD COLUMN fecha_limite TIMESTAMP")
+            else:
+                cursor.execute("PRAGMA table_info(equipo_tareas)")
+                cols = [r[1] for r in cursor.fetchall()]
+                if 'fecha_limite' not in cols:
+                    cursor.execute("ALTER TABLE equipo_tareas ADD COLUMN fecha_limite TIMESTAMP")
+        except Exception as err_col:
+            print(f"[WARN] Error verificando columna fecha_limite: {err_col}")
 
         cursor.execute(f'''
             CREATE TABLE IF NOT EXISTS equipo_notificaciones (

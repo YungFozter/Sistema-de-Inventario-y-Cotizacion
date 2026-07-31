@@ -62,6 +62,12 @@
                                             </div>
                                         </div>
                                         
+                                        {% if tarea.fecha_limite %}
+                                        <div class="mt-2 text-danger fw-bold extra-small">
+                                            <i class="bi bi-clock-history me-1"></i>Límite: {{ tarea.fecha_limite }}
+                                        </div>
+                                        {% endif %}
+                                        
                                         <div class="d-flex justify-content-between align-items-center mt-3 pt-2 border-top">
                                             <div class="small text-muted">
                                                 <i class="bi bi-person me-1"></i>Asignado por: <strong>{{ tarea.creador_nombre }}</strong>
@@ -217,7 +223,7 @@
 <!-- Modal Nueva Tarea (Solo Admin/Superadmin) -->
 {% if session.user_rol in ['admin', 'superadmin'] %}
 <div class="modal fade" id="modalNuevaTarea" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header bg-primary text-white">
                 <h5 class="modal-title fw-bold"><i class="bi bi-plus-circle me-2"></i>Crear Tarea para el Equipo</h5>
@@ -231,8 +237,9 @@
                     </div>
                     <div class="mb-3">
                         <label for="descripcion" class="form-label fw-bold">Descripción / Instrucciones</label>
-                        <textarea class="form-control" id="descripcion" name="descripcion" rows="3" placeholder="Detalla qué deben hacer los empleados..."></textarea>
+                        <textarea class="form-control" id="descripcion" name="descripcion" rows="2" placeholder="Detalla qué deben hacer los empleados..."></textarea>
                     </div>
+                    
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label for="prioridad" class="form-label fw-bold">Prioridad</label>
@@ -243,13 +250,29 @@
                             </select>
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label for="asignado_a" class="form-label fw-bold">Asignar A</label>
-                            <select class="form-select" id="asignado_a" name="asignado_a">
-                                <option value="">Todo el Equipo (General)</option>
+                            <label for="asignado_a" class="form-label fw-bold">Asignar a Empleado(s)</label>
+                            <select class="form-select" id="asignado_a" name="asignado_a[]" multiple style="height: 100px;">
+                                <option value="" selected>-- Todo el Equipo (General) --</option>
                                 {% for u in usuarios_equipo %}
                                     <option value="{{ u.id }}">{{ u.nombre }} ({{ u.rol }})</option>
                                 {% endfor %}
                             </select>
+                            <small class="form-text text-muted">Mantén presionado Ctrl para seleccionar varios empleados.</small>
+                        </div>
+                    </div>
+
+                    <div class="card bg-light border-0 p-3 mb-2">
+                        <h6 class="fw-bold text-danger mb-2"><i class="bi bi-clock-history me-1"></i>Fecha y Hora Límite (Opcional)</h6>
+                        <div class="row">
+                            <div class="col-md-6 mb-2">
+                                <label for="fecha_limite" class="form-label small fw-bold">Fecha Límite</label>
+                                <input type="date" class="form-control" id="fecha_limite" name="fecha_limite">
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <label for="hora_limite" class="form-label small fw-bold">Hora Límite (Opcional)</label>
+                                <input type="time" class="form-control" id="hora_limite" name="hora_limite">
+                                <small class="form-text text-muted">Si no se especifica hora, el límite será las 00:00 del día fijado.</small>
+                            </div>
                         </div>
                     </div>
                 </div>

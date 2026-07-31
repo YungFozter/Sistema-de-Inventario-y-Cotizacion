@@ -47,7 +47,7 @@ def register_routes(app):
                 SELECT t.id, t.creador_id, uc.nombre as creador_nombre,
                        t.asignado_a, ua.nombre as asignado_nombre,
                        t.titulo, t.descripcion, t.prioridad, t.estado,
-                       t.fecha_creacion, t.fecha_completada,
+                       t.fecha_creacion, t.fecha_completada, t.fecha_limite,
                        t.completado_por_id, ucomp.nombre as completado_por_nombre
                 FROM equipo_tareas t
                 JOIN clientes uc ON t.creador_id = uc.id
@@ -146,24 +146,51 @@ def register_routes(app):
         titulo = request.form.get('titulo', '').strip()
         descripcion = request.form.get('descripcion', '').strip()
         prioridad = request.form.get('prioridad', 'media')
-        asignado_a = request.form.get('asignado_a')
+        asignados_raw = request.form.getlist('asignado_a[]') or request.form.getlist('asignado_a')
+        
+        fecha_limite_val = request.form.get('fecha_limite', '').strip()
+        hora_limite_val = request.form.get('hora_limite', '').strip()
 
         if not titulo:
             flash('El título de la tarea es obligatorio', 'danger')
             return redirect(url_for('vista_equipo'))
 
-        asignado_id = int(asignado_a) if asignado_a and asignado_a.isdigit() else None
+        # Procesar Fecha y Hora límite
+        fecha_limite_str = None
+        if fecha_limite_val:
+            if not hora_limite_val:
+                hora_limite_val = "00:00:00"
+            elif len(hora_limite_val) == 5:
+                hora_limite_val += ":00"
+            fecha_limite_str = f"{fecha_limite_val} {hora_limite_val}"
+
+        # Procesar asignados
+        asignados_ids = []
+        for val in asignados_raw:
+            if val and val.isdigit():
+                asignados_ids.append(int(val))
 
         conexion = get_db_connection()
         cursor = conexion.cursor()
         try:
             fecha_actual = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            cursor.execute('''
-                INSERT INTO equipo_tareas (creador_id, asignado_a, titulo, descripcion, prioridad, estado, fecha_creacion)
-                VALUES (?, ?, ?, ?, ?, 'pendiente', ?)
-            ''', (session.get('user_id'), asignado_id, titulo, descripcion, prioridad, fecha_actual))
+            
+            if asignados_ids:
+                # Crear una tarea para cada empleado seleccionado
+                for u_id in asignados_ids:
+                    cursor.execute('''
+                        INSERT INTO equipo_tareas (creador_id, asignado_a, titulo, descripcion, prioridad, estado, fecha_creacion, fecha_limite)
+                        VALUES (?, ?, ?, ?, ?, 'pendiente', ?, ?)
+                    ''', (session.get('user_id'), u_id, titulo, descripcion, prioridad, fecha_actual, fecha_limite_str))
+            else:
+                # Tarea para todo el equipo (asignado_a = None)
+                cursor.execute('''
+                    INSERT INTO equipo_tareas (creador_id, asignado_a, titulo, descripcion, prioridad, estado, fecha_creacion, fecha_limite)
+                    VALUES (?, NULL, ?, ?, ?, 'pendiente', ?, ?)
+                ''', (session.get('user_id'), titulo, descripcion, prioridad, fecha_actual, fecha_limite_str))
+
             conexion.commit()
-            flash('Tarea creada exitosamente', 'success')
+            flash('Tarea(s) asignada(s) exitosamente', 'success')
         except Exception as e:
             conexion.rollback()
             flash(f'Error al crear tarea: {str(e)}', 'danger')

@@ -453,7 +453,18 @@ function seleccionarEmpresaSuperadmin(valor) {
           
           <!-- Sección de categorías existentes -->
           <div class="col-md-12 mb-3">
-            <h6><i class="bi bi-list-ul"></i> Categorías Existentes</h6>
+            <div class="d-flex flex-wrap justify-content-between align-items-center mb-2 gap-2">
+              <h6 class="mb-0 fw-bold"><i class="bi bi-list-ul"></i> Categorías Existentes</h6>
+              <div class="input-group input-group-sm" style="max-width: 320px;">
+                <span class="input-group-text bg-light border-secondary"><i class="bi bi-search text-muted"></i></span>
+                <input type="text" id="buscarCategoriaInput" class="form-control border-secondary fw-bold" 
+                       placeholder="Buscar por nombre o descripción..." 
+                       oninput="filtrarListaCategoriasUI(this.value)">
+                <button class="btn btn-outline-secondary" type="button" onclick="limpiarFiltroCategoriaUI()" title="Limpiar búsqueda">
+                  <i class="bi bi-x-lg"></i>
+                </button>
+              </div>
+            </div>
             <div id="listaCategorias" class="border rounded p-3" style="max-height: 300px; overflow-y: auto;">
               <!-- Se cargarán dinámicamente -->
             </div>
@@ -984,6 +995,8 @@ function mostrarModalGestion() {
     modal.show();
 }
 
+let todasLasCategoriasCargadas = [];
+
 // Cargar lista de categorías en el modal de gestión
 function cargarListaCategorias() {
     const lista = document.getElementById('listaCategorias');
@@ -1004,7 +1017,9 @@ function cargarListaCategorias() {
             return response.json();
         })
         .then(data => {
-            mostrarListaCategorias(data);
+            todasLasCategoriasCargadas = data || [];
+            const queryActual = document.getElementById('buscarCategoriaInput')?.value || '';
+            filtrarListaCategoriasUI(queryActual);
         })
         .catch(error => {
             console.error('Error al cargar categorías:', error);
@@ -1013,8 +1028,30 @@ function cargarListaCategorias() {
         });
 }
 
+// Filtrado en tiempo real por Nombre o Descripción
+function filtrarListaCategoriasUI(query) {
+    const q = (query || '').toLowerCase().trim();
+    if (!q) {
+        mostrarListaCategorias(todasLasCategoriasCargadas, '');
+        return;
+    }
+    const filtradas = todasLasCategoriasCargadas.filter(cat => {
+        const nom = (cat.nombre || '').toLowerCase();
+        const desc = (cat.descripcion || '').toLowerCase();
+        return nom.includes(q) || desc.includes(q);
+    });
+    mostrarListaCategorias(filtradas, q);
+}
+
+// Limpiar campo de filtrado
+function limpiarFiltroCategoriaUI() {
+    const input = document.getElementById('buscarCategoriaInput');
+    if (input) input.value = '';
+    filtrarListaCategoriasUI('');
+}
+
 // Mostrar las categorías en el modal de gestión
-function mostrarListaCategorias(categorias) {
+function mostrarListaCategorias(categorias, query = '') {
     const lista = document.getElementById('listaCategorias');
     
     if (!lista) {
@@ -1023,7 +1060,14 @@ function mostrarListaCategorias(categorias) {
     }
     
     if (categorias.length === 0) {
-        lista.innerHTML = '<p class="text-muted text-center py-3">No hay categorías registradas</p>';
+        if (query) {
+            lista.innerHTML = `<div class="text-muted text-center py-4">
+                <i class="bi bi-search fs-3 d-block mb-2 text-secondary"></i>
+                No se encontraron categorías que coincidan con "<strong>${query.replace(/</g, "&lt;")}</strong>"
+            </div>`;
+        } else {
+            lista.innerHTML = '<p class="text-muted text-center py-3">No hay categorías registradas</p>';
+        }
         return;
     }
     
@@ -1034,12 +1078,24 @@ function mostrarListaCategorias(categorias) {
         const safeNombre = (categoria.nombre || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
         const safeDesc = (categoria.descripcion || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
 
+        // Resaltar coincidencias de texto si hay búsqueda
+        let displayNombre = categoria.nombre || '';
+        let displayDesc = categoria.descripcion || '';
+
+        if (query) {
+            const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+            displayNombre = displayNombre.replace(regex, '<mark class="bg-warning bg-opacity-25 text-dark fw-bold px-1 rounded">$1</mark>');
+            if (displayDesc) {
+                displayDesc = displayDesc.replace(regex, '<mark class="bg-warning bg-opacity-25 text-dark fw-bold px-1 rounded">$1</mark>');
+            }
+        }
+
         html += `
             <div class="d-flex justify-content-between align-items-center border-bottom py-2 ${claseNueva}" id="cat-row-${categoria.id}">
                 <div>
-                    <strong>${categoria.nombre}</strong>
+                    <strong>${displayNombre}</strong>
                     ${esNueva ? '<span class="badge bg-success ms-2">¡Nueva!</span>' : ''}
-                    ${categoria.descripcion ? `<br><small class="text-muted">${categoria.descripcion}</small>` : ''}
+                    ${displayDesc ? `<br><small class="text-muted">${displayDesc}</small>` : ''}
                 </div>
                 <div class="d-flex gap-1">
                     <button class="btn btn-sm btn-outline-primary" onclick="mostrarFormularioEditarCategoria(${categoria.id}, '${safeNombre}', '${safeDesc}')" title="Editar categoría">

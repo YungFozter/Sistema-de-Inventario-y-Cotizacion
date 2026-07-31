@@ -353,17 +353,7 @@ def register_routes(app):
             if not inv:
                 return render_template('equipo/unirse_equipo.html', invitacion_valida=False)
 
-            # Validar expiración de uso único
-            if inv['tipo_expiracion'] == 'uso_unico' and inv['usos_restantes'] <= 0:
-                return render_template('equipo/unirse_equipo.html', invitacion_valida=False)
-
-            # Validar expiración por fecha
-            if inv['fecha_expiracion']:
-                fecha_exp = datetime.strptime(inv['fecha_expiracion'], "%Y-%m-%d %H:%M:%S")
-                if datetime.now() > fecha_exp:
-                    return render_template('equipo/unirse_equipo.html', invitacion_valida=False)
-
-            # Si el usuario actual ya está conectado
+            # Si el usuario actual ya está conectado o envió solicitud
             user_id = session.get('user_id')
             esta_vinculado = False
             solicitud_existente = None
@@ -380,6 +370,16 @@ def register_routes(app):
                     WHERE admin_id = ? AND empleado_id = ? AND estado = 'pendiente'
                 ''', (inv['admin_id'], user_id))
                 solicitud_existente = cursor.fetchone()
+
+            # Validar expiración (solo si el usuario no ha enviado ya la solicitud)
+            if not esta_vinculado and not solicitud_existente:
+                if inv['tipo_expiracion'] == 'uso_unico' and inv['usos_restantes'] <= 0:
+                    return render_template('equipo/unirse_equipo.html', invitacion_valida=False)
+
+                if inv['fecha_expiracion']:
+                    fecha_exp = datetime.strptime(inv['fecha_expiracion'], "%Y-%m-%d %H:%M:%S")
+                    if datetime.now() > fecha_exp:
+                        return render_template('equipo/unirse_equipo.html', invitacion_valida=False)
 
             return render_template(
                 'equipo/unirse_equipo.html',

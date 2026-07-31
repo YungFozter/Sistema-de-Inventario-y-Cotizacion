@@ -6,12 +6,12 @@
 <div class="container-fluid py-4 px-lg-5">
     <!-- Banner de Bienvenida Estilizado -->
     <div class="card border-0 shadow-lg rounded-4 overflow-hidden mb-4 fade-up-enter" 
-         style="background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 60%, #032830 100%); position: relative;">
+         style="background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 60%, #032830 100%);">
         <div class="card-body p-4 p-lg-5 text-white">
             <div class="row align-items-center">
-                <div class="col-lg-8 mb-3 mb-lg-0">
-                    <div class="d-flex align-items-center mb-2">
-                        <span class="badge bg-white bg-opacity-25 text-white rounded-pill px-3 py-2 fs-7 fw-semibold me-2">
+                <div class="col-lg-7 mb-3 mb-lg-0">
+                    <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
+                        <span class="badge bg-white bg-opacity-25 text-white rounded-pill px-3 py-2 fs-7 fw-semibold">
                             <i class="bi bi-shield-check me-1"></i> Usuario Standard / Empleado
                         </span>
                         <span class="badge bg-success bg-opacity-75 text-white rounded-pill px-3 py-2 fs-7 fw-semibold">
@@ -23,13 +23,15 @@
                         Bienvenido a tu centro de control comercial. Gestiona tus cotizaciones, atiende tus tareas de equipo y revisa los anuncios del Administrador.
                     </p>
                 </div>
-                <div class="col-lg-4 text-lg-end">
-                    <a href="{{ url_for('gestion_cotizaciones') }}" class="btn btn-light btn-lg rounded-pill px-4 py-3 fw-bold text-primary shadow-sm me-2 mb-2 mb-sm-0">
-                        <i class="bi bi-plus-circle-fill me-2"></i>Nueva Cotización
-                    </a>
-                    <a href="/equipo" class="btn btn-outline-light btn-lg rounded-pill px-4 py-3 fw-semibold shadow-sm">
-                        <i class="bi bi-people-fill me-2"></i>Mi Equipo
-                    </a>
+                <div class="col-lg-5 text-lg-end">
+                    <div class="d-flex flex-wrap gap-2 justify-content-lg-end align-items-center">
+                        <a href="{{ url_for('gestion_cotizaciones') }}" class="btn btn-light rounded-pill px-4 py-2.5 fw-bold text-primary shadow-sm">
+                            <i class="bi bi-plus-circle-fill me-1"></i>Nueva Cotización
+                        </a>
+                        <a href="/equipo" class="btn btn-outline-light rounded-pill px-4 py-2.5 fw-semibold shadow-sm">
+                            <i class="bi bi-people-fill me-1"></i>Mi Equipo
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
@@ -41,12 +43,12 @@
         <div class="col-12 col-sm-6 col-xl-3">
             <div class="card border-0 shadow-sm rounded-4 h-100 p-3 bg-white">
                 <div class="d-flex align-items-center justify-content-between">
-                    <div>
-                        <span class="text-muted small fw-semibold text-uppercase">Cotizaciones Creadas</span>
-                        <h2 class="fw-bold text-dark mb-0 mt-1">{{ total_cotizaciones }}</h2>
+                    <div class="pe-2">
+                        <span class="text-muted small fw-semibold text-uppercase d-block mb-1">Cotizaciones Creadas</span>
+                        <h2 class="fw-bold text-dark mb-0">{{ total_cotizaciones }}</h2>
                     </div>
-                    <div class="avatar-md bg-primary bg-opacity-10 text-primary rounded-3 p-3 d-flex align-items-center justify-content-center">
-                        <i class="bi bi-file-earmark-text fs-2"></i>
+                    <div class="avatar-md bg-primary bg-opacity-10 text-primary rounded-3 d-flex align-items-center justify-content-center flex-shrink-0" style="width: 48px; height: 48px;">
+                        <i class="bi bi-file-earmark-text fs-3"></i>
                     </div>
                 </div>
                 <div class="mt-3 pt-2 border-top border-light d-flex align-items-center justify-content-between text-muted small">
@@ -60,17 +62,17 @@
         <div class="col-12 col-sm-6 col-xl-3">
             <div class="card border-0 shadow-sm rounded-4 h-100 p-3 bg-white">
                 <div class="d-flex align-items-center justify-content-between">
-                    <div>
-                        <span class="text-muted small fw-semibold text-uppercase">Monto Total Cotizado</span>
-                        <h2 class="fw-bold text-success mb-0 mt-1">{{ "%.2f"|format(total_cotizado) }} <small class="fs-6">Bs.</small></h2>
+                    <div class="pe-2">
+                        <span class="text-muted small fw-semibold text-uppercase d-block mb-1">Monto Total Cotizado</span>
+                        <h2 class="fw-bold text-success mb-0 fs-3">{{ "%.2f"|format(total_cotizado) }} <small class="fs-6 text-muted">Bs.</small></h2>
                     </div>
-                    <div class="avatar-md bg-success bg-opacity-10 text-success rounded-3 p-3 d-flex align-items-center justify-content-center">
-                        <i class="bi bi-currency-dollar fs-2"></i>
+                    <div class="avatar-md bg-success bg-opacity-10 text-success rounded-3 d-flex align-items-center justify-content-center flex-shrink-0" style="width: 48px; height: 48px;">
+                        <i class="bi bi-currency-dollar fs-3"></i>
                     </div>
                 </div>
                 <div class="mt-3 pt-2 border-top border-light d-flex align-items-center justify-content-between text-muted small">
                     <span><i class="bi bi-graph-up me-1"></i>Volumen generado</span>
-                    <span class="badge bg-success bg-opacity-10 text-success fw-semibold">Ventas</span>
+                    <span class="badge bg-success-subtle text-success fw-semibold rounded-pill px-2 py-1 fs-8">Ventas</span>
                 </div>
             </div>
         </div>
@@ -79,19 +81,24 @@
         <div class="col-12 col-sm-6 col-xl-3">
             <div class="card border-0 shadow-sm rounded-4 h-100 p-3 bg-white">
                 <div class="d-flex align-items-center justify-content-between">
-                    <div>
-                        <span class="text-muted small fw-semibold text-uppercase">Estado Cotizaciones</span>
-                        <div class="d-flex align-items-center gap-2 mt-1">
-                            <span class="badge bg-success rounded-pill px-3 py-2 fs-6">{{ cotizaciones_aprobadas }} Aprobadas</span>
-                            <span class="badge bg-warning text-dark rounded-pill px-3 py-2 fs-6">{{ cotizaciones_pendientes }} Pendientes</span>
+                    <div class="pe-2">
+                        <span class="text-muted small fw-semibold text-uppercase d-block mb-1">Estado Cotizaciones</span>
+                        <div class="d-flex flex-wrap gap-1 mt-1">
+                            <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-2 py-1 fs-7 fw-semibold">
+                                {{ cotizaciones_aprobadas }} Aprobadas
+                            </span>
+                            <span class="badge bg-warning-subtle text-dark border border-warning-subtle rounded-pill px-2 py-1 fs-7 fw-semibold">
+                                {{ cotizaciones_pendientes }} Pendientes
+                            </span>
                         </div>
                     </div>
-                    <div class="avatar-md bg-warning bg-opacity-10 text-warning rounded-3 p-3 d-flex align-items-center justify-content-center">
-                        <i class="bi bi-pie-chart-fill fs-2"></i>
+                    <div class="avatar-md bg-warning bg-opacity-10 text-warning rounded-3 d-flex align-items-center justify-content-center flex-shrink-0" style="width: 48px; height: 48px;">
+                        <i class="bi bi-pie-chart-fill fs-3"></i>
                     </div>
                 </div>
-                <div class="mt-3 pt-2 border-top border-light text-muted small">
-                    <i class="bi bi-check2-circle text-success me-1"></i>{{ cotizaciones_rechazadas }} Rechazadas
+                <div class="mt-3 pt-2 border-top border-light d-flex align-items-center justify-content-between text-muted small">
+                    <span><i class="bi bi-x-circle text-danger me-1"></i>{{ cotizaciones_rechazadas }} Rechazadas</span>
+                    <span class="badge bg-light text-muted rounded-pill px-2 py-1 fs-8">Resumen</span>
                 </div>
             </div>
         </div>
@@ -100,12 +107,12 @@
         <div class="col-12 col-sm-6 col-xl-3">
             <div class="card border-0 shadow-sm rounded-4 h-100 p-3 bg-white">
                 <div class="d-flex align-items-center justify-content-between">
-                    <div>
-                        <span class="text-muted small fw-semibold text-uppercase">Tareas Pendientes</span>
-                        <h2 class="fw-bold mb-0 mt-1" style="color: #6f42c1;">{{ tareas_pendientes|length }}</h2>
+                    <div class="pe-2">
+                        <span class="text-muted small fw-semibold text-uppercase d-block mb-1">Tareas Pendientes</span>
+                        <h2 class="fw-bold mb-0" style="color: #6f42c1;">{{ tareas_pendientes|length }}</h2>
                     </div>
-                    <div class="avatar-md rounded-3 p-3 d-flex align-items-center justify-content-center" style="background-color: rgba(111, 66, 193, 0.1); color: #6f42c1;">
-                        <i class="bi bi-kanban fs-2"></i>
+                    <div class="avatar-md rounded-3 d-flex align-items-center justify-content-center flex-shrink-0" style="width: 48px; height: 48px; background-color: rgba(111, 66, 193, 0.1); color: #6f42c1;">
+                        <i class="bi bi-kanban fs-3"></i>
                     </div>
                 </div>
                 <div class="mt-3 pt-2 border-top border-light d-flex align-items-center justify-content-between text-muted small">

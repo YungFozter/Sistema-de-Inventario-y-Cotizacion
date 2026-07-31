@@ -215,8 +215,9 @@ def register_routes(app):
                 with get_db_connection() as conn:  # Usar el context manager existente
                     cursor = conn.cursor()
 
-                    # Iniciar transacción explícita
-                    cursor.execute("BEGIN IMMEDIATE TRANSACTION")
+                    # Iniciar transacción explícita si es SQLite (PostgreSQL maneja transacciones automáticamente)
+                    if not (os.environ.get('DATABASE_URL') and os.environ.get('DATABASE_URL').startswith('postgres')):
+                        cursor.execute("BEGIN IMMEDIATE TRANSACTION")
 
                     # 1. Verificar stock (excepto para superadmin)
                     if session.get('user_rol') != 'superadmin':
@@ -428,7 +429,8 @@ def register_routes(app):
             
             # Solo si el estado cambia
             if estado_anterior != nuevo_estado:
-                cursor.execute("BEGIN IMMEDIATE TRANSACTION")
+                if not (os.environ.get('DATABASE_URL') and os.environ.get('DATABASE_URL').startswith('postgres')):
+                    cursor.execute("BEGIN IMMEDIATE TRANSACTION")
                 
                 # Actualizar estado en la tabla cotizaciones
                 cursor.execute("UPDATE cotizaciones SET estado = ? WHERE id = ?", (nuevo_estado, id))

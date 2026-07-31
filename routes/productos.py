@@ -67,6 +67,8 @@ def register_routes(app):
                     precio_unitario = float(request.form['precio_unitario'])
                     precio_total = cantidad * precio_unitario
                     categoria_id = request.form.get('categoria_id')
+                    if not categoria_id:
+                        categoria_id = None
 
                     # Validar si ya existe combinación empresa + codigo
                     cursor.execute("SELECT COUNT(*) FROM productos WHERE empresa=? AND codigo=?", (empresa, codigo))
@@ -294,6 +296,8 @@ def register_routes(app):
                 precio_unitario = float(request.form['precio_unitario'])
                 precio_total = cantidad * precio_unitario
                 categoria_id = request.form.get('categoria_id')
+                if not categoria_id:
+                    categoria_id = None
             
                 with get_db_connection() as conexion:
                     cursor = conexion.cursor()

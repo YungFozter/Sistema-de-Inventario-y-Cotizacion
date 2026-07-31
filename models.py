@@ -738,6 +738,14 @@ def migrar_tablas_equipo():
             ){";" if is_postgres else ""}
         ''')
 
+        if is_postgres:
+            tablas_rls = ['equipo_chat', 'equipo_tareas', 'equipo_notificaciones', 'equipo_invitaciones', 'equipo_solicitudes']
+            for tbl in tablas_rls:
+                try:
+                    cursor.execute(f"ALTER TABLE public.{tbl} ENABLE ROW LEVEL SECURITY;")
+                except Exception as err_rls:
+                    print(f"[WARN] No se pudo habilitar RLS en {tbl}: {err_rls}")
+
         conexion.commit()
     except Exception as e:
         print(f"[ERROR] Error al migrar tablas de equipo: {e}")

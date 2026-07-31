@@ -692,26 +692,6 @@ def guardar_configuracion_pdf(usuario_id, datos):
             cursor = conexion.cursor()
             asegurar_tabla_configuracion_pdf(cursor)
 
-            # Asegurar que existan las columnas nuevas
-            cursor.execute("PRAGMA table_info(configuracion_pdf)")
-            cols_pdf = [col[1] for col in cursor.fetchall()] if not (os.environ.get('DATABASE_URL') and os.environ.get('DATABASE_URL').startswith('postgres')) else []
-            
-            # Nuevas columnas a añadir en tiempo de ejecución si no existen
-            nuevas_columnas = [
-                ('responsable_nombre', 'TEXT'),
-                ('responsable_telefono', 'TEXT'),
-                ('responsable_email', 'TEXT'),
-                ('plazo_entrega', 'TEXT'),
-                ('logo_base64', 'TEXT')
-            ]
-            for col_n, col_t in nuevas_columnas:
-                if cols_pdf and col_n not in cols_pdf:
-                    try:
-                        cursor.execute(f"ALTER TABLE configuracion_pdf ADD COLUMN {col_n} {col_t}")
-                        conexion.commit()
-                    except Exception:
-                        pass
-
             cursor.execute("SELECT COUNT(*) FROM configuracion_pdf WHERE usuario_id = ?", (usuario_id,))
             existe = cursor.fetchone()[0] > 0
 

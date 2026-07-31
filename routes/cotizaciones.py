@@ -413,7 +413,7 @@ def register_routes(app):
             data = request.get_json()
             nuevo_estado = data.get('estado')
             
-            if nuevo_estado not in ['pendiente', 'aprobada', 'rechazada', 'entregado']:
+            if nuevo_estado not in ['pendiente', 'aprobada', 'rechazada', 'entregado', 'anulada']:
                 return jsonify({'success': False, 'message': 'Estado inválido'}), 400
                 
             cursor.execute("SELECT estado, creador_id FROM cotizaciones WHERE id = ?", (id,))
@@ -445,28 +445,39 @@ def register_routes(app):
                     
                     # Lógica de inventario según el cambio de estado
                     if nuevo_estado == 'aprobada' and estado_anterior == 'pendiente':
-                        # Pasa de pendiente a aprobada: se efectúa la venta (restar de cantidad real, restar de reservado)
-                        cursor.execute("UPDATE productos SET cantidad = cantidad - ?, stock_reservado = stock_reservado - ? WHERE id = ?", (cant, cant, prod_id))
+                        # Pasa de pendiente a aprobada: efectúa la venta y libera reservado
+                        cursor.execute(
+                            """UPDATE productos SET 
+                               cantidad = cantidad - ?, 
+                               stock_reservado = CASE WHEN COALESCE(stock_reservado, 0) - ? < 0 THEN 0 ELSE COALESCE(stock_reservado, 0) - ? END 
+                               WHERE id = ?""", 
+                            (cant, cant, cant, prod_id)
+                        )
                     
-                    elif nuevo_estado == 'rechazada' and estado_anterior == 'pendiente':
-                        # Se rechaza: liberar stock reservado
-                        cursor.execute("UPDATE productos SET stock_reservado = stock_reservado - ? WHERE id = ?", (cant, prod_id))
+                    elif nuevo_estado in ['rechazada', 'anulada'] and estado_anterior == 'pendiente':
+                        # Se rechaza/anula estando pendiente: liberar reservado
+                        cursor.execute(
+                            """UPDATE productos SET 
+                               stock_reservado = CASE WHEN COALESCE(stock_reservado, 0) - ? < 0 THEN 0 ELSE COALESCE(stock_reservado, 0) - ? END 
+                               WHERE id = ?""", 
+                            (cant, cant, prod_id)
+                        )
+                    
+                    elif nuevo_estado in ['anulada', 'rechazada'] and estado_anterior == 'aprobada':
+                        # Se anula o rechaza una venta aprobada: Devolver (restaurar) stock real
+                        cursor.execute("UPDATE productos SET cantidad = cantidad + ? WHERE id = ?", (cant, prod_id))
                     
                     elif nuevo_estado == 'pendiente' and estado_anterior == 'aprobada':
-                        # Revertir venta: sumar a cantidad real, sumar a reservado
+                        # Revertir venta aprobada a pendiente: Devolver a cantidad real y volver a reservar
                         cursor.execute("UPDATE productos SET cantidad = cantidad + ?, stock_reservado = COALESCE(stock_reservado, 0) + ? WHERE id = ?", (cant, cant, prod_id))
                         
-                    elif nuevo_estado == 'pendiente' and estado_anterior == 'rechazada':
-                        # Revertir rechazo: volver a reservar stock
+                    elif nuevo_estado == 'pendiente' and estado_anterior in ['rechazada', 'anulada']:
+                        # Revertir de rechazada/anulada a pendiente: Volver a reservar stock
                         cursor.execute("UPDATE productos SET stock_reservado = COALESCE(stock_reservado, 0) + ? WHERE id = ?", (cant, prod_id))
                         
-                    elif nuevo_estado == 'aprobada' and estado_anterior == 'rechazada':
-                        # Pasa de rechazada a aprobada: descontar stock real, no había reserva
+                    elif nuevo_estado == 'aprobada' and estado_anterior in ['rechazada', 'anulada']:
+                        # Pasa de rechazada/anulada a aprobada directamente: Descontar stock real
                         cursor.execute("UPDATE productos SET cantidad = cantidad - ? WHERE id = ?", (cant, prod_id))
-                        
-                    elif nuevo_estado == 'rechazada' and estado_anterior == 'aprobada':
-                        # Pasa de aprobada a rechazada: restaurar stock real, no se reserva
-                        cursor.execute("UPDATE productos SET cantidad = cantidad + ? WHERE id = ?", (cant, prod_id))
                         
                 registrar_log(
                     usuario_id=session['user_id'],

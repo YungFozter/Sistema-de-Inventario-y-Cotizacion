@@ -17,6 +17,8 @@
                     <i class="bi bi-check-circle-fill text-success"></i> Aprobada
                 {% elif cotizacion[7] == 'rechazada' %}
                     <i class="bi bi-x-circle-fill text-danger"></i> Rechazada
+                {% elif cotizacion[7] == 'anulada' %}
+                    <i class="bi bi-slash-circle-fill text-secondary"></i> Anulada
                 {% else %}
                     <i class="bi bi-question-circle"></i> {{ cotizacion[7]|capitalize }}
                 {% endif %}
@@ -165,16 +167,27 @@
                     <i class="bi bi-eye me-1"></i> Vista Previa
                 </a>
                 
-                {% if cotizacion[7] == 'pendiente' %}
                 <div class="ms-auto d-flex gap-2">
-                    <button class="btn btn-success" onclick="cambiarEstadoCotizacion({{ cotizacion[0] }}, 'aprobada')">
-                        <i class="bi bi-check-circle-fill"></i> Aprobar (Venta)
-                    </button>
-                    <button class="btn btn-danger" onclick="cambiarEstadoCotizacion({{ cotizacion[0] }}, 'rechazada')">
-                        <i class="bi bi-x-circle-fill"></i> Rechazar
-                    </button>
+                    {% if cotizacion[7] == 'pendiente' %}
+                        <button class="btn btn-success" onclick="cambiarEstadoCotizacion({{ cotizacion[0] }}, 'aprobada')">
+                            <i class="bi bi-check-circle-fill"></i> Aprobar (Venta)
+                        </button>
+                        <button class="btn btn-danger" onclick="cambiarEstadoCotizacion({{ cotizacion[0] }}, 'rechazada')">
+                            <i class="bi bi-x-circle-fill"></i> Rechazar
+                        </button>
+                    {% elif cotizacion[7] == 'aprobada' %}
+                        <button class="btn btn-warning text-dark fw-bold" onclick="cambiarEstadoCotizacion({{ cotizacion[0] }}, 'anulada')">
+                            <i class="bi bi-arrow-counterclockwise"></i> Anular / Devolver Stock
+                        </button>
+                    {% elif cotizacion[7] in ['rechazada', 'anulada'] %}
+                        <button class="btn btn-outline-primary" onclick="cambiarEstadoCotizacion({{ cotizacion[0] }}, 'pendiente')">
+                            <i class="bi bi-arrow-return-left"></i> Restablecer a Pendiente
+                        </button>
+                        <button class="btn btn-success" onclick="cambiarEstadoCotizacion({{ cotizacion[0] }}, 'aprobada')">
+                            <i class="bi bi-check-circle-fill"></i> Re-Aprobar (Venta)
+                        </button>
+                    {% endif %}
                 </div>
-                {% endif %}
             </div>
         </div>
     </div>
@@ -182,8 +195,14 @@
 
 <script>
 function cambiarEstadoCotizacion(id, estado) {
-    const accion = estado === 'aprobada' ? 'aprobar (descontar stock real)' : 'rechazar (liberar reserva)';
-    if (!confirm(`¿Está seguro que desea ${accion} esta cotización?`)) return;
+    const mensajes = {
+        'aprobada': 'aprobar (descontar del stock real)',
+        'rechazada': 'rechazar esta cotización',
+        'anulada': 'ANULAR esta cotización y DEVOLVER todas las cantidades al stock disponible',
+        'pendiente': 'restablecer esta cotización a estado pendiente'
+    };
+    const accion = mensajes[estado] || estado;
+    if (!confirm(`¿Está seguro que desea ${accion}?`)) return;
 
     fetch(`/cotizaciones/${id}/estado`, {
         method: 'POST',

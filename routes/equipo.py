@@ -3,10 +3,14 @@ import sqlite3
 import os
 import secrets
 import urllib.parse
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from db_wrapper import get_db_connection
 from models import migrar_tablas_equipo, registrar_log
 from utils.decorators import login_required, admin_required
+
+def obtener_ahora_local():
+    """Retorna la hora local (UTC-4) independientemente de la zona horaria del servidor en Render (UTC)"""
+    return (datetime.now(timezone.utc) - timedelta(hours=4)).replace(tzinfo=None)
 
 def register_routes(app):
 
@@ -21,7 +25,7 @@ def register_routes(app):
             is_postgres = bool(os.environ.get('DATABASE_URL') and os.environ.get('DATABASE_URL').startswith('postgres'))
             
             # 1. Purgar/filtrar chat de más de 7 días (Limpieza automática)
-            hace_siete_dias = (datetime.now() - timedelta(days=7)).strftime("%Y-%m-%d %H:%M:%S")
+            hace_siete_dias = (obtener_ahora_local() - timedelta(days=7)).strftime("%Y-%m-%d %H:%M:%S")
             
             # Obtener mensajes del chat <= 7 días
             cursor.execute('''
@@ -114,7 +118,7 @@ def register_routes(app):
         conexion = get_db_connection()
         cursor = conexion.cursor()
         try:
-            fecha_actual = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            fecha_actual = obtener_ahora_local().strftime("%Y-%m-%d %H:%M:%S")
             cursor.execute(
                 "INSERT INTO equipo_chat (usuario_id, mensaje, fecha) VALUES (?, ?, ?)",
                 (session.get('user_id'), mensaje, fecha_actual)
@@ -189,7 +193,7 @@ def register_routes(app):
         conexion = get_db_connection()
         cursor = conexion.cursor()
         try:
-            fecha_actual = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            fecha_actual = obtener_ahora_local().strftime("%Y-%m-%d %H:%M:%S")
             
             if asignados_ids:
                 for u_id in asignados_ids:
@@ -229,7 +233,7 @@ def register_routes(app):
                 return jsonify({'success': False, 'message': 'La tarea ya estaba completada'}), 400
 
             dias_semana = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"]
-            ahora = datetime.now()
+            ahora = obtener_ahora_local()
             nombre_dia = dias_semana[ahora.weekday()]
             fecha_completada_str = ahora.strftime("%Y-%m-%d %H:%M:%S")
             fecha_formateada = f"{nombre_dia} {ahora.strftime('%d/%m/%Y a las %H:%M')}"
@@ -297,7 +301,7 @@ def register_routes(app):
         # Calcular fecha de expiración y usos según opción
         usos_restantes = 1 if tipo_expiracion == 'uso_unico' else -1
         fecha_expiracion = None
-        now = datetime.now()
+        now = obtener_ahora_local()
 
         if tipo_expiracion == '1_dia':
             fecha_expiracion = (now + timedelta(days=1)).strftime("%Y-%m-%d %H:%M:%S")
@@ -378,7 +382,7 @@ def register_routes(app):
 
                 if inv['fecha_expiracion']:
                     fecha_exp = datetime.strptime(inv['fecha_expiracion'], "%Y-%m-%d %H:%M:%S")
-                    if datetime.now() > fecha_exp:
+                    if obtener_ahora_local() > fecha_exp:
                         return render_template('equipo/unirse_equipo.html', invitacion_valida=False)
 
             return render_template(
@@ -423,7 +427,7 @@ def register_routes(app):
                 return redirect(url_for('unirse_equipo', token=token))
 
             # Registrar solicitud (sin fecha de expiración)
-            fecha_actual = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            fecha_actual = obtener_ahora_local().strftime("%Y-%m-%d %H:%M:%S")
             cursor.execute('''
                 INSERT INTO equipo_solicitudes (admin_id, empleado_id, estado, fecha_solicitud)
                 VALUES (?, ?, 'pendiente', ?)

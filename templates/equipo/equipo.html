@@ -1,0 +1,333 @@
+{% extends 'shared/layout.html' %}
+
+{% block titulo %}Módulo de Equipo & Pizarra de Tareas{% endblock %}
+
+{% block contenido %}
+<div class="container-fluid mt-3 px-4">
+    <!-- Encabezado del Módulo -->
+    <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+        <div>
+            <h2 class="fw-bold text-primary mb-1">
+                <i class="bi bi-kanban me-2"></i>Equipo, Chat & Pizarra de Tareas
+            </h2>
+            <p class="text-muted mb-0">Coordinación de trabajo, anuncios generales y seguimiento de tareas en tiempo real.</p>
+        </div>
+        {% if session.user_rol in ['admin', 'superadmin'] %}
+        <div>
+            <button class="btn btn-primary shadow-sm fw-bold" data-bs-toggle="modal" data-bs-target="#modalNuevaTarea">
+                <i class="bi bi-plus-circle me-1"></i> Nueva Tarea
+            </button>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="row g-4">
+        <!-- COLUMNA IZQUIERDA: Pizarra de Tareas -->
+        <div class="col-lg-7">
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header bg-white py-3 border-0 d-flex justify-content-between align-items-center">
+                    <h4 class="fw-bold mb-0 text-dark">
+                        <i class="bi bi-list-check text-primary me-2"></i>Pizarra de Tareas
+                    </h4>
+                    <span class="badge bg-primary rounded-pill fs-6">{{ tareas_pendientes|length }} Pendientes</span>
+                </div>
+                <div class="card-body bg-light rounded-bottom">
+                    <!-- Tareas Pendientes -->
+                    <h5 class="fw-bold text-secondary mb-3"><i class="bi bi-hourglass-split me-1 text-warning"></i> Pendientes por Hacer</h5>
+                    
+                    {% if tareas_pendientes %}
+                        <div class="row g-3">
+                            {% for tarea in tareas_pendientes %}
+                            <div class="col-12">
+                                <div class="card border-0 shadow-sm rounded-3 border-start border-4 
+                                    {% if tarea.prioridad == 'alta' %}border-danger
+                                    {% elif tarea.prioridad == 'media' %}border-warning
+                                    {% else %}border-info{% endif %}">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between align-items-start mb-2">
+                                            <div>
+                                                <h5 class="card-title fw-bold mb-1">{{ tarea.titulo }}</h5>
+                                                {% if tarea.descripcion %}
+                                                    <p class="card-text text-muted mb-2">{{ tarea.descripcion }}</p>
+                                                {% endif %}
+                                            </div>
+                                            <div>
+                                                {% if tarea.prioridad == 'alta' %}
+                                                    <span class="badge bg-danger text-white">Alta Prioridad</span>
+                                                {% elif tarea.prioridad == 'media' %}
+                                                    <span class="badge bg-warning text-dark">Prioridad Media</span>
+                                                {% else %}
+                                                    <span class="badge bg-info text-white">Baja Prioridad</span>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="d-flex justify-content-between align-items-center mt-3 pt-2 border-top">
+                                            <div class="small text-muted">
+                                                <i class="bi bi-person me-1"></i>Asignado por: <strong>{{ tarea.creador_nombre }}</strong>
+                                                {% if tarea.asignado_nombre %}
+                                                    | <i class="bi bi-arrow-right-short"></i>Para: <span class="badge bg-secondary">{{ tarea.asignado_nombre }}</span>
+                                                {% else %}
+                                                    | <span class="badge bg-light text-dark border">Para Todo el Equipo</span>
+                                                {% endif %}
+                                            </div>
+                                            <div class="d-flex gap-2">
+                                                <button class="btn btn-success btn-sm fw-bold shadow-sm" onclick="completarTarea({{ tarea.id }})">
+                                                    <i class="bi bi-check-circle-fill me-1"></i> Marcar como Hecho
+                                                </button>
+                                                {% if session.user_rol in ['admin', 'superadmin'] %}
+                                                <button class="btn btn-outline-danger btn-sm" onclick="eliminarTarea({{ tarea.id }})" title="Eliminar Tarea">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="alert alert-success border-0 shadow-sm text-center py-4">
+                            <i class="bi bi-check-all fs-1 d-block mb-2 text-success"></i>
+                            <h5 class="fw-bold mb-1">¡No hay tareas pendientes!</h5>
+                            <p class="text-muted mb-0 small">Todo el equipo está al día con sus actividades.</p>
+                        </div>
+                    {% endif %}
+
+                    <!-- Tareas Completadas Recientemente -->
+                    <h5 class="fw-bold text-secondary mt-4 mb-3"><i class="bi bi-check2-square me-1 text-success"></i> Completadas Recientemente</h5>
+                    {% if tareas_completadas %}
+                        <div class="list-group shadow-sm">
+                            {% for tarea in tareas_completadas[:5] %}
+                            <div class="list-group-item list-group-item-action d-flex justify-content-between align-items-center py-3">
+                                <div>
+                                    <h6 class="fw-bold text-decoration-line-through mb-1 text-muted">{{ tarea.titulo }}</h6>
+                                    <small class="text-success fw-bold">
+                                        <i class="bi bi-person-check-fill me-1"></i>Hecho por {{ tarea.completado_por_nombre or 'Usuario' }}
+                                        el {{ tarea.fecha_completada }}
+                                    </small>
+                                </div>
+                                <div>
+                                    <span class="badge bg-success"><i class="bi bi-check-lg"></i> HECHO</span>
+                                    {% if session.user_rol in ['admin', 'superadmin'] %}
+                                    <button class="btn btn-sm text-danger ms-2" onclick="eliminarTarea({{ tarea.id }})" title="Borrar del registro">
+                                        <i class="bi bi-x-circle"></i>
+                                    </button>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-muted small text-center my-3">No hay registro de tareas completadas aún.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- COLUMNA DERECHA: Chat General & Anuncios -->
+        <div class="col-lg-5">
+            <!-- Anuncios / Mensajes Fijados -->
+            <div class="card shadow-sm border-0 mb-4 border-start border-4 border-warning">
+                <div class="card-header bg-warning bg-opacity-10 py-2 d-flex justify-content-between align-items-center border-0">
+                    <h5 class="fw-bold mb-0 text-warning-emphasis fs-6">
+                        <i class="bi bi-pin-angle-fill me-2"></i>Mensajes Fijados / Anuncios
+                    </h5>
+                    <span class="badge bg-warning text-dark small">Avisos del Jefe</span>
+                </div>
+                <div class="card-body py-2">
+                    {% if mensajes_fijados %}
+                        {% for f in mensajes_fijados %}
+                        <div class="p-2 my-1 bg-light rounded border border-warning border-opacity-25">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <strong class="text-primary small"><i class="bi bi-shield-check me-1"></i>{{ f.usuario_nombre }}</strong>
+                                <span class="text-muted extra-small" style="font-size: 0.75rem;">{{ f.fecha }}</span>
+                            </div>
+                            <p class="mb-0 small text-dark fw-medium">{{ f.mensaje }}</p>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-muted extra-small mb-0 py-1" style="font-size: 0.82rem;">No hay anuncios fijados en este momento.</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Chat de Equipo -->
+            <div class="card shadow-sm border-0 d-flex flex-column" style="height: 520px;">
+                <div class="card-header bg-primary text-white py-3 d-flex justify-content-between align-items-center">
+                    <h5 class="fw-bold mb-0 fs-6">
+                        <i class="bi bi-chat-left-dots-fill me-2"></i>Chat General de Equipo
+                    </h5>
+                    <small class="badge bg-light text-dark" title="Los mensajes se auto-purgan después de 7 días">
+                        <i class="bi bi-clock-history me-1"></i>Máx 7 Días
+                    </small>
+                </div>
+                
+                <!-- Caja de Mensajes -->
+                <div class="card-body overflow-auto p-3 flex-grow-1 bg-light" id="box-chat-mensajes">
+                    {% if mensajes_chat %}
+                        {% for m in mensajes_chat %}
+                        <div class="d-flex flex-column mb-3 {% if m.usuario_id == session.user_id %}align-items-end{% else %}align-items-start{% endif %}">
+                            <div class="d-flex align-items-center mb-1 gap-2">
+                                <span class="fw-bold small {% if m.usuario_rol in ['admin', 'superadmin'] %}text-danger{% else %}text-primary{% endif %}">
+                                    {{ m.usuario_nombre }}
+                                    {% if m.usuario_rol in ['admin', 'superadmin'] %}
+                                        <span class="badge bg-danger ms-1" style="font-size:0.65rem;">Jefe/Admin</span>
+                                    {% endif %}
+                                </span>
+                                <span class="text-muted" style="font-size: 0.7rem;">{{ m.fecha }}</span>
+                                {% if session.user_rol in ['admin', 'superadmin'] %}
+                                <button class="btn btn-link p-0 text-warning" onclick="fijarMensaje({{ m.id }})" title="Fijar/Desfijar Anuncio">
+                                    <i class="bi bi-pin-angle{% if m.es_fijado %}-fill{% endif %}"></i>
+                                </button>
+                                {% endif %}
+                            </div>
+                            <div class="p-2 px-3 rounded-3 shadow-sm style-msg 
+                                {% if m.usuario_id == session.user_id %}bg-primary text-white{% else %}bg-white text-dark border{% endif %}" 
+                                style="max-width: 85%; word-break: break-word;">
+                                {{ m.mensaje }}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="text-center text-muted my-5">
+                            <i class="bi bi-chat-square-text fs-2 d-block mb-2"></i>
+                            <p class="small mb-0">No hay mensajes recientes en el chat de equipo.</p>
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Input para Enviar Mensaje -->
+                <div class="card-footer bg-white p-3 border-top">
+                    <form id="form-chat" onsubmit="enviarMensaje(event)">
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="chat-mensaje-input" placeholder="Escribe un mensaje para el equipo..." required autocomplete="off">
+                            <button class="btn btn-primary fw-bold" type="submit">
+                                <i class="bi bi-send-fill me-1"></i> Enviar
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Nueva Tarea (Solo Admin/Superadmin) -->
+{% if session.user_rol in ['admin', 'superadmin'] %}
+<div class="modal fade" id="modalNuevaTarea" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title fw-bold"><i class="bi bi-plus-circle me-2"></i>Crear Tarea para el Equipo</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="{{ url_for('crear_tarea') }}" method="POST">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="titulo" class="form-label fw-bold">Título de la Tarea <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="titulo" name="titulo" placeholder="Ej: Contar inventario de cables" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="descripcion" class="form-label fw-bold">Descripción / Instrucciones</label>
+                        <textarea class="form-control" id="descripcion" name="descripcion" rows="3" placeholder="Detalla qué deben hacer los empleados..."></textarea>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="prioridad" class="form-label fw-bold">Prioridad</label>
+                            <select class="form-select" id="prioridad" name="prioridad">
+                                <option value="baja">Baja</option>
+                                <option value="media" selected>Media</option>
+                                <option value="alta">Alta (Urgente)</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="asignado_a" class="form-label fw-bold">Asignar A</label>
+                            <select class="form-select" id="asignado_a" name="asignado_a">
+                                <option value="">Todo el Equipo (General)</option>
+                                {% for u in usuarios_equipo %}
+                                    <option value="{{ u.id }}">{{ u.nombre }} ({{ u.rol }})</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary fw-bold"><i class="bi bi-save me-1"></i> Asignar Tarea</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Scroll al final del chat al cargar
+    const chatBox = document.getElementById('box-chat-mensajes');
+    if (chatBox) {
+        chatBox.scrollTop = chatBox.scrollHeight;
+    }
+});
+
+function enviarMensaje(e) {
+    e.preventDefault();
+    const input = document.getElementById('chat-mensaje-input');
+    const mensaje = input.value.trim();
+    if (!mensaje) return;
+
+    fetch('/equipo/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({ 'mensaje': mensaje })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            input.value = '';
+            location.reload();
+        } else {
+            alert('Error al enviar mensaje: ' + data.message);
+        }
+    })
+    .catch(err => console.error(err));
+}
+
+function fijarMensaje(id) {
+    fetch(`/equipo/chat/${id}/fijar`, { method: 'POST' })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) location.reload();
+        else alert('Error: ' + data.message);
+    });
+}
+
+function completarTarea(id) {
+    if (!confirm('¿Confirmas que has completado esta tarea?')) return;
+
+    fetch(`/equipo/tareas/${id}/completar`, { method: 'POST' })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            alert(`¡Excelente! Tarea marcada como HECHA el ${data.fecha_formateada}. El Administrador ha sido notificado.`);
+            location.reload();
+        } else {
+            alert('Error: ' + data.message);
+        }
+    });
+}
+
+function eliminarTarea(id) {
+    if (!confirm('¿Está seguro de eliminar esta tarea?')) return;
+
+    fetch(`/equipo/tareas/${id}/eliminar`, { method: 'POST' })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) location.reload();
+        else alert('Error: ' + data.message);
+    });
+}
+</script>
+{% endblock %}

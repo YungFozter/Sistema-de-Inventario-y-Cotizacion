@@ -3,7 +3,7 @@ import os
 import sqlite3
 from datetime import datetime
 from db_wrapper import get_db_connection
-from models import crear_tablas, migrar_columnas_nuevas_clientes, migrar_esquema_productos
+from models import crear_tablas, migrar_columnas_nuevas_clientes, migrar_esquema_productos, migrar_tablas_equipo
 
 import logging
 for _log_name in ['pdfminer', 'pdfminer.pdfinterp', 'pdfminer.pdfpage', 'pdfminer.converter', 'pdfminer.layout', 'PyPDF2', 'pypdf', 'pdfplumber']:
@@ -25,6 +25,7 @@ def inicializar_base_datos():
         crear_tablas()
         migrar_columnas_nuevas_clientes()
         migrar_esquema_productos()
+        migrar_tablas_equipo()
     except Exception as e:
         print(f"[WARN] No se pudo inicializar/migrar la base de datos en inicio: {e}")
 
@@ -71,6 +72,7 @@ from routes.productos import register_routes as init_productos
 from routes.cotizaciones import register_routes as init_cotizaciones
 from routes.core import register_routes as init_core
 from routes.mi_pdf import register_mi_pdf_routes as init_mi_pdf
+from routes.equipo import register_routes as init_equipo
 
 init_auth(app)
 init_admin(app)
@@ -79,6 +81,7 @@ init_productos(app)
 init_cotizaciones(app)
 init_core(app)
 init_mi_pdf(app)
+init_equipo(app)
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)

@@ -178,6 +178,50 @@ def crear_tablas():
             ){";" if is_postgres else ""}
         ''')
 
+        # Tabla de chat de equipo
+        cursor.execute(f'''
+            CREATE TABLE IF NOT EXISTS equipo_chat (
+                id {"SERIAL PRIMARY KEY" if is_postgres else "INTEGER PRIMARY KEY AUTOINCREMENT"},
+                usuario_id INTEGER NOT NULL,
+                mensaje TEXT NOT NULL,
+                es_fijado {"BOOLEAN DEFAULT FALSE" if is_postgres else "BOOLEAN DEFAULT 0"},
+                fecha TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (usuario_id) REFERENCES clientes(id)
+            ){";" if is_postgres else ""}
+        ''')
+
+        # Tabla de tareas de equipo
+        cursor.execute(f'''
+            CREATE TABLE IF NOT EXISTS equipo_tareas (
+                id {"SERIAL PRIMARY KEY" if is_postgres else "INTEGER PRIMARY KEY AUTOINCREMENT"},
+                creador_id INTEGER NOT NULL,
+                asignado_a INTEGER,
+                titulo TEXT NOT NULL,
+                descripcion TEXT,
+                prioridad TEXT DEFAULT 'media',
+                estado TEXT DEFAULT 'pendiente',
+                completado_por_id INTEGER,
+                fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                fecha_completada TIMESTAMP,
+                FOREIGN KEY (creador_id) REFERENCES clientes(id),
+                FOREIGN KEY (asignado_a) REFERENCES clientes(id),
+                FOREIGN KEY (completado_por_id) REFERENCES clientes(id)
+            ){";" if is_postgres else ""}
+        ''')
+
+        # Tabla de notificaciones de equipo
+        cursor.execute(f'''
+            CREATE TABLE IF NOT EXISTS equipo_notificaciones (
+                id {"SERIAL PRIMARY KEY" if is_postgres else "INTEGER PRIMARY KEY AUTOINCREMENT"},
+                usuario_id INTEGER NOT NULL,
+                mensaje TEXT NOT NULL,
+                tipo TEXT DEFAULT 'tarea_completada',
+                leido {"BOOLEAN DEFAULT FALSE" if is_postgres else "BOOLEAN DEFAULT 0"},
+                fecha TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (usuario_id) REFERENCES clientes(id)
+            ){";" if is_postgres else ""}
+        ''')
+
         # Tabla de configuración personalizada de PDF ("MI PDF")
         asegurar_tabla_configuracion_pdf(cursor)
 
@@ -602,6 +646,71 @@ def eliminar_importacion_pdf(importacion_id):
         raise
     finally:
         conexion.close()
+
+
+def migrar_tablas_equipo():
+    """Garantiza la creación de las tablas equipo_chat, equipo_tareas y equipo_notificaciones"""
+    conexion = None
+    try:
+        conexion = get_db_connection()
+        cursor = conexion.cursor()
+        is_postgres = bool(os.environ.get('DATABASE_URL') and os.environ.get('DATABASE_URL').startswith('postgres'))
+
+        cursor.execute(f'''
+            CREATE TABLE IF NOT EXISTS equipo_chat (
+                id {"SERIAL PRIMARY KEY" if is_postgres else "INTEGER PRIMARY KEY AUTOINCREMENT"},
+                usuario_id INTEGER NOT NULL,
+                mensaje TEXT NOT NULL,
+                es_fijado {"BOOLEAN DEFAULT FALSE" if is_postgres else "BOOLEAN DEFAULT 0"},
+                fecha TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (usuario_id) REFERENCES clientes(id)
+            ){";" if is_postgres else ""}
+        ''')
+
+        cursor.execute(f'''
+            CREATE TABLE IF NOT EXISTS equipo_tareas (
+                id {"SERIAL PRIMARY KEY" if is_postgres else "INTEGER PRIMARY KEY AUTOINCREMENT"},
+                creador_id INTEGER NOT NULL,
+                asignado_a INTEGER,
+                titulo TEXT NOT NULL,
+                descripcion TEXT,
+                prioridad TEXT DEFAULT 'media',
+                estado TEXT DEFAULT 'pendiente',
+                completado_por_id INTEGER,
+                fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                fecha_completada TIMESTAMP,
+                FOREIGN KEY (creador_id) REFERENCES clientes(id),
+                FOREIGN KEY (asignado_a) REFERENCES clientes(id),
+                FOREIGN KEY (completado_por_id) REFERENCES clientes(id)
+            ){";" if is_postgres else ""}
+        ''')
+
+        cursor.execute(f'''
+            CREATE TABLE IF NOT EXISTS equipo_notificaciones (
+                id {"SERIAL PRIMARY KEY" if is_postgres else "INTEGER PRIMARY KEY AUTOINCREMENT"},
+                usuario_id INTEGER NOT NULL,
+                mensaje TEXT NOT NULL,
+                tipo TEXT DEFAULT 'tarea_completada',
+                leido {"BOOLEAN DEFAULT FALSE" if is_postgres else "BOOLEAN DEFAULT 0"},
+                fecha TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (usuario_id) REFERENCES clientes(id)
+            ){";" if is_postgres else ""}
+        ''')
+
+        conexion.commit()
+    except Exception as e:
+        print(f"[ERROR] Error al migrar tablas de equipo: {e}")
+        if conexion:
+            try:
+                conexion.rollback()
+            except Exception:
+                pass
+    finally:
+        if conexion:
+            try:
+                conexion.close()
+            except Exception:
+                pass
 
 
 def migrar_columnas_nuevas_clientes():

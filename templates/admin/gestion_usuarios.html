@@ -565,6 +565,11 @@ function verHistorialRenovaciones(id, nombre) {
             }
         })
         .catch(error => {
+            console.error('Error:', error);
+            tbody.innerHTML = '<tr><td colspan="4" class="text-center py-4 text-danger">Error de conexión</td></tr>';
+        });
+}
+
 function eliminarUsuarioPermanente(id, nombre) {
     if (!confirm(`⚠️ ¿ESTÁS ABSOLUTAMENTE SEGURO?\n\nVas a eliminar permanentemente al usuario "${nombre}" y TODA su información asociada (cotizaciones, tareas, historial de chat y notificaciones).\n\nEsta acción NO se puede deshacer.`)) {
         return;

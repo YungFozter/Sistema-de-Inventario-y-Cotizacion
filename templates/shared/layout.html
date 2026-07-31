@@ -434,7 +434,7 @@
           {% for category, message in messages %}
             <div class="alert alert-{{ category }} alert-dismissible fade show d-flex align-items-center">
               <i class="bi flex-shrink-0 me-2 {% if category == 'success' %}bi-check-circle-fill{% elif category == 'danger' %}bi-exclamation-triangle-fill{% elif category == 'warning' %}bi-exclamation-circle-fill{% else %}bi-info-circle-fill{% endif %}"></i>
-              <div class="flex-grow-1">{{ message }}</div>
+              <div class="flex-grow-1" style="word-break: break-word; white-space: pre-wrap;">{{ message }}</div>
               <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
           {% endfor %}

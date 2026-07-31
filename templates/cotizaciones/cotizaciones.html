@@ -45,15 +45,32 @@
       });
     </script>
 
-    <!-- Catálogo de productos -->
-    <h4 class="mb-3">
-      <i class="bi bi-box-seam"></i> Catálogo de Productos
-      <span class="badge bg-primary rounded-pill" id="productos-count">
-        {% if tipo_producto == 'importados' %}{{ total_importados }}{% else %}{{ total_registrados }}{% endif %} productos disponibles
-      </span>
-    </h4>
+    <!-- Catálogo de productos con opción de colapsar -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2 bg-light p-3 rounded border shadow-sm">
+      <div>
+        <h4 class="mb-0 text-dark fw-bold">
+          <i class="bi bi-box-seam text-primary me-2"></i>Catálogo de Productos
+          <span class="badge bg-primary rounded-pill ms-1" id="productos-count">
+            {% if tipo_producto == 'importados' %}{{ total_importados }}{% else %}{{ total_registrados }}{% endif %} productos disponibles
+          </span>
+        </h4>
+      </div>
+      <div class="d-flex flex-wrap gap-2 align-items-center">
+        <a href="#cotizaciones-registradas-sec" class="btn btn-sm btn-outline-secondary rounded-pill px-3">
+          <i class="bi bi-arrow-down-circle me-1"></i>Ir a Historial / Filtros
+        </a>
+        <button class="btn btn-sm btn-primary rounded-pill px-3" type="button" 
+                data-bs-toggle="collapse" data-bs-target="#seccion-catalogo-productos" 
+                aria-expanded="true" aria-controls="seccion-catalogo-productos" id="btn-toggle-catalogo">
+          <i class="bi bi-chevron-up me-1" id="icon-toggle-catalogo"></i> 
+          <span id="text-toggle-catalogo">Ocultar Catálogo</span>
+        </button>
+      </div>
+    </div>
 
-    <!-- Pestañas de Selección entre Productos Registrados (Manuales) e Importados -->
+    <!-- Contenedor Colapsable del Catálogo -->
+    <div class="collapse show" id="seccion-catalogo-productos">
+      <!-- Pestañas de Selección entre Productos Registrados (Manuales) e Importados -->
     <ul class="nav nav-pills nav-fill mb-3 p-2 bg-light rounded border shadow-sm" id="pills-tab-cotizacion" role="tablist">
       <li class="nav-item" role="presentation">
         <button class="nav-link {% if tipo_producto != 'importados' %}active{% endif %} fw-bold fs-6" id="tab-cotiz-registrados" type="button" onclick="cambiarTipoProducto('registrados')">
@@ -385,6 +402,7 @@
       <i class="bi bi-exclamation-triangle"></i> No hay productos disponibles. Registra algunos primero.
     </div>
     {% endif %}
+    </div> <!-- Fin Contenedor Colapsable del Catálogo -->
 
   <!-- Sistema de productos seleccionados NUEVO -->
   <h4 class="mb-3">Productos Seleccionados</h4>
@@ -428,8 +446,8 @@
 
   <hr class="my-5">
 
-  <!-- Filtros de búsqueda -->
-  <div class="card shadow-sm mb-4">
+  <!-- Filtros de búsqueda y Cotizaciones Registradas -->
+  <div class="card shadow-sm mb-4" id="cotizaciones-registradas-sec">
     <div class="card-header bg-primary text-white">
       <h4 class="mb-0"><i class="bi bi-funnel"></i> Filtrar Cotizaciones</h4>
     </div>
@@ -809,6 +827,40 @@
     // Inicializar vista
     mostrarOcultarCarritoVacio();
   });
+// Manejo del colapso del Catálogo de Productos y memoria en localStorage
+document.addEventListener('DOMContentLoaded', function() {
+  const catalogoCollapse = document.getElementById('seccion-catalogo-productos');
+  const btnToggle = document.getElementById('btn-toggle-catalogo');
+  const iconToggle = document.getElementById('icon-toggle-catalogo');
+  const textToggle = document.getElementById('text-toggle-catalogo');
+
+  if (catalogoCollapse && btnToggle) {
+    const estaOculto = localStorage.getItem('catalogo_cotizaciones_colapsado') === 'true';
+    if (estaOculto) {
+      catalogoCollapse.classList.remove('show');
+      if (iconToggle) iconToggle.className = 'bi bi-chevron-down me-1';
+      if (textToggle) textToggle.textContent = 'Mostrar Catálogo';
+      btnToggle.classList.remove('btn-primary');
+      btnToggle.classList.add('btn-outline-primary');
+    }
+
+    catalogoCollapse.addEventListener('hidden.bs.collapse', function () {
+      localStorage.setItem('catalogo_cotizaciones_colapsado', 'true');
+      if (iconToggle) iconToggle.className = 'bi bi-chevron-down me-1';
+      if (textToggle) textToggle.textContent = 'Mostrar Catálogo';
+      btnToggle.classList.remove('btn-primary');
+      btnToggle.classList.add('btn-outline-primary');
+    });
+
+    catalogoCollapse.addEventListener('shown.bs.collapse', function () {
+      localStorage.setItem('catalogo_cotizaciones_colapsado', 'false');
+      if (iconToggle) iconToggle.className = 'bi bi-chevron-up me-1';
+      if (textToggle) textToggle.textContent = 'Ocultar Catálogo';
+      btnToggle.classList.remove('btn-outline-primary');
+      btnToggle.classList.add('btn-primary');
+    });
+  }
+});
 </script>
 
 <style>

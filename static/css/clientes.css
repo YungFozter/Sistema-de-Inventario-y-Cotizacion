@@ -1,28 +1,25 @@
 /* =============================================
-   CLIENTES - GLASSMORPHISM, 3D CARDS & STAGGERED ANIMATIONS
+   CLIENTES - GLASSMORPHISM & PERFORMANCE OPTIMIZED
    ============================================= */
 
-/* Glassmorphism Panel Esmerilado */
+/* Glassmorphism Panel (Optimizado para 60 FPS) */
 .glass-panel {
-    background: rgba(255, 255, 255, 0.85);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(255, 255, 255, 0.6);
+    background: rgba(255, 255, 255, 0.96);
+    border: 1px solid rgba(255, 255, 255, 0.8);
     border-radius: 1.25rem;
-    box-shadow: 0 15px 35px rgba(31, 38, 135, 0.08), 0 5px 15px rgba(0, 0, 0, 0.04);
-    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 10px 30px rgba(31, 38, 135, 0.06), 0 2px 8px rgba(0, 0, 0, 0.03);
+    transition: box-shadow 0.25s ease;
     overflow: hidden;
+    transform: translateZ(0);
 }
 
 .glass-panel:hover {
-    box-shadow: 0 20px 40px rgba(31, 38, 135, 0.12), 0 8px 20px rgba(0, 0, 0, 0.06);
+    box-shadow: 0 15px 35px rgba(31, 38, 135, 0.09);
 }
 
 /* Glassmorphism Header */
 .glass-header {
-    background: linear-gradient(135deg, rgba(13, 110, 253, 0.92), rgba(10, 88, 202, 0.98));
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+    background: linear-gradient(135deg, #0d6efd, #0a58ca);
     color: #ffffff;
     border-bottom: 1px solid rgba(255, 255, 255, 0.2);
     padding: 1.25rem 1.75rem;
@@ -31,8 +28,6 @@
 /* Segmented Control Toggle de Vista (Pill Switcher Pro) */
 .view-toggle-wrapper {
     background: rgba(0, 0, 0, 0.22);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
     padding: 4px;
     border-radius: 50px;
     border: 1px solid rgba(255, 255, 255, 0.35);
@@ -51,7 +46,7 @@
     font-weight: 600;
     font-size: 0.88rem;
     cursor: pointer;
-    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
     display: inline-flex;
     align-items: center;
     gap: 6px;
@@ -71,11 +66,11 @@
     transform: scale(1.02);
 }
 
-/* Animación Escalonada en Cascada */
+/* Animación Escalonada en Cascada Acelerada por Hardware */
 @keyframes staggerCascade {
     from {
         opacity: 0;
-        transform: translateY(24px);
+        transform: translateY(16px);
     }
     to {
         opacity: 1;
@@ -85,29 +80,29 @@
 
 .stagger-item {
     opacity: 0;
-    animation: staggerCascade 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    animation: staggerCascade 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    will-change: opacity, transform;
 }
 
-/* Tarjeta de Cliente 3D (Grid View - Ultra Sharp Crisp Text) */
+/* Tarjeta de Cliente 3D (Grid View - Hardware Accelerated) */
 .client-3d-card {
     background: #ffffff;
     border: 1px solid rgba(13, 110, 253, 0.12);
     border-radius: 1rem;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
-    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease, border-color 0.25s ease;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    backface-visibility: hidden;
-    -webkit-backface-visibility: hidden;
+    transform: translateZ(0);
 }
 
 .client-3d-card:hover {
-    transform: translateY(-6px);
-    box-shadow: 0 16px 35px rgba(13, 110, 253, 0.18), 0 0 0 2px rgba(13, 110, 253, 0.3);
+    transform: translateY(-4px);
+    box-shadow: 0 12px 28px rgba(13, 110, 253, 0.14), 0 0 0 2px rgba(13, 110, 253, 0.25);
     border-color: rgba(13, 110, 253, 0.4);
 }
 
-/* Avatar con elevación limpia sin desenfoque */
+/* Avatar con elevación limpia */
 .avatar-3d {
     background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%);
     color: #ffffff;
@@ -117,12 +112,12 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 8px 16px rgba(13, 110, 253, 0.3);
-    transition: transform 0.25s ease;
+    box-shadow: 0 4px 12px rgba(13, 110, 253, 0.25);
+    transition: transform 0.2s ease;
 }
 
 .client-3d-card:hover .avatar-3d {
-    transform: scale(1.08);
+    transform: scale(1.06);
 }
 
 /* Badges personalizados */
@@ -146,24 +141,23 @@
 
 /* Botones Pro */
 .btn-pro-action {
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
 .btn-pro-action:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 5px 12px rgba(0, 0, 0, 0.15);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
 }
 
-/* Estilos de Tabla */
+/* Estilos de Tabla Fluidos (Sin atrapamiento de scroll) */
 .table-responsive {
-    max-height: 520px;
-    overflow-y: auto;
+    overflow-x: auto;
 }
 
 .pro-table tbody tr {
-    transition: background-color 0.2s ease, transform 0.2s ease;
+    transition: background-color 0.15s ease;
 }
 
 .pro-table tbody tr:hover {
-    background-color: rgba(13, 110, 253, 0.05) !important;
+    background-color: rgba(13, 110, 253, 0.04) !important;
 }

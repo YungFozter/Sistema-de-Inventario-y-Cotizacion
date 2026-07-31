@@ -377,6 +377,8 @@ def migrar_esquema_productos():
             except Exception:
                 pass
 
+migrar_productos_categorias = migrar_esquema_productos
+
 
 def inicializar_base_datos():
     """Inicialización completa de la base de datos con SQLite puro"""

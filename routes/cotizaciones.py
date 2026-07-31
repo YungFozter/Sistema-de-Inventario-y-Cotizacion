@@ -946,13 +946,19 @@ def register_routes(app):
                 except ValueError:
                     pass  # Si no es un número válido, ignorar el filtro de categoría
 
-            # Ordenar por empresa y código
-            query += ' ORDER BY p.empresa, p.codigo LIMIT 100'
+            # Ordenar por empresa y código (ampliado límite a 500)
+            query_with_limit = query + ' ORDER BY p.empresa, p.codigo LIMIT 500'
 
             # Ejecutar la consulta
             with get_db_connection() as conn:
                 cursor = conn.cursor()
-                cursor.execute(query, params)
+
+                # Obtener el total real sin limit
+                count_sql = f"SELECT COUNT(*) FROM ({query}) AS cnt_sub"
+                cursor.execute(count_sql, params)
+                total_real = cursor.fetchone()[0]
+
+                cursor.execute(query_with_limit, params)
                 productos = cursor.fetchall()
 
                 # Convertir a lista de diccionarios
@@ -972,7 +978,8 @@ def register_routes(app):
 
                 return jsonify({
                     'success': True,
-                    'productos': productos_list
+                    'productos': productos_list,
+                    'total_encontrados': total_real
                 })
         except Exception as e:
             return jsonify({'success': False, 'error': str(e)}), 500

@@ -48,7 +48,9 @@
     <!-- Catálogo de productos -->
     <h4 class="mb-3">
       <i class="bi bi-box-seam"></i> Catálogo de Productos
-      <span class="badge bg-primary rounded-pill" id="productos-count">{{ productos|length }} en esta página</span>
+      <span class="badge bg-primary rounded-pill" id="productos-count">
+        {% if tipo_producto == 'importados' %}{{ total_importados }}{% else %}{{ total_registrados }}{% endif %} productos disponibles
+      </span>
     </h4>
 
     <!-- Pestañas de Selección entre Productos Registrados (Manuales) e Importados -->
@@ -170,7 +172,7 @@
         }
 
         // Función para actualizar la tabla con los resultados
-        function actualizarTablaProductos(productos) {
+        function actualizarTablaProductos(productos, totalReal) {
           productsTable.innerHTML = '';
           if (!productos || productos.length === 0) {
             productsTable.innerHTML = `<tr><td colspan="7" class="text-center text-muted py-3">No se encontraron productos en esta sección.</td></tr>`;
@@ -209,8 +211,9 @@
             productsTable.appendChild(row);
           });
           
-          // Actualizar contador de productos
-          productCountBadge.textContent = productos.length + ' encontrados';
+          // Actualizar contador de productos con la cantidad total real sin el tope visual
+          const cntDisplay = (typeof totalReal !== 'undefined') ? totalReal : productos.length;
+          productCountBadge.textContent = cntDisplay + ' productos encontrados';
           
           // Volver a configurar los event listeners para los nuevos botones
           document.querySelectorAll('button[data-producto-id]').forEach(button => {
@@ -240,7 +243,7 @@
             .then(response => response.json())
             .then(data => {
               if (data.success) {
-                actualizarTablaProductos(data.productos);
+                actualizarTablaProductos(data.productos, data.total_encontrados);
               } else {
                 console.error('Error en la búsqueda:', data.error);
               }

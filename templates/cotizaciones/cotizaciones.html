@@ -709,7 +709,9 @@
   // Función para mostrar/ocultar mensaje de carrito vacío
   function mostrarOcultarCarritoVacio() {
     const carritoVacio = document.getElementById('carrito-vacio');
-    carritoVacio.style.display = productosSeleccionados.length === 0 ? 'block' : 'none';
+    if (carritoVacio) {
+      carritoVacio.style.display = productosSeleccionados.length === 0 ? 'block' : 'none';
+    }
   }
 
   // Función para limpiar selección

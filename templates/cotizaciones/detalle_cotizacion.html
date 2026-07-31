@@ -154,18 +154,55 @@
             </div>
             
             <!-- Botones de acción -->
-            <div class="mt-4 d-flex gap-2">
+            <div class="mt-4 d-flex gap-2 align-items-center flex-wrap">
                 <a href="{{ url_for('gestion_cotizaciones') }}" class="btn btn-outline-secondary">
                     <i class="bi bi-arrow-left me-1"></i> Volver a Cotizaciones
                 </a>
-                <a href="{{ url_for('pdf_cotizacion', id=cotizacion[0]) }}" class="btn btn-primary ms-2">
+                <a href="{{ url_for('pdf_cotizacion', id=cotizacion[0]) }}" class="btn btn-primary">
                     <i class="bi bi-file-pdf me-1"></i> Descargar PDF
                 </a>
-                <a href="{{ url_for('vista_previa_cotizacion', id=cotizacion[0]) }}" class="btn btn-info ms-2" target="_blank">
+                <a href="{{ url_for('vista_previa_cotizacion', id=cotizacion[0]) }}" class="btn btn-info text-white" target="_blank">
                     <i class="bi bi-eye me-1"></i> Vista Previa
                 </a>
+                
+                {% if cotizacion[7] == 'pendiente' %}
+                <div class="ms-auto d-flex gap-2">
+                    <button class="btn btn-success" onclick="cambiarEstadoCotizacion({{ cotizacion[0] }}, 'aprobada')">
+                        <i class="bi bi-check-circle-fill"></i> Aprobar (Venta)
+                    </button>
+                    <button class="btn btn-danger" onclick="cambiarEstadoCotizacion({{ cotizacion[0] }}, 'rechazada')">
+                        <i class="bi bi-x-circle-fill"></i> Rechazar
+                    </button>
+                </div>
+                {% endif %}
             </div>
         </div>
     </div>
 </div>
+
+<script>
+function cambiarEstadoCotizacion(id, estado) {
+    const accion = estado === 'aprobada' ? 'aprobar (descontar stock real)' : 'rechazar (liberar reserva)';
+    if (!confirm(`¿Está seguro que desea ${accion} esta cotización?`)) return;
+
+    fetch(`/cotizaciones/${id}/estado`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ estado: estado })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            alert(data.message);
+            location.reload();
+        } else {
+            alert('Error: ' + data.message);
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        alert('Error de conexión.');
+    });
+}
+</script>
 {% endblock %}

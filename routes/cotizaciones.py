@@ -221,12 +221,17 @@ def register_routes(app):
                     # 1. Verificar stock (excepto para superadmin)
                     if session.get('user_rol') != 'superadmin':
                         for producto_id, cantidad, _, _ in productos_cotizacion:
-                            cursor.execute("SELECT cantidad, codigo FROM productos WHERE id=?", (producto_id,))
+                            cursor.execute("SELECT cantidad, stock_reservado, codigo FROM productos WHERE id=?", (producto_id,))
                             producto = cursor.fetchone()
-                            if not producto or (producto['cantidad'] is not None and producto['cantidad'] < cantidad):
+                            
+                            stock_actual = float(producto['cantidad']) if producto['cantidad'] is not None else 999.0
+                            stock_reserv = float(producto['stock_reservado']) if producto['stock_reservado'] is not None else 0.0
+                            stock_disponible = stock_actual - stock_reserv
+                            
+                            if not producto or (stock_actual != 999.0 and stock_disponible < cantidad):
                                 conn.rollback()
                                 codigo_p = producto['codigo'] if producto else str(producto_id)
-                                flash(f"Stock insuficiente para producto {codigo_p}", 'danger')
+                                flash(f"Stock insuficiente para producto {codigo_p}. Disponible: {stock_disponible}", 'danger')
                                 return redirect(url_for('gestion_cotizaciones'))
 
                     # 2. Insertar cabecera de cotización
@@ -242,25 +247,33 @@ def register_routes(app):
 
                     cursor.execute(
                         """INSERT INTO cotizaciones 
-                           (cliente_id, creador_id, fecha, total, descuento_porcentaje, descuento_monto, subtotal) 
-                           VALUES (?, ?, ?, ?, ?, ?, ?)""",
+                           (cliente_id, creador_id, fecha, total, descuento_porcentaje, descuento_monto, subtotal, estado) 
+                           VALUES (?, ?, ?, ?, ?, ?, ?, 'pendiente')""",
                         (cliente_id, session['user_id'], fecha, total_final, descuento_porcentaje, monto_descuento, subtotal_bruto)
                     )
-                    cotizacion_id = cursor.lastrowid
+                    
+                    # Para compatibilidad con Postgres / SQLite (algunos drivers soportan lastrowid, otros no, pero aquí se usa conn.commit después)
+                    # En SQLite lastrowid funciona, en Postgres con pyscopg2 no si no usamos RETURNING
+                    is_postgres = bool(os.environ.get('DATABASE_URL') and os.environ.get('DATABASE_URL').startswith('postgres'))
+                    if is_postgres:
+                        cursor.execute("SELECT currval(pg_get_serial_sequence('cotizaciones', 'id'))")
+                        cotizacion_id = cursor.fetchone()[0]
+                    else:
+                        cotizacion_id = cursor.lastrowid
 
                     # 3. Insertar items
                     for producto_id, cantidad, precio, subtotal in productos_cotizacion:
                         cursor.execute(
                             """INSERT INTO cotizacion_productos 
                             (cotizacion_id, producto_id, cantidad, precio_unitario, subtotal)
-                            VALUES (?, ?, ?, ?, ?) RETURNING id""",
+                            VALUES (?, ?, ?, ?, ?)""",
                             (cotizacion_id, producto_id, cantidad, precio, subtotal)
                         )
 
-                        # 4. Actualizar stock (excepto superadmin)
+                        # 4. Actualizar stock reservado (excepto superadmin)
                         if session.get('user_rol') != 'superadmin':
                             cursor.execute(
-                                "UPDATE productos SET cantidad = cantidad - ? WHERE id = ?",
+                                "UPDATE productos SET stock_reservado = COALESCE(stock_reservado, 0) + ? WHERE id = ?",
                                 (cantidad, producto_id)
                             )
 
@@ -283,12 +296,12 @@ def register_routes(app):
                 if "database is locked" in str(e) and attempt < MAX_RETRIES - 1:
                     time.sleep(RETRY_DELAY * (attempt + 1))
                     continue
-                flash('Error de base de datos al guardar la cotización', 'danger')
+                flash(f'Error de base de datos al guardar la cotización: {str(e)}', 'danger')
                 app.logger.error(f"Error en guardar_cotizacion (intento {attempt + 1}): {str(e)}")
                 return redirect(url_for('gestion_cotizaciones'))
 
             except Exception as e:
-                flash('Error inesperado al guardar la cotización', 'danger')
+                flash(f'Error inesperado al guardar la cotización: {str(e)}', 'danger')
                 app.logger.error(f"Error inesperado en guardar_cotizacion: {str(e)}")
                 return redirect(url_for('gestion_cotizaciones'))
 
@@ -387,6 +400,87 @@ def register_routes(app):
         conexion.commit()
         conexion.close()
         return redirect(url_for('gestion_cotizaciones'))
+
+    @app.route('/cotizaciones/<int:id>/estado', methods=['POST'])
+    @login_required
+    def cambiar_estado_cotizacion(id):
+        conexion = get_db_connection()
+        conexion.row_factory = sqlite3.Row
+        cursor = conexion.cursor()
+        
+        try:
+            data = request.get_json()
+            nuevo_estado = data.get('estado')
+            
+            if nuevo_estado not in ['pendiente', 'aprobada', 'rechazada', 'entregado']:
+                return jsonify({'success': False, 'message': 'Estado inválido'}), 400
+                
+            cursor.execute("SELECT estado, creador_id FROM cotizaciones WHERE id = ?", (id,))
+            cotizacion = cursor.fetchone()
+            
+            if not cotizacion:
+                return jsonify({'success': False, 'message': 'Cotización no encontrada'}), 404
+                
+            if session.get('user_rol') != 'superadmin' and cotizacion['creador_id'] != session.get('user_id'):
+                return jsonify({'success': False, 'message': 'No tienes permiso para modificar esta cotización'}), 403
+
+            estado_anterior = cotizacion['estado']
+            
+            # Solo si el estado cambia
+            if estado_anterior != nuevo_estado:
+                cursor.execute("BEGIN IMMEDIATE TRANSACTION")
+                
+                # Actualizar estado en la tabla cotizaciones
+                cursor.execute("UPDATE cotizaciones SET estado = ? WHERE id = ?", (nuevo_estado, id))
+                
+                # Obtener productos de la cotización
+                cursor.execute("SELECT producto_id, cantidad FROM cotizacion_productos WHERE cotizacion_id = ?", (id,))
+                productos_cotizacion = cursor.fetchall()
+                
+                for item in productos_cotizacion:
+                    prod_id = item['producto_id']
+                    cant = item['cantidad']
+                    
+                    # Lógica de inventario según el cambio de estado
+                    if nuevo_estado == 'aprobada' and estado_anterior == 'pendiente':
+                        # Pasa de pendiente a aprobada: se efectúa la venta (restar de cantidad real, restar de reservado)
+                        cursor.execute("UPDATE productos SET cantidad = cantidad - ?, stock_reservado = stock_reservado - ? WHERE id = ?", (cant, cant, prod_id))
+                    
+                    elif nuevo_estado == 'rechazada' and estado_anterior == 'pendiente':
+                        # Se rechaza: liberar stock reservado
+                        cursor.execute("UPDATE productos SET stock_reservado = stock_reservado - ? WHERE id = ?", (cant, prod_id))
+                    
+                    elif nuevo_estado == 'pendiente' and estado_anterior == 'aprobada':
+                        # Revertir venta: sumar a cantidad real, sumar a reservado
+                        cursor.execute("UPDATE productos SET cantidad = cantidad + ?, stock_reservado = COALESCE(stock_reservado, 0) + ? WHERE id = ?", (cant, cant, prod_id))
+                        
+                    elif nuevo_estado == 'pendiente' and estado_anterior == 'rechazada':
+                        # Revertir rechazo: volver a reservar stock
+                        cursor.execute("UPDATE productos SET stock_reservado = COALESCE(stock_reservado, 0) + ? WHERE id = ?", (cant, prod_id))
+                        
+                    elif nuevo_estado == 'aprobada' and estado_anterior == 'rechazada':
+                        # Pasa de rechazada a aprobada: descontar stock real, no había reserva
+                        cursor.execute("UPDATE productos SET cantidad = cantidad - ? WHERE id = ?", (cant, prod_id))
+                        
+                    elif nuevo_estado == 'rechazada' and estado_anterior == 'aprobada':
+                        # Pasa de aprobada a rechazada: restaurar stock real, no se reserva
+                        cursor.execute("UPDATE productos SET cantidad = cantidad + ? WHERE id = ?", (cant, prod_id))
+                        
+                registrar_log(
+                    usuario_id=session['user_id'],
+                    accion="cambiar_estado_cotizacion",
+                    detalle={"cotizacion_id": id, "estado_anterior": estado_anterior, "nuevo_estado": nuevo_estado}
+                )
+                
+                conexion.commit()
+                
+            return jsonify({'success': True, 'message': f'Estado actualizado a {nuevo_estado}'})
+            
+        except Exception as e:
+            conexion.rollback()
+            return jsonify({'success': False, 'message': str(e)}), 500
+        finally:
+            conexion.close()
 
     @app.route('/cotizaciones/editar/<int:id>', methods=['GET', 'POST'])
     @login_required

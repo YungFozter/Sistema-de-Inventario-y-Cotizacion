@@ -233,7 +233,6 @@ function seleccionarEmpresaSuperadmin(valor) {
               <th>UM</th>
               <th>Cantidad</th>
               <th>P/Unitario</th>
-              <th>P/Total</th>
               <th>Acciones</th>
             </tr>
           </thead>
@@ -257,7 +256,6 @@ function seleccionarEmpresaSuperadmin(valor) {
                 <td data-label="UM">{{ p['um'] }}</td>
                 <td data-label="Cantidad">{{ p['cantidad'] }}</td>
                 <td data-label="P/Unitario">Bs {{ "%.2f"|format(p['precio_unitario']) if p['precio_unitario'] is not none else '0.00' }}</td>
-                <td data-label="P/Total">Bs {{ "%.2f"|format(p['precio_total']) if p['precio_total'] is not none else '0.00' }}</td>
                 <td data-label="Acciones">
                   <a href="/productos/editar/{{ p['id'] }}?tab=importados&page_imp={{ pagination_imp.page }}&per_page={{ pagination_imp.per_page }}&empresa={{ filtros.empresa }}&codigo={{ filtros.codigo }}&descripcion={{ filtros.descripcion }}&marca={{ filtros.marca }}&categoria={{ filtros.categoria }}" class="btn btn-sm btn-warning" title="Editar">
                       <i class="bi bi-pencil"></i>
@@ -664,6 +662,28 @@ function seleccionarEmpresaSuperadmin(valor) {
               <select id="categoriaDestinoImport" class="form-select form-select-sm">
                 <option value="">(Sin categoría o seleccione una)</option>
               </select>
+            </div>
+            
+            <div class="col-12 mt-3">
+              <label class="form-label mb-2 fw-bold text-primary border-bottom border-primary pb-1 w-100">
+                <i class="bi bi-file-earmark-check"></i> Tipo de Documento a Importar:
+              </label>
+              <div class="d-flex flex-column gap-2 ms-2">
+                <div class="form-check">
+                  <input class="form-check-input" type="radio" name="tipoDocumentoImport" id="tipoFactura" value="factura" checked>
+                  <label class="form-check-label fw-bold" for="tipoFactura">
+                    Factura de Compra <span class="badge bg-success ms-1">Actualizar Stock y Precios</span>
+                  </label>
+                  <div class="form-text mt-0"><small>Suma las cantidades extraídas al stock actual de cada producto.</small></div>
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="radio" name="tipoDocumentoImport" id="tipoCatalogo" value="catalogo">
+                  <label class="form-check-label fw-bold" for="tipoCatalogo">
+                    Catálogo de Proveedor <span class="badge bg-info ms-1 text-dark">Solo actualizar Precios</span>
+                  </label>
+                  <div class="form-text mt-0"><small>Mantiene tu stock intacto. Productos nuevos tendrán 0 stock.</small></div>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -1908,6 +1928,12 @@ function registrarSeleccionadosEnCatalogo(irACotizacion = false) {
     const categoria_id = document.getElementById('categoriaDestinoImport').value || null;
     const chkExtraerCant = document.getElementById('chkExtraerCantidadesReales');
     const respetar_cantidades = chkExtraerCant ? chkExtraerCant.checked : true;
+    
+    let tipo_documento = 'factura';
+    const radioCatalogo = document.getElementById('tipoCatalogo');
+    if (radioCatalogo && radioCatalogo.checked) {
+        tipo_documento = 'catalogo';
+    }
 
     const btn = document.getElementById('btnRegistrarSeleccionados');
     const txtOrig = btn.innerHTML;
@@ -1921,7 +1947,8 @@ function registrarSeleccionadosEnCatalogo(irACotizacion = false) {
             items: marcados,
             empresa: empresa,
             categoria_id: categoria_id,
-            respetar_cantidades: respetar_cantidades
+            respetar_cantidades: respetar_cantidades,
+            tipo_documento: tipo_documento
         })
     })
     .then(res => res.json())

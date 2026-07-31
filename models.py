@@ -81,6 +81,7 @@ def crear_tablas():
                 categoria_id INTEGER,
                 categoria TEXT,
                 stock_minimo INTEGER DEFAULT 5,
+                stock_reservado INTEGER DEFAULT 0,
                 fecha_actualizacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 es_importado INTEGER DEFAULT 0,
                 FOREIGN KEY (categoria_id) REFERENCES categorias(id),
@@ -319,36 +320,49 @@ def migrar_clientes_existentes():
         conexion.close()
 
 
-def migrar_productos_categorias():
-    """Agregar columna categoria_id a la tabla productos si no existe"""
-    if bool(os.environ.get('DATABASE_URL') and os.environ.get('DATABASE_URL').startswith('postgres')):
-        return
-
+def migrar_esquema_productos():
+    """Agrega columnas faltantes a la tabla productos (categoria_id, stock_reservado)"""
     try:
         conexion = get_db_connection()
         cursor = conexion.cursor()
         
-        # Verificar si la columna categoria_id ya existe
-        cursor.execute("PRAGMA table_info(productos)")
-        columnas = cursor.fetchall()
-        columnas_nombres = [col[1] for col in columnas]
+        is_postgres = bool(os.environ.get('DATABASE_URL') and os.environ.get('DATABASE_URL').startswith('postgres'))
         
-        if 'categoria_id' not in columnas_nombres:
-            print("[INFO] Agregando columna categoria_id a la tabla productos...")
-            cursor.execute("ALTER TABLE productos ADD COLUMN categoria_id INTEGER")
-            print("[OK] Columna categoria_id agregada correctamente")
+        if is_postgres:
+            cursor.execute("SELECT column_name FROM information_schema.columns WHERE table_name='productos'")
+            columnas_existentes = [col[0] for col in cursor.fetchall()]
+            
+            if 'categoria_id' not in columnas_existentes:
+                print("[INFO] Agregando columna categoria_id a la tabla productos (Postgres)...")
+                cursor.execute("ALTER TABLE productos ADD COLUMN categoria_id INTEGER")
+                print("[OK] Columna categoria_id agregada")
+                
+            if 'stock_reservado' not in columnas_existentes:
+                print("[INFO] Agregando columna stock_reservado a la tabla productos (Postgres)...")
+                cursor.execute("ALTER TABLE productos ADD COLUMN stock_reservado INTEGER DEFAULT 0")
+                print("[OK] Columna stock_reservado agregada")
         else:
-            print("[OK] Columna categoria_id ya existe en productos")
+            cursor.execute("PRAGMA table_info(productos)")
+            columnas = [col[1] for col in cursor.fetchall()]
+            
+            if 'categoria_id' not in columnas:
+                print("[INFO] Agregando columna categoria_id a la tabla productos (SQLite)...")
+                cursor.execute("ALTER TABLE productos ADD COLUMN categoria_id INTEGER")
+                print("[OK] Columna categoria_id agregada")
+                
+            if 'stock_reservado' not in columnas:
+                print("[INFO] Agregando columna stock_reservado a la tabla productos (SQLite)...")
+                cursor.execute("ALTER TABLE productos ADD COLUMN stock_reservado INTEGER DEFAULT 0")
+                print("[OK] Columna stock_reservado agregada")
         
         conexion.commit()
-        conexion.close()
-        
     except Exception as e:
-        print(f"[ERROR] Error en migración de productos: {str(e)}")
+        print(f"[ERROR] Error en migración de esquema de productos: {str(e)}")
         if conexion:
             conexion.rollback()
+    finally:
+        if conexion:
             conexion.close()
-        raise
 
 
 def inicializar_base_datos():
@@ -476,10 +490,11 @@ def obtener_importacion_por_id(importacion_id):
         conexion.close()
 
 
-def registrar_productos_seleccionados(items, empresa="General", categoria_id=None, respetar_cantidades=True):
+def registrar_productos_seleccionados(items, empresa="General", categoria_id=None, respetar_cantidades=True, tipo_documento="factura"):
     """
     Inserta o actualiza un grupo de productos importados en la tabla oficial 'productos'.
-    Si respetar_cantidades es True, guarda la cantidad real extraída (ej: 5.5 MTS, 26, etc.).
+    Si respetar_cantidades es True, guarda la cantidad extraída.
+    Dependiendo de tipo_documento ('factura' o 'catalogo') se actualiza el stock real o se deja en 0.
     """
     conexion = get_db_connection()
     cursor = conexion.cursor()
@@ -497,13 +512,11 @@ def registrar_productos_seleccionados(items, empresa="General", categoria_id=Non
 
             if respetar_cantidades and 'cantidad' in item:
                 try:
-                    cantidad = float(item['cantidad'])
+                    cantidad_extraida = float(item['cantidad'])
                 except (ValueError, TypeError):
-                    cantidad = 999.0
+                    cantidad_extraida = 999.0
             else:
-                cantidad = 999.0
-
-            precio_total = round(cantidad * precio_unitario, 2)
+                cantidad_extraida = 999.0
 
             if not codigo and not descripcion:
                 continue
@@ -513,12 +526,14 @@ def registrar_productos_seleccionados(items, empresa="General", categoria_id=Non
             existente = cursor.fetchone()
 
             if existente:
-                # Si ya existe y respetamos cantidades, sumar la cantidad para no perder stock de repeticiones
-                if respetar_cantidades and existente[1] is not None and existente[1] != 999:
-                    final_cantidad = round(float(existente[1]) + cantidad, 2)
+                # Si ya existe, calculamos la nueva cantidad según el tipo de documento
+                stock_actual = float(existente[1]) if existente[1] is not None and existente[1] != 999 else 0.0
+                
+                if tipo_documento == 'factura' and respetar_cantidades:
+                    final_cantidad = round(stock_actual + cantidad_extraida, 2)
                 else:
-                    final_cantidad = cantidad
-
+                    final_cantidad = stock_actual # Mantiene el stock intacto para 'catalogo' o sin cantidad
+                
                 final_precio_total = round(final_cantidad * precio_unitario, 2)
 
                 cursor.execute('''
@@ -527,11 +542,18 @@ def registrar_productos_seleccionados(items, empresa="General", categoria_id=Non
                     WHERE id = ?
                 ''', (descripcion, marca, um, final_cantidad, precio_unitario, final_precio_total, categoria_id, existente[0]))
             else:
+                # Si es nuevo
+                if tipo_documento == 'catalogo':
+                    final_cantidad = 0.0
+                else:
+                    final_cantidad = cantidad_extraida if respetar_cantidades else 999.0
+                    
+                final_precio_total = round(final_cantidad * precio_unitario, 2)
+                
                 cursor.execute('''
                     INSERT INTO productos (empresa, codigo, descripcion, marca, tm, um, cantidad, precio_unitario, precio_total, categoria_id, es_importado)
                     VALUES (?, ?, ?, ?, 'Bs', ?, ?, ?, ?, ?, 1)
-                ''', (empresa_item, codigo, descripcion, marca, um, cantidad, precio_unitario, precio_total, categoria_id))
-
+                ''', (empresa_item, codigo, descripcion, marca, um, final_cantidad, precio_unitario, final_precio_total, categoria_id))
 
             
             # Si el item venía de una importación guardada, marcarlo como registrado

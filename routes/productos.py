@@ -706,6 +706,7 @@ def register_routes(app):
             empresa = data.get('empresa', 'General').strip() or 'General'
             categoria_id = data.get('categoria_id')
             respetar_cantidades = data.get('respetar_cantidades', True)
+            tipo_documento = data.get('tipo_documento', 'factura')
 
             if not items:
                 return jsonify({'success': False, 'message': 'No se seleccionó ningún producto para registrar'}), 400
@@ -714,7 +715,8 @@ def register_routes(app):
                 items=items,
                 empresa=empresa,
                 categoria_id=categoria_id,
-                respetar_cantidades=respetar_cantidades
+                respetar_cantidades=respetar_cantidades,
+                tipo_documento=tipo_documento
             )
 
             return jsonify({

@@ -24,6 +24,7 @@ def inicializar_base_datos():
     conexion = get_db_connection()
     crear_tablas()
     migrar_columnas_nuevas_clientes()
+    migrar_esquema_productos()
     conexion.close()
 
 inicializar_base_datos()

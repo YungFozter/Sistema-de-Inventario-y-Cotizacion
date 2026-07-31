@@ -225,6 +225,9 @@ def register_routes(app):
         cotizaciones = cursor.fetchall()
         conexion.close()
 
+        # Calcular métricas para el dashboard standard
+        total_cotizado = sum(float(c['total'] or 0) for c in cotizaciones)
+
         # Create the filtros dictionary to pass to the template
         filtros = {
             'estado': estado,
@@ -234,9 +237,10 @@ def register_routes(app):
 
         return render_template('standard/standard_dashboard.html',
                              cotizaciones=cotizaciones,
+                             total_cotizado=total_cotizado,
                              filtros=filtros)
 
-    @app.route('/cotizaciones/standard', endpoint='cotizaciones_standard', methods=['GET'])
+    @app.route('/cotizaciones/standard', endpoint='standard_cotizaciones', methods=['GET'])
     @standard_required
     @login_required
     def standard_cotizaciones():

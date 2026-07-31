@@ -3,7 +3,7 @@ import os
 import sqlite3
 from datetime import datetime
 from db_wrapper import get_db_connection
-from models import crear_tablas, migrar_columnas_nuevas_clientes
+from models import crear_tablas, migrar_columnas_nuevas_clientes, migrar_esquema_productos
 
 import logging
 for _log_name in ['pdfminer', 'pdfminer.pdfinterp', 'pdfminer.pdfpage', 'pdfminer.converter', 'pdfminer.layout', 'PyPDF2', 'pypdf', 'pdfplumber']:

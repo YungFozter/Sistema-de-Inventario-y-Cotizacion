@@ -226,37 +226,39 @@
                 </div>
                 
                 <!-- Caja de Mensajes -->
-                <div class="card-body overflow-auto p-3 flex-grow-1 bg-light" id="box-chat-mensajes">
-                    {% if mensajes_chat %}
-                        {% for m in mensajes_chat %}
-                        <div class="d-flex flex-column mb-3 {% if m.usuario_id == session.user_id %}align-items-end{% else %}align-items-start{% endif %}">
-                            <div class="d-flex align-items-center mb-1 gap-2">
-                                <span class="fw-bold small {% if m.usuario_rol in ['admin', 'superadmin'] %}text-danger{% else %}text-primary{% endif %}">
-                                    {{ m.usuario_nombre }}
-                                    {% if m.usuario_rol in ['admin', 'superadmin'] %}
-                                        <span class="badge bg-danger ms-1" style="font-size:0.65rem;">Jefe/Admin</span>
+                <div class="card-body overflow-auto p-3 flex-grow-1 bg-light d-flex flex-column" id="box-chat-mensajes">
+                    <div class="mt-auto d-flex flex-column gap-3 w-100">
+                        {% if mensajes_chat %}
+                            {% for m in mensajes_chat %}
+                            <div class="d-flex flex-column {% if m.usuario_id == session.user_id %}align-items-end{% else %}align-items-start{% endif %}">
+                                <div class="d-flex align-items-center mb-1 gap-2">
+                                    <span class="fw-bold small {% if m.usuario_rol in ['admin', 'superadmin'] %}text-danger{% else %}text-primary{% endif %}">
+                                        {{ m.usuario_nombre }}
+                                        {% if m.usuario_rol in ['admin', 'superadmin'] %}
+                                            <span class="badge bg-danger ms-1" style="font-size:0.65rem;">Jefe/Admin</span>
+                                        {% endif %}
+                                    </span>
+                                    <span class="text-muted" style="font-size: 0.7rem;">{{ m.fecha }}</span>
+                                    {% if session.user_rol in ['admin', 'superadmin'] %}
+                                    <button class="btn btn-link p-0 text-warning" onclick="fijarMensaje({{ m.id }})" title="Fijar/Desfijar Anuncio">
+                                        <i class="bi bi-pin-angle{% if m.es_fijado %}-fill{% endif %}"></i>
+                                    </button>
                                     {% endif %}
-                                </span>
-                                <span class="text-muted" style="font-size: 0.7rem;">{{ m.fecha }}</span>
-                                {% if session.user_rol in ['admin', 'superadmin'] %}
-                                <button class="btn btn-link p-0 text-warning" onclick="fijarMensaje({{ m.id }})" title="Fijar/Desfijar Anuncio">
-                                    <i class="bi bi-pin-angle{% if m.es_fijado %}-fill{% endif %}"></i>
-                                </button>
-                                {% endif %}
+                                </div>
+                                <div class="p-2 px-3 rounded-3 shadow-sm style-msg 
+                                    {% if m.usuario_id == session.user_id %}bg-primary text-white{% else %}bg-white text-dark border{% endif %}" 
+                                    style="max-width: 85%; word-break: break-word;">
+                                    {{ m.mensaje }}
+                                </div>
                             </div>
-                            <div class="p-2 px-3 rounded-3 shadow-sm style-msg 
-                                {% if m.usuario_id == session.user_id %}bg-primary text-white{% else %}bg-white text-dark border{% endif %}" 
-                                style="max-width: 85%; word-break: break-word;">
-                                {{ m.mensaje }}
+                            {% endfor %}
+                        {% else %}
+                            <div class="text-center text-muted my-5">
+                                <i class="bi bi-chat-square-text fs-2 d-block mb-2"></i>
+                                <p class="small mb-0">No hay mensajes recientes en el chat de equipo.</p>
                             </div>
-                        </div>
-                        {% endfor %}
-                    {% else %}
-                        <div class="text-center text-muted my-5">
-                            <i class="bi bi-chat-square-text fs-2 d-block mb-2"></i>
-                            <p class="small mb-0">No hay mensajes recientes en el chat de equipo.</p>
-                        </div>
-                    {% endif %}
+                        {% endif %}
+                    </div>
                 </div>
 
                 <!-- Input para Enviar Mensaje -->
@@ -601,5 +603,16 @@ function eliminarTarea(id) {
         else alert('Error: ' + data.message);
     });
 }
+
+function scrollToBottomChat() {
+    const box = document.getElementById('box-chat-mensajes');
+    if (box) {
+        box.scrollTop = box.scrollHeight;
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    scrollToBottomChat();
+});
 </script>
 {% endblock %}

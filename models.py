@@ -177,6 +177,9 @@ def crear_tablas():
             ){";" if is_postgres else ""}
         ''')
 
+        # Tabla de configuración personalizada de PDF ("MI PDF")
+        asegurar_tabla_configuracion_pdf(cursor)
+
         # Insertar categorías por defecto
         categorias_defecto = [
             ('Electrónica', 'Equipos y componentes electrónicos'),
@@ -606,11 +609,46 @@ def migrar_columnas_nuevas_clientes():
 # FUNCIONES DE CONFIGURACIÓN DE PDF ("MI PDF")
 # =============================================
 
+def asegurar_tabla_configuracion_pdf(cursor):
+    """Crea la tabla configuracion_pdf si no existe en la base de datos (SQLite y PostgreSQL)"""
+    is_postgres = bool(os.environ.get('DATABASE_URL') and os.environ.get('DATABASE_URL').startswith('postgres'))
+    try:
+        cursor.execute(f'''
+            CREATE TABLE IF NOT EXISTS configuracion_pdf (
+                id {"SERIAL PRIMARY KEY" if is_postgres else "INTEGER PRIMARY KEY AUTOINCREMENT"},
+                usuario_id INTEGER UNIQUE,
+                tipo_hoja TEXT DEFAULT 'A4',
+                color_tema TEXT DEFAULT '#dc2626',
+                titulo_documento TEXT DEFAULT 'COTIZACIÓN DE VENTAS',
+                empresa_nombre TEXT DEFAULT '',
+                nit_emisor TEXT DEFAULT '',
+                telefono TEXT DEFAULT '',
+                correo TEXT DEFAULT '',
+                direccion TEXT DEFAULT '',
+                terminos_condiciones TEXT DEFAULT '1. Validez de la oferta: 15 días.\n2. Precios incluyen impuestos de ley.\n3. Tiempo de entrega a convenir.',
+                nota_pie TEXT DEFAULT '¡Gracias por su preferencia!',
+                responsable_nombre TEXT DEFAULT '',
+                responsable_telefono TEXT DEFAULT '',
+                responsable_email TEXT DEFAULT '',
+                plazo_entrega TEXT DEFAULT '',
+                logo_base64 TEXT DEFAULT '',
+                logo_path TEXT DEFAULT '',
+                firma_path TEXT DEFAULT '',
+                fecha_actualizacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (usuario_id) REFERENCES clientes(id)
+            ){";" if is_postgres else ""}
+        ''')
+    except Exception as e:
+        print(f"Error asegurando tabla configuracion_pdf: {e}")
+
 def obtener_configuracion_pdf(usuario_id):
     """Obtiene la configuración de PDF para un usuario o retorna valores por defecto"""
     try:
         with get_db_connection() as conexion:
             cursor = conexion.cursor()
+            asegurar_tabla_configuracion_pdf(cursor)
+            conexion.commit()
+
             cursor.execute("SELECT * FROM configuracion_pdf WHERE usuario_id = ?", (usuario_id,))
             row = cursor.fetchone()
             if row:
@@ -652,6 +690,7 @@ def guardar_configuracion_pdf(usuario_id, datos):
     try:
         with get_db_connection() as conexion:
             cursor = conexion.cursor()
+            asegurar_tabla_configuracion_pdf(cursor)
 
             # Asegurar que existan las columnas nuevas
             cursor.execute("PRAGMA table_info(configuracion_pdf)")

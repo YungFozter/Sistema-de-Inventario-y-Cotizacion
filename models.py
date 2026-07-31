@@ -212,11 +212,23 @@ def crear_tablas():
         try:
             if is_postgres:
                 cursor.execute("UPDATE productos SET empresa = TRIM(REGEXP_REPLACE(empresa, E'[\\t\\r\\n]+', '', 'g')) WHERE empresa IS NOT NULL")
+                
+                # Activar RLS (Row Level Security) en Supabase para resolver avisos de seguridad
+                tablas_rls = [
+                    'clientes', 'logs', 'categorias', 'productos', 'cotizaciones',
+                    'cotizacion_productos', 'importaciones_pdf', 'items_importados_temp',
+                    'configuracion_pdf', 'pines_admin', 'historial_renovaciones'
+                ]
+                for t in tablas_rls:
+                    try:
+                        cursor.execute(f"ALTER TABLE public.{t} ENABLE ROW LEVEL SECURITY;")
+                    except Exception:
+                        pass
             else:
                 cursor.execute("UPDATE productos SET empresa = TRIM(REPLACE(empresa, char(9), '')) WHERE empresa IS NOT NULL")
             conexion.commit()
         except Exception as err_clean:
-            print(f"[WARN] No se pudo limpiar empresa: {str(err_clean)}")
+            print(f"[WARN] No se pudo limpiar empresa o activar RLS: {str(err_clean)}")
         
         print("[OK] Tablas creadas/verificadas correctamente.")
     except Exception as e:

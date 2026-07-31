@@ -137,10 +137,15 @@
                                             title="{% if usuario.activo %}Suspender Acceso (Kill-Switch){% else %}Reactivar Acceso{% endif %}" data-bs-toggle="tooltip">
                                         <i class="bi bi-power"></i>
                                     </button>
-                                    <button class="btn btn-light text-primary btn-sm"
+                                    <button class="btn btn-light text-primary border-end border-light-subtle btn-sm"
                                             onclick="cambiarRolUsuario({{ usuario.id }}, '{{ usuario.rol }}')"
                                             title="Cambiar Rol" data-bs-toggle="tooltip">
                                         <i class="bi bi-arrow-repeat"></i>
+                                    </button>
+                                    <button class="btn btn-light text-danger btn-sm"
+                                            onclick="eliminarUsuarioPermanente({{ usuario.id }}, '{{ usuario.nombre }}')"
+                                            title="Eliminar Usuario y Toda su Información" data-bs-toggle="tooltip">
+                                        <i class="bi bi-trash-fill"></i>
                                     </button>
                                     {% endif %}
                                 </div>
@@ -560,9 +565,30 @@ function verHistorialRenovaciones(id, nombre) {
             }
         })
         .catch(error => {
-            console.error('Error:', error);
-            tbody.innerHTML = '<tr><td colspan="4" class="text-center py-4 text-danger">Error de conexión</td></tr>';
-        });
+function eliminarUsuarioPermanente(id, nombre) {
+    if (!confirm(`⚠️ ¿ESTÁS ABSOLUTAMENTE SEGURO?\n\nVas a eliminar permanentemente al usuario "${nombre}" y TODA su información asociada (cotizaciones, tareas, historial de chat y notificaciones).\n\nEsta acción NO se puede deshacer.`)) {
+        return;
+    }
+
+    fetch(`/admin/usuarios/${id}`, {
+        method: 'DELETE',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert(data.message);
+            location.reload();
+        } else {
+            alert('Error: ' + data.error);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error de conexión al eliminar usuario');
+    });
 }
 </script>
 {% endblock %}

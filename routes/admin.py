@@ -424,6 +424,66 @@ def register_routes(app):
             if 'conexion' in locals():
                 conexion.close()
 
+    @app.route('/admin/usuarios/<int:id>', methods=['DELETE'])
+    @superadmin_required
+    @login_required
+    def eliminar_usuario_completo(id):
+        if id == session.get('user_id'):
+            return jsonify({'error': 'No puedes eliminar tu propia cuenta'}), 400
+
+        conexion = get_db_connection()
+        cursor = conexion.cursor()
+        try:
+            # 1. Obtener usuario
+            cursor.execute("SELECT id, nombre, correo, rol FROM clientes WHERE id = ?", (id,))
+            user = cursor.fetchone()
+            if not user:
+                return jsonify({'error': 'Usuario no encontrado'}), 404
+
+            user_nombre = user[1] if isinstance(user, (tuple, list)) else user['nombre']
+            user_correo = user[2] if isinstance(user, (tuple, list)) else user['correo']
+
+            # 2. Si es admin, desvincular o limpiar sus empleados asociados
+            cursor.execute("UPDATE clientes SET creador_id = NULL WHERE creador_id = ?", (id,))
+
+            # 3. Eliminar cotizaciones y sus productos
+            cursor.execute('''
+                DELETE FROM cotizacion_productos WHERE cotizacion_id IN (
+                    SELECT id FROM cotizaciones WHERE cliente_id = ? OR creador_id = ?
+                )
+            ''', (id, id))
+            cursor.execute("DELETE FROM cotizaciones WHERE cliente_id = ? OR creador_id = ?", (id, id))
+
+            # 4. Eliminar tareas, chat, notificaciones y solicitudes
+            cursor.execute("DELETE FROM equipo_tareas WHERE creador_id = ? OR asignado_a = ? OR completado_por_id = ?", (id, id, id))
+            cursor.execute("DELETE FROM equipo_chat WHERE usuario_id = ?", (id,))
+            cursor.execute("DELETE FROM equipo_notificaciones WHERE usuario_id = ?", (id,))
+            cursor.execute("DELETE FROM equipo_solicitudes WHERE admin_id = ? OR empleado_id = ?", (id, id))
+            cursor.execute("DELETE FROM equipo_invitaciones WHERE admin_id = ?", (id,))
+
+            # 5. Eliminar logs, config pdf y des-asociar pines/renovaciones
+            cursor.execute("DELETE FROM logs WHERE usuario_id = ?", (id,))
+            cursor.execute("DELETE FROM configuracion_pdf WHERE usuario_id = ?", (id,))
+            cursor.execute("UPDATE pines_admin SET usado = FALSE, usado_por = NULL WHERE usado_por = ?", (id,))
+            cursor.execute("DELETE FROM historial_renovaciones WHERE admin_id = ? OR superadmin_id = ?", (id, id))
+
+            # 6. Eliminar registro del cliente/usuario
+            cursor.execute("DELETE FROM clientes WHERE id = ?", (id,))
+
+            registrar_log(
+                usuario_id=session.get('user_id'),
+                accion="eliminar_usuario_completo",
+                detalle={"usuario_eliminado_id": id, "nombre": user_nombre, "correo": user_correo}
+            )
+
+            conexion.commit()
+            return jsonify({'success': True, 'message': f'Usuario {user_nombre} ({user_correo}) y toda su información fueron eliminados permanentemente.'})
+        except Exception as e:
+            conexion.rollback()
+            return jsonify({'error': f'Error al eliminar usuario: {str(e)}'}), 500
+        finally:
+            conexion.close()
+
     @app.route('/admin/renovar_suscripcion/<int:id>', methods=['POST'])
     @superadmin_required
     @login_required

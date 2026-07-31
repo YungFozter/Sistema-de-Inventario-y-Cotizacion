@@ -1,110 +1,175 @@
 {% extends 'shared/layout.html' %}
 
-{% block titulo %}Mi Panel - Usuario Standard{% endblock %}
+{% block titulo %}Mi Panel Comercial - Empleado Standard{% endblock %}
 
 {% block contenido %}
-<div class="container mt-4">
-    <!-- Banner de Bienvenida -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="card border-0 bg-primary text-white">
-                <div class="card-body">
-                    <div class="row align-items-center">
-                        <div class="col-md-8">
-                            <h2 class="fw-bold">Bienvenido, {{ nombre }}</h2>
-                            <p class="mb-0">Panel exclusivo para usuarios Standard</p>
-                        </div>
-                        <div class="col-md-4 text-md-end">
-                            <span class="badge bg-light text-primary rounded-pill p-2">
-                                <i class="bi bi-person-check me-1"></i> Usuario Standard
-                            </span>
-                        </div>
+<div class="container-fluid py-4 px-lg-5">
+    <!-- Banner de Bienvenida Estilizado -->
+    <div class="card border-0 shadow-lg rounded-4 overflow-hidden mb-4 fade-up-enter" 
+         style="background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 60%, #032830 100%); position: relative;">
+        <div class="card-body p-4 p-lg-5 text-white">
+            <div class="row align-items-center">
+                <div class="col-lg-8 mb-3 mb-lg-0">
+                    <div class="d-flex align-items-center mb-2">
+                        <span class="badge bg-white bg-opacity-25 text-white rounded-pill px-3 py-2 fs-7 fw-semibold me-2">
+                            <i class="bi bi-shield-check me-1"></i> Usuario Standard / Empleado
+                        </span>
+                        <span class="badge bg-success bg-opacity-75 text-white rounded-pill px-3 py-2 fs-7 fw-semibold">
+                            <i class="bi bi-circle-fill me-1" style="font-size: 0.5rem;"></i> En Línea
+                        </span>
+                    </div>
+                    <h1 class="display-6 fw-bold mb-2">¡Hola, {{ nombre }}! 👋</h1>
+                    <p class="mb-0 text-white-50 fs-6">
+                        Bienvenido a tu centro de control comercial. Gestiona tus cotizaciones, atiende tus tareas de equipo y revisa los anuncios del Administrador.
+                    </p>
+                </div>
+                <div class="col-lg-4 text-lg-end">
+                    <a href="{{ url_for('gestion_cotizaciones') }}" class="btn btn-light btn-lg rounded-pill px-4 py-3 fw-bold text-primary shadow-sm me-2 mb-2 mb-sm-0">
+                        <i class="bi bi-plus-circle-fill me-2"></i>Nueva Cotización
+                    </a>
+                    <a href="/equipo" class="btn btn-outline-light btn-lg rounded-pill px-4 py-3 fw-semibold shadow-sm">
+                        <i class="bi bi-people-fill me-2"></i>Mi Equipo
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tarjetas de Métricas KPI -->
+    <div class="row g-3 mb-4 fade-up-enter delay-100">
+        <!-- Cotizaciones Totales -->
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card border-0 shadow-sm rounded-4 h-100 p-3 bg-white">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <span class="text-muted small fw-semibold text-uppercase">Cotizaciones Creadas</span>
+                        <h2 class="fw-bold text-dark mb-0 mt-1">{{ total_cotizaciones }}</h2>
+                    </div>
+                    <div class="avatar-md bg-primary bg-opacity-10 text-primary rounded-3 p-3 d-flex align-items-center justify-content-center">
+                        <i class="bi bi-file-earmark-text fs-2"></i>
                     </div>
                 </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Estadísticas Rápidas -->
-    <div class="row">
-        <div class="col-md-4 mb-4">
-            <div class="card h-100 border-0 shadow-sm">
-                <div class="card-body text-center">
-                    <h3 class="text-primary">{{ total_cotizaciones }}</h3>
-                    <p class="mb-0">Cotizaciones Totales</p>
+                <div class="mt-3 pt-2 border-top border-light d-flex align-items-center justify-content-between text-muted small">
+                    <span><i class="bi bi-clock me-1"></i>Histórico personal</span>
+                    <a href="{{ url_for('standard_cotizaciones') }}" class="text-primary text-decoration-none fw-semibold">Ver todas →</a>
                 </div>
             </div>
         </div>
 
-        <div class="col-md-4 mb-4">
-            <div class="card h-100 border-0 shadow-sm">
-                <div class="card-body text-center">
-                    <h3 class="text-success">{{ "%.2f"|format(total_cotizado) }} Bs.</h3>
-                    <p class="mb-0">Total Cotizado</p>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Acciones Rápidas -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="card border-0 shadow-sm">
-                <div class="card-header bg-white">
-                    <h5 class="mb-0"><i class="bi bi-lightning me-2"></i>Acciones Rápidas</h5>
-                </div>
-                <div class="card-body">
-                    <div class="d-grid gap-2 d-md-flex">
-                        <a href="{{ url_for('gestion_cotizaciones') }}" class="btn btn-primary me-md-2">
-                            <i class="bi bi-plus-circle me-1"></i> Nueva Cotización
-                        </a>
-                        <a href="{{ url_for('standard_cotizaciones') }}" class="btn btn-outline-primary">
-                            <i class="bi bi-list-check me-1"></i> Ver Mis Cotizaciones
-                        </a>
+        <!-- Total Cotizado -->
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card border-0 shadow-sm rounded-4 h-100 p-3 bg-white">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <span class="text-muted small fw-semibold text-uppercase">Monto Total Cotizado</span>
+                        <h2 class="fw-bold text-success mb-0 mt-1">{{ "%.2f"|format(total_cotizado) }} <small class="fs-6">Bs.</small></h2>
+                    </div>
+                    <div class="avatar-md bg-success bg-opacity-10 text-success rounded-3 p-3 d-flex align-items-center justify-content-center">
+                        <i class="bi bi-currency-dollar fs-2"></i>
                     </div>
                 </div>
+                <div class="mt-3 pt-2 border-top border-light d-flex align-items-center justify-content-between text-muted small">
+                    <span><i class="bi bi-graph-up me-1"></i>Volumen generado</span>
+                    <span class="badge bg-success bg-opacity-10 text-success fw-semibold">Ventas</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Aprobadas vs Pendientes -->
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card border-0 shadow-sm rounded-4 h-100 p-3 bg-white">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <span class="text-muted small fw-semibold text-uppercase">Estado Cotizaciones</span>
+                        <div class="d-flex align-items-center gap-2 mt-1">
+                            <span class="badge bg-success rounded-pill px-3 py-2 fs-6">{{ cotizaciones_aprobadas }} Aprobadas</span>
+                            <span class="badge bg-warning text-dark rounded-pill px-3 py-2 fs-6">{{ cotizaciones_pendientes }} Pendientes</span>
+                        </div>
+                    </div>
+                    <div class="avatar-md bg-warning bg-opacity-10 text-warning rounded-3 p-3 d-flex align-items-center justify-content-center">
+                        <i class="bi bi-pie-chart-fill fs-2"></i>
+                    </div>
+                </div>
+                <div class="mt-3 pt-2 border-top border-light text-muted small">
+                    <i class="bi bi-check2-circle text-success me-1"></i>{{ cotizaciones_rechazadas }} Rechazadas
+                </div>
+            </div>
+        </div>
+
+        <!-- Tareas Pendientes -->
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card border-0 shadow-sm rounded-4 h-100 p-3 bg-white">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <span class="text-muted small fw-semibold text-uppercase">Tareas Pendientes</span>
+                        <h2 class="fw-bold mb-0 mt-1" style="color: #6f42c1;">{{ tareas_pendientes|length }}</h2>
+                    </div>
+                    <div class="avatar-md rounded-3 p-3 d-flex align-items-center justify-content-center" style="background-color: rgba(111, 66, 193, 0.1); color: #6f42c1;">
+                        <i class="bi bi-kanban fs-2"></i>
+                    </div>
+                </div>
+                <div class="mt-3 pt-2 border-top border-light d-flex align-items-center justify-content-between text-muted small">
+                    <span><i class="bi bi-list-task me-1"></i>Asignadas por Admin</span>
+                    <a href="/equipo" class="text-decoration-none fw-semibold" style="color: #6f42c1;">Ir a Equipo →</a>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Actividad Reciente -->
-    <div class="row">
-        <div class="col-12">
-            <div class="card border-0 shadow-sm">
-                <div class="card-header bg-white">
-                    <h5 class="mb-0"><i class="bi bi-clock-history me-2"></i>Actividad Reciente</h5>
+    <!-- Cuerpo Interactivo en 2 Columnas -->
+    <div class="row g-4 fade-up-enter delay-200">
+        <!-- Columna Izquierda: Cotizaciones Recientes -->
+        <div class="col-lg-7">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+                <div class="card-header bg-white py-3 px-4 border-0 d-flex justify-content-between align-items-center">
+                    <h5 class="fw-bold mb-0 text-dark">
+                        <i class="bi bi-file-earmark-text text-primary me-2"></i>Mis Cotizaciones Recientes
+                    </h5>
+                    <a href="{{ url_for('standard_cotizaciones') }}" class="btn btn-sm btn-outline-primary rounded-pill px-3">
+                        Ver todas
+                    </a>
                 </div>
-                <div class="card-body">
-                    {% if actividad_reciente %}
+                <div class="card-body p-0">
+                    {% if cotizaciones %}
                     <div class="table-responsive">
-                        <table class="table table-hover">
-                            <thead>
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="bg-light text-muted small text-uppercase">
                                 <tr>
-                                    <th>ID</th>
-                                    <th>Fecha</th>
-                                    <th>Total</th>
-                                    <th>Estado</th>
-                                    <th>Acciones</th>
+                                    <th class="border-0 px-4 py-3">ID</th>
+                                    <th class="border-0 py-3">Fecha</th>
+                                    <th class="border-0 py-3">Cliente</th>
+                                    <th class="border-0 py-3">Total</th>
+                                    <th class="border-0 py-3">Estado</th>
+                                    <th class="border-0 px-4 py-3 text-end">Acción</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {% for cot in actividad_reciente %}
+                                {% for cot in cotizaciones %}
                                 <tr>
-                                    <td>#{{ cot[0] }}</td>
-                                    <td>{{ cot[1]|date('%d/%m/%Y') }}</td>
-                                    <td>{{ "%.2f"|format(cot[2]) }} Bs.</td>
-                                    <td>
-                                        <span class="badge
-                                            {% if cot[3] == 'aprobada' %}bg-success
-                                            {% elif cot[3] == 'pendiente' %}bg-warning
-                                            {% else %}bg-secondary{% endif %}">
-                                            {{ cot[3]|capitalize }}
+                                    <td class="px-4 py-3 fw-bold text-primary">#{{ cot.id }}</td>
+                                    <td class="py-3 text-muted small">{{ cot.fecha }}</td>
+                                    <td class="py-3 fw-semibold text-dark">{{ cot.cliente_nombre or 'Cliente General' }}</td>
+                                    <td class="py-3 fw-bold text-success">{{ "%.2f"|format(cot.total or 0) }} Bs.</td>
+                                    <td class="py-3">
+                                        {% if cot.estado == 'aprobada' %}
+                                        <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-3 py-1">
+                                            <i class="bi bi-check-circle me-1"></i>Aprobada
                                         </span>
+                                        {% elif cot.estado == 'pendiente' %}
+                                        <span class="badge bg-warning-subtle text-warning border border-warning-subtle rounded-pill px-3 py-1">
+                                            <i class="bi bi-hourglass-split me-1"></i>Pendiente
+                                        </span>
+                                        {% else %}
+                                        <span class="badge bg-danger-subtle text-danger border border-danger-subtle rounded-pill px-3 py-1">
+                                            <i class="bi bi-x-circle me-1"></i>Rechazada
+                                        </span>
+                                        {% endif %}
                                     </td>
-                                    <td>
-                                        <a href="{{ url_for('vista_previa_cotizacion', id=cot[0]) }}"
-                                           class="btn btn-sm btn-outline-primary">
-                                            <i class="bi bi-eye"></i> Ver
+                                    <td class="px-4 py-3 text-end">
+                                        <a href="{{ url_for('vista_previa_cotizacion', id=cot.id) }}" 
+                                           class="btn btn-sm btn-light text-primary rounded-pill px-3"
+                                           title="Ver / PDF">
+                                            <i class="bi bi-eye-fill me-1"></i>Ver
                                         </a>
                                     </td>
                                 </tr>
@@ -113,11 +178,123 @@
                         </table>
                     </div>
                     {% else %}
-                    <div class="alert alert-info mb-0">No hay actividad reciente</div>
+                    <div class="p-5 text-center text-muted">
+                        <i class="bi bi-inbox fs-1 d-block mb-3 opacity-50"></i>
+                        <p class="mb-3">Aún no has generado cotizaciones.</p>
+                        <a href="{{ url_for('gestion_cotizaciones') }}" class="btn btn-primary rounded-pill px-4">
+                            <i class="bi bi-plus-circle me-1"></i> Crear mi primera cotización
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Columna Derecha: Tareas Asignadas & Anuncios Fijados -->
+        <div class="col-lg-5">
+            <!-- Card: Tareas Asignadas -->
+            <div class="card border-0 shadow-sm rounded-4 mb-4">
+                <div class="card-header bg-white py-3 px-4 border-0 d-flex justify-content-between align-items-center">
+                    <h5 class="fw-bold mb-0 text-dark">
+                        <i class="bi bi-kanban-fill me-2" style="color: #6f42c1;"></i>Mis Tareas Pendientes
+                    </h5>
+                    <a href="/equipo" class="btn btn-sm btn-light rounded-pill px-3" style="color: #6f42c1;">
+                        Ir a Equipo
+                    </a>
+                </div>
+                <div class="card-body px-4 py-2">
+                    {% if tareas_pendientes %}
+                    <div class="list-group list-group-flush">
+                        {% for tarea in tareas_pendientes %}
+                        <div class="list-group-item px-0 py-3 border-bottom border-light" id="tarea-card-{{ tarea.id }}">
+                            <div class="d-flex justify-content-between align-items-start mb-1">
+                                <h6 class="fw-bold text-dark mb-1">{{ tarea.titulo }}</h6>
+                                <span class="badge {% if tarea.prioridad == 'alta' %}bg-danger{% elif tarea.prioridad == 'media' %}bg-warning text-dark{% else %}bg-info{% endif %} rounded-pill">
+                                    {{ tarea.prioridad|capitalize }}
+                                </span>
+                            </div>
+                            {% if tarea.descripcion %}
+                            <p class="text-muted small mb-2 text-truncate">{{ tarea.descripcion }}</p>
+                            {% endif %}
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="text-muted small">
+                                    {% if tarea.fecha_limite %}
+                                    <i class="bi bi-clock-history text-danger me-1"></i>Límite: {{ tarea.fecha_limite }}
+                                    {% else %}
+                                    <i class="bi bi-person me-1"></i>Por: {{ tarea.creador_nombre }}
+                                    {% endif %}
+                                </span>
+                                <button class="btn btn-sm btn-outline-success rounded-pill px-3 py-1"
+                                        onclick="marcarTareaDashboard({{ tarea.id }})">
+                                    <i class="bi bi-check-circle me-1"></i>Hecho
+                                </button>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="py-4 text-center text-muted">
+                        <i class="bi bi-check-all text-success display-6 d-block mb-2"></i>
+                        <p class="mb-0 small">¡Excelente! No tienes tareas pendientes asignadas.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Card: Anuncios del Administrador -->
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-header bg-white py-3 px-4 border-0">
+                    <h5 class="fw-bold mb-0 text-dark">
+                        <i class="bi bi-pin-angle-fill text-warning me-2"></i>Anuncios del Administrador
+                    </h5>
+                </div>
+                <div class="card-body px-4 py-2">
+                    {% if anuncios_fijados %}
+                    {% for anc in anuncios_fijados %}
+                    <div class="p-3 bg-light rounded-3 mb-3 border-start border-warning border-4">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <span class="fw-bold text-dark small">{{ anc.usuario_nombre }}</span>
+                            <span class="text-muted small">{{ anc.fecha }}</span>
+                        </div>
+                        <p class="mb-0 text-secondary small">{{ anc.mensaje }}</p>
+                    </div>
+                    {% endfor %}
+                    {% else %}
+                    <div class="py-3 text-center text-muted">
+                        <p class="mb-0 small">No hay anuncios fijados por el momento.</p>
+                    </div>
                     {% endif %}
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<script>
+function marcarTareaDashboard(tareaId) {
+    if (!confirm('¿Marcar esta tarea como completada?')) return;
+
+    fetch(`/equipo/tareas/${tareaId}/completar`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            const card = document.getElementById(`tarea-card-${tareaId}`);
+            if (card) {
+                card.style.transition = 'all 0.3s ease';
+                card.style.opacity = '0';
+                setTimeout(() => card.remove(), 300);
+            }
+        } else {
+            alert('Error: ' + data.message);
+        }
+    })
+    .catch(err => {
+        console.error('Error:', err);
+        alert('Error de conexión');
+    });
+}
+</script>
 {% endblock %}

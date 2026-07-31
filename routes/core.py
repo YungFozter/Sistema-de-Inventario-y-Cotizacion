@@ -187,58 +187,80 @@ def register_routes(app):
     @standard_required
     @login_required
     def standard_dashboard():
-        # Obtener parámetros de filtro
-        estado = request.args.get('estado', '')
-        desde = request.args.get('desde', '')
-        hasta = request.args.get('hasta', '')
-
+        user_id = session.get('user_id')
         conexion = get_db_connection()
+        conexion.row_factory = sqlite3.Row
         cursor = conexion.cursor()
 
-        query = '''
-            SELECT 
-                c.id, 
-                c.fecha, 
-                c.total,
-                c.estado
-            FROM cotizaciones c
-            WHERE c.cliente_id = ?
-        '''
-        params = [session['user_id']]
+        try:
+            # 1. Cotizaciones del usuario estándar
+            cursor.execute('''
+                SELECT c.id, c.fecha, c.total, c.estado,
+                       co.nombre as cliente_nombre
+                FROM cotizaciones c
+                LEFT JOIN clientes co ON c.cliente_id = co.id
+                WHERE c.cliente_id = ? OR c.creador_id = ?
+                ORDER BY c.fecha DESC
+            ''', (user_id, user_id))
+            cotizaciones = [dict(row) for row in cursor.fetchall()]
 
-        # Aplicar filtros
-        if estado:
-            query += " AND c.estado = ?"
-            params.append(estado)
+            # Métricas
+            total_cotizaciones = len(cotizaciones)
+            total_cotizado = sum(float(c['total'] or 0) for c in cotizaciones)
+            cotizaciones_aprobadas = sum(1 for c in cotizaciones if c['estado'] == 'aprobada')
+            cotizaciones_pendientes = sum(1 for c in cotizaciones if c['estado'] == 'pendiente')
+            cotizaciones_rechazadas = sum(1 for c in cotizaciones if c['estado'] == 'rechazada')
 
-        if desde:
-            query += " AND DATE(c.fecha) >= ?"
-            params.append(desde)
+            # 2. Tareas activas del usuario
+            cursor.execute('''
+                SELECT t.id, t.creador_id, uc.nombre as creador_nombre,
+                       t.titulo, t.descripcion, t.prioridad, t.estado,
+                       t.fecha_creacion, t.fecha_limite
+                FROM equipo_tareas t
+                JOIN clientes uc ON t.creador_id = uc.id
+                WHERE (t.asignado_a = ? OR t.asignado_a IS NULL) AND t.estado = 'pendiente'
+                ORDER BY t.id DESC LIMIT 5
+            ''', (user_id,))
+            tareas_pendientes = [dict(row) for row in cursor.fetchall()]
 
-        if hasta:
-            query += " AND DATE(c.fecha) <= ?"
-            params.append(hasta)
+            # 3. Anuncios fijados
+            cursor.execute('''
+                SELECT c.id, u.nombre as usuario_nombre, c.mensaje, c.fecha
+                FROM equipo_chat c
+                JOIN clientes u ON c.usuario_id = u.id
+                WHERE c.es_fijado = TRUE
+                ORDER BY c.fecha DESC LIMIT 3
+            ''')
+            anuncios_fijados = [dict(row) for row in cursor.fetchall()]
 
-        query += " ORDER BY c.fecha DESC"
-
-        cursor.execute(query, params)
-        cotizaciones = cursor.fetchall()
-        conexion.close()
-
-        # Calcular métricas para el dashboard standard
-        total_cotizado = sum(float(c['total'] or 0) for c in cotizaciones)
-
-        # Create the filtros dictionary to pass to the template
-        filtros = {
-            'estado': estado,
-            'desde': desde,
-            'hasta': hasta
-        }
-
-        return render_template('standard/standard_dashboard.html',
-                             cotizaciones=cotizaciones,
-                             total_cotizado=total_cotizado,
-                             filtros=filtros)
+            return render_template(
+                'standard/standard_dashboard.html',
+                nombre=session.get('user_nombre', 'Vendedor'),
+                cotizaciones=cotizaciones[:8],
+                total_cotizaciones=total_cotizaciones,
+                total_cotizado=total_cotizado,
+                cotizaciones_aprobadas=cotizaciones_aprobadas,
+                cotizaciones_pendientes=cotizaciones_pendientes,
+                cotizaciones_rechazadas=cotizaciones_rechazadas,
+                tareas_pendientes=tareas_pendientes,
+                anuncios_fijados=anuncios_fijados
+            )
+        except Exception as e:
+            app.logger.error(f"Error en standard_dashboard: {str(e)}")
+            return render_template(
+                'standard/standard_dashboard.html',
+                nombre=session.get('user_nombre', 'Vendedor'),
+                cotizaciones=[],
+                total_cotizaciones=0,
+                total_cotizado=0.0,
+                cotizaciones_aprobadas=0,
+                cotizaciones_pendientes=0,
+                cotizaciones_rechazadas=0,
+                tareas_pendientes=[],
+                anuncios_fijados=[]
+            )
+        finally:
+            conexion.close()
 
     @app.route('/cotizaciones/standard', endpoint='standard_cotizaciones', methods=['GET'])
     @standard_required

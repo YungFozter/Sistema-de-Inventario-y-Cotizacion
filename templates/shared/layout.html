@@ -273,18 +273,28 @@
                         </li>
                         {% elif session.get('user_rol') == 'standard' %}
                         <li>
-                            <a class="dropdown-item" href="/standard/standard_cotizaciones">
-                                <i class="bi bi-list-check"></i> Mis Cotizaciones
+                            <a class="dropdown-item" href="/standard/dashboard">
+                                <i class="bi bi-speedometer2 text-primary"></i> Panel Principal
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" href="/cotizar">
+                                <i class="bi bi-plus-circle text-success"></i> Nueva Cotización
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" href="{{ url_for('standard_cotizaciones') }}">
+                                <i class="bi bi-file-earmark-text text-primary"></i> Mis Cotizaciones
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" href="/equipo">
+                                <i class="bi bi-people-fill" style="color: #6f42c1;"></i> Mi Equipo & Chat
                             </a>
                         </li>
                         <li>
                             <a class="dropdown-item" href="/mi-pdf">
                                 <i class="bi bi-file-earmark-pdf-fill text-danger"></i> MI PDF
-                            </a>
-                        </li>
-                        <li>
-                            <a class="dropdown-item" href="/equipo">
-                                <i class="bi bi-kanban text-info me-1"></i> Equipo & Tareas
                             </a>
                         </li>
                         {% endif %}
@@ -391,15 +401,27 @@
             </a>
             {% endif %}
             {% elif session.get('user_rol') == 'standard' %}
-            <a href="/standard_cotizaciones" class="mobile-menu-item">
-                <i class="bi bi-list-check"></i>
+            <a href="/standard/dashboard" class="mobile-menu-item">
+                <i class="bi bi-speedometer2 text-primary"></i>
+                Panel Principal
+            </a>
+            <a href="/cotizar" class="mobile-menu-item">
+                <i class="bi bi-plus-circle text-success"></i>
+                Nueva Cotización
+            </a>
+            <a href="{{ url_for('standard_cotizaciones') }}" class="mobile-menu-item">
+                <i class="bi bi-file-earmark-text text-primary"></i>
                 Mis Cotizaciones
             </a>
-            {% endif %}
+            <a href="/equipo" class="mobile-menu-item">
+                <i class="bi bi-people-fill" style="color: #6f42c1;"></i>
+                Mi Equipo & Chat
+            </a>
             <a href="/mi-pdf" class="mobile-menu-item">
                 <i class="bi bi-file-earmark-pdf-fill text-danger"></i>
                 MI PDF
             </a>
+            {% endif %}
         </div>
 
         <div class="mobile-menu-divider"></div>

@@ -7,42 +7,156 @@
   <h2 class="mb-4">Crear Cotización</h2>
 
   <form method="post" action="/cotizaciones">
-    <!-- Selección de cliente -->
+    <!-- Selección de cliente (AJAX, sin recarga) -->
+    <!-- Campo oculto que viaja con el formulario de cotización -->
+    <input type="hidden" name="cliente_id" id="cliente_id_hidden" required>
+
     <div class="mb-3">
-      <label for="cliente" class="form-label">Seleccionar Cliente:</label>
-      <div class="input-group">
-        <select name="cliente_id" id="cliente" class="form-select" required>
-          <option value="">-- Selecciona un cliente --</option>
-          {% for cliente in clientes %}
-            <option value="{{ cliente.id }}">{{ cliente.nombre }} {% if cliente.codigo_cliente %}({{ cliente.codigo_cliente }}){% endif %}</option>
-          {% endfor %}
-        </select>
-        <button class="btn btn-outline-secondary" type="button" id="prevCliente" {% if page_cliente <= 1 %}disabled{% endif %}>&laquo;</button>
-        <span class="input-group-text">Página {{ page_cliente }} de {{ total_pages_clientes }}</span>
-        <button class="btn btn-outline-secondary" type="button" id="nextCliente" {% if page_cliente >= total_pages_clientes %}disabled{% endif %}>&raquo;</button>
+      <label class="form-label fw-bold"><i class="bi bi-person-check me-1 text-primary"></i>Seleccionar Cliente:</label>
+
+      <!-- Tarjeta del cliente seleccionado -->
+      <div id="cliente-seleccionado-card" class="alert alert-success d-flex align-items-center justify-content-between gap-3 mb-2 py-2 px-3 rounded-3" style="display:none !important;">
+        <div>
+          <i class="bi bi-person-circle fs-5 me-2 text-success"></i>
+          <strong id="cliente-sel-nombre">—</strong>
+          <span class="text-muted small ms-2" id="cliente-sel-detalle"></span>
+        </div>
+        <button type="button" class="btn btn-sm btn-outline-danger rounded-pill" id="btn-cambiar-cliente">
+          <i class="bi bi-pencil-square me-1"></i>Cambiar
+        </button>
+      </div>
+
+      <!-- Panel de búsqueda (visible hasta que se selecciona un cliente) -->
+      <div id="panel-buscar-cliente">
+        <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+          <div class="card-body py-2 px-3" style="background: linear-gradient(135deg,#fff 0%,#f8f9fa 100%);">
+
+            <!-- Buscador -->
+            <div class="input-group mb-2">
+              <span class="input-group-text bg-white border-end-0">
+                <i class="bi bi-search text-primary"></i>
+              </span>
+              <input type="text" class="form-control border-start-0 ps-0" id="buscar-cliente-input"
+                     placeholder="Buscar por nombre, código o NIT…" autocomplete="off">
+              <span class="input-group-text bg-white text-muted small" id="clientes-total-info">…</span>
+            </div>
+
+            <!-- Lista de resultados -->
+            <div id="lista-clientes-ajax" class="list-group list-group-flush" style="max-height:280px; overflow-y:auto;"></div>
+
+            <!-- Controles de paginación -->
+            <div class="d-flex align-items-center justify-content-between mt-2">
+              <button type="button" class="btn btn-sm btn-light rounded-circle" id="prevClienteAjax" disabled
+                      style="width:30px;height:30px;" title="Anterior">
+                <i class="bi bi-chevron-left"></i>
+              </button>
+              <span class="text-muted small" id="clientes-page-info">Página 1 de 1</span>
+              <button type="button" class="btn btn-sm btn-light rounded-circle" id="nextClienteAjax" disabled
+                      style="width:30px;height:30px;" title="Siguiente">
+                <i class="bi bi-chevron-right"></i>
+              </button>
+            </div>
+
+          </div>
+        </div>
       </div>
     </div>
+
     <script>
-      document.addEventListener('DOMContentLoaded', function() {
-        const prevBtn = document.getElementById('prevCliente');
-        const nextBtn = document.getElementById('nextCliente');
-        if (prevBtn && nextBtn) {
-          prevBtn.addEventListener('click', function() {
-            const url = new URL(window.location.href);
-            let page = parseInt(url.searchParams.get('page_cliente') || '1');
-            if (page > 1) {
-              url.searchParams.set('page_cliente', page - 1);
-              window.location.href = url.toString();
+    (function() {
+      let _pageCliente = 1;
+      let _totalPagesCliente = 1;
+      let _timeoutCliente;
+      let _selectedClienteId = null;
+
+      function buscarClientes(page) {
+        _pageCliente = page || 1;
+        const q = document.getElementById('buscar-cliente-input').value;
+        const lista = document.getElementById('lista-clientes-ajax');
+        const info  = document.getElementById('clientes-total-info');
+        const pageInfo = document.getElementById('clientes-page-info');
+
+        lista.innerHTML = `<div class="list-group-item text-center text-muted py-3"><div class="spinner-border spinner-border-sm text-primary me-2"></div>Buscando…</div>`;
+
+        fetch(`/api/buscar_clientes_cotizacion?q=${encodeURIComponent(q)}&page=${_pageCliente}`)
+          .then(r => r.json())
+          .then(data => {
+            if (!data.success) { lista.innerHTML = `<div class="list-group-item text-danger">Error al buscar clientes.</div>`; return; }
+
+            _totalPagesCliente = data.total_pages;
+            info.textContent = data.total + ' encontrado' + (data.total !== 1 ? 's' : '');
+            pageInfo.innerHTML = `Página <strong>${data.page}</strong> de <strong>${data.total_pages}</strong>`;
+
+            const prevBtn = document.getElementById('prevClienteAjax');
+            const nextBtn = document.getElementById('nextClienteAjax');
+            prevBtn.disabled = (data.page <= 1);
+            nextBtn.disabled = (data.page >= data.total_pages);
+
+            if (!data.clientes.length) {
+              lista.innerHTML = `<div class="list-group-item text-center text-muted py-3"><i class="bi bi-person-x me-2"></i>No se encontraron clientes.</div>`;
+              return;
             }
-          });
-          nextBtn.addEventListener('click', function() {
-            const url = new URL(window.location.href);
-            let page = parseInt(url.searchParams.get('page_cliente') || '1');
-            url.searchParams.set('page_cliente', page + 1);
-            window.location.href = url.toString();
-          });
-        }
+
+            lista.innerHTML = data.clientes.map(c => `
+              <button type="button"
+                      class="list-group-item list-group-item-action d-flex justify-content-between align-items-center py-2 px-3"
+                      onclick="seleccionarCliente(${c.id}, '${c.nombre.replace(/'/g,"\\'")}',${ JSON.stringify(c.codigo_cliente) },${ JSON.stringify(c.nit) })">
+                <div>
+                  <i class="bi bi-person me-2 text-primary"></i>
+                  <strong>${c.nombre}</strong>
+                  ${c.codigo_cliente ? `<span class="badge bg-primary bg-opacity-10 text-primary ms-2 small">${c.codigo_cliente}</span>` : ''}
+                </div>
+                <small class="text-muted">${c.nit ? 'NIT: ' + c.nit : ''}</small>
+              </button>
+            `).join('');
+          })
+          .catch(() => { lista.innerHTML = `<div class="list-group-item text-danger">Error de conexión.</div>`; });
+      }
+
+      window.seleccionarCliente = function(id, nombre, codigo, nit) {
+        _selectedClienteId = id;
+        document.getElementById('cliente_id_hidden').value = id;
+
+        // Mostrar tarjeta de selección
+        const card = document.getElementById('cliente-seleccionado-card');
+        document.getElementById('cliente-sel-nombre').textContent = nombre;
+        const detalle = [codigo ? 'Cód: ' + codigo : '', nit ? 'NIT: ' + nit : ''].filter(Boolean).join(' · ');
+        document.getElementById('cliente-sel-detalle').textContent = detalle;
+        card.style.display = 'flex';
+
+        // Ocultar panel de búsqueda
+        document.getElementById('panel-buscar-cliente').style.display = 'none';
+      };
+
+      document.addEventListener('DOMContentLoaded', function() {
+        // Buscar al escribir (debounce 300 ms)
+        document.getElementById('buscar-cliente-input').addEventListener('input', function() {
+          clearTimeout(_timeoutCliente);
+          _timeoutCliente = setTimeout(() => buscarClientes(1), 300);
+        });
+
+        // Paginación
+        document.getElementById('prevClienteAjax').addEventListener('click', function() {
+          if (_pageCliente > 1) buscarClientes(_pageCliente - 1);
+        });
+        document.getElementById('nextClienteAjax').addEventListener('click', function() {
+          if (_pageCliente < _totalPagesCliente) buscarClientes(_pageCliente + 1);
+        });
+
+        // Botón Cambiar cliente
+        document.getElementById('btn-cambiar-cliente').addEventListener('click', function() {
+          _selectedClienteId = null;
+          document.getElementById('cliente_id_hidden').value = '';
+          document.getElementById('cliente-seleccionado-card').style.display = 'none';
+          document.getElementById('panel-buscar-cliente').style.display = '';
+          document.getElementById('buscar-cliente-input').value = '';
+          buscarClientes(1);
+        });
+
+        // Carga inicial
+        buscarClientes(1);
       });
+    })();
     </script>
 
     <!-- Catálogo de productos con opción de colapsar -->

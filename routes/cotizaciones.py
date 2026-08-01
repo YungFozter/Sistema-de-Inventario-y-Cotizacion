@@ -1117,7 +1117,71 @@ def register_routes(app):
             return jsonify({'success': False, 'error': str(e)}), 500
 
 
-            return jsonify({'success': True, 'productos': productos_list})
-            app.logger.error(f"Error en búsqueda de productos: {str(e)}")
-            return jsonify({'success': False, 'error': str(e)}), 500
+    @app.route('/api/buscar_clientes_cotizacion', methods=['GET'])
+    @login_required
+    def buscar_clientes_cotizacion():
+        """Endpoint AJAX para buscar clientes sin recargar la página de cotizaciones."""
+        try:
+            q         = request.args.get('q', '').strip()
+            page      = int(request.args.get('page', 1))
+            per_page  = 8   # clientes por página en el modal AJAX
 
+            conn   = get_db_connection()
+            cursor = conn.cursor()
+
+            like = f'%{q}%'
+
+            if session.get('user_rol') == 'superadmin':
+                base_where = "WHERE rol = 'cliente'"
+                count_params = []
+                if q:
+                    base_where += " AND (nombre LIKE ? OR codigo_cliente LIKE ? OR nit LIKE ?)"
+                    count_params = [like, like, like]
+                cursor.execute(f"SELECT COUNT(*) FROM clientes {base_where}", count_params)
+                total = cursor.fetchone()[0]
+
+                query_params = count_params + [per_page, (page - 1) * per_page]
+                cursor.execute(
+                    f"SELECT id, nombre, codigo_cliente, nit, telefono, correo FROM clientes {base_where} ORDER BY nombre LIMIT ? OFFSET ?",
+                    query_params
+                )
+            else:
+                base_where = "WHERE rol = 'cliente' AND creador_id = ?"
+                count_params = [session['user_id']]
+                if q:
+                    base_where += " AND (nombre LIKE ? OR codigo_cliente LIKE ? OR nit LIKE ?)"
+                    count_params += [like, like, like]
+                cursor.execute(f"SELECT COUNT(*) FROM clientes {base_where}", count_params)
+                total = cursor.fetchone()[0]
+
+                query_params = count_params + [per_page, (page - 1) * per_page]
+                cursor.execute(
+                    f"SELECT id, nombre, codigo_cliente, nit, telefono, correo FROM clientes {base_where} ORDER BY nombre LIMIT ? OFFSET ?",
+                    query_params
+                )
+
+            rows = cursor.fetchall()
+            conn.close()
+
+            total_pages = max(1, (total + per_page - 1) // per_page)
+
+            clientes_list = [{
+                'id':             r[0],
+                'nombre':         r[1],
+                'codigo_cliente': r[2] or '',
+                'nit':            r[3] or '',
+                'telefono':       r[4] or '',
+                'correo':         r[5] or ''
+            } for r in rows]
+
+            return jsonify({
+                'success': True,
+                'clientes': clientes_list,
+                'total': total,
+                'page': page,
+                'total_pages': total_pages,
+                'per_page': per_page
+            })
+
+        except Exception as e:
+            return jsonify({'success': False, 'error': str(e)}), 500

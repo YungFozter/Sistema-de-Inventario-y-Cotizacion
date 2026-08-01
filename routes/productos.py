@@ -350,7 +350,8 @@ def register_routes(app):
             ''')
             categorias_en_uso = cursor.fetchall()
         
-            cursor.execute('SELECT id, nombre FROM categorias ORDER BY nombre')
+            user_id = session.get('user_id')
+            cursor.execute('SELECT id, nombre FROM categorias WHERE activo = 1 AND (creador_id = ? OR creador_id IS NULL) ORDER BY nombre', (user_id,))
             todas_categorias = cursor.fetchall()
         
             categorias = categorias_en_uso if categorias_en_uso else todas_categorias
@@ -398,7 +399,8 @@ def register_routes(app):
             conexion = get_db_connection()
             cursor = conexion.cursor()
         
-            cursor.execute("SELECT id, nombre, descripcion FROM categorias WHERE activo = 1 ORDER BY nombre")
+            user_id = session.get('user_id')
+            cursor.execute("SELECT id, nombre, descripcion FROM categorias WHERE activo = 1 AND (creador_id = ? OR creador_id IS NULL) ORDER BY nombre", (user_id,))
             categorias = cursor.fetchall()
         
             # Convertir a lista de diccionarios
@@ -428,8 +430,10 @@ def register_routes(app):
             conexion = get_db_connection()
             cursor = conexion.cursor()
         
-            # Verificar si la categoría ya existe (activa o inactiva)
-            cursor.execute("SELECT id, activo FROM categorias WHERE LOWER(nombre) = LOWER(?)", (nombre,))
+            user_id = session.get('user_id')
+            
+            # Verificar si la categoría ya existe (activa o inactiva) para este admin o global
+            cursor.execute("SELECT id, activo FROM categorias WHERE LOWER(nombre) = LOWER(?) AND (creador_id = ? OR creador_id IS NULL)", (nombre, user_id))
             existente = cursor.fetchone()
 
             if existente:
@@ -449,8 +453,8 @@ def register_routes(app):
         
             # Crear la nueva categoría
             cursor.execute(
-                "INSERT INTO categorias (nombre, descripcion, activo) VALUES (?, ?, 1)",
-                (nombre, descripcion)
+                "INSERT INTO categorias (nombre, descripcion, activo, creador_id) VALUES (?, ?, 1, ?)",
+                (nombre, descripcion, user_id)
             )
             categoria_id = cursor.lastrowid
             conexion.commit()
@@ -477,14 +481,21 @@ def register_routes(app):
             conexion = get_db_connection()
             cursor = conexion.cursor()
 
-            # Verificar si la categoría existe
-            cursor.execute("SELECT id FROM categorias WHERE id = ? AND activo = 1", (categoria_id,))
-            if not cursor.fetchone():
+            user_id = session.get('user_id')
+            
+            # Verificar si la categoría existe y pertenece a este admin (o es global y permitimos edición, aunque mejor solo si es de él)
+            cursor.execute("SELECT id, creador_id FROM categorias WHERE id = ? AND activo = 1", (categoria_id,))
+            cat_actual = cursor.fetchone()
+            if not cat_actual:
                 conexion.close()
                 return jsonify({'success': False, 'message': 'Categoría no encontrada'})
+            
+            if cat_actual[1] is not None and cat_actual[1] != user_id:
+                conexion.close()
+                return jsonify({'success': False, 'message': 'No tienes permiso para editar esta categoría'})
 
-            # Verificar si otra categoría activa ya tiene ese mismo nombre
-            cursor.execute("SELECT id FROM categorias WHERE nombre = ? AND id != ? AND activo = 1", (nombre, categoria_id))
+            # Verificar si otra categoría activa ya tiene ese mismo nombre para este admin
+            cursor.execute("SELECT id FROM categorias WHERE nombre = ? AND id != ? AND activo = 1 AND (creador_id = ? OR creador_id IS NULL)", (nombre, categoria_id, user_id))
             if cursor.fetchone():
                 conexion.close()
                 return jsonify({'success': False, 'message': 'Ya existe otra categoría con ese nombre'})
@@ -521,13 +532,19 @@ def register_routes(app):
             conexion = get_db_connection()
             cursor = conexion.cursor()
         
-            # Verificar si la categoría existe
-            cursor.execute("SELECT nombre FROM categorias WHERE id = ? AND activo = 1", (categoria_id,))
+            user_id = session.get('user_id')
+            
+            # Verificar si la categoría existe y si el usuario tiene permisos
+            cursor.execute("SELECT nombre, creador_id FROM categorias WHERE id = ? AND activo = 1", (categoria_id,))
             categoria = cursor.fetchone()
         
             if not categoria:
                 conexion.close()
                 return jsonify({'success': False, 'message': 'Categoría no encontrada'})
+                
+            if categoria[1] is not None and categoria[1] != user_id:
+                conexion.close()
+                return jsonify({'success': False, 'message': 'No tienes permiso para eliminar esta categoría'})
         
             # Verificar si hay productos usando esta categoría
             cursor.execute("SELECT COUNT(*) FROM productos WHERE categoria_id = ?", (categoria_id,))

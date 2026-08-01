@@ -2,7 +2,11 @@ import os
 import sqlite3
 from db_wrapper import get_db_connection
 import json
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
+
+def obtener_fecha_bolivia():
+    """Devuelve la fecha y hora actual en la zona horaria de Bolivia (UTC-4)"""
+    return datetime.now(timezone(timedelta(hours=-4)))
 
 
 # =============================================
@@ -58,10 +62,12 @@ def crear_tablas():
         cursor.execute(f'''
             CREATE TABLE IF NOT EXISTS categorias (
                 id {"SERIAL PRIMARY KEY" if is_postgres else "INTEGER PRIMARY KEY AUTOINCREMENT"},
-                nombre TEXT NOT NULL UNIQUE,
+                nombre TEXT NOT NULL,
                 descripcion TEXT,
                 fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                activo {"BOOLEAN DEFAULT TRUE" if is_postgres else "BOOLEAN DEFAULT 1"}
+                activo {"BOOLEAN DEFAULT TRUE" if is_postgres else "BOOLEAN DEFAULT 1"},
+                creador_id INTEGER,
+                FOREIGN KEY (creador_id) REFERENCES clientes(id)
             ){";" if is_postgres else ""}
         ''')
 
@@ -421,6 +427,78 @@ def migrar_esquema_productos():
             except Exception:
                 pass
 
+def migrar_columnas_nuevas_categorias():
+    """Agrega creador_id a categorias y quita el UNIQUE de nombre."""
+    conexion = None
+    try:
+        conexion = get_db_connection()
+        cursor = conexion.cursor()
+        
+        is_postgres = bool(os.environ.get('DATABASE_URL') and os.environ.get('DATABASE_URL').startswith('postgres'))
+        
+        if is_postgres:
+            cursor.execute("SELECT column_name FROM information_schema.columns WHERE table_name='categorias'")
+            rows = cursor.fetchall()
+            columnas_existentes = []
+            for col in rows:
+                if isinstance(col, (dict, list, tuple)):
+                    columnas_existentes.append(col[0])
+                else:
+                    columnas_existentes.append(getattr(col, 'column_name', col[0]))
+            
+            if 'creador_id' not in columnas_existentes:
+                print("[INFO] Agregando columna creador_id a la tabla categorias (Postgres)...")
+                cursor.execute("ALTER TABLE categorias ADD COLUMN creador_id INTEGER REFERENCES clientes(id)")
+                try:
+                    cursor.execute("ALTER TABLE categorias DROP CONSTRAINT categorias_nombre_key")
+                except Exception as e:
+                    print(f"[WARN] No se pudo eliminar la restriccion UNIQUE en categorias (Postgres): {e}")
+                print("[OK] Columna creador_id agregada y UNIQUE removido")
+        else:
+            cursor.execute("PRAGMA table_info(categorias)")
+            columnas = [col[1] for col in cursor.fetchall()]
+            
+            if 'creador_id' not in columnas:
+                print("[INFO] Agregando columna creador_id a la tabla categorias (SQLite)...")
+                cursor.execute("PRAGMA foreign_keys=off;")
+                
+                cursor.execute('''
+                    CREATE TABLE IF NOT EXISTS categorias_new (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        nombre TEXT NOT NULL,
+                        descripcion TEXT,
+                        fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                        activo BOOLEAN DEFAULT 1,
+                        creador_id INTEGER,
+                        FOREIGN KEY (creador_id) REFERENCES clientes(id)
+                    )
+                ''')
+                
+                cursor.execute('''
+                    INSERT INTO categorias_new (id, nombre, descripcion, fecha_creacion, activo)
+                    SELECT id, nombre, descripcion, fecha_creacion, activo FROM categorias
+                ''')
+                
+                cursor.execute("DROP TABLE categorias")
+                cursor.execute("ALTER TABLE categorias_new RENAME TO categorias")
+                cursor.execute("PRAGMA foreign_keys=on;")
+                print("[OK] Tabla categorias migrada en SQLite (agregado creador_id y eliminada restricción UNIQUE)")
+        
+        conexion.commit()
+    except Exception as e:
+        print(f"[ERROR] Error en migración de esquema de categorias: {str(e)}")
+        if conexion:
+            try:
+                conexion.rollback()
+            except Exception:
+                pass
+    finally:
+        if conexion:
+            try:
+                conexion.close()
+            except Exception:
+                pass
+
 migrar_productos_categorias = migrar_esquema_productos
 
 
@@ -433,6 +511,7 @@ def inicializar_base_datos():
     try:
         crear_tablas()
         migrar_clientes_existentes()
+        migrar_columnas_nuevas_categorias()
 
         print("\n" + "=" * 50)
         print(" BASE DE DATOS PREPARADA CORRECTAMENTE")
@@ -454,7 +533,9 @@ def guardar_importacion_pdf(nombre_importacion, items, usuario_id=None):
     conexion = get_db_connection()
     cursor = conexion.cursor()
     try:
-        now_dt = datetime.now()
+        now_dt = obtener_fecha_bolivia()
+        fecha_str = now_dt.strftime('%Y-%m-%d %H:%M:%S')
+
         if not nombre_importacion or not nombre_importacion.strip():
             nombre_importacion = f"Importación - {now_dt.strftime('%d/%m/%Y %H:%M')}"
 
@@ -468,16 +549,16 @@ def guardar_importacion_pdf(nombre_importacion, items, usuario_id=None):
         is_postgres = bool(os.environ.get('DATABASE_URL') and os.environ.get('DATABASE_URL').startswith('postgres'))
         if is_postgres:
             cursor.execute('''
-                INSERT INTO importaciones_pdf (nombre_importacion, usuario_id, total_items, estado)
-                VALUES (?, ?, ?, ?) RETURNING id
-            ''', (nombre_importacion, usuario_id, len(items), 'guardado'))
+                INSERT INTO importaciones_pdf (nombre_importacion, fecha_importacion, usuario_id, total_items, estado)
+                VALUES (?, ?, ?, ?, ?) RETURNING id
+            ''', (nombre_importacion, fecha_str, usuario_id, len(items), 'guardado'))
             row = cursor.fetchone()
             importacion_id = row[0] if row else getattr(cursor, 'lastrowid', None)
         else:
             cursor.execute('''
-                INSERT INTO importaciones_pdf (nombre_importacion, usuario_id, total_items, estado)
-                VALUES (?, ?, ?, ?)
-            ''', (nombre_importacion, usuario_id, len(items), 'guardado'))
+                INSERT INTO importaciones_pdf (nombre_importacion, fecha_importacion, usuario_id, total_items, estado)
+                VALUES (?, ?, ?, ?, ?)
+            ''', (nombre_importacion, fecha_str, usuario_id, len(items), 'guardado'))
             importacion_id = cursor.lastrowid
 
         if not importacion_id:
@@ -526,7 +607,26 @@ def obtener_importaciones_pdf():
             FROM importaciones_pdf
             ORDER BY id DESC
         ''')
-        return [dict(row) for row in cursor.fetchall()]
+        rows = cursor.fetchall()
+        importaciones = []
+        tz_bolivia = timezone(timedelta(hours=-4))
+        for r in rows:
+            d = dict(r)
+            fi = d.get('fecha_importacion')
+            if isinstance(fi, datetime):
+                if fi.tzinfo is not None:
+                    fi = fi.astimezone(tz_bolivia)
+                d['fecha_importacion'] = fi.strftime('%d/%m/%Y %H:%M:%S')
+            elif isinstance(fi, str) and fi:
+                try:
+                    dt = datetime.fromisoformat(fi.replace('Z', '+00:00'))
+                    if dt.tzinfo is not None:
+                        dt = dt.astimezone(tz_bolivia)
+                    d['fecha_importacion'] = dt.strftime('%d/%m/%Y %H:%M:%S')
+                except Exception:
+                    d['fecha_importacion'] = str(fi)
+            importaciones.append(d)
+        return importaciones
     finally:
         conexion.close()
 

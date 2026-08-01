@@ -3,7 +3,7 @@ import os
 import sqlite3
 from datetime import datetime
 from db_wrapper import get_db_connection
-from models import crear_tablas, migrar_columnas_nuevas_clientes, migrar_esquema_productos, migrar_tablas_equipo
+from models import crear_tablas, migrar_columnas_nuevas_clientes, migrar_esquema_productos, migrar_tablas_equipo, migrar_columnas_nuevas_categorias
 
 import logging
 for _log_name in ['pdfminer', 'pdfminer.pdfinterp', 'pdfminer.pdfpage', 'pdfminer.converter', 'pdfminer.layout', 'PyPDF2', 'pypdf', 'pdfplumber']:
@@ -26,6 +26,7 @@ def inicializar_base_datos():
         migrar_columnas_nuevas_clientes()
         migrar_esquema_productos()
         migrar_tablas_equipo()
+        migrar_columnas_nuevas_categorias()
     except Exception as e:
         print(f"[WARN] No se pudo inicializar/migrar la base de datos en inicio: {e}")
 

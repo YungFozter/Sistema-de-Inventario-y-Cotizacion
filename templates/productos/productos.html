@@ -392,8 +392,43 @@
     100% {
       transform: rotate(360deg);
     }
-  }
 </style>
+
+<!-- Modal Elegante de Confirmación para Eliminación Masiva -->
+<div class="modal fade" id="modalConfirmarEliminacionMasiva" tabindex="-1" aria-labelledby="modalConfirmarEliminacionMasivaLabel" aria-hidden="true" style="z-index: 1060;">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg" style="border-radius: 1rem; overflow: hidden;">
+      <div class="modal-header bg-danger text-white py-3">
+        <h5 class="modal-title fw-bold" id="modalConfirmarEliminacionMasivaLabel">
+          <i class="bi bi-exclamation-triangle-fill me-2 fs-5"></i> Confirmar Eliminación Masiva
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body text-center p-4">
+        <div class="mb-3">
+          <span class="d-inline-flex align-items-center justify-content-center bg-danger bg-opacity-10 text-danger rounded-circle" style="width: 70px; height: 70px;">
+            <i class="bi bi-trash3-fill fs-1"></i>
+          </span>
+        </div>
+        <h4 class="fw-bold text-dark mb-2">¿Eliminar productos seleccionados?</h4>
+        <p class="text-muted mb-3 fs-6">
+          Está a punto de eliminar <strong id="cantEliminarModalText" class="text-danger fs-5">0</strong> producto(s) de la lista de <span id="tipoEliminarModalText" class="fw-bold text-dark">Registrados</span>.
+        </p>
+        <div class="alert alert-warning border border-warning-subtle text-start py-2 px-3 small rounded-3 mb-0">
+          <i class="bi bi-info-circle-fill text-warning me-1"></i> <strong>Atención:</strong> Esta acción no se puede deshacer y los registros seleccionados serán eliminados permanentemente del sistema.
+        </div>
+      </div>
+      <div class="modal-footer bg-light px-4 py-3 justify-content-center gap-2">
+        <button type="button" class="btn btn-outline-secondary rounded-pill px-4 fw-semibold" data-bs-dismiss="modal">
+          <i class="bi bi-x-lg me-1"></i> Cancelar
+        </button>
+        <button type="button" id="btnEjecutarEliminacionConfirmada" class="btn btn-danger rounded-pill px-4 fw-bold shadow-sm" onclick="ejecutarEliminacionMasivaConfirmada()">
+          <i class="bi bi-trash-fill me-1"></i> Sí, Eliminar Definitivamente
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
 
 <!-- Modal de Selección de Categoría -->
 <div class="modal fade" id="modalCategoria" tabindex="-1" aria-labelledby="modalCategoriaLabel" aria-hidden="true">
@@ -858,42 +893,6 @@
                   </button>
                   <button type="button" class="btn btn-success fw-bold" data-bs-dismiss="modal">
                     <i class="bi bi-check-circle-fill"></i> Aplicar Consolidación Automática
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Modal Elegante de Confirmación para Eliminación Masiva -->
-          <div class="modal fade" id="modalConfirmarEliminacionMasiva" tabindex="-1" aria-labelledby="modalConfirmarEliminacionMasivaLabel" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered">
-              <div class="modal-content border-0 shadow-lg" style="border-radius: 1rem; overflow: hidden;">
-                <div class="modal-header bg-danger text-white py-3">
-                  <h5 class="modal-title fw-bold" id="modalConfirmarEliminacionMasivaLabel">
-                    <i class="bi bi-exclamation-triangle-fill me-2 fs-5"></i> Confirmar Eliminación Masiva
-                  </h5>
-                  <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body text-center p-4">
-                  <div class="mb-3">
-                    <span class="d-inline-flex align-items-center justify-content-center bg-danger bg-opacity-10 text-danger rounded-circle" style="width: 70px; height: 70px;">
-                      <i class="bi bi-trash3-fill fs-1"></i>
-                    </span>
-                  </div>
-                  <h4 class="fw-bold text-dark mb-2">¿Eliminar productos seleccionados?</h4>
-                  <p class="text-muted mb-3 fs-6">
-                    Está a punto de eliminar <strong id="cantEliminarModalText" class="text-danger fs-5">0</strong> producto(s) de la lista de <span id="tipoEliminarModalText" class="fw-bold text-dark">Registrados</span>.
-                  </p>
-                  <div class="alert alert-warning border border-warning-subtle text-start py-2 px-3 small rounded-3 mb-0">
-                    <i class="bi bi-info-circle-fill text-warning me-1"></i> <strong>Atención:</strong> Esta acción no se puede deshacer y los registros seleccionados serán eliminados permanentemente del sistema.
-                  </div>
-                </div>
-                <div class="modal-footer bg-light px-4 py-3 justify-content-center gap-2">
-                  <button type="button" class="btn btn-outline-secondary rounded-pill px-4 fw-semibold" data-bs-dismiss="modal">
-                    <i class="bi bi-x-lg me-1"></i> Cancelar
-                  </button>
-                  <button type="button" id="btnEjecutarEliminacionConfirmada" class="btn btn-danger rounded-pill px-4 fw-bold shadow-sm" onclick="ejecutarEliminacionMasivaConfirmada()">
-                    <i class="bi bi-trash-fill me-1"></i> Sí, Eliminar Definitivamente
                   </button>
                 </div>
               </div>

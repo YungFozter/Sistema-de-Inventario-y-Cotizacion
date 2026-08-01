@@ -90,7 +90,7 @@ def register_routes(app):
 
                 # Quemar el PIN si es admin
                 if pin_id_usado:
-                    cursor.execute('UPDATE pines_admin SET usado = 1, usado_por = ? WHERE id = ?', (nuevo_usuario_id, pin_id_usado))
+                    cursor.execute('UPDATE pines_admin SET usado = TRUE, usado_por = ? WHERE id = ?', (nuevo_usuario_id, pin_id_usado))
                 
                 conexion.commit()
                 flash('¡Cuenta creada exitosamente! Ya puedes iniciar sesión.', 'success')

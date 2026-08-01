@@ -224,15 +224,26 @@
   <!-- ============================================= -->
   <div class="tab-pane fade {% if tab_activa == 'importados' %}show active{% endif %}" id="pills-importados"
     role="tabpanel">
-    <div class="d-flex flex-wrap align-items-center mb-4 gap-2">
-      <h3 class="mb-0 text-success me-2">
-        <i class="bi bi-box-seam-fill"></i> Productos Importados
-        <span class="badge bg-success ms-1">Total: {{ pagination_imp.total_items }} | Página {{ pagination_imp.page }} de {{
-          pagination_imp.total_pages }}</span>
-      </h3>
-      <button id="btnEliminarSeleccionadosImp" class="btn btn-sm btn-danger shadow-sm fw-bold border-0 px-3 py-1" style="display: none;" onclick="eliminarSeleccionadosImportados()">
-        <i class="bi bi-trash-fill me-1"></i> Eliminar Seleccionados (<span id="countImpSeleccionados">0</span>)
-      </button>
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
+      <div class="d-flex align-items-center gap-2">
+        <h3 class="mb-0 text-success me-2">
+          <i class="bi bi-box-seam-fill"></i> Productos Importados
+          <span class="badge bg-success ms-1">Total: {{ pagination_imp.total_items }} | Página {{ pagination_imp.page }} de {{ pagination_imp.total_pages }}</span>
+        </h3>
+        <button id="btnEliminarSeleccionadosImp" class="btn btn-sm btn-danger shadow-sm fw-bold border-0 px-3 py-1" style="display: none;" onclick="eliminarSeleccionadosImportados()">
+          <i class="bi bi-trash-fill me-1"></i> Eliminar Seleccionados (<span id="countImpSeleccionados">0</span>)
+        </button>
+      </div>
+      <div class="d-flex align-items-center gap-2 bg-light p-2 rounded border shadow-sm">
+        <label for="selectPerPageImp" class="form-label mb-0 fw-bold text-dark small">
+          <i class="bi bi-card-list me-1 text-success"></i>Mostrar por página:
+        </label>
+        <select id="selectPerPageImp" class="form-select form-select-sm fw-bold border-success shadow-sm" style="width: 85px;" onchange="cambiarItemsPorPaginaImportados(this.value)">
+          <option value="5" {% if pagination_imp.per_page == 5 %}selected{% endif %}>5</option>
+          <option value="15" {% if pagination_imp.per_page == 15 %}selected{% endif %}>15</option>
+          <option value="30" {% if pagination_imp.per_page == 30 %}selected{% endif %}>30</option>
+        </select>
+      </div>
     </div>
 
     {% if productos_importados %}
@@ -300,7 +311,7 @@
       <ul class="pagination justify-content-center">
         <li class="page-item {% if pagination_imp.page == 1 %}disabled{% endif %}">
           <a class="page-link"
-            href="{{ url_for('productos', tab='importados', page_imp=pagination_imp.page-1, page_reg=pagination_reg.page, empresa=filtros.empresa, codigo=filtros.codigo, descripcion=filtros.descripcion, marca=filtros.marca, categoria=filtros.categoria) }}"
+            href="{{ url_for('productos', tab='importados', page_imp=pagination_imp.page-1, per_page=pagination_imp.per_page, page_reg=pagination_reg.page, empresa=filtros.empresa, codigo=filtros.codigo, descripcion=filtros.descripcion, marca=filtros.marca, categoria=filtros.categoria) }}"
             aria-label="Anterior">
             <span aria-hidden="true">&laquo; Anterior</span>
           </a>
@@ -311,26 +322,25 @@
         <li class="page-item active">
           <span class="page-link bg-success border-success">{{ i }}</span>
         </li>
-        {% elif i >= pagination_imp.page - 2 and i <= pagination_imp.page + 2 or i==1 or i==pagination_imp.total_pages
-          %} <li class="page-item">
+        {% elif i >= pagination_imp.page - 2 and i <= pagination_imp.page + 2 or i==1 or i==pagination_imp.total_pages %}
+        <li class="page-item">
           <a class="page-link"
-            href="{{ url_for('productos', tab='importados', page_imp=i, page_reg=pagination_reg.page, empresa=filtros.empresa, codigo=filtros.codigo, descripcion=filtros.descripcion, marca=filtros.marca, categoria=filtros.categoria) }}">{{
-            i }}</a>
-          </li>
-          {% elif i == pagination_imp.page - 3 or i == pagination_imp.page + 3 %}
-          <li class="page-item disabled">
-            <span class="page-link">...</span>
-          </li>
-          {% endif %}
-          {% endfor %}
+            href="{{ url_for('productos', tab='importados', page_imp=i, per_page=pagination_imp.per_page, page_reg=pagination_reg.page, empresa=filtros.empresa, codigo=filtros.codigo, descripcion=filtros.descripcion, marca=filtros.marca, categoria=filtros.categoria) }}">{{ i }}</a>
+        </li>
+        {% elif i == pagination_imp.page - 3 or i == pagination_imp.page + 3 %}
+        <li class="page-item disabled">
+          <span class="page-link">...</span>
+        </li>
+        {% endif %}
+        {% endfor %}
 
-          <li class="page-item {% if pagination_imp.page == pagination_imp.total_pages %}disabled{% endif %}">
-            <a class="page-link"
-              href="{{ url_for('productos', tab='importados', page_imp=pagination_imp.page+1, page_reg=pagination_reg.page, empresa=filtros.empresa, codigo=filtros.codigo, descripcion=filtros.descripcion, marca=filtros.marca, categoria=filtros.categoria) }}"
-              aria-label="Siguiente">
-              <span aria-hidden="true">Siguiente &raquo;</span>
-            </a>
-          </li>
+        <li class="page-item {% if pagination_imp.page == pagination_imp.total_pages %}disabled{% endif %}">
+          <a class="page-link"
+            href="{{ url_for('productos', tab='importados', page_imp=pagination_imp.page+1, per_page=pagination_imp.per_page, page_reg=pagination_reg.page, empresa=filtros.empresa, codigo=filtros.codigo, descripcion=filtros.descripcion, marca=filtros.marca, categoria=filtros.categoria) }}"
+            aria-label="Siguiente">
+            <span aria-hidden="true">Siguiente &raquo;</span>
+          </a>
+        </li>
       </ul>
     </nav>
     {% else %}
@@ -1849,8 +1859,19 @@
             let currentPageReg = {{ pagination_reg.page or 1 }};
 
             function cambiarItemsPorPaginaRegistrados(perPage) {
-              currentPerPageReg = parseInt(perPage) || 5;
-              cargarPaginaProductosRegistrados(null, 1);
+              const urlParams = new URLSearchParams(window.location.search);
+              urlParams.set('tab', 'registrados');
+              urlParams.set('page_reg', '1');
+              urlParams.set('per_page', perPage);
+              window.location.href = '/productos?' + urlParams.toString();
+            }
+
+            function cambiarItemsPorPaginaImportados(perPage) {
+              const urlParams = new URLSearchParams(window.location.search);
+              urlParams.set('tab', 'importados');
+              urlParams.set('page_imp', '1');
+              urlParams.set('per_page', perPage);
+              window.location.href = '/productos?' + urlParams.toString();
             }
 
             function cargarPaginaProductosRegistrados(event, pageNum) {

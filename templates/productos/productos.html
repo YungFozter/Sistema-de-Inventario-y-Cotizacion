@@ -860,6 +860,14 @@
 
             // Cargar categorías al inicializar la página
             document.addEventListener('DOMContentLoaded', function () {
+              const toastPendiente = sessionStorage.getItem('toastNotificacion');
+              if (toastPendiente) {
+                try {
+                  const t = JSON.parse(toastPendiente);
+                  mostrarAlertaGestion(t.mensaje, t.tipo);
+                } catch(e) {}
+                sessionStorage.removeItem('toastNotificacion');
+              }
               cargarCategorias();
 
               // Event listeners
@@ -1028,10 +1036,11 @@
             // Registrar el producto con la categoría seleccionada
             function registrarProducto(categoriaId) {
               const formData = new FormData();
+              const codigoVal = document.getElementById('codigo').value.trim();
 
               // Obtener todos los datos del formulario
               formData.append('empresa', document.getElementById('empresa').value);
-              formData.append('codigo', document.getElementById('codigo').value);
+              formData.append('codigo', codigoVal);
               formData.append('descripcion', document.getElementById('descripcion').value);
               formData.append('marca', document.getElementById('marca').value);
               formData.append('tm', document.getElementById('tm').value);
@@ -1045,10 +1054,12 @@
                 method: 'POST',
                 body: formData
               })
-                .then(response => response.text())
-                .then(data => {
-                  // Recargar la página para mostrar el nuevo producto
-                  window.location.reload();
+                .then(response => {
+                  sessionStorage.setItem('toastNotificacion', JSON.stringify({
+                    mensaje: `✅ Producto "${codigoVal}" registrado exitosamente en el catálogo.`,
+                    tipo: 'success'
+                  }));
+                  window.location.href = '/productos?tab=registrados';
                 })
                 .catch(error => {
                   console.error('Error:', error);
@@ -1429,14 +1440,14 @@
                 toast.style.opacity = '1';
               });
 
-              // Ocultar con barrido de salida tras 5 segundos
+              // Ocultar con barrido de salida tras 3 segundos
               setTimeout(() => {
                 if (toast.parentNode) {
                   toast.style.transform = 'translateX(120%)';
                   toast.style.opacity = '0';
                   setTimeout(() => { if (toast.parentNode) toast.remove(); }, 400);
                 }
-              }, 5000);
+              }, 3000);
             }
 
             // =============================================

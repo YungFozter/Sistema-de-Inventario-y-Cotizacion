@@ -57,7 +57,11 @@ def register_routes(app):
                 with get_db_connection() as conexion:
                     cursor = conexion.cursor()
                 
-                    empresa = request.form['empresa']
+                    empresa = request.form.get('empresa', '').strip()
+                    if not empresa:
+                        cursor.execute("SELECT nombre FROM clientes WHERE id = ?", (session.get('user_id'),))
+                        u = cursor.fetchone()
+                        empresa = u[0] if u and u[0] else 'General'
                     codigo = request.form['codigo']
                     descripcion = request.form['descripcion']
                     marca = request.form['marca']
@@ -187,14 +191,14 @@ def register_routes(app):
                 cursor.execute(count_query + filter_sql + cond_reg, params)
                 total_registrados = cursor.fetchone()[0]
                 total_pages_reg = max(1, (total_registrados + per_page - 1) // per_page)
-                cursor.execute(base_query + filter_sql + cond_reg + " ORDER BY empresa, codigo LIMIT ? OFFSET ?", params + [per_page, offset_reg])
+                cursor.execute(base_query + filter_sql + cond_reg + " ORDER BY id DESC LIMIT ? OFFSET ?", params + [per_page, offset_reg])
                 productos_registrados = cursor.fetchall()
 
                 # Importados
                 cursor.execute(count_query + filter_sql + cond_imp, params)
                 total_importados = cursor.fetchone()[0]
                 total_pages_imp = max(1, (total_importados + per_page - 1) // per_page)
-                cursor.execute(base_query + filter_sql + cond_imp + " ORDER BY empresa, codigo LIMIT ? OFFSET ?", params + [per_page, offset_imp])
+                cursor.execute(base_query + filter_sql + cond_imp + " ORDER BY id DESC LIMIT ? OFFSET ?", params + [per_page, offset_imp])
                 productos_importados = cursor.fetchall()
 
         except Exception as e:

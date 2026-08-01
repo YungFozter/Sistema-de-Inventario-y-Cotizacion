@@ -440,6 +440,42 @@
   </div>
 </div>
 
+<!-- Modal Elegante de Confirmación para Eliminación de Categoría -->
+<div class="modal fade" id="modalConfirmarEliminarCategoria" tabindex="-1" aria-labelledby="modalConfirmarEliminarCategoriaLabel" aria-hidden="true" style="z-index: 1070;">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg" style="border-radius: 1rem; overflow: hidden;">
+      <div class="modal-header bg-danger text-white py-3">
+        <h5 class="modal-title fw-bold" id="modalConfirmarEliminarCategoriaLabel">
+          <i class="bi bi-exclamation-triangle-fill me-2 fs-5"></i> Confirmar Eliminación de Categoría
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body text-center p-4">
+        <div class="mb-3">
+          <span class="d-inline-flex align-items-center justify-content-center bg-danger bg-opacity-10 text-danger rounded-circle" style="width: 70px; height: 70px;">
+            <i class="bi bi-tag-fill fs-1"></i>
+          </span>
+        </div>
+        <h4 class="fw-bold text-dark mb-2">¿Eliminar esta categoría?</h4>
+        <p class="text-muted mb-3 fs-6">
+          Está a punto de eliminar la categoría <strong id="nombreCatEliminarModalText" class="text-danger fs-5 font-monospace">"Categoría"</strong>.
+        </p>
+        <div class="alert alert-warning border border-warning-subtle text-start py-2 px-3 small rounded-3 mb-0">
+          <i class="bi bi-info-circle-fill text-warning me-1"></i> <strong>Atención:</strong> Esta acción no se puede deshacer. Los productos asignados a esta categoría mantendrán sus datos pero figurarán como "Sin categoría".
+        </div>
+      </div>
+      <div class="modal-footer bg-light px-4 py-3 justify-content-center gap-2">
+        <button type="button" class="btn btn-outline-secondary rounded-pill px-4 fw-semibold" data-bs-dismiss="modal">
+          <i class="bi bi-x-lg me-1"></i> Cancelar
+        </button>
+        <button type="button" id="btnEjecutarEliminarCategoriaConfirmada" class="btn btn-danger rounded-pill px-4 fw-bold shadow-sm" onclick="ejecutarEliminacionCategoriaConfirmada()">
+          <i class="bi bi-trash-fill me-1"></i> Sí, Eliminar Categoría
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- Modal de Selección de Categoría -->
 <div class="modal fade" id="modalCategoria" tabindex="-1" aria-labelledby="modalCategoriaLabel" aria-hidden="true">
   <div class="modal-dialog">
@@ -1456,33 +1492,63 @@
                 });
             }
 
-            // Eliminar categoría
+            // Eliminar categoría (Modal Elegante)
+            let catIdAEliminar = null;
+
             function eliminarCategoria(categoriaId, nombreCategoria) {
-              if (!confirm(`¿Está seguro de que desea eliminar la categoría "${nombreCategoria}"?\n\nEsta acción no se puede deshacer.`)) {
-                return;
+              catIdAEliminar = categoriaId;
+              const nameEl = document.getElementById('nombreCatEliminarModalText');
+              if (nameEl) nameEl.textContent = `"${nombreCategoria}"`;
+
+              const modalEl = document.getElementById('modalConfirmarEliminarCategoria');
+              const modalInstance = bootstrap.Modal.getOrCreateInstance(modalEl);
+              modalInstance.show();
+            }
+
+            function ejecutarEliminacionCategoriaConfirmada() {
+              if (!catIdAEliminar) return;
+
+              const btnExec = document.getElementById('btnEjecutarEliminarCategoriaConfirmada');
+              if (btnExec) {
+                btnExec.disabled = true;
+                btnExec.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Eliminando...';
               }
 
-              fetch(`/api/categorias/${categoriaId}`, {
+              fetch(`/api/categorias/${catIdAEliminar}`, {
                 method: 'DELETE',
-                headers: {
-                  'Content-Type': 'application/json',
+                headers: { 'Content-Type': 'application/json' }
+              })
+              .then(res => res.json())
+              .then(data => {
+                const modalEl = document.getElementById('modalConfirmarEliminarCategoria');
+                const modalInstance = bootstrap.Modal.getInstance(modalEl);
+                if (modalInstance) modalInstance.hide();
+
+                if (btnExec) {
+                  btnExec.disabled = false;
+                  btnExec.innerHTML = '<i class="bi bi-trash-fill me-1"></i> Sí, Eliminar Categoría';
+                }
+
+                if (data.success) {
+                  mostrarAlertaGestion(data.message, 'success');
+                  cargarListaCategorias();
+                  cargarCategorias();
+                } else {
+                  mostrarAlertaGestion(data.message || 'Error al eliminar la categoría', 'danger');
                 }
               })
-                .then(response => response.json())
-                .then(data => {
-                  if (data.success) {
-                    mostrarAlertaGestion(data.message, 'success');
-                    // Actualizar ambas listas
-                    cargarListaCategorias();
-                    cargarCategorias(); // Actualizar el select del modal de registro
-                  } else {
-                    mostrarAlertaGestion(data.message, 'danger');
-                  }
-                })
-                .catch(error => {
-                  console.error('Error al eliminar categoría:', error);
-                  mostrarAlertaGestion('Error al eliminar la categoría', 'danger');
-                });
+              .catch(error => {
+                console.error('Error al eliminar categoría:', error);
+                const modalEl = document.getElementById('modalConfirmarEliminarCategoria');
+                const modalInstance = bootstrap.Modal.getInstance(modalEl);
+                if (modalInstance) modalInstance.hide();
+
+                if (btnExec) {
+                  btnExec.disabled = false;
+                  btnExec.innerHTML = '<i class="bi bi-trash-fill me-1"></i> Sí, Eliminar Categoría';
+                }
+                mostrarAlertaGestion('Error al eliminar la categoría', 'danger');
+              });
             }
 
             // Agregar nueva categoría desde el modal de gestión

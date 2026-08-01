@@ -513,12 +513,14 @@
       return new bootstrap.Tooltip(tooltipTriggerEl);
     });
 
-    // Cerrar alerts automáticamente después de 5 segundos
-    var alerts = document.querySelectorAll('.alert');
+    // Cerrar flash alerts automáticamente después de 5 segundos
+    var alerts = document.querySelectorAll('.flashes .alert');
     alerts.forEach(function(alert) {
       setTimeout(function() {
-        var bsAlert = new bootstrap.Alert(alert);
-        bsAlert.close();
+        if (alert && alert.parentNode) {
+          var bsAlert = new bootstrap.Alert(alert);
+          bsAlert.close();
+        }
       }, 5000);
     });
 

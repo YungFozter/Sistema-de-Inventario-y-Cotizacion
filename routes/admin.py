@@ -681,6 +681,21 @@ def register_routes(app):
 
         return render_template('admin/pines.html', pines=pines)
 
+    @app.route('/admin/pines/eliminar/<int:pin_id>', methods=['POST'])
+    @login_required
+    @superadmin_required
+    def eliminar_pin(pin_id):
+        try:
+            conexion = get_db_connection()
+            cursor = conexion.cursor()
+            cursor.execute("DELETE FROM pines_admin WHERE id = ?", (pin_id,))
+            conexion.commit()
+            conexion.close()
+            flash('PIN eliminado exitosamente del registro.', 'success')
+        except Exception as e:
+            flash(f'Error al eliminar el PIN: {str(e)}', 'danger')
+        return redirect(url_for('gestion_pines'))
+
 
     @app.route('/admin/usuarios/<int:id>', methods=['GET'])
     @admin_required

@@ -28,7 +28,8 @@
                             <th class="border-0 px-4 py-3" style="border-top-left-radius: var(--radius-lg);">PIN Generado</th>
                             <th class="border-0 py-3">Estado</th>
                             <th class="border-0 py-3">Fecha de Creación</th>
-                            <th class="border-0 px-4 py-3 text-end" style="border-top-right-radius: var(--radius-lg);">Usado Por</th>
+                            <th class="border-0 py-3">Usado Por</th>
+                            <th class="border-0 px-4 py-3 text-end" style="border-top-right-radius: var(--radius-lg);">Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -54,17 +55,28 @@
                             <td class="py-3 text-muted">
                                 <i class="bi bi-calendar3 me-1"></i> {{ pin.creado_en | date('%Y-%m-%d %H:%M') }}
                             </td>
-                            <td class="px-4 py-3 text-end">
+                            <td class="py-3">
                                 {% if pin.usado %}
-                                    <span class="fw-semibold text-dark"><i class="bi bi-person-check-fill text-primary me-1"></i> {{ pin.usado_por_nombre }}</span>
+                                    {% if pin.usado_por_nombre %}
+                                        <span class="fw-semibold text-dark"><i class="bi bi-person-check-fill text-primary me-1"></i> {{ pin.usado_por_nombre }}</span>
+                                    {% else %}
+                                        <span class="fw-semibold text-secondary"><i class="bi bi-person-check-fill me-1"></i> Admin Registrado</span>
+                                    {% endif %}
                                 {% else %}
                                     <span class="text-muted fst-italic">- Nadie -</span>
                                 {% endif %}
                             </td>
+                            <td class="px-4 py-3 text-end">
+                                <form action="/admin/pines/eliminar/{{ pin.id }}" method="POST" class="d-inline" onsubmit="return confirm('¿Está seguro de que desea eliminar el PIN {{ pin.pin }}?');">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger shadow-sm rounded-3" title="Eliminar PIN">
+                                        <i class="bi bi-trash"></i> Eliminar
+                                    </button>
+                                </form>
+                            </td>
                         </tr>
                         {% else %}
                         <tr>
-                            <td colspan="4" class="text-center py-5 text-muted">
+                            <td colspan="5" class="text-center py-5 text-muted">
                                 <i class="bi bi-inbox fs-1 d-block mb-3 opacity-50"></i>
                                 No hay PINs generados todavía.<br>Haz clic en "Generar Nuevo PIN" para crear el primero.
                             </td>

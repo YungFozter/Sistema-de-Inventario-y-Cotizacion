@@ -84,12 +84,21 @@ def register_routes(app):
                 '''
                 if is_postgres:
                     query_insert += " RETURNING id"
+                    cursor.execute(query_insert, (nombre, correo, telefono, contrasena_hash, rol, fecha_vencimiento))
+                    row_id = cursor.fetchone()
+                    nuevo_usuario_id = row_id[0] if row_id else None
+                else:
+                    cursor.execute(query_insert, (nombre, correo, telefono, contrasena_hash, rol, fecha_vencimiento))
+                    nuevo_usuario_id = cursor.lastrowid
 
-                cursor.execute(query_insert, (nombre, correo, telefono, contrasena_hash, rol, fecha_vencimiento))
-                nuevo_usuario_id = cursor.lastrowid
+                if not nuevo_usuario_id:
+                    cursor.execute("SELECT id FROM clientes WHERE correo = ?", (correo,))
+                    row_u = cursor.fetchone()
+                    if row_u:
+                        nuevo_usuario_id = row_u[0]
 
                 # Quemar el PIN si es admin
-                if pin_id_usado:
+                if pin_id_usado and nuevo_usuario_id:
                     cursor.execute('UPDATE pines_admin SET usado = TRUE, usado_por = ? WHERE id = ?', (nuevo_usuario_id, pin_id_usado))
                 
                 conexion.commit()

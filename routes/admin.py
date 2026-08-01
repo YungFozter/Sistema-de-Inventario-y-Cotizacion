@@ -647,6 +647,9 @@ def register_routes(app):
                 flash(f'Nuevo PIN generado: {nuevo_pin}', 'success')
             except sqlite3.IntegrityError:
                 flash('Error al generar el PIN (colisión). Intenta de nuevo.', 'danger')
+            finally:
+                conexion.close()
+            return redirect(url_for('gestion_pines'))
 
         cursor.execute('''
             SELECT p.*, c.nombre as usado_por_nombre 

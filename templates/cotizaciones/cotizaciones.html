@@ -155,6 +155,30 @@
 
         // Carga inicial
         buscarClientes(1);
+
+        // Validar cliente antes de enviar el formulario
+        const formCotizacion = document.querySelector('form[action="/cotizaciones"]');
+        if (formCotizacion) {
+          formCotizacion.addEventListener('submit', function(e) {
+            const clienteId = document.getElementById('cliente_id_hidden').value;
+            if (!clienteId || clienteId === '') {
+              e.preventDefault();
+              e.stopPropagation();
+              // Mostrar alerta visual en el panel de cliente
+              const panel = document.getElementById('panel-buscar-cliente');
+              let alerta = document.getElementById('alerta-cliente-requerido');
+              if (!alerta) {
+                alerta = document.createElement('div');
+                alerta.id = 'alerta-cliente-requerido';
+                alerta.className = 'alert alert-danger alert-dismissible d-flex align-items-center gap-2 py-2 mt-2';
+                alerta.innerHTML = '<i class="bi bi-exclamation-triangle-fill"></i><strong>Debes seleccionar un cliente</strong> antes de guardar la cotización.<button type="button" class="btn-close" onclick="this.parentElement.remove()"></button>';
+                panel.insertAdjacentElement('beforebegin', alerta);
+              }
+              panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              return false;
+            }
+          });
+        }
       });
     })();
     </script>

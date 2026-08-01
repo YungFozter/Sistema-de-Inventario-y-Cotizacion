@@ -183,13 +183,23 @@ def register_routes(app):
         MAX_RETRIES = 3
         RETRY_DELAY = 0.5  # segundos
 
-        # Validación inicial
+        # Validación inicial de claves presentes
         if not all(key in request.form for key in ['cliente_id', 'producto_id[]', 'cantidad[]', 'precio_unitario[]']):
             flash('Datos incompletos en el formulario', 'danger')
             return redirect(url_for('gestion_cotizaciones'))
 
-        # Preparar datos
-        cliente_id = request.form['cliente_id']
+        # Validar que cliente_id sea un entero válido (no vacío)
+        raw_cliente_id = request.form.get('cliente_id', '').strip()
+        if not raw_cliente_id:
+            flash('Debes seleccionar un cliente antes de guardar la cotización.', 'danger')
+            return redirect(url_for('gestion_cotizaciones'))
+        try:
+            cliente_id = int(raw_cliente_id)
+        except (ValueError, TypeError):
+            flash('El cliente seleccionado no es válido.', 'danger')
+            return redirect(url_for('gestion_cotizaciones'))
+
+        # Preparar datos de productos
         items = zip(
             request.form.getlist('producto_id[]'),
             request.form.getlist('cantidad[]'),

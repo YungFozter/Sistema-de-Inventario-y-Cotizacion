@@ -116,23 +116,52 @@
       </div>
     </div>
 
-    <!-- Barra de Control de Paginación y Cantidad por Página -->
-    <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 p-2.5 bg-light rounded-3 border shadow-sm gap-2">
-      <div class="d-flex align-items-center gap-2">
-        <label for="select-per-page" class="form-label mb-0 fw-semibold text-secondary small">
-          <i class="bi bi-list-check me-1"></i>Mostrar:
-        </label>
-        <select class="form-select form-select-sm w-auto rounded-pill px-3 fw-bold border-primary text-primary" id="select-per-page" onchange="cambiarCantidadMostrar(this.value)">
-          <option value="15" selected>15 por página</option>
-          <option value="30">30 por página</option>
-          <option value="50">50 por página</option>
-          <option value="todos">Mostrar Todos</option>
-        </select>
-      </div>
-      <div class="d-flex align-items-center gap-2">
-        <button class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-semibold" type="button" id="prevProducto" disabled>&laquo; Anterior</button>
-        <span class="badge bg-white text-dark border px-3 py-2 rounded-pill fw-semibold shadow-sm" id="paginacion-info">Página 1 de 1</span>
-        <button class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-semibold" type="button" id="nextProducto" disabled>Siguiente &raquo;</button>
+    <!-- Barra de Control de Paginación y Cantidad por Página (Diseño Pro Max) -->
+    <div class="card border-0 shadow-sm rounded-4 mb-3 overflow-hidden" style="background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);">
+      <div class="card-body py-2 px-3 px-md-4">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+          <!-- Selector de Cantidad por Página -->
+          <div class="d-flex align-items-center gap-2">
+            <div class="bg-primary bg-opacity-10 text-primary rounded-circle d-flex align-items-center justify-content-center" style="width: 34px; height: 34px;">
+              <i class="bi bi-sliders fs-6"></i>
+            </div>
+            <span class="fw-bold text-dark me-1 small text-uppercase" style="letter-spacing: 0.5px;">Mostrar:</span>
+            <select class="form-select form-select-sm rounded-pill px-3 py-1.5 fw-bold text-primary border-primary border-opacity-25 shadow-sm bg-white" 
+                    id="select-per-page" 
+                    style="cursor: pointer; min-width: 140px;" 
+                    onchange="cambiarCantidadMostrar(this.value)">
+              <option value="15" selected>15 por página</option>
+              <option value="30">30 por página</option>
+              <option value="50">50 por página</option>
+              <option value="todos">Mostrar Todos</option>
+            </select>
+          </div>
+
+          <!-- Controles de Paginación UI (Pill Group) -->
+          <div class="d-flex align-items-center bg-white p-1 rounded-pill border shadow-sm gap-1">
+            <button class="btn btn-sm btn-light text-primary rounded-circle p-0 d-flex align-items-center justify-content-center" 
+                    type="button" 
+                    id="prevProducto" 
+                    disabled 
+                    style="width: 32px; height: 32px;"
+                    title="Página Anterior">
+              <i class="bi bi-chevron-left fw-bold"></i>
+            </button>
+            
+            <div class="px-3 text-secondary small fw-semibold text-nowrap" id="paginacion-info">
+              Página <span class="fw-bold text-dark">1</span> de <span class="fw-bold text-dark">1</span>
+            </div>
+
+            <button class="btn btn-sm btn-light text-primary rounded-circle p-0 d-flex align-items-center justify-content-center" 
+                    type="button" 
+                    id="nextProducto" 
+                    disabled 
+                    style="width: 32px; height: 32px;"
+                    title="Página Siguiente">
+              <i class="bi bi-chevron-right fw-bold"></i>
+            </button>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -319,9 +348,9 @@
 
           if (pageInfo) {
             if (perPageVal === 'todos') {
-              pageInfo.textContent = `Mostrando todos (${total} productos)`;
+              pageInfo.innerHTML = `Mostrando todos <span class="badge bg-primary bg-opacity-10 text-primary ms-1">${total} productos</span>`;
             } else {
-              pageInfo.textContent = `Página ${page} de ${totalPages} (${total} total)`;
+              pageInfo.innerHTML = `Página <span class="fw-bold text-primary">${page}</span> de <span class="fw-bold text-dark">${totalPages}</span> <small class="text-muted ms-1">(${total} total)</small>`;
             }
           }
 

@@ -83,7 +83,7 @@
   <div class="card-body">
     <form method="get" action="/productos" class="row g-3">
       <div class="col-md-3">
-        <label class="form-label">Empresa</label>
+        <label class="form-label">Nombre del Producto</label>
         <input type="text" name="empresa" class="form-control" value="{{ request.args.get('empresa', '') }}"
           placeholder="Ej: ElectroRed">
       </div>
@@ -224,17 +224,25 @@
   <!-- ============================================= -->
   <div class="tab-pane fade {% if tab_activa == 'importados' %}show active{% endif %}" id="pills-importados"
     role="tabpanel">
-    <h3 class="mb-4 text-success">
-      <i class="bi bi-box-seam-fill"></i> Productos Importados
-      <span class="badge bg-success">Total: {{ pagination_imp.total_items }} | Página {{ pagination_imp.page }} de {{
-        pagination_imp.total_pages }}</span>
-    </h3>
+    <div class="d-flex flex-wrap align-items-center mb-4 gap-2">
+      <h3 class="mb-0 text-success me-2">
+        <i class="bi bi-box-seam-fill"></i> Productos Importados
+        <span class="badge bg-success ms-1">Total: {{ pagination_imp.total_items }} | Página {{ pagination_imp.page }} de {{
+          pagination_imp.total_pages }}</span>
+      </h3>
+      <button id="btnEliminarSeleccionadosImp" class="btn btn-sm btn-danger shadow-sm fw-bold border-0 px-3 py-1" style="display: none;" onclick="eliminarSeleccionadosImportados()">
+        <i class="bi bi-trash-fill me-1"></i> Eliminar Seleccionados (<span id="countImpSeleccionados">0</span>)
+      </button>
+    </div>
 
     {% if productos_importados %}
     <div class="table-responsive">
-      <table class="table table-striped table-bordered table-hover">
+      <table class="table table-striped table-bordered table-hover align-middle">
         <thead class="table-dark bg-success">
           <tr>
+            <th class="text-center" style="width: 40px;">
+              <input type="checkbox" id="checkSelectAllImp" class="form-check-input" onclick="toggleSelectAllImportados(this.checked)" title="Seleccionar todos en esta página">
+            </th>
             <th>Empresa</th>
             <th>Código</th>
             <th>Descripción</th>
@@ -250,6 +258,9 @@
         <tbody>
           {% for p in productos_importados %}
           <tr>
+            <td class="text-center" data-label="Seleccionar">
+              <input type="checkbox" class="form-check-input chk-producto-imp" value="{{ p['id'] }}" onchange="actualizarBotonEliminarImportados()">
+            </td>
             <td data-label="Empresa">{{ p['empresa'] }}</td>
             <td data-label="Código"><strong>{{ p['codigo'] }}</strong></td>
             <td data-label="Descripción">{{ p['descripcion'] }}</td>
@@ -865,7 +876,7 @@
                 try {
                   const t = JSON.parse(toastPendiente);
                   mostrarAlertaGestion(t.mensaje, t.tipo);
-                } catch(e) {}
+                } catch (e) { }
                 sessionStorage.removeItem('toastNotificacion');
               }
               cargarCategorias();
@@ -1085,6 +1096,118 @@
               setTimeout(() => {
                 if (alert) alert.style.display = 'none';
               }, 5000);
+            }
+
+            // =============================================
+            // FUNCIONES PARA ELIMINACIÓN MASIVA DE PRODUCTOS
+            // =============================================
+
+            // --- 1. PRODUCTOS REGISTRADOS (MANUALES) ---
+            function toggleSelectAllRegistrados(checked) {
+              document.querySelectorAll('.chk-producto-reg').forEach(chk => chk.checked = checked);
+              actualizarBotonEliminarRegistrados();
+            }
+
+            function actualizarBotonEliminarRegistrados() {
+              const marcados = document.querySelectorAll('.chk-producto-reg:checked');
+              const btn = document.getElementById('btnEliminarSeleccionadosReg');
+              const countSpan = document.getElementById('countRegSeleccionados');
+              const chkAll = document.getElementById('checkSelectAllReg');
+              const todos = document.querySelectorAll('.chk-producto-reg');
+
+              if (countSpan) countSpan.textContent = marcados.length;
+              if (btn) btn.style.display = (marcados.length >= 1) ? 'inline-block' : 'none';
+              if (chkAll && todos.length > 0) chkAll.checked = (marcados.length === todos.length);
+            }
+
+            function eliminarSeleccionadosRegistrados() {
+              const marcados = Array.from(document.querySelectorAll('.chk-producto-reg:checked')).map(chk => parseInt(chk.value));
+              if (!marcados || marcados.length === 0) return;
+
+              if (!confirm(`¿Está seguro de que desea eliminar los ${marcados.length} producto(s) seleccionados? Esta acción no se puede deshacer.`)) {
+                return;
+              }
+
+              const btn = document.getElementById('btnEliminarSeleccionadosReg');
+              if (btn) btn.disabled = true;
+
+              fetch('/productos/eliminar-masivo', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ ids: marcados })
+              })
+              .then(res => res.json())
+              .then(data => {
+                if (data.success) {
+                  sessionStorage.setItem('toastNotificacion', JSON.stringify({
+                    mensaje: `✅ ${data.message}`,
+                    tipo: 'success'
+                  }));
+                  window.location.href = '/productos?tab=registrados';
+                } else {
+                  if (btn) btn.disabled = false;
+                  mostrarAlertaGestion(data.message || 'Error al eliminar productos', 'danger');
+                }
+              })
+              .catch(err => {
+                console.error(err);
+                if (btn) btn.disabled = false;
+                mostrarAlertaGestion('Error de conexión al eliminar los productos.', 'danger');
+              });
+            }
+
+            // --- 2. PRODUCTOS IMPORTADOS (PDF / TEXTO) ---
+            function toggleSelectAllImportados(checked) {
+              document.querySelectorAll('.chk-producto-imp').forEach(chk => chk.checked = checked);
+              actualizarBotonEliminarImportados();
+            }
+
+            function actualizarBotonEliminarImportados() {
+              const marcados = document.querySelectorAll('.chk-producto-imp:checked');
+              const btn = document.getElementById('btnEliminarSeleccionadosImp');
+              const countSpan = document.getElementById('countImpSeleccionados');
+              const chkAll = document.getElementById('checkSelectAllImp');
+              const todos = document.querySelectorAll('.chk-producto-imp');
+
+              if (countSpan) countSpan.textContent = marcados.length;
+              if (btn) btn.style.display = (marcados.length >= 1) ? 'inline-block' : 'none';
+              if (chkAll && todos.length > 0) chkAll.checked = (marcados.length === todos.length);
+            }
+
+            function eliminarSeleccionadosImportados() {
+              const marcados = Array.from(document.querySelectorAll('.chk-producto-imp:checked')).map(chk => parseInt(chk.value));
+              if (!marcados || marcados.length === 0) return;
+
+              if (!confirm(`¿Está seguro de que desea eliminar los ${marcados.length} producto(s) importado(s) seleccionados? Esta acción no se puede deshacer.`)) {
+                return;
+              }
+
+              const btn = document.getElementById('btnEliminarSeleccionadosImp');
+              if (btn) btn.disabled = true;
+
+              fetch('/productos/eliminar-masivo', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ ids: marcados })
+              })
+              .then(res => res.json())
+              .then(data => {
+                if (data.success) {
+                  sessionStorage.setItem('toastNotificacion', JSON.stringify({
+                    mensaje: `✅ ${data.message}`,
+                    tipo: 'success'
+                  }));
+                  window.location.href = '/productos?tab=importados';
+                } else {
+                  if (btn) btn.disabled = false;
+                  mostrarAlertaGestion(data.message || 'Error al eliminar productos', 'danger');
+                }
+              })
+              .catch(err => {
+                console.error(err);
+                if (btn) btn.disabled = false;
+                mostrarAlertaGestion('Error de conexión al eliminar los productos.', 'danger');
+              });
             }
 
             // FUNCIONES PARA GESTIÓN DE CATEGORÍAS

@@ -382,6 +382,29 @@ def register_routes(app):
 
         return render_template('productos/editar_producto.html', producto=producto, categorias=categorias, filtros=filtros, page=page)
 
+    @app.route('/productos/eliminar-masivo', methods=['POST'])
+    @login_required
+    @admin_required
+    def eliminar_productos_masivo():
+        try:
+            data = request.get_json() or {}
+            ids = data.get('ids', [])
+            if not ids or not isinstance(ids, list):
+                return jsonify({'success': False, 'message': 'No se seleccionaron productos para eliminar.'}), 400
+
+            with get_db_connection() as conexion:
+                cursor = conexion.cursor()
+                placeholders = ','.join(['?'] * len(ids))
+                cursor.execute(f'DELETE FROM productos WHERE id IN ({placeholders})', ids)
+                conexion.commit()
+
+            return jsonify({
+                'success': True,
+                'message': f'{len(ids)} producto(s) eliminado(s) correctamente.'
+            })
+        except Exception as e:
+            return jsonify({'success': False, 'message': f'Error al eliminar los productos: {str(e)}'}), 500
+
     @app.route('/productos/eliminar/<int:id>')
     @login_required
     def eliminar_producto(id):

@@ -147,3 +147,44 @@ def test_registro_y_filtrado_completo_productos(client, admin_user):
 
     # Clean up
     client.delete(f'/api/categorias/{cat_id}')
+
+def test_eliminar_productos_masivo(client, admin_user):
+    client.post('/login', data={'correo': admin_user['email'], 'contrasena': admin_user['password']})
+
+    # Crear 3 productos de prueba
+    ids_creados = []
+    for i in range(1, 4):
+        client.post('/productos', data={
+            'empresa': 'EmpresaBulk',
+            'codigo': f'BULK-00{i}',
+            'descripcion': f'Producto Bulk {i}',
+            'marca': 'MarcaBulk',
+            'tm': 'TM',
+            'um': 'PZ',
+            'cantidad': '10',
+            'precio_unitario': '100'
+        })
+        conn = get_db_connection()
+        c = conn.cursor()
+        c.execute("SELECT id FROM productos WHERE codigo = ?", (f'BULK-00{i}',))
+        row = c.fetchone()
+        conn.close()
+        if row:
+            ids_creados.append(row[0])
+
+    assert len(ids_creados) == 3
+
+    # Ejecutar eliminación masiva vía POST /productos/eliminar-masivo
+    resp_bulk = client.post('/productos/eliminar-masivo', json={'ids': ids_creados})
+    assert resp_bulk.status_code == 200
+    res_json = resp_bulk.get_json()
+    assert res_json['success'] is True
+    assert '3 producto(s) eliminado(s)' in res_json['message']
+
+    # Verificar en BD que ya no existen
+    conn = get_db_connection()
+    c = conn.cursor()
+    c.execute("SELECT COUNT(*) FROM productos WHERE id IN (?, ?, ?)", tuple(ids_creados))
+    count = c.fetchone()[0]
+    conn.close()
+    assert count == 0

@@ -69,10 +69,12 @@ def register_routes(app):
             # Guardar en la base de datos
             contrasena_hash = generate_password_hash(contrasena)
         
-            from datetime import datetime, timedelta
+            from datetime import timedelta
+            from models import obtener_fecha_bolivia
             fecha_vencimiento = None
             if rol == 'admin':
-                fecha_vencimiento = (datetime.now() + timedelta(days=30)).strftime('%Y-%m-%d %H:%M:%S')
+                now_bo = obtener_fecha_bolivia()
+                fecha_vencimiento = (now_bo + timedelta(days=30)).strftime('%Y-%m-%d %H:%M:%S')
             
             try:
                 is_postgres = bool(os.environ.get('DATABASE_URL') and os.environ.get('DATABASE_URL').startswith('postgres'))

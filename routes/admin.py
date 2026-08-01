@@ -20,7 +20,7 @@ from models import (
     crear_tablas, registrar_log, migrar_clientes_existentes, migrar_productos_categorias,
     migrar_columnas_nuevas_clientes,
     guardar_importacion_pdf, obtener_importaciones_pdf, obtener_importacion_por_id, registrar_productos_seleccionados,
-    eliminar_importacion_pdf
+    eliminar_importacion_pdf, obtener_fecha_bolivia
 )
 from utils.pdf_extractor import PDFProductExtractor
 import io
@@ -638,9 +638,11 @@ def register_routes(app):
             # Generar un nuevo PIN de 8 caracteres alfanuméricos en mayúsculas
             caracteres = string.ascii_uppercase + string.digits
             nuevo_pin = ''.join(random.choice(caracteres) for _ in range(8))
+            now_bo = obtener_fecha_bolivia()
+            fecha_str = now_bo.strftime('%Y-%m-%d %H:%M:%S')
         
             try:
-                cursor.execute('INSERT INTO pines_admin (pin) VALUES (?)', (nuevo_pin,))
+                cursor.execute('INSERT INTO pines_admin (pin, creado_en) VALUES (?, ?)', (nuevo_pin, fecha_str))
                 conexion.commit()
                 flash(f'Nuevo PIN generado: {nuevo_pin}', 'success')
             except sqlite3.IntegrityError:
@@ -652,7 +654,26 @@ def register_routes(app):
             LEFT JOIN clientes c ON p.usado_por = c.id 
             ORDER BY p.creado_en DESC
         ''')
-        pines = cursor.fetchall()
+        rows = cursor.fetchall()
+        pines = []
+        from datetime import timezone, timedelta
+        tz_bolivia = timezone(timedelta(hours=-4))
+        for row in rows:
+            p = dict(row)
+            creado = p.get('creado_en')
+            if isinstance(creado, datetime):
+                if creado.tzinfo is not None:
+                    creado = creado.astimezone(tz_bolivia)
+                p['creado_en'] = creado.strftime('%Y-%m-%d %H:%M:%S')
+            elif isinstance(creado, str) and creado:
+                try:
+                    dt = datetime.fromisoformat(creado.replace('Z', '+00:00'))
+                    if dt.tzinfo is not None:
+                        dt = dt.astimezone(tz_bolivia)
+                    p['creado_en'] = dt.strftime('%Y-%m-%d %H:%M:%S')
+                except Exception:
+                    pass
+            pines.append(p)
         conexion.close()
 
         return render_template('admin/pines.html', pines=pines)

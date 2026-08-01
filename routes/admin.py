@@ -461,6 +461,14 @@ def register_routes(app):
             cursor.execute("DELETE FROM equipo_solicitudes WHERE admin_id = ? OR empleado_id = ?", (id, id))
             cursor.execute("DELETE FROM equipo_invitaciones WHERE admin_id = ?", (id,))
 
+            # 4.5 Eliminar importaciones pdf
+            cursor.execute('''
+                DELETE FROM items_importados_temp WHERE importacion_id IN (
+                    SELECT id FROM importaciones_pdf WHERE usuario_id = ?
+                )
+            ''', (id,))
+            cursor.execute("DELETE FROM importaciones_pdf WHERE usuario_id = ?", (id,))
+
             # 5. Eliminar logs, config pdf y des-asociar pines/renovaciones
             cursor.execute("DELETE FROM logs WHERE usuario_id = ?", (id,))
             cursor.execute("DELETE FROM configuracion_pdf WHERE usuario_id = ?", (id,))

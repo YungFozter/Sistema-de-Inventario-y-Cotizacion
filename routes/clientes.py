@@ -286,6 +286,15 @@ def register_routes(app):
             }
         )
 
+        # Eliminar cotizaciones y sus productos asociados al cliente
+        cursor.execute('''
+            DELETE FROM cotizacion_productos WHERE cotizacion_id IN (
+                SELECT id FROM cotizaciones WHERE cliente_id = ?
+            )
+        ''', (id,))
+        cursor.execute("DELETE FROM cotizaciones WHERE cliente_id = ?", (id,))
+
+        # Eliminar cliente
         cursor.execute('DELETE FROM clientes WHERE id=?', (id,))
         conexion.commit()
         conexion.close()

@@ -59,6 +59,15 @@ def verificar_sesion_unica():
                 db_token = row[0] if isinstance(row, (tuple, list)) else row['session_token']
                 if db_token and db_token != token_sesion:
                     session.clear()
+                    # Detectar si es una petición AJAX/API para retornar JSON en vez de redirect
+                    is_ajax = (
+                        request.headers.get('X-Requested-With') == 'XMLHttpRequest'
+                        or 'application/json' in request.headers.get('Accept', '')
+                        or (request.path.startswith('/api/'))
+                    )
+                    if is_ajax:
+                        from flask import jsonify
+                        return jsonify({'success': False, 'error': 'sesion_invalidada', 'redirect': '/login'}), 401
                     flash('Tu sesión ha sido cerrada automáticamente porque tu cuenta inició sesión en otro dispositivo o navegador.', 'warning')
                     return redirect(url_for('login'))
         except Exception:

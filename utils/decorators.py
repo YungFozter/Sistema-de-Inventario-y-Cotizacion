@@ -46,6 +46,15 @@ def login_required(f):
                     "ip": request.remote_addr
                 }
             )
+            # Si es una petición AJAX/JSON, retornar JSON 401 en vez de redirect HTML
+            is_ajax = (
+                request.headers.get('X-Requested-With') == 'XMLHttpRequest'
+                or 'application/json' in request.headers.get('Accept', '')
+                or request.path.startswith('/api/')
+            )
+            if is_ajax:
+                from flask import jsonify
+                return jsonify({'success': False, 'error': 'no_autenticado', 'redirect': '/login'}), 401
             return redirect(url_for('login', next=request.url))
         return f(*args, **kwargs)
     return decorated_function

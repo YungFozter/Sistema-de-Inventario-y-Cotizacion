@@ -79,8 +79,17 @@
         lista.innerHTML = `<div class="list-group-item text-center text-muted py-3"><div class="spinner-border spinner-border-sm text-primary me-2"></div>Buscando…</div>`;
 
         fetch(`/api/buscar_clientes_cotizacion?q=${encodeURIComponent(q)}&page=${_pageCliente}`)
-          .then(r => r.json())
+          .then(r => {
+            if (r.status === 401) {
+              // Sesión expirada: redirigir al login
+              lista.innerHTML = `<div class="list-group-item text-warning"><i class="bi bi-exclamation-circle me-2"></i>Sesión expirada. <a href="/login">Vuelve a iniciar sesión</a>.</div>`;
+              setTimeout(() => { window.location.href = '/login'; }, 2000);
+              return null;
+            }
+            return r.json();
+          })
           .then(data => {
+            if (!data) return;
             if (!data.success) { lista.innerHTML = `<div class="list-group-item text-danger">Error al buscar clientes.</div>`; return; }
 
             _totalPagesCliente = data.total_pages;
@@ -97,18 +106,39 @@
               return;
             }
 
-            lista.innerHTML = data.clientes.map(c => `
+            // Usar data-* en lugar de onclick inline para evitar
+            // conflicto de comillas dobles en atributos HTML
+            lista.innerHTML = data.clientes.map(c => {
+              const nombre = (c.nombre || '').replace(/&/g,'&amp;').replace(/"/g,'&quot;');
+              const codigo = (c.codigo_cliente || '').replace(/&/g,'&amp;').replace(/"/g,'&quot;');
+              const nit    = (c.nit || '').replace(/&/g,'&amp;').replace(/"/g,'&quot;');
+              return `
               <button type="button"
-                      class="list-group-item list-group-item-action d-flex justify-content-between align-items-center py-2 px-3"
-                      onclick="seleccionarCliente(${c.id}, '${c.nombre.replace(/'/g,"\\'")}',${ JSON.stringify(c.codigo_cliente) },${ JSON.stringify(c.nit) })">
+                      class="btn-seleccionar-cliente list-group-item list-group-item-action d-flex justify-content-between align-items-center py-2 px-3"
+                      data-id="${c.id}"
+                      data-nombre="${nombre}"
+                      data-codigo="${codigo}"
+                      data-nit="${nit}">
                 <div>
                   <i class="bi bi-person me-2 text-primary"></i>
                   <strong>${c.nombre}</strong>
                   ${c.codigo_cliente ? `<span class="badge bg-primary bg-opacity-10 text-primary ms-2 small">${c.codigo_cliente}</span>` : ''}
                 </div>
                 <small class="text-muted">${c.nit ? 'NIT: ' + c.nit : ''}</small>
-              </button>
-            `).join('');
+              </button>`;
+            }).join('');
+
+            // Vincular evento click a cada botón generado
+            lista.querySelectorAll('.btn-seleccionar-cliente').forEach(btn => {
+              btn.addEventListener('click', function() {
+                seleccionarCliente(
+                  this.dataset.id,
+                  this.dataset.nombre,
+                  this.dataset.codigo,
+                  this.dataset.nit
+                );
+              });
+            });
           })
           .catch(() => { lista.innerHTML = `<div class="list-group-item text-danger">Error de conexión.</div>`; });
       }
@@ -402,8 +432,16 @@
           }
 
           fetch('/api/buscar_productos_cotizacion?' + params.toString())
-            .then(response => response.json())
+            .then(response => {
+              if (response.status === 401) {
+                console.warn('Sesión expirada al buscar productos.');
+                setTimeout(() => { window.location.href = '/login'; }, 1500);
+                return null;
+              }
+              return response.json();
+            })
             .then(data => {
+              if (!data) return;
               if (data.success) {
                 totalPaginasProducto = data.total_pages_productos || 1;
                 paginaActualProducto = data.page_producto || 1;

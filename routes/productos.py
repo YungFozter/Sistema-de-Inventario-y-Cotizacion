@@ -400,7 +400,7 @@ def register_routes(app):
             cursor = conexion.cursor()
         
             user_id = session.get('user_id')
-            cursor.execute("SELECT id, nombre, descripcion FROM categorias WHERE activo = 1 AND (creador_id = ? OR creador_id IS NULL) ORDER BY nombre", (user_id,))
+            cursor.execute("SELECT id, nombre, descripcion FROM categorias WHERE (activo IS TRUE OR activo = 1) AND (creador_id = ? OR creador_id IS NULL) ORDER BY nombre", (user_id,))
             categorias = cursor.fetchall()
         
             # Convertir a lista de diccionarios
@@ -444,7 +444,7 @@ def register_routes(app):
                 else:
                     # Reactivar categoría borrada lógicamente
                     cursor.execute(
-                        "UPDATE categorias SET activo = 1, descripcion = ? WHERE id = ?",
+                        "UPDATE categorias SET activo = TRUE, descripcion = ? WHERE id = ?",
                         (descripcion, cat_id)
                     )
                     conexion.commit()
@@ -453,7 +453,7 @@ def register_routes(app):
         
             # Crear la nueva categoría
             cursor.execute(
-                "INSERT INTO categorias (nombre, descripcion, activo, creador_id) VALUES (?, ?, 1, ?)",
+                "INSERT INTO categorias (nombre, descripcion, activo, creador_id) VALUES (?, ?, TRUE, ?)",
                 (nombre, descripcion, user_id)
             )
             categoria_id = cursor.lastrowid
@@ -483,8 +483,8 @@ def register_routes(app):
 
             user_id = session.get('user_id')
             
-            # Verificar si la categoría existe y pertenece a este admin (o es global y permitimos edición, aunque mejor solo si es de él)
-            cursor.execute("SELECT id, creador_id FROM categorias WHERE id = ? AND activo = 1", (categoria_id,))
+            # Verificar si la categoría existe y pertenece a este admin
+            cursor.execute("SELECT id, creador_id FROM categorias WHERE id = ? AND (activo IS TRUE OR activo = 1)", (categoria_id,))
             cat_actual = cursor.fetchone()
             if not cat_actual:
                 conexion.close()
@@ -495,7 +495,7 @@ def register_routes(app):
                 return jsonify({'success': False, 'message': 'No tienes permiso para editar esta categoría'})
 
             # Verificar si otra categoría activa ya tiene ese mismo nombre para este admin
-            cursor.execute("SELECT id FROM categorias WHERE nombre = ? AND id != ? AND activo = 1 AND (creador_id = ? OR creador_id IS NULL)", (nombre, categoria_id, user_id))
+            cursor.execute("SELECT id FROM categorias WHERE nombre = ? AND id != ? AND (activo IS TRUE OR activo = 1) AND (creador_id = ? OR creador_id IS NULL)", (nombre, categoria_id, user_id))
             if cursor.fetchone():
                 conexion.close()
                 return jsonify({'success': False, 'message': 'Ya existe otra categoría con ese nombre'})
@@ -535,7 +535,7 @@ def register_routes(app):
             user_id = session.get('user_id')
             
             # Verificar si la categoría existe y si el usuario tiene permisos
-            cursor.execute("SELECT nombre, creador_id FROM categorias WHERE id = ? AND activo = 1", (categoria_id,))
+            cursor.execute("SELECT nombre, creador_id FROM categorias WHERE id = ? AND (activo IS TRUE OR activo = 1)", (categoria_id,))
             categoria = cursor.fetchone()
         
             if not categoria:
@@ -558,7 +558,7 @@ def register_routes(app):
                 })
         
             # Eliminar la categoría (marcado lógico)
-            cursor.execute("UPDATE categorias SET activo = 0 WHERE id = ?", (categoria_id,))
+            cursor.execute("UPDATE categorias SET activo = FALSE WHERE id = ?", (categoria_id,))
             conexion.commit()
             conexion.close()
         

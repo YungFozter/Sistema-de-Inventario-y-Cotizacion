@@ -116,6 +116,26 @@
       </div>
     </div>
 
+    <!-- Barra de Control de Paginación y Cantidad por Página -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 p-2.5 bg-light rounded-3 border shadow-sm gap-2">
+      <div class="d-flex align-items-center gap-2">
+        <label for="select-per-page" class="form-label mb-0 fw-semibold text-secondary small">
+          <i class="bi bi-list-check me-1"></i>Mostrar:
+        </label>
+        <select class="form-select form-select-sm w-auto rounded-pill px-3 fw-bold border-primary text-primary" id="select-per-page" onchange="cambiarCantidadMostrar(this.value)">
+          <option value="15" selected>15 por página</option>
+          <option value="30">30 por página</option>
+          <option value="50">50 por página</option>
+          <option value="todos">Mostrar Todos</option>
+        </select>
+      </div>
+      <div class="d-flex align-items-center gap-2">
+        <button class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-semibold" type="button" id="prevProducto" disabled>&laquo; Anterior</button>
+        <span class="badge bg-white text-dark border px-3 py-2 rounded-pill fw-semibold shadow-sm" id="paginacion-info">Página 1 de 1</span>
+        <button class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-semibold" type="button" id="nextProducto" disabled>Siguiente &raquo;</button>
+      </div>
+    </div>
+
     {% if productos %}
     <div class="table-responsive mb-4">
       <table class="table table-striped table-hover">
@@ -165,9 +185,11 @@
       </table>
 
       <script>
-        // Variables de estado
+        // Estado global de la paginación del catálogo
         let timeoutId;
         let tipoProductoActual = '{{ tipo_producto or "registrados" }}';
+        let paginaActualProducto = 1;
+        let totalPaginasProducto = 1;
         const productsTable = document.querySelector('table tbody');
         const productCountBadge = document.getElementById('productos-count');
 
@@ -185,15 +207,53 @@
             btnImp.classList.add('text-success');
             btnReg.classList.add('active');
           }
-          buscarProductos();
+          buscarProductos(1);
         }
 
-        // Función para actualizar la tabla con los resultados
-        function actualizarTablaProductos(productos, totalReal) {
+        function cambiarCantidadMostrar(val) {
+          localStorage.setItem('productos_per_page', val);
+          buscarProductos(1);
+        }
+
+        function buscarProductos(page = 1) {
+          paginaActualProducto = page;
+          const perPageVal = document.getElementById('select-per-page')?.value || '15';
+          const categoriaSelect = document.getElementById('buscar-categoria');
+
+          const params = new URLSearchParams({
+            codigo: document.getElementById('buscar-codigo')?.value || '',
+            descripcion: document.getElementById('buscar-descripcion')?.value || '',
+            marca: document.getElementById('buscar-marca')?.value || '',
+            categoria: categoriaSelect?.value || '',
+            tipo_producto: tipoProductoActual,
+            per_page: perPageVal,
+            page_producto: page
+          });
+
+          if (productsTable) {
+            productsTable.innerHTML = '<tr><td colspan="7" class="text-center py-4"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Cargando...</span></div></td></tr>';
+          }
+
+          fetch('/api/buscar_productos_cotizacion?' + params.toString())
+            .then(response => response.json())
+            .then(data => {
+              if (data.success) {
+                totalPaginasProducto = data.total_pages_productos || 1;
+                paginaActualProducto = data.page_producto || 1;
+                actualizarTablaProductos(data.productos, data.total_encontrados, data.page_producto, data.total_pages_productos, perPageVal);
+              } else {
+                console.error('Error en la búsqueda:', data.error);
+              }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        function actualizarTablaProductos(productos, totalReal, page, totalPages, perPageVal) {
           productsTable.innerHTML = '';
           if (!productos || productos.length === 0) {
-            productsTable.innerHTML = `<tr><td colspan="7" class="text-center text-muted py-3">No se encontraron productos en esta sección.</td></tr>`;
-            productCountBadge.textContent = '0 encontrados';
+            productsTable.innerHTML = `<tr><td colspan="7" class="text-center text-muted py-4">No se encontraron productos con los criterios seleccionados.</td></tr>`;
+            if (productCountBadge) productCountBadge.textContent = '0 encontrados';
+            actualizarPaginacionControles(0, page, 1, perPageVal);
             return;
           }
 
@@ -201,6 +261,10 @@
             const row = document.createElement('tr');
             if (producto.cantidad <= 0) row.classList.add('table-secondary');
             
+            const badgeStock = (producto.cantidad_total !== undefined && producto.cantidad_total !== null)
+              ? `${producto.cantidad_total} (${producto.cantidad} disp.)`
+              : producto.cantidad;
+
             row.innerHTML = `
               <td class="text-center" data-label="Código"><strong>${producto.codigo}</strong></td>
               <td data-label="Descripción">${producto.descripcion}</td>
@@ -208,7 +272,7 @@
               <td class="text-center" data-label="UM">${producto.um || 'Pza'}</td>
               <td class="text-center" data-label="Disponible">
                 <span class="badge ${producto.cantidad > 0 ? 'bg-success' : 'bg-danger'}">
-                  ${producto.cantidad}
+                  ${badgeStock}
                 </span>
               </td>
               <td class="text-end" data-label="P/Unitario">Bs ${parseFloat(producto.precio_unitario).toFixed(2)}</td>
@@ -228,11 +292,13 @@
             productsTable.appendChild(row);
           });
           
-          // Actualizar contador de productos con la cantidad total real sin el tope visual
-          const cntDisplay = (typeof totalReal !== 'undefined') ? totalReal : productos.length;
-          productCountBadge.textContent = cntDisplay + ' productos encontrados';
+          if (productCountBadge) {
+            productCountBadge.textContent = (totalReal || productos.length) + ' productos en total';
+          }
+
+          actualizarPaginacionControles(totalReal || productos.length, page, totalPages, perPageVal);
           
-          // Volver a configurar los event listeners para los nuevos botones
+          // Re-vincular event listeners
           document.querySelectorAll('button[data-producto-id]').forEach(button => {
             button.addEventListener('click', function() {
               agregarAlCarrito(
@@ -246,41 +312,46 @@
           });
         }
 
-        // Función para realizar la búsqueda
-        function buscarProductos() {
-          const categoriaSelect = document.getElementById('buscar-categoria');
-          const params = new URLSearchParams({
-            codigo: document.getElementById('buscar-codigo').value,
-            descripcion: document.getElementById('buscar-descripcion').value,
-            marca: document.getElementById('buscar-marca').value,
-            categoria: categoriaSelect.value,
-            tipo_producto: tipoProductoActual
-          });
+        function actualizarPaginacionControles(total, page, totalPages, perPageVal) {
+          const prevBtn = document.getElementById('prevProducto');
+          const nextBtn = document.getElementById('nextProducto');
+          const pageInfo = document.getElementById('paginacion-info');
 
-          fetch('/api/buscar_productos_cotizacion?' + params.toString())
-            .then(response => response.json())
-            .then(data => {
-              if (data.success) {
-                actualizarTablaProductos(data.productos, data.total_encontrados);
-              } else {
-                console.error('Error en la búsqueda:', data.error);
-              }
-            })
-            .catch(error => console.error('Error:', error));
+          if (pageInfo) {
+            if (perPageVal === 'todos') {
+              pageInfo.textContent = `Mostrando todos (${total} productos)`;
+            } else {
+              pageInfo.textContent = `Página ${page} de ${totalPages} (${total} total)`;
+            }
+          }
+
+          if (prevBtn) {
+            prevBtn.disabled = (page <= 1 || perPageVal === 'todos');
+            prevBtn.onclick = () => {
+              if (paginaActualProducto > 1) buscarProductos(paginaActualProducto - 1);
+            };
+          }
+
+          if (nextBtn) {
+            nextBtn.disabled = (page >= totalPages || perPageVal === 'todos');
+            nextBtn.onclick = () => {
+              if (paginaActualProducto < totalPaginasProducto) buscarProductos(paginaActualProducto + 1);
+            };
+          }
         }
 
-        // Evento para manejar cambios en los campos de búsqueda
+        // Eventos de entrada para búsqueda dinámica
         ['buscar-codigo', 'buscar-descripcion', 'buscar-marca', 'buscar-categoria'].forEach(id => {
           const el = document.getElementById(id);
           if (el) {
             el.addEventListener('input', () => {
               clearTimeout(timeoutId);
-              timeoutId = setTimeout(buscarProductos, 300);
+              timeoutId = setTimeout(() => buscarProductos(1), 300);
             });
           }
         });
 
-        // Evento para limpiar filtros
+        // Limpiar filtros
         const btnLimpiar = document.getElementById('limpiar-filtros');
         if (btnLimpiar) {
           btnLimpiar.addEventListener('click', () => {
@@ -288,115 +359,20 @@
             document.getElementById('buscar-descripcion').value = '';
             document.getElementById('buscar-marca').value = '';
             document.getElementById('buscar-categoria').value = '';
-            buscarProductos();
+            buscarProductos(1);
           });
         }
 
-        // Inicializar la búsqueda cuando el DOM está listo
+        // Inicializar preferencia de per_page y búsqueda inicial
         document.addEventListener('DOMContentLoaded', function() {
-          buscarProductos();
+          const savedPerPage = localStorage.getItem('productos_per_page');
+          const selectElement = document.getElementById('select-per-page');
+          if (savedPerPage && selectElement) {
+            selectElement.value = savedPerPage;
+          }
+          buscarProductos(1);
         });
       </script>
-
-      <div class="d-flex justify-content-end align-items-center gap-2 mt-2">
-        <button class="btn btn-outline-secondary" type="button" id="prevProducto" {% if page_producto <= 1 %}disabled{% endif %}>&laquo;</button>
-        <span class="input-group-text">Página {{ page_producto }} de {{ total_pages_productos }}</span>
-        <button class="btn btn-outline-secondary" type="button" id="nextProducto" {% if page_producto >= total_pages_productos %}disabled{% endif %}>&raquo;</button>
-      </div>
-    </div>
-    <script>
-      document.addEventListener('DOMContentLoaded', function() {
-        const prevBtn = document.getElementById('prevProducto');
-        const nextBtn = document.getElementById('nextProducto');
-        if (prevBtn && nextBtn) {
-          prevBtn.addEventListener('click', function() {
-            const url = new URL(window.location.href);
-            let page = parseInt(url.searchParams.get('page_producto') || '1');
-            if (page > 1) {
-              cargarPaginaProductos(page - 1);
-            }
-          });
-          nextBtn.addEventListener('click', function() {
-            const url = new URL(window.location.href);
-            let page = parseInt(url.searchParams.get('page_producto') || '1');
-            cargarPaginaProductos(page + 1);
-          });
-        }
-
-        // Función para cargar productos por AJAX
-        function cargarPaginaProductos(page) {
-          const url = new URL(window.location.href);
-          url.searchParams.set('page_producto', page);
-          
-          // Mostrar indicador de carga
-          const tabla = document.querySelector('table tbody');
-          tabla.innerHTML = '<tr><td colspan="7" class="text-center"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Cargando...</span></div></td></tr>';
-          
-          fetch(url.toString(), {
-            headers: {
-              'X-Requested-With': 'XMLHttpRequest'
-            }
-          })
-          .then(response => response.json())
-          .then(data => {
-            // Actualizar la tabla de productos
-            tabla.innerHTML = data.productos.map(producto => `
-              <tr class="${producto.cantidad <= 0 ? 'table-secondary' : ''}">
-                <td class="text-center" data-label="Código"><strong>${producto.codigo}</strong></td>
-                <td data-label="Descripción">${producto.descripcion}</td>
-                <td data-label="Marca">${producto.marca || 'N/A'}</td>
-                <td class="text-center" data-label="UM">${producto.um}</td>
-                <td class="text-center" data-label="Disponible">
-                  <span class="badge ${producto.cantidad > 0 ? 'bg-success' : 'bg-danger'}">
-                    ${producto.cantidad_total ? `${producto.cantidad_total} (${producto.cantidad} disp.)` : producto.cantidad}
-                  </span>
-                </td>
-                <td class="text-end" data-label="P/Unitario">Bs ${producto.precio_unitario.toFixed(2)}</td>
-                <td class="text-center" data-label="Acciones">
-                  <button type="button"
-                          class="btn btn-sm ${producto.cantidad > 0 ? 'btn-success' : 'btn-outline-secondary'}" 
-                          data-producto-id="${producto.id}"
-                          data-producto-codigo="${producto.codigo}"
-                          data-producto-descripcion="${producto.descripcion}"
-                          data-producto-precio="${producto.precio_unitario}"
-                          data-stock-disponible="${producto.cantidad}"
-                          ${producto.cantidad <= 0 ? 'disabled title="Producto no disponible"' : ''}>
-                      <i class="bi bi-cart-plus"></i> Agregar
-                  </button>
-                </td>
-              </tr>
-            `).join('');
-            
-            // Actualizar el contador de página
-            document.querySelector('.input-group-text').textContent = `Página ${data.page_producto} de ${data.total_pages_productos}`;
-            
-            // Actualizar estado de los botones
-            prevBtn.disabled = data.page_producto <= 1;
-            nextBtn.disabled = data.page_producto >= data.total_pages_productos;
-            
-            // Actualizar la URL sin recargar
-            window.history.pushState({}, '', url.toString());
-            
-            // Reconfigurar los event listeners para los nuevos botones
-            document.querySelectorAll('button[data-producto-id]').forEach(button => {
-              button.addEventListener('click', function() {
-                agregarAlCarrito(
-                  this.dataset.productoId,
-                  this.dataset.productoCodigo,
-                  this.dataset.productoDescripcion,
-                  this.dataset.productoPrecio,
-                  this.dataset.stockDisponible
-                );
-              });
-            });
-          })
-          .catch(error => {
-            console.error('Error al cargar la página:', error);
-            mostrarNotificacion('Error al cargar los productos', 'danger');
-          });
-        }
-      });
-    </script>
     {% else %}
     <div class="alert alert-warning">
       <i class="bi bi-exclamation-triangle"></i> No hay productos disponibles. Registra algunos primero.

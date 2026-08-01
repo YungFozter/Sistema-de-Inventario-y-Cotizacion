@@ -72,8 +72,15 @@ def register_routes(app):
         total_pages_clientes = (total_clientes + clientes_per_page - 1) // clientes_per_page
 
         # Paginación de productos para el catálogo
+        per_page_param = request.args.get('per_page', '15')
+        try:
+            if per_page_param == 'todos':
+                productos_per_page = 999999
+            else:
+                productos_per_page = int(per_page_param)
+        except ValueError:
+            productos_per_page = 15
 
-        productos_per_page = 10
         page_producto = int(request.args.get('page_producto', 1))
         tipo_producto = request.args.get('tipo_producto', 'registrados')
         offset_producto = (page_producto - 1) * productos_per_page
@@ -92,7 +99,7 @@ def register_routes(app):
             total_productos = total_registrados
 
         productos = cursor.fetchall()
-        total_pages_productos = max(1, (total_productos + productos_per_page - 1) // productos_per_page)
+        total_pages_productos = max(1, (total_productos + productos_per_page - 1) // productos_per_page) if productos_per_page < 999999 else 1
 
         # Si es una solicitud AJAX, devolver solo la tabla de productos y paginación
         if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
@@ -109,7 +116,8 @@ def register_routes(app):
                     'cantidad_total': p[7] if session.get('user_rol') == 'superadmin' else None
                 } for p in productos],
                 'page_producto': page_producto,
-                'total_pages_productos': total_pages_productos
+                'total_pages_productos': total_pages_productos,
+                'total_productos': total_productos
             })
 
         # Paginación de cotizaciones registradas
@@ -1053,8 +1061,19 @@ def register_routes(app):
                 except ValueError:
                     pass  # Si no es un número válido, ignorar el filtro de categoría
 
-            # Ordenar por empresa y código (ampliado límite a 500)
-            query_with_limit = query + ' ORDER BY p.empresa, p.codigo LIMIT 500'
+            # Paginación dinámica (15, 30, 50, todos)
+            per_page_param = request.args.get('per_page', '15').strip()
+            page_producto = int(request.args.get('page_producto', request.args.get('page', 1)))
+            try:
+                if per_page_param == 'todos':
+                    limit = 999999
+                else:
+                    limit = int(per_page_param)
+            except ValueError:
+                limit = 15
+
+            offset = (page_producto - 1) * limit
+            query_with_limit = query + f' ORDER BY p.empresa, p.codigo LIMIT {limit} OFFSET {offset}'
 
             # Ejecutar la consulta
             with get_db_connection() as conn:
@@ -1080,13 +1099,19 @@ def register_routes(app):
                         'um': producto['um'],
                         'cantidad': producto['cantidad'],
                         'precio_unitario': float(producto['precio_unitario']),
-                        'categoria': producto['categoria_nombre']
+                        'categoria': producto['categoria_nombre'],
+                        'cantidad_total': producto['cantidad'] if session.get('user_rol') == 'superadmin' else None
                     })
+
+                total_pages = max(1, (total_real + limit - 1) // limit) if limit < 999999 else 1
 
                 return jsonify({
                     'success': True,
                     'productos': productos_list,
-                    'total_encontrados': total_real
+                    'total_encontrados': total_real,
+                    'page_producto': page_producto,
+                    'total_pages_productos': total_pages,
+                    'per_page': per_page_param
                 })
         except Exception as e:
             return jsonify({'success': False, 'error': str(e)}), 500

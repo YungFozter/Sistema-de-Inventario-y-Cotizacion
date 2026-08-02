@@ -675,3 +675,21 @@
         box-shadow 0.3s ease,
         border-color 0.2s ease;
 }
+
+/* --------------------------------------------------------------------------
+   CARD BOUNCE HIGHLIGHT — al navegar desde el mega-menú
+   -------------------------------------------------------------------------- */
+@keyframes cardHighlightBounce {
+    0%   { transform: scale(1);    box-shadow: inherit; outline: 0px solid transparent; }
+    15%  { transform: scale(1.04); box-shadow: 0 0 0 4px rgba(255,107,53,0.5), 0 24px 48px rgba(255,107,53,0.18); outline: 3px solid rgba(255,107,53,0.4); }
+    35%  { transform: scale(0.97); }
+    55%  { transform: scale(1.02); box-shadow: 0 0 0 3px rgba(255,107,53,0.3); }
+    75%  { transform: scale(0.99); }
+    100% { transform: scale(1);    box-shadow: inherit; outline: 0px solid transparent; }
+}
+
+.card-bounce-highlight {
+    animation: cardHighlightBounce 0.85s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    position: relative;
+    z-index: 10;
+}

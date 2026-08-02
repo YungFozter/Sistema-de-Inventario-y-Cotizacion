@@ -20,7 +20,7 @@
       </a>
       <div class="bento-nav-links">
         <a href="#funciones">Funciones</a>
-        <a href="#roles">Roles</a>
+        <a href="#como-funciona">Cómo Funciona</a>
         <a href="{{ url_for('login') }}">Iniciar Sesión</a>
       </div>
       <a href="{{ url_for('registro') }}" class="btn-clay-primary">
@@ -321,6 +321,55 @@
     </div>
     <!-- FIN BENTO GRID -->
 
+    <!-- ==========================================
+         SECCIÓN: CÓMO FUNCIONA (3 PASOS)
+         ========================================== -->
+    <div id="como-funciona" style="max-width: 1200px; margin: 5rem auto 3rem; padding: 0 1.5rem; scroll-margin-top: 100px;">
+      <div style="text-align: center; margin-bottom: 3rem;" data-aos="fade-up">
+        <div class="bento-headline-tag" style="justify-content: center; margin-bottom: 1rem;">
+          <span></span> Flujo de trabajo
+        </div>
+        <h2 style="font-size: clamp(1.8rem, 3vw, 2.5rem); font-weight: 900; letter-spacing: -0.03em; color: #141414;">
+          ¿Cómo funciona? En 3 simples pasos.
+        </h2>
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem;" data-aos="fade-up" data-aos-delay="100">
+        <!-- Paso 1 -->
+        <div class="clay-card clay-white clay-shadow-md" style="display: flex; flex-direction: column; align-items: center; text-align: center; padding: 2.5rem 1.5rem;">
+          <div class="clay-icon-3d clay-icon-indigo mb-4" style="width: 60px; height: 60px; font-size: 1.5rem; border-radius: 18px;">
+            <i class="bi bi-cloud-arrow-up-fill"></i>
+          </div>
+          <h3 style="font-size: 1.15rem; font-weight: 800; margin-bottom: 0.5rem; color: #141414; letter-spacing: -0.02em;">1. Importa tu Catálogo</h3>
+          <p style="font-size: 0.9rem; color: #555; line-height: 1.55; margin: 0;">
+            Sube tus listas de precios o usa nuestra IA para extraer productos directamente desde PDFs de tus proveedores.
+          </p>
+        </div>
+        
+        <!-- Paso 2 -->
+        <div class="clay-card clay-peach clay-shadow-md" style="display: flex; flex-direction: column; align-items: center; text-align: center; padding: 2.5rem 1.5rem;">
+          <div class="clay-icon-3d clay-icon-orange mb-4" style="width: 60px; height: 60px; font-size: 1.5rem; border-radius: 18px;">
+            <i class="bi bi-cart-plus-fill"></i>
+          </div>
+          <h3 style="font-size: 1.15rem; font-weight: 800; margin-bottom: 0.5rem; color: #141414; letter-spacing: -0.02em;">2. Arma tu Cotización</h3>
+          <p style="font-size: 0.9rem; color: #555; line-height: 1.55; margin: 0;">
+            Selecciona el cliente, busca productos al instante y ajusta cantidades. El IVA y los totales se calculan automáticamente.
+          </p>
+        </div>
+        
+        <!-- Paso 3 -->
+        <div class="clay-card clay-lavender clay-shadow-md" style="display: flex; flex-direction: column; align-items: center; text-align: center; padding: 2.5rem 1.5rem;">
+          <div class="clay-icon-3d clay-icon-indigo mb-4" style="width: 60px; height: 60px; font-size: 1.5rem; border-radius: 18px;">
+            <i class="bi bi-file-earmark-pdf-fill"></i>
+          </div>
+          <h3 style="font-size: 1.15rem; font-weight: 800; margin-bottom: 0.5rem; color: #141414; letter-spacing: -0.02em;">3. Exporta en PDF</h3>
+          <p style="font-size: 0.9rem; color: #555; line-height: 1.55; margin: 0;">
+            Genera un documento profesional con tu branding, listo para descargar o enviar por correo para cerrar tu venta.
+          </p>
+        </div>
+      </div>
+    </div>
+    
   </div>
 </div>
 {% endblock %}

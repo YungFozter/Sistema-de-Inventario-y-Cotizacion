@@ -11,170 +11,427 @@
   <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
 
   <style>
-    /* Tus estilos personalizados aquí */
-    .btn-transparent {
+    /* ====================================================================
+       NAVBAR CLAYMORPHISM 3D (Pill flotante con frosted glass)
+    ==================================================================== */
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700;800;900&display=swap');
+
+    /* Wrapper para posicionar la navbar flotante */
+    .clay-nav-wrapper {
+      position: sticky;
+      top: 0;
+      z-index: 1050;
+      padding: 10px 16px;
+      background: transparent;
+      pointer-events: none;
+    }
+
+    /* Pill navbar: frosted glass + sombra clay */
+    .clay-navbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      background: rgba(255, 255, 255, 0.82);
+      backdrop-filter: blur(18px) saturate(180%);
+      -webkit-backdrop-filter: blur(18px) saturate(180%);
+      border: 1px solid rgba(255, 255, 255, 0.9);
+      border-radius: 100px;
+      padding: 8px 8px 8px 22px;
+      box-shadow:
+        0 2px 0 rgba(0,0,0,0.03),
+        0 6px 16px rgba(0,0,0,0.07),
+        0 20px 48px rgba(0,0,0,0.06),
+        inset 0 1px 0 rgba(255,255,255,0.95);
+      pointer-events: all;
+      transition: box-shadow 0.3s ease;
+    }
+
+    .clay-navbar:hover {
+      box-shadow:
+        0 3px 0 rgba(0,0,0,0.04),
+        0 10px 24px rgba(0,0,0,0.09),
+        0 28px 60px rgba(0,0,0,0.08),
+        inset 0 1px 0 rgba(255,255,255,1);
+    }
+
+    /* MARCA */
+    .clay-nav-brand {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 1.1rem;
+      font-weight: 900;
+      color: #141414;
+      text-decoration: none;
+      letter-spacing: -0.03em;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      white-space: nowrap;
+    }
+
+    .clay-nav-brand-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: #FF6B35;
+      box-shadow: 0 0 0 3px rgba(255,107,53,0.2);
+      flex-shrink: 0;
+    }
+
+    /* Links centrales */
+    .clay-nav-links {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+    }
+
+    .clay-nav-link {
+      color: #555;
+      font-size: 0.88rem;
+      font-weight: 600;
+      text-decoration: none;
+      padding: 7px 14px;
+      border-radius: 50px;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+
+    .clay-nav-link:hover {
+      background: rgba(0,0,0,0.055);
+      color: #141414;
+    }
+
+    /* Badge de usuario */
+    .clay-user-badge {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      background: rgba(0,0,0,0.04);
+      border: 1px solid rgba(0,0,0,0.08);
+      border-radius: 50px;
+      padding: 5px 14px 5px 8px;
+      font-size: 0.83rem;
+      font-weight: 700;
+      color: #333;
+    }
+
+    .clay-user-avatar {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #FF8A5C, #E8501A);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+      color: #fff;
+      font-weight: 800;
+      flex-shrink: 0;
+      box-shadow: 0 2px 0 #C44E1E, 0 4px 8px rgba(255,107,53,0.3);
+    }
+
+    /* Botón hamburguesa */
+    .clay-nav-toggler {
+      background: rgba(0,0,0,0.06);
+      border: 1px solid rgba(0,0,0,0.09);
+      border-radius: 50px;
+      padding: 8px 12px;
+      cursor: pointer;
+      color: #333;
+      font-size: 1.1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+    }
+
+    .clay-nav-toggler:hover {
+      background: rgba(0,0,0,0.1);
+    }
+
+    /* Botón principal CTA */
+    .clay-nav-cta {
+      background: #141414;
+      color: #FFFFFF !important;
+      border: none;
+      border-radius: 50px;
+      padding: 9px 20px;
+      font-size: 0.86rem;
+      font-weight: 700;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+      box-shadow: 0 3px 0 #000, 0 6px 16px rgba(0,0,0,0.2);
+      transition: all 0.22s cubic-bezier(0.34,1.56,0.64,1);
+    }
+
+    .clay-nav-cta:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 0 #000, 0 10px 24px rgba(0,0,0,0.25);
+      color: #FFFFFF !important;
+    }
+
+    /* DROPDOWN CLAYMORPHISM */
+    .clay-dropdown {
+      position: relative;
+    }
+
+    .clay-dropdown-toggle {
       background: transparent;
       border: none;
-      transition: all 0.3s ease;
-    }
-
-    .btn-transparent:hover {
-      transform: scale(1.1);
-      opacity: 0.8;
-    }
-
-    .btn-transparent:focus {
-      box-shadow: none !important;
-    }
-
-    .bi-list {
-      color: white;
-      transition: all 0.3s ease;
-    }
-
-    /* Menú desplegable mejorado */
-    .dropdown-menu {
-      border: none !important;
-      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15) !important;
-      border-radius: 10px !important;
-      padding: 8px;
-      min-width: 240px;
-      margin-top: 10px !important;
-      animation: fadeIn 0.2s ease-out;
-      border: 1px solid rgba(0, 0, 0, 0.05) !important;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(5px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    .dropdown-item {
-      border-radius: 8px;
-      padding: 10px 15px;
-      margin: 2px 0;
-      transition: all 0.2s ease;
-      font-size: 0.95rem;
+      padding: 0;
+      cursor: pointer;
       display: flex;
       align-items: center;
     }
 
-    .dropdown-item:hover {
-      background-color: #f0f7ff;
-      padding-left: 20px;
+    .clay-dropdown-menu {
+      position: absolute;
+      top: calc(100% + 10px);
+      right: 0;
+      min-width: 240px;
+      background: rgba(255,255,255,0.95);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(0,0,0,0.08);
+      border-radius: 20px;
+      padding: 8px;
+      box-shadow:
+        0 4px 0 rgba(0,0,0,0.04),
+        0 12px 28px rgba(0,0,0,0.1),
+        0 30px 60px rgba(0,0,0,0.08);
+      display: none;
+      z-index: 1060;
+      animation: clayDropDown 0.2s cubic-bezier(0.34,1.56,0.64,1);
     }
 
-    .dropdown-item i {
-      width: 24px;
+    .clay-dropdown-menu.show {
+      display: block;
+    }
+
+    @keyframes clayDropDown {
+      from { opacity: 0; transform: translateY(8px) scale(0.96); }
+      to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .clay-dropdown-header {
+      padding: 10px 12px 8px;
+      border-bottom: 1px solid rgba(0,0,0,0.06);
+      margin-bottom: 6px;
+    }
+
+    .clay-dropdown-header .name {
+      font-size: 0.9rem;
+      font-weight: 800;
+      color: #141414;
+    }
+
+    .clay-dropdown-header .email {
+      font-size: 0.78rem;
+      color: #888;
+    }
+
+    .clay-dropdown-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 12px;
+      border-radius: 12px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: #333;
+      text-decoration: none;
+      transition: all 0.18s ease;
+      cursor: pointer;
+    }
+
+    .clay-dropdown-item:hover {
+      background: #F5F4F0;
+      color: #141414;
+    }
+
+    .clay-dropdown-item i {
+      width: 22px;
       text-align: center;
-      font-size: 1.1rem;
-      margin-right: 10px;
-      color: #0d6efd;
+      font-size: 1rem;
+      color: #FF6B35;
+      flex-shrink: 0;
     }
 
-    /* Versión móvil */
-    @media (max-width: 991.98px) {
-      .navbar-toggler {
-        border: none;
-        padding: 0.5rem;
-      }
+    .clay-dropdown-item.danger { color: #dc2626; }
+    .clay-dropdown-item.danger i { color: #dc2626; }
+    .clay-dropdown-item.danger:hover { background: #FEF2F2; }
 
-      .navbar-toggler:focus {
-        box-shadow: none;
-      }
-
-      .navbar-toggler-icon {
-        background-image: none;
-        width: 1.75em;
-        height: 1.75em;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      }
-
-      .navbar-toggler-icon::before {
-        content: "\F479";
-        font-family: "bootstrap-icons";
-        font-size: 1.75rem;
-        color: white;
-      }
-
-      /* Menú móvil mejorado */
-      .navbar-collapse {
-        position: fixed;
-        top: 56px;
-        left: 0;
-        right: 0;
-        background: white;
-        padding: 20px;
-        max-height: calc(100vh - 56px);
-        overflow-y: auto;
-        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-        z-index: 1000;
-      }
-
-      .mobile-menu-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 15px;
-        padding-bottom: 10px;
-        border-bottom: 1px solid #eee;
-      }
-
-      .mobile-user-info {
-        font-size: 1.1rem;
-        font-weight: 500;
-      }
-
-      .mobile-menu-section {
-        margin-bottom: 20px;
-      }
-
-      .mobile-menu-title {
-        font-size: 1rem;
-        font-weight: 600;
-        margin-bottom: 10px;
-        color: #6c757d;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-      }
-
-      .mobile-menu-item {
-        display: flex;
-        align-items: center;
-        padding: 12px 15px;
-        border-radius: 8px;
-        margin-bottom: 5px;
-        text-decoration: none;
-        color: #212529;
-        transition: all 0.2s;
-      }
-
-      .mobile-menu-item:hover {
-        background-color: #f8f9fa;
-      }
-
-      .mobile-menu-item i {
-        width: 28px;
-        font-size: 1.2rem;
-        color: #0d6efd;
-      }
-
-      .mobile-menu-divider {
-        height: 1px;
-        background-color: #e9ecef;
-        margin: 15px 0;
-      }
+    .clay-dropdown-divider {
+      height: 1px;
+      background: rgba(0,0,0,0.06);
+      margin: 6px 4px;
     }
 
-    /* Versión escritorio */
+    /* MENÚ MÓVIL */
+    .clay-mobile-menu {
+      display: none;
+      background: rgba(255,255,255,0.96);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(0,0,0,0.08);
+      border-radius: 24px;
+      padding: 16px;
+      margin-top: 8px;
+      box-shadow:
+        0 4px 0 rgba(0,0,0,0.04),
+        0 12px 32px rgba(0,0,0,0.1);
+      pointer-events: all;
+      animation: clayDropDown 0.25s cubic-bezier(0.34,1.56,0.64,1);
+    }
+
+    .clay-mobile-menu.show { display: block; }
+
+    .clay-mobile-section-title {
+      font-size: 0.72rem;
+      font-weight: 800;
+      color: #aaa;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      padding: 4px 10px 8px;
+    }
+
+    .clay-mobile-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 14px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #333;
+      text-decoration: none;
+      margin-bottom: 2px;
+      transition: all 0.18s ease;
+    }
+
+    .clay-mobile-item:hover { background: #F5F4F0; color: #141414; }
+    .clay-mobile-item i { width: 22px; text-align: center; color: #FF6B35; }
+    .clay-mobile-item.danger { color: #dc2626; }
+    .clay-mobile-item.danger i { color: #dc2626; }
+    .clay-mobile-divider { height: 1px; background: rgba(0,0,0,0.06); margin: 8px 4px; }
+
+    /* Ocultar/Mostrar según breakpoint */
     @media (min-width: 992px) {
-      .dropdown-menu-end {
-        right: 0;
-        left: auto;
-      }
+      .clay-nav-toggler { display: none; }
+      .clay-mobile-menu-wrapper { display: none; }
     }
+
+    @media (max-width: 991.98px) {
+      .clay-nav-links { display: none; }
+      .clay-user-badge .clay-user-name { display: none; }
+    }
+
+    /* ====================================================================
+       FOOTER CLAYMORPHISM / BENTO DARK
+    ==================================================================== */
+    .clay-footer {
+      background: #141414;
+      color: rgba(255,255,255,0.65);
+      padding: 2.5rem 0 1.5rem;
+      margin-top: auto;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .clay-footer::before {
+      content: '';
+      position: absolute;
+      top: -60px; left: -60px;
+      width: 300px; height: 300px;
+      border-radius: 50%;
+      background: rgba(255,107,53,0.07);
+      filter: blur(60px);
+      pointer-events: none;
+    }
+
+    .clay-footer::after {
+      content: '';
+      position: absolute;
+      bottom: -60px; right: -60px;
+      width: 250px; height: 250px;
+      border-radius: 50%;
+      background: rgba(79,70,229,0.07);
+      filter: blur(60px);
+      pointer-events: none;
+    }
+
+    .clay-footer-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    .clay-footer-brand {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 1rem;
+      font-weight: 900;
+      color: #FFFFFF;
+      text-decoration: none;
+      letter-spacing: -0.03em;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .clay-footer-brand-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: #FF6B35;
+    }
+
+    .clay-footer-tagline {
+      font-size: 0.78rem;
+      color: rgba(255,255,255,0.4);
+      margin-top: 3px;
+    }
+
+    .clay-footer-links {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      flex-wrap: wrap;
+    }
+
+    .clay-footer-link {
+      color: rgba(255,255,255,0.5);
+      font-size: 0.82rem;
+      font-weight: 600;
+      text-decoration: none;
+      padding: 6px 12px;
+      border-radius: 50px;
+      transition: all 0.2s ease;
+    }
+
+    .clay-footer-link:hover {
+      background: rgba(255,255,255,0.08);
+      color: #FFFFFF;
+    }
+
+    .clay-footer-copy {
+      font-size: 0.78rem;
+      color: rgba(255,255,255,0.3);
+      text-align: center;
+      margin-top: 1.5rem;
+      padding-top: 1.25rem;
+      border-top: 1px solid rgba(255,255,255,0.07);
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Ocultar navbar vieja de Bootstrap */
+    nav.navbar.navbar-dark { display: none !important; }
   </style>
 
   {% block styles %}
@@ -183,168 +440,149 @@
 </head>
 
 <body data-user-rol="{{ session.get('user_rol', '') }}" class="d-flex flex-column min-vh-100 {{ 'user-superadmin' if session.get('user_rol') == 'superadmin' else '' }}">
-<!-- NAVBAR MEJORADA -->
-<nav class="navbar navbar-expand-lg navbar-dark bg-primary sticky-top">
-    <div class="container">
-        <a class="navbar-brand" href="{% if 'user_id' in session %}{% if session.get('user_rol') == 'admin' %}{{ url_for('dashboard') }}{% elif session.get('user_rol') == 'standard' %}{{ url_for('standard_dashboard') }}{% else %}{{ url_for('index') }}{% endif %}{% else %}{{ url_for('index') }}{% endif %}">
-            <i class="bi bi-calculator"></i> Sistema de Cotizaciones
-        </a>
+<!-- NAVBAR CLAYMORPHISM 3D (Pill Flotante) -->
+<div class="clay-nav-wrapper">
+  <div class="container" style="max-width: 1280px;">
+    <!-- Barra principal -->
+    <div class="clay-navbar">
 
-        <!-- Botón del menú móvil -->
-        <button class="navbar-toggler" type="button"
-                data-bs-toggle="collapse" data-bs-target="#navbarContent"
-                aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
+      <!-- MARCA -->
+      <a class="clay-nav-brand" href="{% if 'user_id' in session %}{% if session.get('user_rol') == 'admin' %}{{ url_for('dashboard') }}{% elif session.get('user_rol') == 'standard' %}{{ url_for('standard_dashboard') }}{% else %}{{ url_for('index') }}{% endif %}{% else %}{{ url_for('index') }}{% endif %}">
+        <span class="clay-nav-brand-dot"></span>
+        COTIZA<span style="color: #FF6B35;">Pro</span>
+      </a>
 
-        <div class="collapse navbar-collapse" id="navbarContent">
-      <!-- Eliminado el nombre del usuario de la izquierda -->
+      <!-- LINKS DE NAVEGACIÓN (solo escritorio, solo sin sesión) -->
+      {% if 'user_id' not in session %}
+      <div class="clay-nav-links">
+        <a href="{{ url_for('index') }}" class="clay-nav-link">Inicio</a>
+        <a href="/acerca-de" class="clay-nav-link">Acerca de</a>
+      </div>
+      {% endif %}
 
-      <div class="d-flex align-items-center ms-auto">
+      <!-- ACCIONES DERECHA -->
+      <div style="display: flex; align-items: center; gap: 8px; margin-left: auto;">
+
         {% if 'user_id' in session %}
-        <span class="text-white me-3 d-none d-lg-block">
-          <i class="bi bi-person-check me-1"></i>
-          {{ session.get('user_nombre', 'Usuario') }}
-        </span>
+        <!-- Badge de usuario con avatar clay 3D -->
+        <div class="clay-user-badge d-none d-lg-flex">
+          <div class="clay-user-avatar">{{ session.get('user_nombre', 'U')[0] | upper }}</div>
+          <span class="clay-user-name">{{ session.get('user_nombre', 'Usuario').split(' ')[0] }}</span>
+        </div>
         {% endif %}
 
-        <!-- Menú desplegable para escritorio -->
-        <div class="dropdown d-none d-lg-block">
-          <button class="btn btn-transparent text-white p-1" type="button" id="userDropdown" data-bs-toggle="dropdown">
-            <i class="bi bi-list" style="font-size: 1.75rem;"></i>
+        <!-- DROPDOWN MENU (escritorio) -->
+        <div class="clay-dropdown d-none d-lg-block">
+          <button class="clay-dropdown-toggle" id="clayDropdownBtn" onclick="toggleClayDropdown()" aria-expanded="false">
+            <div style="background: rgba(0,0,0,0.06); border: 1px solid rgba(0,0,0,0.09); border-radius: 50px; padding: 8px 14px; display: flex; align-items: center; gap: 6px; font-size: 0.86rem; font-weight: 700; color: #333; cursor: pointer; transition: all 0.2s;">
+              <i class="bi bi-grid-3x3-gap-fill" style="font-size: 1rem;"></i>
+              <i class="bi bi-chevron-down" style="font-size: 0.7rem;"></i>
+            </div>
           </button>
 
-          <ul class="dropdown-menu dropdown-menu-end shadow-lg mt-2" aria-labelledby="userDropdown">
+          <div class="clay-dropdown-menu" id="clayDropdownMenu">
             {% if 'user_id' not in session %}
-            <!-- Menú para usuarios NO autenticados -->
-                        <li>
-                            <a class="dropdown-item" href="/login">
-                                <i class="bi bi-box-arrow-in-right"></i> Iniciar Sesión
-                            </a>
-                        </li>
-                        <li>
-                            <a class="dropdown-item" href="/registro">
-                                <i class="bi bi-person-plus"></i> Registrarse
-                            </a>
-                        </li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li>
-                            <a class="dropdown-item" href="/acerca-de">
-                                <i class="bi bi-info-circle"></i> Acerca del Sistema
-                            </a>
-                        </li>
-                        {% else %}
-                        <!-- Menú para usuarios autenticados -->
-                        <li class="dropdown-header">
-                            <div class="fw-bold">{{ session.get('user_nombre', 'Usuario') }}</div>
-                            <div>{{ session.get('user_email', '') }}</div>
-                        </li>
-                        <li><hr class="dropdown-divider"></li>
-                        {% if session.get('user_rol') in ['admin', 'superadmin'] %}
-                        <li>
-                            <a class="dropdown-item" href="/dashboard">
-                                <i class="bi bi-speedometer2"></i> Dashboard
-                            </a>
-                        </li>
-                        <li>
-                            <a class="dropdown-item" href="/clientes">
-                                <i class="bi bi-people"></i> Clientes
-                            </a>
-                        </li>
-                        <li>
-                            <a class="dropdown-item" href="/productos">
-                                <i class="bi bi-box-seam"></i> Productos
-                            </a>
-                        </li>
-                        <li>
-                            <a class="dropdown-item" href="{{ url_for('gestion_cotizaciones') }}">
-                                <i class="bi bi-file-earmark-text"></i> Cotizaciones
-                            </a>
-                        </li>
-                        <li>
-                            <a class="dropdown-item" href="/mi-pdf">
-                                <i class="bi bi-file-earmark-pdf-fill text-danger"></i> MI PDF
-                            </a>
-                        </li>
-                        <li>
-                            <a class="dropdown-item" href="/equipo">
-                                <i class="bi bi-kanban text-info me-1"></i> Equipo & Tareas
-                            </a>
-                        </li>
-                        {% elif session.get('user_rol') == 'standard' %}
-                        <li>
-                            <a class="dropdown-item" href="/standard/dashboard">
-                                <i class="bi bi-speedometer2 text-primary"></i> Panel Principal
-                            </a>
-                        </li>
-                        <li>
-                            <a class="dropdown-item" href="/cotizar">
-                                <i class="bi bi-plus-circle text-success"></i> Nueva Cotización
-                            </a>
-                        </li>
-                        <li>
-                            <a class="dropdown-item" href="{{ url_for('standard_cotizaciones') }}">
-                                <i class="bi bi-file-earmark-text text-primary"></i> Mis Cotizaciones
-                            </a>
-                        </li>
-                        <li>
-                            <a class="dropdown-item" href="/equipo">
-                                <i class="bi bi-people-fill" style="color: #6f42c1;"></i> Mi Equipo & Chat
-                            </a>
-                        </li>
-                        <li>
-                            <a class="dropdown-item" href="/mi-pdf">
-                                <i class="bi bi-file-earmark-pdf-fill text-danger"></i> MI PDF
-                            </a>
-                        </li>
-                        {% endif %}
+            <!-- Menú NO autenticado -->
+            <a class="clay-dropdown-item" href="/login"><i class="bi bi-box-arrow-in-right"></i> Iniciar Sesión</a>
+            <a class="clay-dropdown-item" href="/registro"><i class="bi bi-person-plus"></i> Registrarse</a>
+            <div class="clay-dropdown-divider"></div>
+            <a class="clay-dropdown-item" href="/acerca-de"><i class="bi bi-info-circle"></i> Acerca del Sistema</a>
 
-                        <!-- AÑADIR ESTE ELEMENTO SOLO PARA SUPERADMIN -->
-                        {% if session.get('user_rol') == 'superadmin' %}
-                        <li>
-                            <a class="dropdown-item" href="/admin/usuarios">
-                                <i class="bi bi-people-fill"></i> Gestionar Usuarios
-                            </a>
-                        </li>
-                        <li>
-                            <a class="dropdown-item" href="/admin/pines">
-                                <i class="bi bi-key-fill" style="color: var(--secondary);"></i> Gestión de PINs
-                            </a>
-                        </li>
-                        <li>
-                            <a class="dropdown-item" href="/admin/logs">
-                                <i class="bi bi-shield-check text-info"></i> Auditoría Global
-                            </a>
-                        </li>
-                        <li>
-                            <a class="dropdown-item" href="/admin/respaldos">
-                                <i class="bi bi-database-fill-gear text-warning"></i> Respaldos de BD
-                            </a>
-                        </li>
-                        {% endif %}
-                        <!-- FIN AÑADIDO -->
-
-                        <li><hr class="dropdown-divider"></li>
-                        <li>
-                            <a class="dropdown-item" href="/perfil">
-                                <i class="bi bi-person-gear"></i> Perfil
-                            </a>
-                        </li>
-                        <li>
-                            <a class="dropdown-item text-danger" href="/logout">
-                                <i class="bi bi-box-arrow-right"></i> Cerrar Sesión
-                            </a>
-                        </li>
-                        {% endif %}
-                    </ul>
-                </div>
+            {% else %}
+            <!-- Menú autenticado -->
+            <div class="clay-dropdown-header">
+              <div class="name">{{ session.get('user_nombre', 'Usuario') }}</div>
+              <div class="email">{{ session.get('user_email', '') }}</div>
             </div>
-        </div>
-    </div>
-</nav>
 
-<!-- Menú móvil - Solo visible en pantallas pequeñas -->
-<div class="d-lg-none">
+            {% if session.get('user_rol') in ['admin', 'superadmin'] %}
+            <a class="clay-dropdown-item" href="/dashboard"><i class="bi bi-speedometer2"></i> Dashboard</a>
+            <a class="clay-dropdown-item" href="/clientes"><i class="bi bi-people"></i> Clientes</a>
+            <a class="clay-dropdown-item" href="/productos"><i class="bi bi-box-seam"></i> Productos</a>
+            <a class="clay-dropdown-item" href="{{ url_for('gestion_cotizaciones') }}"><i class="bi bi-file-earmark-text"></i> Cotizaciones</a>
+            <a class="clay-dropdown-item" href="/mi-pdf"><i class="bi bi-file-earmark-pdf-fill"></i> MI PDF</a>
+            <a class="clay-dropdown-item" href="/equipo"><i class="bi bi-kanban"></i> Equipo & Tareas</a>
+            {% elif session.get('user_rol') == 'standard' %}
+            <a class="clay-dropdown-item" href="/standard/dashboard"><i class="bi bi-speedometer2"></i> Panel Principal</a>
+            <a class="clay-dropdown-item" href="/cotizar"><i class="bi bi-plus-circle"></i> Nueva Cotización</a>
+            <a class="clay-dropdown-item" href="{{ url_for('standard_cotizaciones') }}"><i class="bi bi-file-earmark-text"></i> Mis Cotizaciones</a>
+            <a class="clay-dropdown-item" href="/equipo"><i class="bi bi-people-fill"></i> Mi Equipo & Chat</a>
+            <a class="clay-dropdown-item" href="/mi-pdf"><i class="bi bi-file-earmark-pdf-fill"></i> MI PDF</a>
+            {% endif %}
+
+            {% if session.get('user_rol') == 'superadmin' %}
+            <div class="clay-dropdown-divider"></div>
+            <a class="clay-dropdown-item" href="/admin/usuarios"><i class="bi bi-people-fill"></i> Gestionar Usuarios</a>
+            <a class="clay-dropdown-item" href="/admin/pines"><i class="bi bi-key-fill"></i> Gestión de PINs</a>
+            <a class="clay-dropdown-item" href="/admin/logs"><i class="bi bi-shield-check"></i> Auditoría Global</a>
+            <a class="clay-dropdown-item" href="/admin/respaldos"><i class="bi bi-database-fill-gear"></i> Respaldos de BD</a>
+            {% endif %}
+
+            <div class="clay-dropdown-divider"></div>
+            <a class="clay-dropdown-item" href="/perfil"><i class="bi bi-person-gear"></i> Perfil</a>
+            <a class="clay-dropdown-item danger" href="/logout"><i class="bi bi-box-arrow-right"></i> Cerrar Sesión</a>
+            {% endif %}
+          </div>
+        </div>
+
+        {% if 'user_id' not in session %}
+        <a href="{{ url_for('registro') }}" class="clay-nav-cta">
+          <i class="bi bi-lightning-charge-fill"></i> Empezar
+        </a>
+        {% endif %}
+
+        <!-- HAMBURGUESA MÓVIL -->
+        <button class="clay-nav-toggler d-lg-none" onclick="toggleClayMobile()" aria-label="Menú">
+          <i class="bi bi-list" id="clayMobileIcon"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- MENÚ MÓVIL DESPLEGABLE -->
+    <div class="clay-mobile-menu clay-mobile-menu-wrapper" id="clayMobileMenu">
+      {% if 'user_id' in session %}
+      <div class="clay-mobile-section-title">Navegación</div>
+      {% if session.get('user_rol') in ['admin', 'superadmin'] %}
+      <a href="/dashboard" class="clay-mobile-item"><i class="bi bi-speedometer2"></i> Dashboard</a>
+      <a href="/clientes" class="clay-mobile-item"><i class="bi bi-people"></i> Clientes</a>
+      <a href="/productos" class="clay-mobile-item"><i class="bi bi-box-seam"></i> Productos</a>
+      <a href="{{ url_for('gestion_cotizaciones') }}" class="clay-mobile-item"><i class="bi bi-file-earmark-text"></i> Cotizaciones</a>
+      <a href="/mi-pdf" class="clay-mobile-item"><i class="bi bi-file-earmark-pdf-fill"></i> MI PDF</a>
+      <a href="/equipo" class="clay-mobile-item"><i class="bi bi-kanban"></i> Equipo & Tareas</a>
+      {% if session.get('user_rol') == 'superadmin' %}
+      <div class="clay-mobile-divider"></div>
+      <div class="clay-mobile-section-title">Superadmin</div>
+      <a href="/admin/usuarios" class="clay-mobile-item"><i class="bi bi-people-fill"></i> Usuarios</a>
+      <a href="/admin/pines" class="clay-mobile-item"><i class="bi bi-key-fill"></i> PINs</a>
+      <a href="/admin/logs" class="clay-mobile-item"><i class="bi bi-shield-check"></i> Auditoría</a>
+      <a href="/admin/respaldos" class="clay-mobile-item"><i class="bi bi-database-fill-gear"></i> Respaldos</a>
+      {% endif %}
+      {% elif session.get('user_rol') == 'standard' %}
+      <a href="/standard/dashboard" class="clay-mobile-item"><i class="bi bi-speedometer2"></i> Panel Principal</a>
+      <a href="/cotizar" class="clay-mobile-item"><i class="bi bi-plus-circle"></i> Nueva Cotización</a>
+      <a href="{{ url_for('standard_cotizaciones') }}" class="clay-mobile-item"><i class="bi bi-file-earmark-text"></i> Mis Cotizaciones</a>
+      <a href="/equipo" class="clay-mobile-item"><i class="bi bi-people-fill"></i> Mi Equipo & Chat</a>
+      <a href="/mi-pdf" class="clay-mobile-item"><i class="bi bi-file-earmark-pdf-fill"></i> MI PDF</a>
+      {% endif %}
+      <div class="clay-mobile-divider"></div>
+      <div class="clay-mobile-section-title">Cuenta</div>
+      <a href="/perfil" class="clay-mobile-item"><i class="bi bi-person-gear"></i> Perfil</a>
+      <a href="/logout" class="clay-mobile-item danger"><i class="bi bi-box-arrow-right"></i> Cerrar Sesión</a>
+
+      {% else %}
+      <div class="clay-mobile-section-title">Acceso</div>
+      <a href="/login" class="clay-mobile-item"><i class="bi bi-box-arrow-in-right"></i> Iniciar Sesión</a>
+      <a href="/registro" class="clay-mobile-item"><i class="bi bi-person-plus"></i> Registrarse</a>
+      <div class="clay-mobile-divider"></div>
+      <a href="/acerca-de" class="clay-mobile-item"><i class="bi bi-info-circle"></i> Acerca del Sistema</a>
+      {% endif %}
+    </div>
+
+  </div>
+</div>
+
+<!-- Menú móvil eliminado: ahora integrado en clay-nav-wrapper -->
+<div class="d-none">
     <div class="collapse navbar-collapse" id="navbarContent">
         <div class="mobile-menu-header">
             <div class="mobile-user-info">
@@ -481,25 +719,35 @@
     {% block contenido %}{% endblock %}
 </main>
 
-<!-- FOOTER MEJORADO -->
-<footer class="py-4 bg-light border-top mt-auto">
-    <div class="container">
-      <div class="row">
-        <div class="col-md-6 text-center text-md-start">
-          <small class="text-muted">
-                <a href="{% if 'user_id' in session %}{% if session.get('user_rol') == 'admin' %}{{ url_for('dashboard') }}{% elif session.get('user_rol') == 'standard' %}{{ url_for('standard_dashboard') }}{% else %}{{ url_for('index') }}{% endif %}{% else %}{{ url_for('index') }}{% endif %}" class="text-decoration-none text-muted">
-        Sistema de Cotizaciones
-                </a> &copy; {{ now.year if now else '2023' }}
-            </small>
-        </div>
-        <div class="col-md-6 text-center text-md-end">
-          <small class="text-muted">
-            <a href="/acerca-de" class="text-decoration-none text-muted me-3">Acerca de</a>
-            <a href="/politica-privacidad" class="text-decoration-none text-muted">Política de Privacidad</a>
-          </small>
-        </div>
+<!-- FOOTER CLAYMORPHISM / BENTO DARK -->
+<footer class="clay-footer">
+  <div class="container" style="max-width: 1280px;">
+    <div class="clay-footer-inner">
+      <!-- Marca izquierda -->
+      <div>
+        <a href="{% if 'user_id' in session %}{% if session.get('user_rol') == 'admin' %}{{ url_for('dashboard') }}{% elif session.get('user_rol') == 'standard' %}{{ url_for('standard_dashboard') }}{% else %}{{ url_for('index') }}{% endif %}{% else %}{{ url_for('index') }}{% endif %}" class="clay-footer-brand">
+          <span class="clay-footer-brand-dot"></span>
+          COTIZA<span style="color: #FF6B35;">Pro</span>
+        </a>
+        <div class="clay-footer-tagline">Sistema de Cotizaciones Inteligente · Bolivia (UTC-4)</div>
+      </div>
+
+      <!-- Links centro/derecha -->
+      <div class="clay-footer-links">
+        <a href="/acerca-de" class="clay-footer-link">Acerca de</a>
+        <a href="/politica-privacidad" class="clay-footer-link">Privacidad</a>
+        {% if 'user_id' not in session %}
+        <a href="/login" class="clay-footer-link">Iniciar Sesión</a>
+        <a href="/registro" class="clay-footer-link" style="background: rgba(255,107,53,0.15); color: #FF6B35;">Registrarse</a>
+        {% endif %}
       </div>
     </div>
+
+    <!-- Copyright bar -->
+    <div class="clay-footer-copy">
+      &copy; {{ now.year if now else '2025' }} CotizaPro &mdash; Todos los derechos reservados.
+    </div>
+  </div>
 </footer>
 
 <!-- JS -->
@@ -537,12 +785,41 @@
     document.querySelectorAll('#navbarContent .mobile-menu-item').forEach(function(item) {
       item.addEventListener('click', function() {
         var collapse = document.getElementById('navbarContent');
-        var bsCollapse = new bootstrap.Collapse(collapse, {
-          toggle: false
-        });
-        bsCollapse.hide();
+        if (collapse) {
+          var bsCollapse = new bootstrap.Collapse(collapse, { toggle: false });
+          bsCollapse.hide();
+        }
       });
     });
+  });
+
+  // ─── CLAY NAVBAR: Dropdown & Mobile Menu ───────────────────────────────────
+  function toggleClayDropdown() {
+    var menu = document.getElementById('clayDropdownMenu');
+    var btn  = document.getElementById('clayDropdownBtn');
+    if (!menu) return;
+    menu.classList.toggle('show');
+    btn.setAttribute('aria-expanded', menu.classList.contains('show'));
+  }
+
+  function toggleClayMobile() {
+    var menu = document.getElementById('clayMobileMenu');
+    var icon = document.getElementById('clayMobileIcon');
+    if (!menu) return;
+    menu.classList.toggle('show');
+    if (icon) {
+      icon.className = menu.classList.contains('show') ? 'bi bi-x-lg' : 'bi bi-list';
+    }
+  }
+
+  // Cerrar dropdown al hacer clic fuera
+  document.addEventListener('click', function(e) {
+    var dropdown = document.getElementById('clayDropdownMenu');
+    var btn = document.getElementById('clayDropdownBtn');
+    if (dropdown && !btn.contains(e.target) && !dropdown.contains(e.target)) {
+      dropdown.classList.remove('show');
+      if (btn) btn.setAttribute('aria-expanded', 'false');
+    }
   });
 
   // Limpiar localStorage/sessionStorage al cargar la página

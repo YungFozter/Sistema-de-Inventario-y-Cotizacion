@@ -631,3 +631,45 @@
     .bento-hero-nav .bento-nav-links { display: none; }
     .bento-h1 { font-size: 2rem; }
 }
+
+/* --------------------------------------------------------------------------
+   SWEEP / SHIMMER EFFECT — CTA FINAL CARD
+   -------------------------------------------------------------------------- */
+
+/* El pseudo-elemento genera la luz que "barre" la card */
+.bento-cta-sweep::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        115deg,
+        transparent 30%,
+        rgba(255, 255, 255, 0.55) 50%,
+        transparent 70%
+    );
+    background-size: 250% 100%;
+    background-position: 200% 0;
+    border-radius: inherit;
+    pointer-events: none;
+    z-index: 0;
+    transition: background-position 0s;
+}
+
+.bento-cta-sweep:hover::before {
+    background-position: -50% 0;
+    transition: background-position 0.65s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Borde que se ilumina en hover */
+.bento-cta-sweep:hover {
+    border-color: #333 !important;
+    box-shadow:
+        0 0 0 3px rgba(20, 20, 20, 0.08),
+        0 12px 40px rgba(0, 0, 0, 0.14),
+        0 2px 0 rgba(255,255,255,0.9) inset;
+    transform: translateY(-2px);
+    transition:
+        transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
+        box-shadow 0.3s ease,
+        border-color 0.2s ease;
+}

@@ -35,6 +35,29 @@
         0 1px 0 rgba(255, 255, 255, 0.9) inset,
         0 2px 8px rgba(0, 0, 0, 0.05),
         0 8px 32px rgba(0, 0, 0, 0.04);
+      transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    /* ── Morphing to Pill Mode (Landing Page) ── */
+    .clay-nav-wrapper.pill-mode {
+      top: 24px;
+      margin-left: auto;
+      margin-right: auto;
+      max-width: 900px;
+      border-radius: 100px;
+      border: 1px solid rgba(255, 255, 255, 0.9);
+      background: rgba(255, 255, 255, 0.85);
+      box-shadow:
+        0 2px 0 rgba(0,0,0,0.03),
+        0 6px 16px rgba(0,0,0,0.07),
+        0 20px 48px rgba(0,0,0,0.06),
+        inset 0 1px 0 rgba(255,255,255,0.95);
+    }
+    .clay-nav-wrapper.pill-mode .clay-btn-secondary {
+      display: none !important;
+    }
+    .clay-nav-wrapper.pill-mode .clay-navbar {
+      padding: 0 16px;
     }
 
     .clay-navbar {
@@ -687,8 +710,7 @@
   {% endblock %}
 </head>
 
-<body data-user-rol="{{ session.get('user_rol', '') }}"
-  class="d-flex flex-column min-vh-100 {{ 'user-superadmin' if session.get('user_rol') == 'superadmin' else '' }}">
+<body data-user-rol="{{ session.get('user_rol', '') }}" class="d-flex flex-column min-vh-100 {{ 'user-superadmin' if session.get('user_rol') == 'superadmin' else '' }} {{ 'page-landing' if request.endpoint == 'index' else '' }}">
   <!-- NAVBAR HORIZONTAL CLAYMORPHISM 3D -->
   <div class="clay-nav-wrapper">
     <div class="container-fluid px-3" style="max-width: 1440px; margin: 0 auto;">
@@ -1178,6 +1200,23 @@
         if (btn) btn.setAttribute('aria-expanded', 'false');
       }
     });
+
+    // ─── CLAY NAVBAR: Morphing Pill en Landing ─────────────────────────────────
+    window.addEventListener('scroll', function() {
+      if (document.body.classList.contains('page-landing')) {
+        var nav = document.querySelector('.clay-nav-wrapper');
+        if (nav) {
+          if (window.scrollY < 60) {
+            nav.classList.add('pill-mode');
+          } else {
+            nav.classList.remove('pill-mode');
+          }
+        }
+      }
+    });
+    if (document.body.classList.contains('page-landing')) {
+      window.dispatchEvent(new Event('scroll'));
+    }
 
     // Limpiar localStorage/sessionStorage al cargar la página
     window.addEventListener('load', function () {

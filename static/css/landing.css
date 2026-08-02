@@ -636,16 +636,18 @@
    SWEEP / SHIMMER EFFECT — CTA FINAL CARD
    -------------------------------------------------------------------------- */
 
-/* El pseudo-elemento genera la luz que "barre" la card */
+/* El pseudo-elemento genera el rayo de barrido visible sobre fondo blanco */
 .bento-cta-sweep::before {
     content: '';
     position: absolute;
     inset: 0;
     background: linear-gradient(
         115deg,
-        transparent 30%,
-        rgba(255, 255, 255, 0.55) 50%,
-        transparent 70%
+        transparent 20%,
+        rgba(0, 0, 0, 0.07) 38%,
+        rgba(20, 20, 20, 0.13) 50%,
+        rgba(0, 0, 0, 0.07) 62%,
+        transparent 80%
     );
     background-size: 250% 100%;
     background-position: 200% 0;

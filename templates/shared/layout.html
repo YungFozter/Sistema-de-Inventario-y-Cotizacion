@@ -16,46 +16,34 @@
     ==================================================================== */
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700;800;900&display=swap');
 
-    /* Wrapper para posicionar la navbar flotante */
+    /* ====================================================================
+       NAVBAR HORIZONTAL CLAYMORPHISM 3D
+       Estructura: [Logo | Nav Links]  ─────────────────  [Ghost | Link | CTA]
+    ==================================================================== */
+
+    /* ── Barra principal ─────────────────────────────────────────────── */
     .clay-nav-wrapper {
       position: sticky;
       top: 0;
       z-index: 1050;
-      padding: 10px 16px;
-      background: transparent;
-      pointer-events: none;
+      background: rgba(255,255,255,0.88);
+      backdrop-filter: blur(18px) saturate(180%);
+      -webkit-backdrop-filter: blur(18px) saturate(180%);
+      border-bottom: 1px solid rgba(0,0,0,0.07);
+      box-shadow:
+        0 1px 0 rgba(255,255,255,0.9) inset,
+        0 2px 8px rgba(0,0,0,0.05),
+        0 8px 32px rgba(0,0,0,0.04);
     }
 
-    /* Pill navbar: frosted glass + sombra clay */
     .clay-navbar {
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      gap: 1rem;
-      background: rgba(255, 255, 255, 0.82);
-      backdrop-filter: blur(18px) saturate(180%);
-      -webkit-backdrop-filter: blur(18px) saturate(180%);
-      border: 1px solid rgba(255, 255, 255, 0.9);
-      border-radius: 100px;
-      padding: 8px 8px 8px 22px;
-      box-shadow:
-        0 2px 0 rgba(0,0,0,0.03),
-        0 6px 16px rgba(0,0,0,0.07),
-        0 20px 48px rgba(0,0,0,0.06),
-        inset 0 1px 0 rgba(255,255,255,0.95);
-      pointer-events: all;
-      transition: box-shadow 0.3s ease;
+      height: 60px;
+      gap: 0;
     }
 
-    .clay-navbar:hover {
-      box-shadow:
-        0 3px 0 rgba(0,0,0,0.04),
-        0 10px 24px rgba(0,0,0,0.09),
-        0 28px 60px rgba(0,0,0,0.08),
-        inset 0 1px 0 rgba(255,255,255,1);
-    }
-
-    /* MARCA */
+    /* ── Marca ───────────────────────────────────────────────────────── */
     .clay-nav-brand {
       font-family: 'Plus Jakarta Sans', sans-serif;
       font-size: 1.1rem;
@@ -66,7 +54,9 @@
       display: flex;
       align-items: center;
       gap: 8px;
+      margin-right: 28px;
       white-space: nowrap;
+      flex-shrink: 0;
     }
 
     .clay-nav-brand-dot {
@@ -78,21 +68,27 @@
       flex-shrink: 0;
     }
 
-    /* Links centrales */
+    /* ── Links de navegación centrales ───────────────────────────────── */
     .clay-nav-links {
       display: flex;
       align-items: center;
       gap: 2px;
+      flex: 1;
     }
 
     .clay-nav-link {
-      color: #555;
-      font-size: 0.88rem;
+      position: relative;
+      color: #444;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 0.875rem;
       font-weight: 600;
       text-decoration: none;
-      padding: 7px 14px;
-      border-radius: 50px;
-      transition: all 0.2s ease;
+      padding: 8px 14px;
+      border-radius: 10px;
+      transition: all 0.18s ease;
+      display: flex;
+      align-items: center;
+      gap: 5px;
       white-space: nowrap;
     }
 
@@ -101,115 +97,155 @@
       color: #141414;
     }
 
-    /* Badge de usuario */
-    .clay-user-badge {
-      display: flex;
-      align-items: center;
-      gap: 7px;
-      background: rgba(0,0,0,0.04);
+    .clay-nav-link.has-mega:hover > .clay-mega-menu,
+    .clay-nav-link.has-mega:focus-within > .clay-mega-menu {
+      opacity: 1;
+      pointer-events: all;
+      transform: translateY(0) scale(1);
+    }
+
+    .clay-nav-chevron {
+      font-size: 0.65rem;
+      transition: transform 0.2s ease;
+      opacity: 0.5;
+    }
+
+    .clay-nav-link.has-mega:hover .clay-nav-chevron {
+      transform: rotate(180deg);
+      opacity: 1;
+    }
+
+    /* ── MEGA MENU ───────────────────────────────────────────────────── */
+    .clay-mega-menu {
+      position: absolute;
+      top: calc(100% + 6px);
+      left: 0;
+      background: rgba(255,255,255,0.97);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
       border: 1px solid rgba(0,0,0,0.08);
-      border-radius: 50px;
-      padding: 5px 14px 5px 8px;
-      font-size: 0.83rem;
-      font-weight: 700;
-      color: #333;
+      border-radius: 20px;
+      padding: 20px;
+      box-shadow:
+        0 4px 0 rgba(0,0,0,0.04),
+        0 16px 40px rgba(0,0,0,0.12),
+        0 40px 80px rgba(0,0,0,0.07);
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(10px) scale(0.97);
+      transition: all 0.22s cubic-bezier(0.34,1.4,0.64,1);
+      z-index: 1070;
+      min-width: 560px;
     }
 
-    .clay-user-avatar {
-      width: 28px;
-      height: 28px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, #FF8A5C, #E8501A);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 0.8rem;
-      color: #fff;
+    .clay-mega-cols {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px 24px;
+    }
+
+    .clay-mega-col-title {
+      font-size: 0.68rem;
       font-weight: 800;
-      flex-shrink: 0;
-      box-shadow: 0 2px 0 #C44E1E, 0 4px 8px rgba(255,107,53,0.3);
+      color: #aaa;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      padding: 0 8px 8px;
+      border-bottom: 1px solid rgba(0,0,0,0.06);
+      margin-bottom: 6px;
     }
 
-    /* Botón hamburguesa */
-    .clay-nav-toggler {
-      background: rgba(0,0,0,0.06);
-      border: 1px solid rgba(0,0,0,0.09);
-      border-radius: 50px;
-      padding: 8px 12px;
-      cursor: pointer;
+    .clay-mega-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 10px;
+      border-radius: 12px;
+      font-size: 0.84rem;
+      font-weight: 600;
       color: #333;
-      font-size: 1.1rem;
+      text-decoration: none;
+      transition: all 0.16s ease;
+    }
+
+    .clay-mega-item:hover {
+      background: #F5F4F0;
+      color: #141414;
+    }
+
+    .clay-mega-icon {
+      width: 34px;
+      height: 34px;
+      border-radius: 10px;
       display: flex;
       align-items: center;
       justify-content: center;
-      transition: all 0.2s ease;
+      font-size: 1rem;
+      flex-shrink: 0;
+      background: #F5F4F0;
+      transition: all 0.16s ease;
     }
 
-    .clay-nav-toggler:hover {
-      background: rgba(0,0,0,0.1);
+    .clay-mega-item:hover .clay-mega-icon {
+      background: #fff;
+      box-shadow: 0 2px 0 rgba(0,0,0,0.08), 0 4px 12px rgba(0,0,0,0.08);
     }
 
-    /* Botón principal CTA */
-    .clay-nav-cta {
-      background: #141414;
-      color: #FFFFFF !important;
-      border: none;
-      border-radius: 50px;
-      padding: 9px 20px;
-      font-size: 0.86rem;
-      font-weight: 700;
-      text-decoration: none;
-      display: inline-flex;
+    .clay-mega-icon.orange { color: #FF6B35; }
+    .clay-mega-icon.indigo { color: #4F46E5; }
+    .clay-mega-icon.green  { color: #059669; }
+    .clay-mega-icon.yellow { color: #D97706; }
+    .clay-mega-icon.sky    { color: #0284C7; }
+    .clay-mega-icon.rose   { color: #E11D48; }
+
+    .clay-mega-footer {
+      margin-top: 16px;
+      padding-top: 12px;
+      border-top: 1px solid rgba(0,0,0,0.06);
+      display: flex;
       align-items: center;
-      gap: 6px;
-      white-space: nowrap;
-      box-shadow: 0 3px 0 #000, 0 6px 16px rgba(0,0,0,0.2);
-      transition: all 0.22s cubic-bezier(0.34,1.56,0.64,1);
+      justify-content: space-between;
     }
 
-    .clay-nav-cta:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 5px 0 #000, 0 10px 24px rgba(0,0,0,0.25);
-      color: #FFFFFF !important;
+    .clay-mega-footer-link {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: #FF6B35;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      transition: gap 0.2s ease;
     }
 
-    /* DROPDOWN CLAYMORPHISM */
-    .clay-dropdown {
+    .clay-mega-footer-link:hover { gap: 9px; color: #E8501A; }
+
+    /* ── DROPDOWN SIMPLE (sesión activa) ─────────────────────────────── */
+    .clay-simple-dropdown {
       position: relative;
     }
 
-    .clay-dropdown-toggle {
-      background: transparent;
-      border: none;
-      padding: 0;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-    }
-
-    .clay-dropdown-menu {
+    .clay-simple-dropdown-menu {
       position: absolute;
-      top: calc(100% + 10px);
+      top: calc(100% + 8px);
       right: 0;
-      min-width: 240px;
-      background: rgba(255,255,255,0.95);
+      min-width: 220px;
+      background: rgba(255,255,255,0.97);
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
       border: 1px solid rgba(0,0,0,0.08);
-      border-radius: 20px;
+      border-radius: 18px;
       padding: 8px;
       box-shadow:
         0 4px 0 rgba(0,0,0,0.04),
         0 12px 28px rgba(0,0,0,0.1),
-        0 30px 60px rgba(0,0,0,0.08);
+        0 32px 64px rgba(0,0,0,0.07);
       display: none;
-      z-index: 1060;
+      z-index: 1070;
       animation: clayDropDown 0.2s cubic-bezier(0.34,1.56,0.64,1);
     }
 
-    .clay-dropdown-menu.show {
-      display: block;
-    }
+    .clay-simple-dropdown-menu.show { display: block; }
 
     @keyframes clayDropDown {
       from { opacity: 0; transform: translateY(8px) scale(0.96); }
@@ -223,13 +259,13 @@
     }
 
     .clay-dropdown-header .name {
-      font-size: 0.9rem;
+      font-size: 0.88rem;
       font-weight: 800;
       color: #141414;
     }
 
     .clay-dropdown-header .email {
-      font-size: 0.78rem;
+      font-size: 0.76rem;
       color: #888;
     }
 
@@ -237,14 +273,13 @@
       display: flex;
       align-items: center;
       gap: 10px;
-      padding: 9px 12px;
-      border-radius: 12px;
-      font-size: 0.88rem;
+      padding: 8px 12px;
+      border-radius: 11px;
+      font-size: 0.86rem;
       font-weight: 600;
       color: #333;
       text-decoration: none;
-      transition: all 0.18s ease;
-      cursor: pointer;
+      transition: all 0.15s ease;
     }
 
     .clay-dropdown-item:hover {
@@ -253,9 +288,9 @@
     }
 
     .clay-dropdown-item i {
-      width: 22px;
+      width: 20px;
       text-align: center;
-      font-size: 1rem;
+      font-size: 0.95rem;
       color: #FF6B35;
       flex-shrink: 0;
     }
@@ -270,32 +305,170 @@
       margin: 6px 4px;
     }
 
-    /* MENÚ MÓVIL */
+    /* ── Acciones de la derecha ──────────────────────────────────────── */
+    .clay-nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+
+    /* Ghost (Iniciar Sesión) */
+    .clay-btn-ghost {
+      background: transparent;
+      border: none;
+      color: #444;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 0.875rem;
+      font-weight: 700;
+      padding: 8px 16px;
+      border-radius: 10px;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.18s ease;
+      cursor: pointer;
+    }
+
+    .clay-btn-ghost:hover {
+      background: rgba(0,0,0,0.055);
+      color: #141414;
+    }
+
+    /* Secundario (con borde sutil) */
+    .clay-btn-secondary {
+      background: rgba(255,255,255,0.7);
+      border: 1.5px solid rgba(0,0,0,0.12);
+      color: #333;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 0.875rem;
+      font-weight: 700;
+      padding: 7px 16px;
+      border-radius: 10px;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.18s ease;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.04),
+                  inset 0 1px 0 rgba(255,255,255,0.8);
+    }
+
+    .clay-btn-secondary:hover {
+      background: #fff;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08),
+                  inset 0 1px 0 rgba(255,255,255,1);
+      color: #141414;
+    }
+
+    /* CTA (Naranja 3D Claymorphism) */
+    .clay-btn-cta {
+      background: #FF6B35;
+      color: #FFFFFF !important;
+      border: none;
+      border-radius: 10px;
+      padding: 9px 20px;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 0.875rem;
+      font-weight: 800;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      white-space: nowrap;
+      box-shadow:
+        0 3px 0 #C44E1E,
+        0 6px 18px rgba(255,107,53,0.3);
+      transition: all 0.22s cubic-bezier(0.34,1.56,0.64,1);
+    }
+
+    .clay-btn-cta:hover {
+      transform: translateY(-3px);
+      box-shadow:
+        0 6px 0 #C44E1E,
+        0 12px 28px rgba(255,107,53,0.38);
+      color: #FFFFFF !important;
+    }
+
+    .clay-btn-cta:active {
+      transform: translateY(1px);
+      box-shadow: 0 1px 0 #C44E1E, 0 4px 12px rgba(255,107,53,0.25);
+    }
+
+    /* Avatar badge (sesión activa) */
+    .clay-user-badge {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      background: rgba(0,0,0,0.04);
+      border: 1.5px solid rgba(0,0,0,0.09);
+      border-radius: 10px;
+      padding: 5px 12px 5px 6px;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 0.83rem;
+      font-weight: 700;
+      color: #333;
+      cursor: pointer;
+      transition: all 0.18s ease;
+    }
+
+    .clay-user-badge:hover {
+      background: rgba(0,0,0,0.07);
+    }
+
+    .clay-user-avatar {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, #FF8A5C, #E8501A);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.78rem;
+      color: #fff;
+      font-weight: 900;
+      flex-shrink: 0;
+      box-shadow: 0 2px 0 #C44E1E, 0 4px 8px rgba(255,107,53,0.28);
+    }
+
+    /* ── Hamburguesa móvil ───────────────────────────────────────────── */
+    .clay-nav-toggler {
+      background: rgba(0,0,0,0.05);
+      border: 1.5px solid rgba(0,0,0,0.09);
+      border-radius: 10px;
+      padding: 7px 11px;
+      cursor: pointer;
+      color: #333;
+      font-size: 1.15rem;
+      display: flex;
+      align-items: center;
+      transition: all 0.18s ease;
+    }
+
+    .clay-nav-toggler:hover { background: rgba(0,0,0,0.09); }
+
+    /* ── Menú móvil ──────────────────────────────────────────────────── */
     .clay-mobile-menu {
       display: none;
-      background: rgba(255,255,255,0.96);
+      background: rgba(255,255,255,0.97);
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
-      border: 1px solid rgba(0,0,0,0.08);
-      border-radius: 24px;
-      padding: 16px;
-      margin-top: 8px;
-      box-shadow:
-        0 4px 0 rgba(0,0,0,0.04),
-        0 12px 32px rgba(0,0,0,0.1);
-      pointer-events: all;
-      animation: clayDropDown 0.25s cubic-bezier(0.34,1.56,0.64,1);
+      border-top: 1px solid rgba(0,0,0,0.07);
+      padding: 12px 16px 20px;
+      max-height: calc(100vh - 60px);
+      overflow-y: auto;
     }
 
     .clay-mobile-menu.show { display: block; }
 
     .clay-mobile-section-title {
-      font-size: 0.72rem;
+      font-size: 0.7rem;
       font-weight: 800;
       color: #aaa;
       text-transform: uppercase;
-      letter-spacing: 0.07em;
-      padding: 4px 10px 8px;
+      letter-spacing: 0.08em;
+      padding: 10px 10px 6px;
     }
 
     .clay-mobile-item {
@@ -303,31 +476,35 @@
       align-items: center;
       gap: 10px;
       padding: 10px 12px;
-      border-radius: 14px;
+      border-radius: 12px;
       font-size: 0.9rem;
       font-weight: 600;
       color: #333;
       text-decoration: none;
       margin-bottom: 2px;
-      transition: all 0.18s ease;
+      transition: all 0.15s ease;
     }
 
     .clay-mobile-item:hover { background: #F5F4F0; color: #141414; }
-    .clay-mobile-item i { width: 22px; text-align: center; color: #FF6B35; }
+    .clay-mobile-item i { width: 22px; text-align: center; color: #FF6B35; font-size: 1rem; }
     .clay-mobile-item.danger { color: #dc2626; }
     .clay-mobile-item.danger i { color: #dc2626; }
     .clay-mobile-divider { height: 1px; background: rgba(0,0,0,0.06); margin: 8px 4px; }
 
-    /* Ocultar/Mostrar según breakpoint */
+    /* Breakpoints */
     @media (min-width: 992px) {
-      .clay-nav-toggler { display: none; }
-      .clay-mobile-menu-wrapper { display: none; }
+      .clay-nav-toggler { display: none !important; }
+      .clay-mobile-menu  { display: none !important; }
     }
 
     @media (max-width: 991.98px) {
-      .clay-nav-links { display: none; }
-      .clay-user-badge .clay-user-name { display: none; }
+      .clay-nav-links  { display: none !important; }
     }
+
+    /* Ocultar navbar Bootstrap antigua */
+    nav.navbar.navbar-dark { display: none !important; }
+    </style>
+
 
     /* ====================================================================
        FOOTER CLAYMORPHISM / BENTO DARK
@@ -440,106 +617,187 @@
 </head>
 
 <body data-user-rol="{{ session.get('user_rol', '') }}" class="d-flex flex-column min-vh-100 {{ 'user-superadmin' if session.get('user_rol') == 'superadmin' else '' }}">
-<!-- NAVBAR CLAYMORPHISM 3D (Pill Flotante) -->
+<!-- NAVBAR HORIZONTAL CLAYMORPHISM 3D -->
 <div class="clay-nav-wrapper">
-  <div class="container" style="max-width: 1280px;">
-    <!-- Barra principal -->
+  <div class="container-fluid px-3" style="max-width: 1440px; margin: 0 auto;">
+
+    <!-- ━━━ BARRA PRINCIPAL ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
     <div class="clay-navbar">
 
-      <!-- MARCA -->
+      <!-- ❶ MARCA -->
       <a class="clay-nav-brand" href="{% if 'user_id' in session %}{% if session.get('user_rol') == 'admin' %}{{ url_for('dashboard') }}{% elif session.get('user_rol') == 'standard' %}{{ url_for('standard_dashboard') }}{% else %}{{ url_for('index') }}{% endif %}{% else %}{{ url_for('index') }}{% endif %}">
         <span class="clay-nav-brand-dot"></span>
-        COTIZA<span style="color: #FF6B35;">Pro</span>
+        COTIZA<span style="color:#FF6B35;">Pro</span>
       </a>
 
-      <!-- LINKS DE NAVEGACIÓN (solo escritorio, solo sin sesión) -->
-      {% if 'user_id' not in session %}
-      <div class="clay-nav-links">
-        <a href="{{ url_for('index') }}" class="clay-nav-link">Inicio</a>
-        <a href="/acerca-de" class="clay-nav-link">Acerca de</a>
-      </div>
-      {% endif %}
+      <!-- ❷ NAV LINKS CENTRALES (escritorio) -->
+      <nav class="clay-nav-links" aria-label="Navegación principal">
 
-      <!-- ACCIONES DERECHA -->
-      <div style="display: flex; align-items: center; gap: 8px; margin-left: auto;">
+        {% if 'user_id' not in session %}
+        <!-- Usuario NO autenticado: muestra Funciones con mega-menú + otros links -->
 
-        {% if 'user_id' in session %}
-        <!-- Badge de usuario con avatar clay 3D -->
-        <div class="clay-user-badge d-none d-lg-flex">
-          <div class="clay-user-avatar">{{ session.get('user_nombre', 'U')[0] | upper }}</div>
-          <span class="clay-user-name">{{ session.get('user_nombre', 'Usuario').split(' ')[0] }}</span>
+        <!-- FUNCIONES (mega-menú) -->
+        <div class="clay-nav-link has-mega" tabindex="0" role="button" aria-haspopup="true">
+          Funciones <i class="bi bi-chevron-down clay-nav-chevron"></i>
+
+          <!-- MEGA MENÚ -->
+          <div class="clay-mega-menu" role="menu">
+            <div class="clay-mega-cols">
+
+              <!-- Columna 1: COTIZACIONES -->
+              <div>
+                <div class="clay-mega-col-title">Cotizaciones</div>
+                <a href="/acerca-de#busqueda" class="clay-mega-item">
+                  <div class="clay-mega-icon orange"><i class="bi bi-search"></i></div>
+                  <div><div style="font-size:0.84rem;font-weight:700;color:#141414;">Búsqueda Inteligente</div>
+                  <div style="font-size:0.74rem;color:#888;">Encuentra productos al instante</div></div>
+                </a>
+                <a href="/acerca-de#pdf" class="clay-mega-item">
+                  <div class="clay-mega-icon rose"><i class="bi bi-file-earmark-pdf-fill"></i></div>
+                  <div><div style="font-size:0.84rem;font-weight:700;color:#141414;">Exportación PDF</div>
+                  <div style="font-size:0.74rem;color:#888;">Con IVA y branding</div></div>
+                </a>
+                <a href="/acerca-de#clientes" class="clay-mega-item">
+                  <div class="clay-mega-icon indigo"><i class="bi bi-people-fill"></i></div>
+                  <div><div style="font-size:0.84rem;font-weight:700;color:#141414;">Gestión de Clientes</div>
+                  <div style="font-size:0.74rem;color:#888;">Cartera centralizada</div></div>
+                </a>
+              </div>
+
+              <!-- Columna 2: CATÁLOGO -->
+              <div>
+                <div class="clay-mega-col-title">Catálogo</div>
+                <a href="/acerca-de#import" class="clay-mega-item">
+                  <div class="clay-mega-icon yellow"><i class="bi bi-file-earmark-text-fill"></i></div>
+                  <div><div style="font-size:0.84rem;font-weight:700;color:#141414;">Extracción de PDFs</div>
+                  <div style="font-size:0.74rem;color:#888;">Importación IA mágica</div></div>
+                </a>
+                <a href="/acerca-de#sincronizacion" class="clay-mega-item">
+                  <div class="clay-mega-icon sky"><i class="bi bi-cloud-arrow-up-fill"></i></div>
+                  <div><div style="font-size:0.84rem;font-weight:700;color:#141414;">Sincronización</div>
+                  <div style="font-size:0.74rem;color:#888;">Inventario en la nube</div></div>
+                </a>
+                <a href="/acerca-de#precios" class="clay-mega-item">
+                  <div class="clay-mega-icon green"><i class="bi bi-tags-fill"></i></div>
+                  <div><div style="font-size:0.84rem;font-weight:700;color:#141414;">Listas de Precios</div>
+                  <div style="font-size:0.74rem;color:#888;">Actualización masiva</div></div>
+                </a>
+              </div>
+
+              <!-- Columna 3: ADMINISTRACIÓN -->
+              <div>
+                <div class="clay-mega-col-title">Administración</div>
+                <a href="/acerca-de#roles" class="clay-mega-item">
+                  <div class="clay-mega-icon indigo"><i class="bi bi-shield-lock-fill"></i></div>
+                  <div><div style="font-size:0.84rem;font-weight:700;color:#141414;">Roles & Permisos</div>
+                  <div style="font-size:0.74rem;color:#888;">Admin, Vendedor, Superadmin</div></div>
+                </a>
+                <a href="/acerca-de#analisis" class="clay-mega-item">
+                  <div class="clay-mega-icon green"><i class="bi bi-graph-up-arrow"></i></div>
+                  <div><div style="font-size:0.84rem;font-weight:700;color:#141414;">Analíticas</div>
+                  <div style="font-size:0.74rem;color:#888;">Reportes en tiempo real</div></div>
+                </a>
+                <a href="/acerca-de#respaldo" class="clay-mega-item">
+                  <div class="clay-mega-icon sky"><i class="bi bi-database-fill-gear"></i></div>
+                  <div><div style="font-size:0.84rem;font-weight:700;color:#141414;">Respaldos DB</div>
+                  <div style="font-size:0.74rem;color:#888;">PostgreSQL + Auditoría</div></div>
+                </a>
+              </div>
+
+            </div>
+            <div class="clay-mega-footer">
+              <a href="/acerca-de" class="clay-mega-footer-link">
+                Ver todas las funciones <i class="bi bi-arrow-right"></i>
+              </a>
+              <a href="{{ url_for('registro') }}" class="clay-btn-cta" style="padding: 7px 16px; font-size:0.8rem; border-radius: 8px;">
+                <i class="bi bi-lightning-charge-fill"></i> Empezar gratis
+              </a>
+            </div>
+          </div>
         </div>
+
+        <a href="/acerca-de#roles" class="clay-nav-link">Roles</a>
+        <a href="/acerca-de" class="clay-nav-link">Acerca de</a>
+
+        {% else %}
+        <!-- Usuario AUTENTICADO: muestra módulos del sistema como links directos -->
+        {% if session.get('user_rol') in ['admin', 'superadmin'] %}
+        <a href="/dashboard" class="clay-nav-link"><i class="bi bi-speedometer2" style="color:#FF6B35;"></i> Dashboard</a>
+        <a href="/clientes" class="clay-nav-link">Clientes</a>
+        <a href="/productos" class="clay-nav-link">Productos</a>
+        <a href="{{ url_for('gestion_cotizaciones') }}" class="clay-nav-link">Cotizaciones</a>
+        <a href="/equipo" class="clay-nav-link">Equipo</a>
+        {% if session.get('user_rol') == 'superadmin' %}
+        <a href="/admin/usuarios" class="clay-nav-link" style="color:#4F46E5; font-weight:800;"><i class="bi bi-shield-fill" style="color:#4F46E5;"></i> Admin</a>
+        {% endif %}
+        {% elif session.get('user_rol') == 'standard' %}
+        <a href="/standard/dashboard" class="clay-nav-link"><i class="bi bi-speedometer2" style="color:#FF6B35;"></i> Panel</a>
+        <a href="/cotizar" class="clay-nav-link">Nueva Cotización</a>
+        <a href="{{ url_for('standard_cotizaciones') }}" class="clay-nav-link">Mis Cotizaciones</a>
+        <a href="/equipo" class="clay-nav-link">Equipo & Chat</a>
+        {% endif %}
         {% endif %}
 
-        <!-- DROPDOWN MENU (escritorio) -->
-        <div class="clay-dropdown d-none d-lg-block">
-          <button class="clay-dropdown-toggle" id="clayDropdownBtn" onclick="toggleClayDropdown()" aria-expanded="false">
-            <div style="background: rgba(0,0,0,0.06); border: 1px solid rgba(0,0,0,0.09); border-radius: 50px; padding: 8px 14px; display: flex; align-items: center; gap: 6px; font-size: 0.86rem; font-weight: 700; color: #333; cursor: pointer; transition: all 0.2s;">
-              <i class="bi bi-grid-3x3-gap-fill" style="font-size: 1rem;"></i>
-              <i class="bi bi-chevron-down" style="font-size: 0.7rem;"></i>
-            </div>
+      </nav>
+
+      <!-- ❸ ACCIONES DERECHA -->
+      <div class="clay-nav-actions">
+
+        {% if 'user_id' not in session %}
+        <!-- Sin sesión: Sign In + Acerca de + CTA -->
+        <a href="/login" class="clay-btn-ghost">
+          <i class="bi bi-box-arrow-in-right"></i> Iniciar Sesión
+        </a>
+        <a href="/acerca-de" class="clay-btn-secondary">
+          <i class="bi bi-book"></i> Acerca de
+        </a>
+        <a href="{{ url_for('registro') }}" class="clay-btn-cta">
+          <i class="bi bi-lightning-charge-fill"></i> Empezar Gratis
+        </a>
+
+        {% else %}
+        <!-- Con sesión: Avatar + menú desplegable -->
+        <div class="clay-simple-dropdown">
+          <button class="clay-user-badge" onclick="toggleClayDropdown()" id="clayDropdownBtn" aria-expanded="false">
+            <div class="clay-user-avatar">{{ session.get('user_nombre', 'U')[0] | upper }}</div>
+            {{ session.get('user_nombre', 'Usuario').split(' ')[0] }}
+            <i class="bi bi-chevron-down" style="font-size:0.65rem; opacity:0.5;"></i>
           </button>
 
-          <div class="clay-dropdown-menu" id="clayDropdownMenu">
-            {% if 'user_id' not in session %}
-            <!-- Menú NO autenticado -->
-            <a class="clay-dropdown-item" href="/login"><i class="bi bi-box-arrow-in-right"></i> Iniciar Sesión</a>
-            <a class="clay-dropdown-item" href="/registro"><i class="bi bi-person-plus"></i> Registrarse</a>
-            <div class="clay-dropdown-divider"></div>
-            <a class="clay-dropdown-item" href="/acerca-de"><i class="bi bi-info-circle"></i> Acerca del Sistema</a>
-
-            {% else %}
-            <!-- Menú autenticado -->
+          <div class="clay-simple-dropdown-menu" id="clayDropdownMenu">
             <div class="clay-dropdown-header">
               <div class="name">{{ session.get('user_nombre', 'Usuario') }}</div>
               <div class="email">{{ session.get('user_email', '') }}</div>
             </div>
 
-            {% if session.get('user_rol') in ['admin', 'superadmin'] %}
-            <a class="clay-dropdown-item" href="/dashboard"><i class="bi bi-speedometer2"></i> Dashboard</a>
-            <a class="clay-dropdown-item" href="/clientes"><i class="bi bi-people"></i> Clientes</a>
-            <a class="clay-dropdown-item" href="/productos"><i class="bi bi-box-seam"></i> Productos</a>
-            <a class="clay-dropdown-item" href="{{ url_for('gestion_cotizaciones') }}"><i class="bi bi-file-earmark-text"></i> Cotizaciones</a>
-            <a class="clay-dropdown-item" href="/mi-pdf"><i class="bi bi-file-earmark-pdf-fill"></i> MI PDF</a>
-            <a class="clay-dropdown-item" href="/equipo"><i class="bi bi-kanban"></i> Equipo & Tareas</a>
-            {% elif session.get('user_rol') == 'standard' %}
-            <a class="clay-dropdown-item" href="/standard/dashboard"><i class="bi bi-speedometer2"></i> Panel Principal</a>
-            <a class="clay-dropdown-item" href="/cotizar"><i class="bi bi-plus-circle"></i> Nueva Cotización</a>
-            <a class="clay-dropdown-item" href="{{ url_for('standard_cotizaciones') }}"><i class="bi bi-file-earmark-text"></i> Mis Cotizaciones</a>
-            <a class="clay-dropdown-item" href="/equipo"><i class="bi bi-people-fill"></i> Mi Equipo & Chat</a>
-            <a class="clay-dropdown-item" href="/mi-pdf"><i class="bi bi-file-earmark-pdf-fill"></i> MI PDF</a>
-            {% endif %}
-
             {% if session.get('user_rol') == 'superadmin' %}
-            <div class="clay-dropdown-divider"></div>
             <a class="clay-dropdown-item" href="/admin/usuarios"><i class="bi bi-people-fill"></i> Gestionar Usuarios</a>
             <a class="clay-dropdown-item" href="/admin/pines"><i class="bi bi-key-fill"></i> Gestión de PINs</a>
             <a class="clay-dropdown-item" href="/admin/logs"><i class="bi bi-shield-check"></i> Auditoría Global</a>
             <a class="clay-dropdown-item" href="/admin/respaldos"><i class="bi bi-database-fill-gear"></i> Respaldos de BD</a>
+            <div class="clay-dropdown-divider"></div>
             {% endif %}
 
-            <div class="clay-dropdown-divider"></div>
+            <a class="clay-dropdown-item" href="/mi-pdf"><i class="bi bi-file-earmark-pdf-fill"></i> MI PDF</a>
             <a class="clay-dropdown-item" href="/perfil"><i class="bi bi-person-gear"></i> Perfil</a>
+            <div class="clay-dropdown-divider"></div>
             <a class="clay-dropdown-item danger" href="/logout"><i class="bi bi-box-arrow-right"></i> Cerrar Sesión</a>
-            {% endif %}
           </div>
         </div>
-
-        {% if 'user_id' not in session %}
-        <a href="{{ url_for('registro') }}" class="clay-nav-cta">
-          <i class="bi bi-lightning-charge-fill"></i> Empezar
-        </a>
         {% endif %}
 
         <!-- HAMBURGUESA MÓVIL -->
-        <button class="clay-nav-toggler d-lg-none" onclick="toggleClayMobile()" aria-label="Menú">
+        <button class="clay-nav-toggler" onclick="toggleClayMobile()" aria-label="Menú">
           <i class="bi bi-list" id="clayMobileIcon"></i>
         </button>
+
       </div>
     </div>
+  </div>
 
-    <!-- MENÚ MÓVIL DESPLEGABLE -->
-    <div class="clay-mobile-menu clay-mobile-menu-wrapper" id="clayMobileMenu">
+  <!-- ━━━ MENÚ MÓVIL ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+  <div class="clay-mobile-menu" id="clayMobileMenu">
+    <div style="max-width:1440px; margin:0 auto; padding: 0 1rem;">
       {% if 'user_id' in session %}
       <div class="clay-mobile-section-title">Navegación</div>
       {% if session.get('user_rol') in ['admin', 'superadmin'] %}
@@ -570,15 +828,18 @@
       <a href="/logout" class="clay-mobile-item danger"><i class="bi bi-box-arrow-right"></i> Cerrar Sesión</a>
 
       {% else %}
+      <div class="clay-mobile-section-title">Sistema</div>
+      <a href="/acerca-de" class="clay-mobile-item"><i class="bi bi-grid-3x3-gap-fill"></i> Funciones</a>
+      <a href="/acerca-de#roles" class="clay-mobile-item"><i class="bi bi-people-fill"></i> Roles</a>
+      <a href="/acerca-de" class="clay-mobile-item"><i class="bi bi-info-circle"></i> Acerca de</a>
+      <div class="clay-mobile-divider"></div>
       <div class="clay-mobile-section-title">Acceso</div>
       <a href="/login" class="clay-mobile-item"><i class="bi bi-box-arrow-in-right"></i> Iniciar Sesión</a>
-      <a href="/registro" class="clay-mobile-item"><i class="bi bi-person-plus"></i> Registrarse</a>
-      <div class="clay-mobile-divider"></div>
-      <a href="/acerca-de" class="clay-mobile-item"><i class="bi bi-info-circle"></i> Acerca del Sistema</a>
+      <a href="/registro" class="clay-mobile-item" style="color:#FF6B35;"><i class="bi bi-lightning-charge-fill"></i> Empezar Gratis</a>
       {% endif %}
     </div>
-
   </div>
+
 </div>
 
 <!-- Menú móvil eliminado: ahora integrado en clay-nav-wrapper -->

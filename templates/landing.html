@@ -9,359 +9,408 @@
 {% endblock %}
 
 {% block contenido %}
-<div class="landing-bento-wrapper" style="margin-top: -1.5rem; margin-left: -12px; margin-right: -12px; margin-bottom: -3rem; padding: 2rem 2rem 5rem;">
-  <div style="max-width: 1280px; margin: 0 auto;">
+<div class="landing-bento-wrapper"
+    style="margin-top: -1.5rem; margin-left: -12px; margin-right: -12px; margin-bottom: -3rem; padding: 2rem 2rem 5rem;">
+    <div style="max-width: 1280px; margin: 0 auto;">
 
-    <!-- NAV PILL FLOTANTE -->
-    <nav class="bento-hero-nav" data-aos="fade-down" data-aos-duration="600">
-      <a href="/" class="bento-brand">
-        <span class="bento-brand-dot"></span>
-        COTIZA<span style="color: #FF6B35;">Pro</span>
-      </a>
-      <div class="bento-nav-links">
-        <a href="#funciones">Funciones</a>
-        <a href="#como-funciona">Cómo Funciona</a>
-        <a href="{{ url_for('login') }}">Iniciar Sesión</a>
-      </div>
-      <a href="{{ url_for('registro') }}" class="btn-clay-primary">
-        Empezar Gratis <i class="bi bi-arrow-right"></i>
-      </a>
-    </nav>
+        <!-- NAV PILL FLOTANTE -->
+        <nav class="bento-hero-nav" data-aos="fade-down" data-aos-duration="600">
+            <a href="/" class="bento-brand">
+                <span class="bento-brand-dot"></span>
+                COTIZA<span style="color: #FF6B35;">Pro</span>
+            </a>
+            <div class="bento-nav-links">
+                <a href="#funciones">Funciones</a>
+                <a href="#como-funciona">Cómo Funciona</a>
+                <a href="{{ url_for('login') }}">Iniciar Sesión</a>
+            </div>
+            <a href="{{ url_for('registro') }}" class="btn-clay-primary">
+                ¡Empieza ahora! <i class="bi bi-arrow-right"></i>
+            </a>
+        </nav>
 
-    <!-- HEADLINE CENTRAL -->
-    <div class="bento-hero-headline" data-aos="fade-up" data-aos-duration="700">
+        <!-- HEADLINE CENTRAL -->
+        <div class="bento-hero-headline" data-aos="fade-up" data-aos-duration="700">
 
-      <h1 class="bento-h1">
-        Cotizaciones que<br>
-        <span class="text-orange">cierran ventas</span> más<br>
-        <span class="text-indigo">rápido y sin errores</span>
-      </h1>
-      <p class="bento-hero-sub">
-        Importa catálogos PDF, gestiona tu inventario y emite propuestas profesionales en segundos. Diseñado para equipos de ventas bolivianos.
-      </p>
+            <h1 class="bento-h1">
+                Cotizaciones que<br>
+                <span class="text-orange">cierran ventas</span> más<br>
+                <span class="text-indigo">rápido y sin errores</span>
+            </h1>
+            <p class="bento-hero-sub">
+                Importa catálogos PDF, gestiona tu inventario y emite propuestas profesionales en segundos. Diseñado
+                para equipos de ventas bolivianos.
+            </p>
 
-    </div>
+        </div>
 
-    <!-- ============================================================
+        <!-- ============================================================
          BENTO GRID PRINCIPAL
     ============================================================ -->
-    <div class="bento-grid" id="funciones">
+        <div class="bento-grid" id="funciones">
 
-      <!-- ┌─────────────────────────────────────┐
+            <!-- ┌─────────────────────────────────────┐
            │  CELDA HERO: Extracción Mágica PDF  │  Col 1-7, Rows 1-2
            └─────────────────────────────────────┘ -->
-      <div class="clay-card clay-dark clay-shadow-lg bento-hero-main" data-aos="fade-up" data-aos-delay="0">
-        <!-- Notificación flotante decorativa -->
-        <div class="clay-floating-notif" style="width: fit-content; margin-bottom: 1.5rem;">
-          <span class="clay-notif-dot"></span>
-          Importación completada — 348 productos cargados
-        </div>
+            <div class="clay-card clay-dark clay-shadow-lg bento-hero-main" data-aos="fade-up" data-aos-delay="0">
+                <!-- Notificación flotante decorativa -->
+                <div class="clay-floating-notif" style="width: fit-content; margin-bottom: 1.5rem;">
+                    <span class="clay-notif-dot"></span>
+                    Importación completada — 348 productos cargados
+                </div>
 
-        <div>
-          <div class="clay-icon-3d clay-icon-orange mb-3">
-            <i class="bi bi-file-earmark-pdf-fill"></i>
-          </div>
-          <h2 style="font-size: 1.8rem; font-weight: 900; letter-spacing: -0.03em; margin-bottom: 0.75rem;">
-            Extracción Mágica<br>desde PDF y Texto
-          </h2>
-          <p style="font-size: 0.95rem; opacity: 0.7; line-height: 1.6; margin-bottom: 1.5rem;">
-            Sube cualquier lista de precios o catálogo y nuestro motor IA lo convierte automáticamente en inventario listo para cotizar.
-          </p>
-          <!-- Progress simulado -->
-          <div style="font-size: 0.78rem; font-weight: 700; opacity: 0.6; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.05em;">Extracción IA</div>
-          <div class="clay-progress-bar">
-            <div class="clay-progress-fill" style="width: 94%;"></div>
-          </div>
-          <div style="font-size: 0.82rem; opacity: 0.6; margin-top: 6px;">94% precisión promedio · Tiempo: 2.3s</div>
-        </div>
-      </div>
+                <div>
+                    <div class="clay-icon-3d clay-icon-orange mb-3">
+                        <i class="bi bi-file-earmark-pdf-fill"></i>
+                    </div>
+                    <h2 style="font-size: 1.8rem; font-weight: 900; letter-spacing: -0.03em; margin-bottom: 0.75rem;">
+                        Extracción Mágica<br>desde PDF y Texto
+                    </h2>
+                    <p style="font-size: 0.95rem; opacity: 0.7; line-height: 1.6; margin-bottom: 1.5rem;">
+                        Sube cualquier lista de precios o catálogo y nuestro motor IA lo convierte automáticamente en
+                        inventario listo para cotizar.
+                    </p>
+                    <!-- Progress simulado -->
+                    <div
+                        style="font-size: 0.78rem; font-weight: 700; opacity: 0.6; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.05em;">
+                        Extracción IA</div>
+                    <div class="clay-progress-bar">
+                        <div class="clay-progress-fill" style="width: 94%;"></div>
+                    </div>
+                    <div style="font-size: 0.82rem; opacity: 0.6; margin-top: 6px;">94% precisión promedio · Tiempo:
+                        2.3s</div>
+                </div>
+            </div>
 
-      <!-- ┌───────────────────────┐
+            <!-- ┌───────────────────────┐
            │ STAT: Cotizaciones    │  Col 8-10, Row 1
            └───────────────────────┘ -->
-      <div class="clay-card clay-orange clay-shadow-md bento-stat-1" data-aos="fade-up" data-aos-delay="80">
-        <div>
-          <div class="clay-stat-badge" style="margin-bottom: 10px;">
-            <i class="bi bi-graph-up-arrow"></i> Este mes
-          </div>
-          <div class="clay-stat-number">+500</div>
-          <div class="clay-stat-label">Cotizaciones<br>Generadas</div>
-        </div>
-        <!-- Mini chart decorativo -->
-        <div class="clay-mini-chart">
-          <div class="clay-mini-bar" style="height: 30%;"></div>
-          <div class="clay-mini-bar" style="height: 55%;"></div>
-          <div class="clay-mini-bar" style="height: 40%;"></div>
-          <div class="clay-mini-bar" style="height: 75%;"></div>
-          <div class="clay-mini-bar" style="height: 60%;"></div>
-          <div class="clay-mini-bar active" style="height: 100%;"></div>
-        </div>
-      </div>
+            <div class="clay-card clay-orange clay-shadow-md bento-stat-1" data-aos="fade-up" data-aos-delay="80">
+                <div>
+                    <div class="clay-stat-badge" style="margin-bottom: 10px;">
+                        <i class="bi bi-graph-up-arrow"></i> Este mes
+                    </div>
+                    <div class="clay-stat-number">+500</div>
+                    <div class="clay-stat-label">Cotizaciones<br>Generadas</div>
+                </div>
+                <!-- Mini chart decorativo -->
+                <div class="clay-mini-chart">
+                    <div class="clay-mini-bar" style="height: 30%;"></div>
+                    <div class="clay-mini-bar" style="height: 55%;"></div>
+                    <div class="clay-mini-bar" style="height: 40%;"></div>
+                    <div class="clay-mini-bar" style="height: 75%;"></div>
+                    <div class="clay-mini-bar" style="height: 60%;"></div>
+                    <div class="clay-mini-bar active" style="height: 100%;"></div>
+                </div>
+            </div>
 
-      <!-- ┌───────────────────────┐
+            <!-- ┌───────────────────────┐
            │ STAT: Tiempo Récord   │  Col 11-13, Row 1
            └───────────────────────┘ -->
-      <div class="clay-card clay-indigo clay-shadow-md bento-stat-2" data-aos="fade-up" data-aos-delay="140">
-        <div>
-          <div style="font-size: 2rem; margin-bottom: 6px;">⚡</div>
-          <div class="clay-stat-number">2 min</div>
-          <div class="clay-stat-label">Promedio para<br>emitir 1 cotización</div>
-        </div>
-        <div class="clay-stat-badge">
-          <i class="bi bi-clock-fill"></i> Antes: 25 min
-        </div>
-      </div>
+            <div class="clay-card clay-indigo clay-shadow-md bento-stat-2" data-aos="fade-up" data-aos-delay="140">
+                <div>
+                    <div style="font-size: 2rem; margin-bottom: 6px;">⚡</div>
+                    <div class="clay-stat-number">2 min</div>
+                    <div class="clay-stat-label">Promedio para<br>emitir 1 cotización</div>
+                </div>
+                <div class="clay-stat-badge">
+                    <i class="bi bi-clock-fill"></i> Antes: 25 min
+                </div>
+            </div>
 
-      <!-- ┌────────────────────────────────────┐
+            <!-- ┌────────────────────────────────────┐
            │ FEATURE: Analytics Dashboard        │  Col 8-13, Row 2
            └────────────────────────────────────┘ -->
-      <div class="clay-card clay-mint clay-shadow-md bento-feature-analytics" data-aos="fade-up" data-aos-delay="100">
-        <div class="clay-icon-3d clay-icon-green flex-shrink-0">
-          <i class="bi bi-graph-up-arrow"></i>
-        </div>
-        <div>
-          <h3 style="font-size: 1.1rem; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 0.4rem; color: #141414;">
-            Analíticas de Ventas en Tiempo Real
-          </h3>
-          <p style="font-size: 0.87rem; color: #555; line-height: 1.5; margin: 0;">
-            Supervisa facturación total, cotizaciones por vendedor y tasa de cierre desde el dashboard de Superadmin.
-          </p>
-        </div>
-      </div>
+            <div class="clay-card clay-mint clay-shadow-md bento-feature-analytics" data-aos="fade-up"
+                data-aos-delay="100">
+                <div class="clay-icon-3d clay-icon-green flex-shrink-0">
+                    <i class="bi bi-graph-up-arrow"></i>
+                </div>
+                <div>
+                    <h3
+                        style="font-size: 1.1rem; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 0.4rem; color: #141414;">
+                        Analíticas de Ventas en Tiempo Real
+                    </h3>
+                    <p style="font-size: 0.87rem; color: #555; line-height: 1.5; margin: 0;">
+                        Supervisa facturación total, cotizaciones por vendedor y tasa de cierre desde el dashboard de
+                        Superadmin.
+                    </p>
+                </div>
+            </div>
 
-      <!-- ┌────────────────────────────────────┐
+            <!-- ┌────────────────────────────────────┐
            │ CTA: Crear Cuenta                   │  Col 1-4, Row 3
            └────────────────────────────────────┘ -->
-      <div class="clay-card clay-orange clay-shadow-lg bento-cta-register" data-aos="fade-up" data-aos-delay="60" id="roles">
-        <div>
-          <div style="font-size: 2.5rem; margin-bottom: 0.75rem;">🚀</div>
-          <h3 style="font-size: 1.35rem; font-weight: 900; letter-spacing: -0.03em; margin-bottom: 0.5rem;">
-            Empieza hoy<br>sin tarjeta
-          </h3>
-          <p style="font-size: 0.87rem; opacity: 0.85; line-height: 1.5; margin: 0;">
-            Crea tu cuenta de administrador, invita a tu equipo de ventas y genera tu primera cotización en minutos.
-          </p>
-        </div>
-        <a href="{{ url_for('registro') }}" class="btn-clay-ghost" style="width: fit-content; margin-top: 1rem;">
-          Crear Cuenta <i class="bi bi-arrow-right"></i>
-        </a>
-      </div>
+            <div class="clay-card clay-orange clay-shadow-lg bento-cta-register" data-aos="fade-up" data-aos-delay="60"
+                id="roles">
+                <div>
+                    <div style="font-size: 2.5rem; margin-bottom: 0.75rem;">🚀</div>
+                    <h3 style="font-size: 1.35rem; font-weight: 900; letter-spacing: -0.03em; margin-bottom: 0.5rem;">
+                        Empieza hoy<br>sin tarjeta
+                    </h3>
+                    <p style="font-size: 0.87rem; opacity: 0.85; line-height: 1.5; margin: 0;">
+                        Crea tu cuenta de administrador, invita a tu equipo de ventas y genera tu primera cotización en
+                        minutos.
+                    </p>
+                </div>
+                <a href="{{ url_for('registro') }}" class="btn-clay-ghost"
+                    style="width: fit-content; margin-top: 1rem;">
+                    Crear Cuenta <i class="bi bi-arrow-right"></i>
+                </a>
+            </div>
 
-      <!-- ┌────────────────────────────────────┐
+            <!-- ┌────────────────────────────────────┐
            │ FEATURE: Gestión de Roles           │  Col 5-9, Row 3
            └────────────────────────────────────┘ -->
-      <div class="clay-card clay-white clay-shadow-md bento-feature-roles" data-aos="fade-up" data-aos-delay="100">
-        <div>
-          <div class="clay-icon-3d clay-icon-indigo mb-3">
-            <i class="bi bi-people-fill"></i>
-          </div>
-          <h3 style="font-size: 1.15rem; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 1rem; color: #141414;">
-            Control de Roles & Permisos
-          </h3>
-        </div>
-        <div>
-          <div class="clay-role-pill">
-            <div class="clay-role-icon clay-icon-indigo">
-              <i class="bi bi-shield-lock-fill"></i>
+            <div class="clay-card clay-white clay-shadow-md bento-feature-roles" data-aos="fade-up"
+                data-aos-delay="100">
+                <div>
+                    <div class="clay-icon-3d clay-icon-indigo mb-3">
+                        <i class="bi bi-people-fill"></i>
+                    </div>
+                    <h3
+                        style="font-size: 1.15rem; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 1rem; color: #141414;">
+                        Control de Roles & Permisos
+                    </h3>
+                </div>
+                <div>
+                    <div class="clay-role-pill">
+                        <div class="clay-role-icon clay-icon-indigo">
+                            <i class="bi bi-shield-lock-fill"></i>
+                        </div>
+                        <div>
+                            <div style="font-size: 0.85rem; font-weight: 700;">Superadmin & Admin</div>
+                            <div style="font-size: 0.76rem; color: #666; font-weight: 500;">PINs, suscripciones,
+                                catálogo global</div>
+                        </div>
+                    </div>
+                    <div class="clay-role-pill">
+                        <div class="clay-role-icon clay-icon-green">
+                            <i class="bi bi-person-badge-fill"></i>
+                        </div>
+                        <div>
+                            <div style="font-size: 0.85rem; font-weight: 700;">Vendedor Standard</div>
+                            <div style="font-size: 0.76rem; color: #666; font-weight: 500;">Cotizaciones, clientes
+                                propios</div>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div>
-              <div style="font-size: 0.85rem; font-weight: 700;">Superadmin & Admin</div>
-              <div style="font-size: 0.76rem; color: #666; font-weight: 500;">PINs, suscripciones, catálogo global</div>
-            </div>
-          </div>
-          <div class="clay-role-pill">
-            <div class="clay-role-icon clay-icon-green">
-              <i class="bi bi-person-badge-fill"></i>
-            </div>
-            <div>
-              <div style="font-size: 0.85rem; font-weight: 700;">Vendedor Standard</div>
-              <div style="font-size: 0.76rem; color: #666; font-weight: 500;">Cotizaciones, clientes propios</div>
-            </div>
-          </div>
-        </div>
-      </div>
 
-      <!-- ┌────────────────────────────────────┐
+            <!-- ┌────────────────────────────────────┐
            │ STAT: Catálogo de Productos         │  Col 9-13, Row 3
            └────────────────────────────────────┘ -->
-      <div class="clay-card clay-dark clay-shadow-lg bento-stat-products" data-aos="fade-up" data-aos-delay="150">
-        <div>
-          <div class="clay-stat-badge" style="margin-bottom: 10px;">
-            <i class="bi bi-box-seam-fill"></i> Catálogo Activo
-          </div>
-          <div class="clay-stat-number">+10K</div>
-          <div class="clay-stat-label">Productos<br>Gestionados</div>
-        </div>
-        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-          <span style="background: rgba(255,255,255,0.1); border-radius: 8px; padding: 6px 10px; font-size: 0.77rem; font-weight: 600;">📦 Importados PDF</span>
-          <span style="background: rgba(255,255,255,0.1); border-radius: 8px; padding: 6px 10px; font-size: 0.77rem; font-weight: 600;">✏️ Manual</span>
-        </div>
-      </div>
+            <div class="clay-card clay-dark clay-shadow-lg bento-stat-products" data-aos="fade-up" data-aos-delay="150">
+                <div>
+                    <div class="clay-stat-badge" style="margin-bottom: 10px;">
+                        <i class="bi bi-box-seam-fill"></i> Catálogo Activo
+                    </div>
+                    <div class="clay-stat-number">+10K</div>
+                    <div class="clay-stat-label">Productos<br>Gestionados</div>
+                </div>
+                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                    <span
+                        style="background: rgba(255,255,255,0.1); border-radius: 8px; padding: 6px 10px; font-size: 0.77rem; font-weight: 600;">📦
+                        Importados PDF</span>
+                    <span
+                        style="background: rgba(255,255,255,0.1); border-radius: 8px; padding: 6px 10px; font-size: 0.77rem; font-weight: 600;">✏️
+                        Manual</span>
+                </div>
+            </div>
 
-      <!-- ┌──────────────────────────┐
+            <!-- ┌──────────────────────────┐
            │ FEATURE: PDF Cotización   │  Col 1-4, Row 4
            └──────────────────────────┘ -->
-      <div class="clay-card clay-peach clay-shadow-md bento-feature-pdf" data-aos="fade-up" data-aos-delay="80">
-        <div class="clay-icon-3d clay-icon-orange">
-          <i class="bi bi-file-earmark-richtext-fill"></i>
-        </div>
-        <div>
-          <h3 style="font-size: 1.1rem; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 0.4rem; color: #141414;">
-            Exportación PDF Profesional
-          </h3>
-          <p style="font-size: 0.87rem; color: #555; line-height: 1.5; margin-bottom: 0.75rem;">
-            Genera cotizaciones con IVA 13%, branding corporativo, hora Bolivia (UTC-4) y formato impecable.
-          </p>
-          <div class="clay-feature-item">
-            <div class="clay-feature-check" style="background: #FF6B35; color: #fff;">
-              <i class="bi bi-check-lg"></i>
+            <div class="clay-card clay-peach clay-shadow-md bento-feature-pdf" data-aos="fade-up" data-aos-delay="80">
+                <div class="clay-icon-3d clay-icon-orange">
+                    <i class="bi bi-file-earmark-richtext-fill"></i>
+                </div>
+                <div>
+                    <h3
+                        style="font-size: 1.1rem; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 0.4rem; color: #141414;">
+                        Exportación PDF Profesional
+                    </h3>
+                    <p style="font-size: 0.87rem; color: #555; line-height: 1.5; margin-bottom: 0.75rem;">
+                        Genera cotizaciones con IVA 13%, branding corporativo, hora Bolivia (UTC-4) y formato impecable.
+                    </p>
+                    <div class="clay-feature-item">
+                        <div class="clay-feature-check" style="background: #FF6B35; color: #fff;">
+                            <i class="bi bi-check-lg"></i>
+                        </div>
+                        IVA automático 13%
+                    </div>
+                    <div class="clay-feature-item">
+                        <div class="clay-feature-check" style="background: #FF6B35; color: #fff;">
+                            <i class="bi bi-check-lg"></i>
+                        </div>
+                        Descarga instantánea
+                    </div>
+                </div>
             </div>
-            IVA automático 13%
-          </div>
-          <div class="clay-feature-item">
-            <div class="clay-feature-check" style="background: #FF6B35; color: #fff;">
-              <i class="bi bi-check-lg"></i>
-            </div>
-            Descarga instantánea
-          </div>
-        </div>
-      </div>
 
-      <!-- ┌──────────────────────────┐
+            <!-- ┌──────────────────────────┐
            │ FEATURE: Seguridad PINs  │  Col 5-9, Row 4
            └──────────────────────────┘ -->
-      <div class="clay-card clay-lavender clay-shadow-md bento-feature-security" data-aos="fade-up" data-aos-delay="120">
-        <div class="clay-icon-3d clay-icon-indigo">
-          <i class="bi bi-key-fill"></i>
-        </div>
-        <div>
-          <h3 style="font-size: 1.1rem; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 0.4rem; color: #141414;">
-            Seguridad con PINs de Acceso
-          </h3>
-          <p style="font-size: 0.87rem; color: #555; line-height: 1.5; margin-bottom: 0.75rem;">
-            El Superadmin emite PINs únicos con vigencia de 30 días para habilitar nuevas cuentas de administrador de forma segura.
-          </p>
-          <div class="clay-feature-item">
-            <div class="clay-feature-check" style="background: #4F46E5; color: #fff;">
-              <i class="bi bi-check-lg"></i>
+            <div class="clay-card clay-lavender clay-shadow-md bento-feature-security" data-aos="fade-up"
+                data-aos-delay="120">
+                <div class="clay-icon-3d clay-icon-indigo">
+                    <i class="bi bi-key-fill"></i>
+                </div>
+                <div>
+                    <h3
+                        style="font-size: 1.1rem; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 0.4rem; color: #141414;">
+                        Seguridad con PINs de Acceso
+                    </h3>
+                    <p style="font-size: 0.87rem; color: #555; line-height: 1.5; margin-bottom: 0.75rem;">
+                        El Superadmin emite PINs únicos con vigencia de 30 días para habilitar nuevas cuentas de
+                        administrador de forma segura.
+                    </p>
+                    <div class="clay-feature-item">
+                        <div class="clay-feature-check" style="background: #4F46E5; color: #fff;">
+                            <i class="bi bi-check-lg"></i>
+                        </div>
+                        PINs con expiración
+                    </div>
+                    <div class="clay-feature-item">
+                        <div class="clay-feature-check" style="background: #4F46E5; color: #fff;">
+                            <i class="bi bi-check-lg"></i>
+                        </div>
+                        Auditoría de uso
+                    </div>
+                </div>
             </div>
-            PINs con expiración
-          </div>
-          <div class="clay-feature-item">
-            <div class="clay-feature-check" style="background: #4F46E5; color: #fff;">
-              <i class="bi bi-check-lg"></i>
-            </div>
-            Auditoría de uso
-          </div>
-        </div>
-      </div>
 
-      <!-- ┌──────────────────────────┐
+            <!-- ┌──────────────────────────┐
            │ FEATURE: Respaldos DB    │  Col 9-13, Row 4
            └──────────────────────────┘ -->
-      <div class="clay-card clay-sky clay-shadow-md bento-feature-backup" data-aos="fade-up" data-aos-delay="160">
-        <div class="clay-icon-3d clay-icon-sky">
-          <i class="bi bi-database-fill-gear"></i>
-        </div>
-        <div>
-          <h3 style="font-size: 1.1rem; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 0.4rem; color: #141414;">
-            Respaldos & Auditoría Global
-          </h3>
-          <p style="font-size: 0.87rem; color: #555; line-height: 1.5; margin-bottom: 0.75rem;">
-            Descarga respaldos completos de la base de datos PostgreSQL y revisa el historial de toda acción del sistema.
-          </p>
-          <div class="clay-feature-item">
-            <div class="clay-feature-check" style="background: #0284C7; color: #fff;">
-              <i class="bi bi-check-lg"></i>
+            <div class="clay-card clay-sky clay-shadow-md bento-feature-backup" data-aos="fade-up" data-aos-delay="160">
+                <div class="clay-icon-3d clay-icon-sky">
+                    <i class="bi bi-database-fill-gear"></i>
+                </div>
+                <div>
+                    <h3
+                        style="font-size: 1.1rem; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 0.4rem; color: #141414;">
+                        Respaldos & Auditoría Global
+                    </h3>
+                    <p style="font-size: 0.87rem; color: #555; line-height: 1.5; margin-bottom: 0.75rem;">
+                        Descarga respaldos completos de la base de datos PostgreSQL y revisa el historial de toda acción
+                        del sistema.
+                    </p>
+                    <div class="clay-feature-item">
+                        <div class="clay-feature-check" style="background: #0284C7; color: #fff;">
+                            <i class="bi bi-check-lg"></i>
+                        </div>
+                        PostgreSQL Backup .sql
+                    </div>
+                    <div class="clay-feature-item">
+                        <div class="clay-feature-check" style="background: #0284C7; color: #fff;">
+                            <i class="bi bi-check-lg"></i>
+                        </div>
+                        Log de auditoría en tiempo real
+                    </div>
+                </div>
             </div>
-            PostgreSQL Backup .sql
-          </div>
-          <div class="clay-feature-item">
-            <div class="clay-feature-check" style="background: #0284C7; color: #fff;">
-              <i class="bi bi-check-lg"></i>
-            </div>
-            Log de auditoría en tiempo real
-          </div>
-        </div>
-      </div>
 
-      <!-- ┌──────────────────────────────────────────────┐
+            <!-- ┌──────────────────────────────────────────────┐
            │ CTA FINAL: La Propuesta de Valor              │  Col 1-13, Row 5
            └──────────────────────────────────────────────┘ -->
-      <div class="clay-card clay-dark clay-shadow-lg bento-cta-final" data-aos="fade-up" data-aos-delay="0">
-        <div>
-          <div class="bento-headline-tag" style="background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.15); color: rgba(255,255,255,0.7); margin-bottom: 1.5rem;">
-            <span style="background: #FF6B35;"></span> ¿Listo para transformar tu proceso de ventas?
-          </div>
-          <h2 style="font-size: clamp(1.8rem, 4vw, 3rem); font-weight: 900; letter-spacing: -0.04em; line-height: 1.1; margin-bottom: 1rem;">
-            Empieza a emitir cotizaciones<br>
-            <span style="color: #FF6B35;">profesionales en minutos.</span>
-          </h2>
-          <p style="font-size: 1rem; opacity: 0.65; line-height: 1.6; max-width: 480px; margin: 0;">
-            Únete a empresas bolivianas que ya redujeron un 60% el tiempo invertido en crear propuestas comerciales.
-          </p>
-        </div>
-        <div style="flex-shrink: 0; text-align: center;">
-          <a href="{{ url_for('registro') }}" class="btn-clay-orange" style="font-size: 1.1rem; padding: 16px 42px;">
-            <i class="bi bi-lightning-charge-fill"></i> Crear Cuenta Gratis
-          </a>
-          <div style="font-size: 0.8rem; opacity: 0.5; margin-top: 12px;">Sin tarjeta de crédito · Acceso inmediato</div>
-        </div>
-      </div>
+            <div class="clay-card clay-dark clay-shadow-lg bento-cta-final" data-aos="fade-up" data-aos-delay="0">
+                <div>
+                    <div class="bento-headline-tag"
+                        style="background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.15); color: rgba(255,255,255,0.7); margin-bottom: 1.5rem;">
+                        <span style="background: #FF6B35;"></span> ¿Listo para transformar tu proceso de ventas?
+                    </div>
+                    <h2
+                        style="font-size: clamp(1.8rem, 4vw, 3rem); font-weight: 900; letter-spacing: -0.04em; line-height: 1.1; margin-bottom: 1rem;">
+                        Empieza a emitir cotizaciones<br>
+                        <span style="color: #FF6B35;">profesionales en minutos.</span>
+                    </h2>
+                    <p style="font-size: 1rem; opacity: 0.65; line-height: 1.6; max-width: 480px; margin: 0;">
+                        Únete a empresas bolivianas que ya redujeron un 60% el tiempo invertido en crear propuestas
+                        comerciales.
+                    </p>
+                </div>
+                <div style="flex-shrink: 0; text-align: center;">
+                    <a href="{{ url_for('registro') }}" class="btn-clay-orange"
+                        style="font-size: 1.1rem; padding: 16px 42px;">
+                        <i class="bi bi-lightning-charge-fill"></i> Crear Cuenta Gratis
+                    </a>
+                    <div style="font-size: 0.8rem; opacity: 0.5; margin-top: 12px;">Sin tarjeta de crédito · Acceso
+                        inmediato</div>
+                </div>
+            </div>
 
-    </div>
-    <!-- FIN BENTO GRID -->
+        </div>
+        <!-- FIN BENTO GRID -->
 
-    <!-- ==========================================
+        <!-- ==========================================
          SECCIÓN: CÓMO FUNCIONA (3 PASOS)
          ========================================== -->
-    <div id="como-funciona" style="max-width: 1200px; margin: 5rem auto 3rem; padding: 0 1.5rem; scroll-margin-top: 100px;">
-      <div style="text-align: center; margin-bottom: 3rem;" data-aos="fade-up">
-        <div class="bento-headline-tag" style="justify-content: center; margin-bottom: 1rem;">
-          <span></span> Flujo de trabajo
-        </div>
-        <h2 style="font-size: clamp(1.8rem, 3vw, 2.5rem); font-weight: 900; letter-spacing: -0.03em; color: #141414;">
-          ¿Cómo funciona? En 3 simples pasos.
-        </h2>
-      </div>
+        <div id="como-funciona"
+            style="max-width: 1200px; margin: 5rem auto 3rem; padding: 0 1.5rem; scroll-margin-top: 100px;">
+            <div style="text-align: center; margin-bottom: 3rem;" data-aos="fade-up">
+                <div class="bento-headline-tag" style="justify-content: center; margin-bottom: 1rem;">
+                    <span></span> Flujo de trabajo
+                </div>
+                <h2
+                    style="font-size: clamp(1.8rem, 3vw, 2.5rem); font-weight: 900; letter-spacing: -0.03em; color: #141414;">
+                    ¿Cómo funciona? En 3 simples pasos.
+                </h2>
+            </div>
 
-      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem;" data-aos="fade-up" data-aos-delay="100">
-        <!-- Paso 1 -->
-        <div class="clay-card clay-white clay-shadow-md" style="display: flex; flex-direction: column; align-items: center; text-align: center; padding: 2.5rem 1.5rem;">
-          <div class="clay-icon-3d clay-icon-indigo mb-4" style="width: 60px; height: 60px; font-size: 1.5rem; border-radius: 18px;">
-            <i class="bi bi-cloud-arrow-up-fill"></i>
-          </div>
-          <h3 style="font-size: 1.15rem; font-weight: 800; margin-bottom: 0.5rem; color: #141414; letter-spacing: -0.02em;">1. Importa tu Catálogo</h3>
-          <p style="font-size: 0.9rem; color: #555; line-height: 1.55; margin: 0;">
-            Sube tus listas de precios o usa nuestra IA para extraer productos directamente desde PDFs de tus proveedores.
-          </p>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem;"
+                data-aos="fade-up" data-aos-delay="100">
+                <!-- Paso 1 -->
+                <div class="clay-card clay-white clay-shadow-md"
+                    style="display: flex; flex-direction: column; align-items: center; text-align: center; padding: 2.5rem 1.5rem;">
+                    <div class="clay-icon-3d clay-icon-indigo mb-4"
+                        style="width: 60px; height: 60px; font-size: 1.5rem; border-radius: 18px;">
+                        <i class="bi bi-cloud-arrow-up-fill"></i>
+                    </div>
+                    <h3
+                        style="font-size: 1.15rem; font-weight: 800; margin-bottom: 0.5rem; color: #141414; letter-spacing: -0.02em;">
+                        1. Importa tu Catálogo</h3>
+                    <p style="font-size: 0.9rem; color: #555; line-height: 1.55; margin: 0;">
+                        Sube tus listas de precios o usa nuestra IA para extraer productos directamente desde PDFs de
+                        tus proveedores.
+                    </p>
+                </div>
+
+                <!-- Paso 2 -->
+                <div class="clay-card clay-peach clay-shadow-md"
+                    style="display: flex; flex-direction: column; align-items: center; text-align: center; padding: 2.5rem 1.5rem;">
+                    <div class="clay-icon-3d clay-icon-orange mb-4"
+                        style="width: 60px; height: 60px; font-size: 1.5rem; border-radius: 18px;">
+                        <i class="bi bi-cart-plus-fill"></i>
+                    </div>
+                    <h3
+                        style="font-size: 1.15rem; font-weight: 800; margin-bottom: 0.5rem; color: #141414; letter-spacing: -0.02em;">
+                        2. Arma tu Cotización</h3>
+                    <p style="font-size: 0.9rem; color: #555; line-height: 1.55; margin: 0;">
+                        Selecciona el cliente, busca productos al instante y ajusta cantidades. El IVA y los totales se
+                        calculan automáticamente.
+                    </p>
+                </div>
+
+                <!-- Paso 3 -->
+                <div class="clay-card clay-lavender clay-shadow-md"
+                    style="display: flex; flex-direction: column; align-items: center; text-align: center; padding: 2.5rem 1.5rem;">
+                    <div class="clay-icon-3d clay-icon-indigo mb-4"
+                        style="width: 60px; height: 60px; font-size: 1.5rem; border-radius: 18px;">
+                        <i class="bi bi-file-earmark-pdf-fill"></i>
+                    </div>
+                    <h3
+                        style="font-size: 1.15rem; font-weight: 800; margin-bottom: 0.5rem; color: #141414; letter-spacing: -0.02em;">
+                        3. Exporta en PDF</h3>
+                    <p style="font-size: 0.9rem; color: #555; line-height: 1.55; margin: 0;">
+                        Genera un documento profesional con tu branding, listo para descargar o enviar por correo para
+                        cerrar tu venta.
+                    </p>
+                </div>
+            </div>
         </div>
-        
-        <!-- Paso 2 -->
-        <div class="clay-card clay-peach clay-shadow-md" style="display: flex; flex-direction: column; align-items: center; text-align: center; padding: 2.5rem 1.5rem;">
-          <div class="clay-icon-3d clay-icon-orange mb-4" style="width: 60px; height: 60px; font-size: 1.5rem; border-radius: 18px;">
-            <i class="bi bi-cart-plus-fill"></i>
-          </div>
-          <h3 style="font-size: 1.15rem; font-weight: 800; margin-bottom: 0.5rem; color: #141414; letter-spacing: -0.02em;">2. Arma tu Cotización</h3>
-          <p style="font-size: 0.9rem; color: #555; line-height: 1.55; margin: 0;">
-            Selecciona el cliente, busca productos al instante y ajusta cantidades. El IVA y los totales se calculan automáticamente.
-          </p>
-        </div>
-        
-        <!-- Paso 3 -->
-        <div class="clay-card clay-lavender clay-shadow-md" style="display: flex; flex-direction: column; align-items: center; text-align: center; padding: 2.5rem 1.5rem;">
-          <div class="clay-icon-3d clay-icon-indigo mb-4" style="width: 60px; height: 60px; font-size: 1.5rem; border-radius: 18px;">
-            <i class="bi bi-file-earmark-pdf-fill"></i>
-          </div>
-          <h3 style="font-size: 1.15rem; font-weight: 800; margin-bottom: 0.5rem; color: #141414; letter-spacing: -0.02em;">3. Exporta en PDF</h3>
-          <p style="font-size: 0.9rem; color: #555; line-height: 1.55; margin: 0;">
-            Genera un documento profesional con tu branding, listo para descargar o enviar por correo para cerrar tu venta.
-          </p>
-        </div>
-      </div>
+
     </div>
-    
-  </div>
 </div>
 {% endblock %}
 
@@ -369,8 +418,8 @@
 {{ super() }}
 <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
 <script>
-  document.addEventListener('DOMContentLoaded', function() {
-    AOS.init({ once: true, duration: 700, easing: 'ease-out-cubic' });
-  });
+    document.addEventListener('DOMContentLoaded', function () {
+        AOS.init({ once: true, duration: 700, easing: 'ease-out-cubic' });
+    });
 </script>
 {% endblock %}

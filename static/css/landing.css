@@ -1,0 +1,633 @@
+/* ==========================================================================
+   LANDING PAGE - BENTO GRID + CLAYMORPHISM 3D
+   Paleta: Blanco Hueso (#FAFAF8), Naranja Cálido (#FF6B35), Azul Índigo (#4F46E5)
+   Claymorphism: Sombras multicapa, bordes suaves inflados, sensación táctil 3D
+   Bento Grid: Módulos de tamaño variable en cuadrícula editorial
+   Tipografía: Plus Jakarta Sans (bold, expresivo)
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600&display=swap');
+
+/* --------------------------------------------------------------------------
+   BASE
+   -------------------------------------------------------------------------- */
+.landing-bento-wrapper {
+    background-color: #F5F4F0;
+    background-image: radial-gradient(circle at 20% 10%, rgba(255, 107, 53, 0.06) 0%, transparent 55%),
+                      radial-gradient(circle at 80% 90%, rgba(79, 70, 229, 0.06) 0%, transparent 55%);
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    min-height: 100vh;
+    color: #141414;
+    padding: 2rem 0 5rem;
+}
+
+/* --------------------------------------------------------------------------
+   HERO SECTION (PILL NAVBAR + HEADLINE)
+   -------------------------------------------------------------------------- */
+.bento-hero-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: rgba(255, 255, 255, 0.80);
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.9);
+    border-radius: 100px;
+    padding: 10px 10px 10px 24px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+    margin-bottom: 3.5rem;
+}
+
+.bento-brand {
+    font-size: 1.25rem;
+    font-weight: 900;
+    color: #141414;
+    text-decoration: none;
+    letter-spacing: -0.03em;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.bento-brand-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #FF6B35;
+    box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.2);
+}
+
+.bento-nav-links {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.bento-nav-links a {
+    color: #555;
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-decoration: none;
+    padding: 7px 16px;
+    border-radius: 50px;
+    transition: all 0.2s ease;
+}
+
+.bento-nav-links a:hover {
+    background: rgba(0,0,0,0.05);
+    color: #141414;
+}
+
+.btn-clay-primary {
+    background: #141414;
+    color: #FFFFFF !important;
+    border: none;
+    border-radius: 50px;
+    padding: 11px 26px;
+    font-size: 0.92rem;
+    font-weight: 700;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+}
+
+.btn-clay-primary:hover {
+    transform: translateY(-2px) scale(1.03);
+    box-shadow: 0 8px 22px rgba(0, 0, 0, 0.3);
+    color: #FFFFFF !important;
+}
+
+.btn-clay-orange {
+    background: #FF6B35;
+    color: #FFFFFF !important;
+    border: none;
+    border-radius: 50px;
+    padding: 14px 34px;
+    font-size: 1rem;
+    font-weight: 800;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+    box-shadow: 
+        0 6px 0px #C44E1E,
+        0 10px 28px rgba(255, 107, 53, 0.35);
+}
+
+.btn-clay-orange:hover {
+    transform: translateY(-4px);
+    box-shadow: 
+        0 10px 0px #C44E1E,
+        0 16px 36px rgba(255, 107, 53, 0.42);
+    color: #FFFFFF !important;
+}
+
+.btn-clay-orange:active {
+    transform: translateY(2px);
+    box-shadow: 0 2px 0px #C44E1E, 0 4px 14px rgba(255, 107, 53, 0.3);
+}
+
+.btn-clay-ghost {
+    background: rgba(255, 255, 255, 0.7);
+    color: #141414;
+    border: 1.5px solid rgba(0,0,0,0.12);
+    border-radius: 50px;
+    padding: 13px 28px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.25s ease;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.06);
+}
+
+.btn-clay-ghost:hover {
+    background: #FFFFFF;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+    color: #141414;
+}
+
+/* HEADLINE */
+.bento-hero-headline {
+    text-align: center;
+    margin-bottom: 3.5rem;
+}
+
+.bento-headline-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #FFFFFF;
+    border: 1.5px solid rgba(0,0,0,0.08);
+    border-radius: 50px;
+    padding: 7px 18px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: #555;
+    margin-bottom: 1.75rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.bento-headline-tag span {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #4ade80;
+    display: inline-block;
+    animation: pulse-green 2s ease-in-out infinite;
+}
+
+@keyframes pulse-green {
+    0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.4); }
+    50% { opacity: 0.8; box-shadow: 0 0 0 6px rgba(74, 222, 128, 0); }
+}
+
+.bento-h1 {
+    font-size: clamp(2.4rem, 5.5vw, 4rem);
+    font-weight: 900;
+    line-height: 1.1;
+    letter-spacing: -0.04em;
+    color: #141414;
+    margin-bottom: 1.25rem;
+}
+
+.bento-h1 .text-orange { color: #FF6B35; }
+.bento-h1 .text-indigo { color: #4F46E5; }
+
+.bento-hero-sub {
+    font-size: 1.15rem;
+    color: #666;
+    line-height: 1.65;
+    max-width: 540px;
+    margin: 0 auto 2.5rem;
+}
+
+.bento-cta-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+/* --------------------------------------------------------------------------
+   BENTO GRID PRINCIPAL
+   -------------------------------------------------------------------------- */
+.bento-grid {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    grid-auto-rows: minmax(140px, auto);
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+/* --------------------------------------------------------------------------
+   CLAYMORPHISM CARD BASE (Sensación 3D Táctil)
+   -------------------------------------------------------------------------- */
+.clay-card {
+    border-radius: 28px;
+    overflow: hidden;
+    position: relative;
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
+                box-shadow 0.3s ease;
+}
+
+.clay-card:hover {
+    transform: translateY(-6px) scale(1.01);
+}
+
+/* Sombra Claymorphism Multicapa (el secreto del efecto 3D) */
+.clay-shadow-sm {
+    box-shadow: 
+        0 2px 0 rgba(0,0,0,0.04),
+        0 4px 8px rgba(0,0,0,0.05),
+        0 12px 24px rgba(0,0,0,0.06),
+        inset 0 1px 0 rgba(255,255,255,0.8);
+}
+
+.clay-shadow-md {
+    box-shadow: 
+        0 3px 0 rgba(0,0,0,0.05),
+        0 8px 16px rgba(0,0,0,0.07),
+        0 20px 40px rgba(0,0,0,0.08),
+        inset 0 1px 0 rgba(255,255,255,0.85);
+}
+
+.clay-shadow-lg {
+    box-shadow: 
+        0 4px 0 rgba(0,0,0,0.06),
+        0 12px 24px rgba(0,0,0,0.08),
+        0 32px 64px rgba(0,0,0,0.1),
+        inset 0 1px 0 rgba(255,255,255,0.9);
+}
+
+/* Backgrounds Clay */
+.clay-white   { background: #FFFFFF; }
+.clay-orange  { background: #FF6B35; color: #FFFFFF; }
+.clay-indigo  { background: #4F46E5; color: #FFFFFF; }
+.clay-dark    { background: #141414; color: #FFFFFF; }
+.clay-mint    { background: #D1FAE5; }
+.clay-yellow  { background: #FEF3C7; }
+.clay-peach   { background: #FFEDD5; }
+.clay-lavender{ background: #EDE9FE; }
+.clay-sky     { background: #E0F2FE; }
+.clay-rose    { background: #FFE4E6; }
+
+/* --------------------------------------------------------------------------
+   COLORES DE ÍCONOS 3D EN CLAYMORPHISM
+   -------------------------------------------------------------------------- */
+.clay-icon-3d {
+    width: 68px;
+    height: 68px;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.9rem;
+    flex-shrink: 0;
+}
+
+.clay-icon-orange {
+    background: linear-gradient(145deg, #FF8A5C, #E8501A);
+    color: #FFFFFF;
+    box-shadow: 0 4px 0 #B33B0E, 0 8px 16px rgba(255, 107, 53, 0.35);
+}
+
+.clay-icon-indigo {
+    background: linear-gradient(145deg, #6366F1, #3730A3);
+    color: #FFFFFF;
+    box-shadow: 0 4px 0 #2E276E, 0 8px 16px rgba(79, 70, 229, 0.35);
+}
+
+.clay-icon-green {
+    background: linear-gradient(145deg, #34D399, #059669);
+    color: #FFFFFF;
+    box-shadow: 0 4px 0 #046B4A, 0 8px 16px rgba(52, 211, 153, 0.35);
+}
+
+.clay-icon-yellow {
+    background: linear-gradient(145deg, #FCD34D, #F59E0B);
+    color: #FFFFFF;
+    box-shadow: 0 4px 0 #B45309, 0 8px 16px rgba(245, 158, 11, 0.35);
+}
+
+.clay-icon-rose {
+    background: linear-gradient(145deg, #FB7185, #E11D48);
+    color: #FFFFFF;
+    box-shadow: 0 4px 0 #9F0D2E, 0 8px 16px rgba(251, 113, 133, 0.35);
+}
+
+.clay-icon-sky {
+    background: linear-gradient(145deg, #38BDF8, #0284C7);
+    color: #FFFFFF;
+    box-shadow: 0 4px 0 #0158A0, 0 8px 16px rgba(56, 189, 248, 0.35);
+}
+
+/* --------------------------------------------------------------------------
+   CELDAS DEL BENTO GRID (por posición y tamaño)
+   -------------------------------------------------------------------------- */
+
+/* --- FILA 1 --- */
+/* Celda Hero Principal (PDF Import): columnas 1-7, 2 filas */
+.bento-hero-main {
+    grid-column: 1 / 8;
+    grid-row: 1 / 3;
+    padding: 2.5rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+/* Celda Estadística 1 (Cotizaciones): columnas 8-10, 1 fila */
+.bento-stat-1 {
+    grid-column: 8 / 11;
+    grid-row: 1 / 2;
+    padding: 1.75rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+/* Celda Estadística 2 (Tiempo): columnas 11-13, 1 fila */
+.bento-stat-2 {
+    grid-column: 11 / 13;
+    grid-row: 1 / 2;
+    padding: 1.75rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+/* --- FILA 2 --- */
+/* Celda Feature (Analytics): columnas 8-13, 1 fila */
+.bento-feature-analytics {
+    grid-column: 8 / 13;
+    grid-row: 2 / 3;
+    padding: 1.75rem;
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+}
+
+/* --- FILA 3 --- */
+/* Celda CTA Grande (Registro): columnas 1-5 */
+.bento-cta-register {
+    grid-column: 1 / 5;
+    grid-row: 3 / 4;
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+/* Celda Feature Roles: columnas 5-9 */
+.bento-feature-roles {
+    grid-column: 5 / 9;
+    grid-row: 3 / 4;
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+/* Celda Stat Productos: columnas 9-13 */
+.bento-stat-products {
+    grid-column: 9 / 13;
+    grid-row: 3 / 4;
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+/* --- FILA 4 --- */
+/* Celda Feature PDF: columnas 1-4 */
+.bento-feature-pdf {
+    grid-column: 1 / 5;
+    grid-row: 4 / 5;
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+/* Celda Feature Seguridad: columnas 5-9 */
+.bento-feature-security {
+    grid-column: 5 / 9;
+    grid-row: 4 / 5;
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+/* Celda Feature Respaldos: columnas 9-13 */
+.bento-feature-backup {
+    grid-column: 9 / 13;
+    grid-row: 4 / 5;
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+/* --- FILA 5: CTA FINAL --- */
+.bento-cta-final {
+    grid-column: 1 / 13;
+    grid-row: 5 / 6;
+    padding: 3.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 2rem;
+}
+
+/* --------------------------------------------------------------------------
+   COMPONENTES INTERNOS
+   -------------------------------------------------------------------------- */
+
+/* Big Number Stat */
+.clay-stat-number {
+    font-size: 2.8rem;
+    font-weight: 900;
+    line-height: 1;
+    letter-spacing: -0.04em;
+}
+
+.clay-stat-label {
+    font-size: 0.82rem;
+    font-weight: 700;
+    opacity: 0.7;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.clay-stat-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: rgba(255,255,255,0.25);
+    border-radius: 50px;
+    padding: 4px 10px;
+    font-size: 0.78rem;
+    font-weight: 700;
+}
+
+/* Mini bar chart (decorativo) */
+.clay-mini-chart {
+    display: flex;
+    align-items: flex-end;
+    gap: 4px;
+    height: 40px;
+}
+
+.clay-mini-bar {
+    border-radius: 4px 4px 0 0;
+    width: 14px;
+    background: rgba(255,255,255,0.35);
+    transition: height 0.4s ease;
+}
+
+.clay-mini-bar.active {
+    background: rgba(255,255,255,0.85);
+}
+
+/* Pills de Rol */
+.clay-role-pill {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(255,255,255,0.5);
+    border: 1.5px solid rgba(0,0,0,0.07);
+    border-radius: 16px;
+    padding: 12px 16px;
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: #141414;
+    margin-bottom: 8px;
+}
+
+.clay-role-icon {
+    width: 38px;
+    height: 38px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+}
+
+/* Feature List Items */
+.clay-feature-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.87rem;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 8px;
+}
+
+.clay-feature-check {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    flex-shrink: 0;
+    background: rgba(255,255,255,0.6);
+}
+
+/* Progress bar decorativa */
+.clay-progress-bar {
+    height: 8px;
+    border-radius: 50px;
+    background: rgba(255,255,255,0.25);
+    overflow: hidden;
+    margin-top: 8px;
+}
+
+.clay-progress-fill {
+    height: 100%;
+    border-radius: 50px;
+    background: rgba(255,255,255,0.75);
+    transition: width 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Floating Notification (decorativa) */
+.clay-floating-notif {
+    background: #FFFFFF;
+    border-radius: 16px;
+    padding: 10px 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #141414;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    animation: float-notif 4s ease-in-out infinite alternate;
+}
+
+@keyframes float-notif {
+    0% { transform: translateY(0); }
+    100% { transform: translateY(-8px); }
+}
+
+.clay-notif-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #4ade80;
+    flex-shrink: 0;
+    animation: pulse-green 1.5s ease-in-out infinite;
+}
+
+/* --------------------------------------------------------------------------
+   RESPONSIVE (Tablet / Mobile)
+   -------------------------------------------------------------------------- */
+@media (max-width: 1024px) {
+    .bento-grid {
+        grid-template-columns: repeat(6, 1fr);
+    }
+
+    .bento-hero-main         { grid-column: 1 / 7; grid-row: 1 / 2; }
+    .bento-stat-1            { grid-column: 1 / 4; grid-row: 2 / 3; }
+    .bento-stat-2            { grid-column: 4 / 7; grid-row: 2 / 3; }
+    .bento-feature-analytics { grid-column: 1 / 7; grid-row: 3 / 4; }
+    .bento-cta-register      { grid-column: 1 / 4; grid-row: 4 / 5; }
+    .bento-feature-roles     { grid-column: 4 / 7; grid-row: 4 / 5; }
+    .bento-stat-products     { grid-column: 1 / 7; grid-row: 5 / 6; }
+    .bento-feature-pdf       { grid-column: 1 / 3; grid-row: 6 / 7; }
+    .bento-feature-security  { grid-column: 3 / 5; grid-row: 6 / 7; }
+    .bento-feature-backup    { grid-column: 5 / 7; grid-row: 6 / 7; }
+    .bento-cta-final         { grid-column: 1 / 7; grid-row: 7 / 8; flex-direction: column; text-align: center; }
+
+    .clay-stat-number { font-size: 2.2rem; }
+}
+
+@media (max-width: 640px) {
+    .bento-grid              { grid-template-columns: 1fr; gap: 12px; }
+    .bento-hero-main         { grid-column: 1 / 2; }
+    .bento-stat-1            { grid-column: 1 / 2; }
+    .bento-stat-2            { grid-column: 1 / 2; }
+    .bento-feature-analytics { grid-column: 1 / 2; }
+    .bento-cta-register      { grid-column: 1 / 2; }
+    .bento-feature-roles     { grid-column: 1 / 2; }
+    .bento-stat-products     { grid-column: 1 / 2; }
+    .bento-feature-pdf       { grid-column: 1 / 2; }
+    .bento-feature-security  { grid-column: 1 / 2; }
+    .bento-feature-backup    { grid-column: 1 / 2; }
+    .bento-cta-final         { grid-column: 1 / 2; }
+    .bento-hero-nav .bento-nav-links { display: none; }
+    .bento-h1 { font-size: 2rem; }
+}

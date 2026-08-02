@@ -1,443 +1,336 @@
 {% extends 'shared/layout.html' %}
 
-{% block titulo %}Sistema Premium de Cotizaciones{% endblock %}
+{% block titulo %}Sistema Premium de Cotizaciones | Inicio{% endblock %}
 
 {% block styles %}
 {{ super() }}
-<!-- Google Fonts: Outfit & Inter -->
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-<!-- AOS Animation CSS -->
 <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
-
-<style>
-    /* Tipografía Premium */
-    body {
-        font-family: 'Inter', sans-serif;
-        background-color: #f8fafc;
-        color: #1e293b;
-        overflow-x: hidden;
-    }
-    
-    h1, h2, h3, h4, h5, h6, .display-4, .display-5 {
-        font-family: 'Outfit', sans-serif;
-        letter-spacing: -0.02em;
-    }
-
-    /* Variables Globales */
-    :root {
-        --glass-bg: rgba(255, 255, 255, 0.75);
-        --glass-border: rgba(255, 255, 255, 0.4);
-        --premium-blue: #2563eb;
-        --premium-purple: #7c3aed;
-        --gradient-primary: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
-        --gradient-text: linear-gradient(to right, #2563eb, #9333ea);
-    }
-
-    /* Utilidades */
-    .text-gradient {
-        background: var(--gradient-text);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-    }
-
-    .bg-gradient-premium {
-        background: var(--gradient-primary);
-    }
-
-    .glass-card {
-        background: var(--glass-bg);
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
-        border: 1px solid var(--glass-border);
-        border-radius: 24px;
-        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.05);
-        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    .glass-card:hover {
-        transform: translateY(-10px) scale(1.02);
-        box-shadow: 0 30px 60px rgba(124, 58, 237, 0.12);
-        border-color: rgba(124, 58, 237, 0.3);
-    }
-
-    /* Animaciones Persistentes (Keyframes) */
-    @keyframes float {
-        0% { transform: translateY(0px); }
-        50% { transform: translateY(-20px); }
-        100% { transform: translateY(0px); }
-    }
-
-    @keyframes pulse-glow {
-        0% { box-shadow: 0 0 0 0 rgba(124, 58, 237, 0.4); }
-        70% { box-shadow: 0 0 0 20px rgba(124, 58, 237, 0); }
-        100% { box-shadow: 0 0 0 0 rgba(124, 58, 237, 0); }
-    }
-
-    @keyframes blob-spin {
-        0% { transform: rotate(0deg) scale(1); }
-        50% { transform: rotate(180deg) scale(1.1); }
-        100% { transform: rotate(360deg) scale(1); }
-    }
-
-    .floating-element {
-        animation: float 6s ease-in-out infinite;
-    }
-    
-    .floating-element-delayed {
-        animation: float 7s ease-in-out infinite;
-        animation-delay: 2s;
-    }
-
-    /* Blobs de Fondo */
-    .bg-blobs {
-        position: absolute;
-        top: 0; left: 0; width: 100%; height: 100%;
-        overflow: hidden;
-        z-index: -1;
-        pointer-events: none;
-    }
-
-    .blob {
-        position: absolute;
-        filter: blur(80px);
-        opacity: 0.5;
-        border-radius: 50%;
-        animation: blob-spin 20s linear infinite;
-    }
-
-    .blob-1 {
-        top: -10%; left: -10%; width: 50vw; height: 50vw;
-        background: rgba(37, 99, 235, 0.3);
-    }
-
-    .blob-2 {
-        bottom: -20%; right: -10%; width: 60vw; height: 60vw;
-        background: rgba(124, 58, 237, 0.25);
-        animation-direction: reverse;
-        animation-duration: 25s;
-    }
-    
-    .blob-3 {
-        top: 40%; left: 30%; width: 40vw; height: 40vw;
-        background: rgba(236, 72, 153, 0.2);
-        animation-delay: -5s;
-    }
-
-    /* Botones Premium */
-    .btn-premium {
-        background: var(--gradient-primary);
-        color: white;
-        border: none;
-        border-radius: 50px;
-        font-weight: 600;
-        letter-spacing: 0.5px;
-        padding: 12px 32px;
-        transition: all 0.3s ease;
-        position: relative;
-        overflow: hidden;
-        z-index: 1;
-    }
-
-    .btn-premium::before {
-        content: '';
-        position: absolute;
-        top: 0; left: 0; width: 100%; height: 100%;
-        background: linear-gradient(135deg, #7c3aed 0%, #2563eb 100%);
-        z-index: -1;
-        transition: opacity 0.3s ease;
-        opacity: 0;
-    }
-
-    .btn-premium:hover::before {
-        opacity: 1;
-    }
-
-    .btn-premium:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 10px 20px rgba(124, 58, 237, 0.3);
-        color: white;
-    }
-
-    .btn-outline-premium {
-        background: transparent;
-        color: var(--premium-blue);
-        border: 2px solid var(--premium-blue);
-        border-radius: 50px;
-        font-weight: 600;
-        padding: 10px 30px;
-        transition: all 0.3s ease;
-    }
-
-    .btn-outline-premium:hover {
-        background: var(--premium-blue);
-        color: white;
-        transform: translateY(-3px);
-        box-shadow: 0 10px 20px rgba(37, 99, 235, 0.2);
-    }
-
-    /* Feature Icons */
-    .feature-icon-wrapper {
-        width: 80px; height: 80px;
-        border-radius: 20px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin: 0 auto 1.5rem;
-        background: linear-gradient(135deg, rgba(255,255,255,0.9), rgba(255,255,255,0.4));
-        box-shadow: inset 0 0 0 1px rgba(255,255,255,0.5), 0 10px 20px rgba(0,0,0,0.05);
-        font-size: 2rem;
-        transition: transform 0.3s ease;
-    }
-
-    .glass-card:hover .feature-icon-wrapper {
-        transform: rotate(10deg) scale(1.1);
-    }
-
-    .hero-image-wrapper {
-        position: relative;
-        border-radius: 30px;
-        padding: 10px;
-        background: linear-gradient(135deg, rgba(255,255,255,0.4), rgba(255,255,255,0.1));
-        backdrop-filter: blur(10px);
-        box-shadow: 0 30px 60px rgba(0,0,0,0.1);
-    }
-    
-    .hero-image-wrapper img {
-        border-radius: 20px;
-        box-shadow: 0 15px 35px rgba(0,0,0,0.1);
-    }
-
-    .step-number {
-        width: 50px; height: 50px;
-        background: var(--gradient-primary);
-        color: white;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.5rem;
-        font-weight: bold;
-        box-shadow: 0 10px 20px rgba(37, 99, 235, 0.3);
-    }
-
-    /* Listas y viñetas */
-    .premium-list li {
-        margin-bottom: 15px;
-        font-size: 1.05rem;
-        display: flex;
-        align-items: flex-start;
-    }
-    
-    .premium-list i {
-        background: var(--gradient-primary);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        font-size: 1.25rem;
-        margin-right: 12px;
-        margin-top: 2px;
-    }
-</style>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/landing.css') }}">
 {% endblock %}
 
 {% block contenido %}
-<!-- Elementos de fondo (Blobs) -->
-<div class="bg-blobs">
-    <div class="blob blob-1"></div>
-    <div class="blob blob-2"></div>
-    <div class="blob blob-3"></div>
-</div>
+<div class="landing-bento-wrapper" style="margin-top: -1.5rem; margin-left: -12px; margin-right: -12px; margin-bottom: -3rem; padding: 2rem 2rem 5rem;">
+  <div style="max-width: 1280px; margin: 0 auto;">
 
-<div class="container my-4 position-relative" style="z-index: 1;">
-    <!-- HERO SECTION -->
-    <div class="row align-items-center min-vh-75 py-5">
-        <div class="col-lg-6 mb-5 mb-lg-0 text-center text-lg-start" data-aos="fade-right" data-aos-duration="1000">
-            <div class="badge bg-white text-primary px-3 py-2 rounded-pill shadow-sm mb-4 fw-bold" style="border: 1px solid rgba(37, 99, 235, 0.2);">
-                <i class="bi bi-stars me-1 text-warning"></i> La Nueva Generación
-            </div>
-            <h1 class="display-3 fw-black mb-4 lh-sm text-dark" style="font-weight: 900;">
-                Eleva tus ventas con <br/>
-                <span class="text-gradient">Cotizaciones Premium</span>
-            </h1>
-            <p class="lead mb-5 text-secondary" style="font-size: 1.25rem; max-width: 90%;">
-                Una plataforma inteligente, fluida y espectacular para diseñar, rastrear y cerrar propuestas comerciales en tiempo récord.
-            </p>
-            <div class="d-flex flex-column flex-sm-row gap-3 justify-content-center justify-content-lg-start">
-                <a href="/registro" class="btn btn-premium btn-lg">
-                    Comenzar Gratis <i class="bi bi-arrow-right ms-2"></i>
-                </a>
-                <a href="/login" class="btn btn-outline-premium btn-lg">
-                    <i class="bi bi-box-arrow-in-right me-2"></i> Iniciar Sesión
-                </a>
-            </div>
-            
-            <div class="mt-5 d-flex align-items-center justify-content-center justify-content-lg-start gap-4 opacity-75">
-                <div class="d-flex align-items-center">
-                    <i class="bi bi-shield-check fs-4 text-success me-2"></i> 
-                    <span class="fw-semibold">100% Seguro</span>
-                </div>
-                <div class="d-flex align-items-center">
-                    <i class="bi bi-lightning-charge fs-4 text-warning me-2"></i> 
-                    <span class="fw-semibold">Ultra Rápido</span>
-                </div>
-            </div>
-        </div>
-        
-        <div class="col-lg-6" data-aos="fade-left" data-aos-duration="1200" data-aos-delay="200">
-            <div class="hero-image-wrapper floating-element">
-                <!-- Usamos una imagen de muestra impactante (puedes reemplazarla con capturas reales) -->
-                <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=2070&auto=format&fit=crop" 
-                     class="img-fluid w-100" alt="Dashboard Analítico" style="object-fit: cover; aspect-ratio: 4/3;">
-                
-                <!-- Floating Badge -->
-                <div class="position-absolute glass-card px-4 py-3 floating-element-delayed" style="bottom: -20px; left: -20px; animation-duration: 5s;">
-                    <div class="d-flex align-items-center gap-3">
-                        <div class="bg-success rounded-circle p-2 text-white">
-                            <i class="bi bi-graph-up-arrow fs-4"></i>
-                        </div>
-                        <div>
-                            <p class="mb-0 text-muted fs-7 fw-bold text-uppercase">Cierre de Ventas</p>
-                            <h4 class="mb-0 fw-bold">+45%</h4>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+    <!-- NAV PILL FLOTANTE -->
+    <nav class="bento-hero-nav" data-aos="fade-down" data-aos-duration="600">
+      <a href="/" class="bento-brand">
+        <span class="bento-brand-dot"></span>
+        COTIZA<span style="color: #FF6B35;">Pro</span>
+      </a>
+      <div class="bento-nav-links">
+        <a href="#funciones">Funciones</a>
+        <a href="#roles">Roles</a>
+        <a href="{{ url_for('login') }}">Iniciar Sesión</a>
+      </div>
+      <a href="{{ url_for('registro') }}" class="btn-clay-primary">
+        Empezar Gratis <i class="bi bi-arrow-right"></i>
+      </a>
+    </nav>
+
+    <!-- HEADLINE CENTRAL -->
+    <div class="bento-hero-headline" data-aos="fade-up" data-aos-duration="700">
+      <div class="bento-headline-tag">
+        <span></span> Sistema activo en Bolivia (UTC-4) · Disponibilidad 99.9%
+      </div>
+      <h1 class="bento-h1">
+        Cotizaciones que<br>
+        <span class="text-orange">cierran ventas</span> más<br>
+        <span class="text-indigo">rápido y sin errores</span>
+      </h1>
+      <p class="bento-hero-sub">
+        Importa catálogos PDF, gestiona tu inventario y emite propuestas profesionales en segundos. Diseñado para equipos de ventas bolivianos.
+      </p>
+      <div class="bento-cta-row">
+        <a href="{{ url_for('registro') }}" class="btn-clay-orange">
+          <i class="bi bi-lightning-charge-fill"></i> Comenzar Gratis
+        </a>
+        <a href="{{ url_for('login') }}" class="btn-clay-ghost">
+          <i class="bi bi-box-arrow-in-right"></i> Iniciar Sesión
+        </a>
+      </div>
     </div>
 
-    <!-- CARACTERÍSTICAS PRINCIPALES -->
-    <div class="py-5 mt-5">
-        <div class="text-center mb-5" data-aos="fade-up">
-            <h6 class="text-primary fw-bold text-uppercase tracking-wider">Potencia Absoluta</h6>
-            <h2 class="display-5 fw-bold text-dark">Todo lo que tu equipo necesita</h2>
+    <!-- ============================================================
+         BENTO GRID PRINCIPAL
+    ============================================================ -->
+    <div class="bento-grid" id="funciones">
+
+      <!-- ┌─────────────────────────────────────┐
+           │  CELDA HERO: Extracción Mágica PDF  │  Col 1-7, Rows 1-2
+           └─────────────────────────────────────┘ -->
+      <div class="clay-card clay-dark clay-shadow-lg bento-hero-main" data-aos="fade-up" data-aos-delay="0">
+        <!-- Notificación flotante decorativa -->
+        <div class="clay-floating-notif" style="width: fit-content; margin-bottom: 1.5rem;">
+          <span class="clay-notif-dot"></span>
+          Importación completada — 348 productos cargados
         </div>
 
-        <div class="row g-4 mt-3">
-            <!-- Feature 1 -->
-            <div class="col-md-4" data-aos="fade-up" data-aos-delay="100">
-                <div class="glass-card p-5 h-100 text-center">
-                    <div class="feature-icon-wrapper text-primary">
-                        <i class="bi bi-search"></i>
-                    </div>
-                    <h3 class="h4 fw-bold mb-3">Buscador Inteligente</h3>
-                    <p class="text-secondary mb-0">
-                        Encuentra y añade productos a la cotización en milisegundos. Olvídate de copiar y pegar desde lentas hojas de Excel.
-                    </p>
-                </div>
-            </div>
-            
-            <!-- Feature 2 -->
-            <div class="col-md-4" data-aos="fade-up" data-aos-delay="200">
-                <div class="glass-card p-5 h-100 text-center">
-                    <div class="feature-icon-wrapper text-success">
-                        <i class="bi bi-cloud-arrow-up"></i>
-                    </div>
-                    <h3 class="h4 fw-bold mb-3">Catálogo Centralizado</h3>
-                    <p class="text-secondary mb-0">
-                        Importa listas de precios masivas desde texto o PDFs (Extracción Mágica), y mantén el inventario sincronizado en la nube para todo tu equipo.
-                    </p>
-                </div>
-            </div>
-            
-            <!-- Feature 3 -->
-            <div class="col-md-4" data-aos="fade-up" data-aos-delay="300">
-                <div class="glass-card p-5 h-100 text-center">
-                    <div class="feature-icon-wrapper text-info">
-                        <i class="bi bi-file-pdf"></i>
-                    </div>
-                    <h3 class="h4 fw-bold mb-3">Exportación PDF</h3>
-                    <p class="text-secondary mb-0">
-                        Documentos PDF generados al instante con cálculos matemáticos automáticos, totales correctos e identidad visual, listos para enviar.
-                    </p>
-                </div>
-            </div>
+        <div>
+          <div class="clay-icon-3d clay-icon-orange mb-3">
+            <i class="bi bi-file-earmark-pdf-fill"></i>
+          </div>
+          <h2 style="font-size: 1.8rem; font-weight: 900; letter-spacing: -0.03em; margin-bottom: 0.75rem;">
+            Extracción Mágica<br>desde PDF y Texto
+          </h2>
+          <p style="font-size: 0.95rem; opacity: 0.7; line-height: 1.6; margin-bottom: 1.5rem;">
+            Sube cualquier lista de precios o catálogo y nuestro motor IA lo convierte automáticamente en inventario listo para cotizar.
+          </p>
+          <!-- Progress simulado -->
+          <div style="font-size: 0.78rem; font-weight: 700; opacity: 0.6; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.05em;">Extracción IA</div>
+          <div class="clay-progress-bar">
+            <div class="clay-progress-fill" style="width: 94%;"></div>
+          </div>
+          <div style="font-size: 0.82rem; opacity: 0.6; margin-top: 6px;">94% precisión promedio · Tiempo: 2.3s</div>
         </div>
-    </div>
+      </div>
 
-    <!-- PANELES POR ROL -->
-    <div class="py-5 mt-5">
-        <div class="row align-items-center g-5">
-            <!-- Texto Izquierda -->
-            <div class="col-lg-5" data-aos="fade-right">
-                <h2 class="display-5 fw-bold mb-4">Adaptable a cada miembro de tu equipo</h2>
-                <p class="lead text-secondary mb-4">
-                    Asigna roles específicos para mantener la información segura y organizada, permitiendo que cada usuario se enfoque en lo que mejor sabe hacer.
-                </p>
-                
-                <div class="d-flex align-items-center gap-3 mb-4">
-                    <div class="bg-primary bg-opacity-10 text-primary p-3 rounded-circle">
-                        <i class="bi bi-shield-lock fs-3"></i>
-                    </div>
-                    <div>
-                        <h5 class="fw-bold mb-1">Administradores</h5>
-                        <p class="text-muted mb-0 small">Control total de productos, reportes globales y usuarios.</p>
-                    </div>
-                </div>
-                
-                <div class="d-flex align-items-center gap-3">
-                    <div class="bg-success bg-opacity-10 text-success p-3 rounded-circle">
-                        <i class="bi bi-person-workspace fs-3"></i>
-                    </div>
-                    <div>
-                        <h5 class="fw-bold mb-1">Vendedores (Estándar)</h5>
-                        <p class="text-muted mb-0 small">Acceso exclusivo a sus propias cotizaciones y cartera de clientes.</p>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Imagen/Mockup Derecha -->
-            <div class="col-lg-7" data-aos="fade-left" data-aos-delay="200">
-                <div class="glass-card p-4 p-md-5">
-                    <h4 class="fw-bold mb-4 text-center">Capacidades del Administrador</h4>
-                    <ul class="list-unstyled premium-list">
-                        <li><i class="bi bi-check-circle-fill"></i> Importación masiva de productos (Archivos y Texto)</li>
-                        <li><i class="bi bi-check-circle-fill"></i> Analíticas de rendimiento de ventas de toda la empresa</li>
-                        <li><i class="bi bi-check-circle-fill"></i> Gestión centralizada de bases de datos de clientes</li>
-                        <li><i class="bi bi-check-circle-fill"></i> Control de permisos y estados de cuentas</li>
-                        <li><i class="bi bi-check-circle-fill"></i> Modificación global de listas de precios</li>
-                    </ul>
-                </div>
-            </div>
+      <!-- ┌───────────────────────┐
+           │ STAT: Cotizaciones    │  Col 8-10, Row 1
+           └───────────────────────┘ -->
+      <div class="clay-card clay-orange clay-shadow-md bento-stat-1" data-aos="fade-up" data-aos-delay="80">
+        <div>
+          <div class="clay-stat-badge" style="margin-bottom: 10px;">
+            <i class="bi bi-graph-up-arrow"></i> Este mes
+          </div>
+          <div class="clay-stat-number">+500</div>
+          <div class="clay-stat-label">Cotizaciones<br>Generadas</div>
         </div>
-    </div>
+        <!-- Mini chart decorativo -->
+        <div class="clay-mini-chart">
+          <div class="clay-mini-bar" style="height: 30%;"></div>
+          <div class="clay-mini-bar" style="height: 55%;"></div>
+          <div class="clay-mini-bar" style="height: 40%;"></div>
+          <div class="clay-mini-bar" style="height: 75%;"></div>
+          <div class="clay-mini-bar" style="height: 60%;"></div>
+          <div class="clay-mini-bar active" style="height: 100%;"></div>
+        </div>
+      </div>
 
-    <!-- CTA FINAL -->
-    <div class="py-5 mt-4 mb-5" data-aos="zoom-in" data-aos-duration="800">
-        <div class="bg-gradient-premium rounded-4 p-5 text-center text-white position-relative overflow-hidden shadow-lg" style="border: 1px solid rgba(255,255,255,0.2);">
-            
-            <!-- Decoraciones del CTA -->
-            <div class="position-absolute top-0 start-0 w-100 h-100 opacity-25" style="background-image: radial-gradient(circle at 20% 150%, rgba(255,255,255,0.8) 0%, transparent 50%); z-index: 0;"></div>
-            
-            <div class="position-relative" style="z-index: 1;">
-                <i class="bi bi-rocket-takeoff display-3 mb-3 d-block opacity-75 floating-element"></i>
-                <h2 class="display-4 fw-black mb-4" style="font-family: 'Outfit';">Comienza a transformar tus ventas hoy</h2>
-                <p class="lead mb-5 opacity-75" style="max-width: 600px; margin: 0 auto;">
-                    Únete a las empresas que ya han reducido un 60% el tiempo invertido en la creación de propuestas comerciales.
-                </p>
-                <div class="d-flex justify-content-center gap-3">
-                    <a href="/registro" class="btn btn-light btn-lg px-5 py-3 fw-bold rounded-pill text-primary" style="box-shadow: 0 10px 20px rgba(0,0,0,0.2);">
-                        Crear Cuenta Gratis
-                    </a>
-                </div>
-            </div>
+      <!-- ┌───────────────────────┐
+           │ STAT: Tiempo Récord   │  Col 11-13, Row 1
+           └───────────────────────┘ -->
+      <div class="clay-card clay-indigo clay-shadow-md bento-stat-2" data-aos="fade-up" data-aos-delay="140">
+        <div>
+          <div style="font-size: 2rem; margin-bottom: 6px;">⚡</div>
+          <div class="clay-stat-number">2 min</div>
+          <div class="clay-stat-label">Promedio para<br>emitir 1 cotización</div>
         </div>
+        <div class="clay-stat-badge">
+          <i class="bi bi-clock-fill"></i> Antes: 25 min
+        </div>
+      </div>
+
+      <!-- ┌────────────────────────────────────┐
+           │ FEATURE: Analytics Dashboard        │  Col 8-13, Row 2
+           └────────────────────────────────────┘ -->
+      <div class="clay-card clay-mint clay-shadow-md bento-feature-analytics" data-aos="fade-up" data-aos-delay="100">
+        <div class="clay-icon-3d clay-icon-green flex-shrink-0">
+          <i class="bi bi-graph-up-arrow"></i>
+        </div>
+        <div>
+          <h3 style="font-size: 1.1rem; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 0.4rem; color: #141414;">
+            Analíticas de Ventas en Tiempo Real
+          </h3>
+          <p style="font-size: 0.87rem; color: #555; line-height: 1.5; margin: 0;">
+            Supervisa facturación total, cotizaciones por vendedor y tasa de cierre desde el dashboard de Superadmin.
+          </p>
+        </div>
+      </div>
+
+      <!-- ┌────────────────────────────────────┐
+           │ CTA: Crear Cuenta                   │  Col 1-4, Row 3
+           └────────────────────────────────────┘ -->
+      <div class="clay-card clay-orange clay-shadow-lg bento-cta-register" data-aos="fade-up" data-aos-delay="60" id="roles">
+        <div>
+          <div style="font-size: 2.5rem; margin-bottom: 0.75rem;">🚀</div>
+          <h3 style="font-size: 1.35rem; font-weight: 900; letter-spacing: -0.03em; margin-bottom: 0.5rem;">
+            Empieza hoy<br>sin tarjeta
+          </h3>
+          <p style="font-size: 0.87rem; opacity: 0.85; line-height: 1.5; margin: 0;">
+            Crea tu cuenta de administrador, invita a tu equipo de ventas y genera tu primera cotización en minutos.
+          </p>
+        </div>
+        <a href="{{ url_for('registro') }}" class="btn-clay-ghost" style="width: fit-content; margin-top: 1rem;">
+          Crear Cuenta <i class="bi bi-arrow-right"></i>
+        </a>
+      </div>
+
+      <!-- ┌────────────────────────────────────┐
+           │ FEATURE: Gestión de Roles           │  Col 5-9, Row 3
+           └────────────────────────────────────┘ -->
+      <div class="clay-card clay-white clay-shadow-md bento-feature-roles" data-aos="fade-up" data-aos-delay="100">
+        <div>
+          <div class="clay-icon-3d clay-icon-indigo mb-3">
+            <i class="bi bi-people-fill"></i>
+          </div>
+          <h3 style="font-size: 1.15rem; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 1rem; color: #141414;">
+            Control de Roles & Permisos
+          </h3>
+        </div>
+        <div>
+          <div class="clay-role-pill">
+            <div class="clay-role-icon clay-icon-indigo">
+              <i class="bi bi-shield-lock-fill"></i>
+            </div>
+            <div>
+              <div style="font-size: 0.85rem; font-weight: 700;">Superadmin & Admin</div>
+              <div style="font-size: 0.76rem; color: #666; font-weight: 500;">PINs, suscripciones, catálogo global</div>
+            </div>
+          </div>
+          <div class="clay-role-pill">
+            <div class="clay-role-icon clay-icon-green">
+              <i class="bi bi-person-badge-fill"></i>
+            </div>
+            <div>
+              <div style="font-size: 0.85rem; font-weight: 700;">Vendedor Standard</div>
+              <div style="font-size: 0.76rem; color: #666; font-weight: 500;">Cotizaciones, clientes propios</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ┌────────────────────────────────────┐
+           │ STAT: Catálogo de Productos         │  Col 9-13, Row 3
+           └────────────────────────────────────┘ -->
+      <div class="clay-card clay-dark clay-shadow-lg bento-stat-products" data-aos="fade-up" data-aos-delay="150">
+        <div>
+          <div class="clay-stat-badge" style="margin-bottom: 10px;">
+            <i class="bi bi-box-seam-fill"></i> Catálogo Activo
+          </div>
+          <div class="clay-stat-number">+10K</div>
+          <div class="clay-stat-label">Productos<br>Gestionados</div>
+        </div>
+        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+          <span style="background: rgba(255,255,255,0.1); border-radius: 8px; padding: 6px 10px; font-size: 0.77rem; font-weight: 600;">📦 Importados PDF</span>
+          <span style="background: rgba(255,255,255,0.1); border-radius: 8px; padding: 6px 10px; font-size: 0.77rem; font-weight: 600;">✏️ Manual</span>
+        </div>
+      </div>
+
+      <!-- ┌──────────────────────────┐
+           │ FEATURE: PDF Cotización   │  Col 1-4, Row 4
+           └──────────────────────────┘ -->
+      <div class="clay-card clay-peach clay-shadow-md bento-feature-pdf" data-aos="fade-up" data-aos-delay="80">
+        <div class="clay-icon-3d clay-icon-orange">
+          <i class="bi bi-file-earmark-richtext-fill"></i>
+        </div>
+        <div>
+          <h3 style="font-size: 1.1rem; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 0.4rem; color: #141414;">
+            Exportación PDF Profesional
+          </h3>
+          <p style="font-size: 0.87rem; color: #555; line-height: 1.5; margin-bottom: 0.75rem;">
+            Genera cotizaciones con IVA 13%, branding corporativo, hora Bolivia (UTC-4) y formato impecable.
+          </p>
+          <div class="clay-feature-item">
+            <div class="clay-feature-check" style="background: #FF6B35; color: #fff;">
+              <i class="bi bi-check-lg"></i>
+            </div>
+            IVA automático 13%
+          </div>
+          <div class="clay-feature-item">
+            <div class="clay-feature-check" style="background: #FF6B35; color: #fff;">
+              <i class="bi bi-check-lg"></i>
+            </div>
+            Descarga instantánea
+          </div>
+        </div>
+      </div>
+
+      <!-- ┌──────────────────────────┐
+           │ FEATURE: Seguridad PINs  │  Col 5-9, Row 4
+           └──────────────────────────┘ -->
+      <div class="clay-card clay-lavender clay-shadow-md bento-feature-security" data-aos="fade-up" data-aos-delay="120">
+        <div class="clay-icon-3d clay-icon-indigo">
+          <i class="bi bi-key-fill"></i>
+        </div>
+        <div>
+          <h3 style="font-size: 1.1rem; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 0.4rem; color: #141414;">
+            Seguridad con PINs de Acceso
+          </h3>
+          <p style="font-size: 0.87rem; color: #555; line-height: 1.5; margin-bottom: 0.75rem;">
+            El Superadmin emite PINs únicos con vigencia de 30 días para habilitar nuevas cuentas de administrador de forma segura.
+          </p>
+          <div class="clay-feature-item">
+            <div class="clay-feature-check" style="background: #4F46E5; color: #fff;">
+              <i class="bi bi-check-lg"></i>
+            </div>
+            PINs con expiración
+          </div>
+          <div class="clay-feature-item">
+            <div class="clay-feature-check" style="background: #4F46E5; color: #fff;">
+              <i class="bi bi-check-lg"></i>
+            </div>
+            Auditoría de uso
+          </div>
+        </div>
+      </div>
+
+      <!-- ┌──────────────────────────┐
+           │ FEATURE: Respaldos DB    │  Col 9-13, Row 4
+           └──────────────────────────┘ -->
+      <div class="clay-card clay-sky clay-shadow-md bento-feature-backup" data-aos="fade-up" data-aos-delay="160">
+        <div class="clay-icon-3d clay-icon-sky">
+          <i class="bi bi-database-fill-gear"></i>
+        </div>
+        <div>
+          <h3 style="font-size: 1.1rem; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 0.4rem; color: #141414;">
+            Respaldos & Auditoría Global
+          </h3>
+          <p style="font-size: 0.87rem; color: #555; line-height: 1.5; margin-bottom: 0.75rem;">
+            Descarga respaldos completos de la base de datos PostgreSQL y revisa el historial de toda acción del sistema.
+          </p>
+          <div class="clay-feature-item">
+            <div class="clay-feature-check" style="background: #0284C7; color: #fff;">
+              <i class="bi bi-check-lg"></i>
+            </div>
+            PostgreSQL Backup .sql
+          </div>
+          <div class="clay-feature-item">
+            <div class="clay-feature-check" style="background: #0284C7; color: #fff;">
+              <i class="bi bi-check-lg"></i>
+            </div>
+            Log de auditoría en tiempo real
+          </div>
+        </div>
+      </div>
+
+      <!-- ┌──────────────────────────────────────────────┐
+           │ CTA FINAL: La Propuesta de Valor              │  Col 1-13, Row 5
+           └──────────────────────────────────────────────┘ -->
+      <div class="clay-card clay-dark clay-shadow-lg bento-cta-final" data-aos="fade-up" data-aos-delay="0">
+        <div>
+          <div class="bento-headline-tag" style="background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.15); color: rgba(255,255,255,0.7); margin-bottom: 1.5rem;">
+            <span style="background: #FF6B35;"></span> ¿Listo para transformar tu proceso de ventas?
+          </div>
+          <h2 style="font-size: clamp(1.8rem, 4vw, 3rem); font-weight: 900; letter-spacing: -0.04em; line-height: 1.1; margin-bottom: 1rem;">
+            Empieza a emitir cotizaciones<br>
+            <span style="color: #FF6B35;">profesionales en minutos.</span>
+          </h2>
+          <p style="font-size: 1rem; opacity: 0.65; line-height: 1.6; max-width: 480px; margin: 0;">
+            Únete a empresas bolivianas que ya redujeron un 60% el tiempo invertido en crear propuestas comerciales.
+          </p>
+        </div>
+        <div style="flex-shrink: 0; text-align: center;">
+          <a href="{{ url_for('registro') }}" class="btn-clay-orange" style="font-size: 1.1rem; padding: 16px 42px;">
+            <i class="bi bi-lightning-charge-fill"></i> Crear Cuenta Gratis
+          </a>
+          <div style="font-size: 0.8rem; opacity: 0.5; margin-top: 12px;">Sin tarjeta de crédito · Acceso inmediato</div>
+        </div>
+      </div>
+
     </div>
+    <!-- FIN BENTO GRID -->
+
+  </div>
 </div>
 {% endblock %}
 
 {% block scripts %}
 {{ super() }}
-<!-- AOS Animation JS -->
 <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Inicializar animaciones de scroll
-        AOS.init({
-            once: true,           // Si las animaciones deben ocurrir solo la primera vez que se hace scroll
-            offset: 50,           // Offset (en px) desde el elemento de activación original
-            duration: 800,        // Valores de 0 a 3000, con pasos de 50ms
-            easing: 'ease-out-cubic', // Easing predeterminado para las animaciones AOS
-        });
-    });
+  document.addEventListener('DOMContentLoaded', function() {
+    AOS.init({ once: true, duration: 700, easing: 'ease-out-cubic' });
+  });
 </script>
 {% endblock %}

@@ -1,175 +1,400 @@
 {% extends 'shared/layout.html' %}
 
-{% block titulo %}Registro de Usuario{% endblock %}
+{% block titulo %}Crear Cuenta | COTIZAPro{% endblock %}
+
+{% block styles %}
+{{ super() }}
+<link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+<style>
+    /* ============================================================
+       REGISTRO - BENTO GRID + CLAYMORPHISM 3D
+       ============================================================ */
+    .auth-page-wrapper {
+        background-color: #F5F4F0;
+        background-image: radial-gradient(circle at 15% 15%, rgba(255, 107, 53, 0.07) 0%, transparent 55%),
+                          radial-gradient(circle at 85% 85%, rgba(79, 70, 229, 0.07) 0%, transparent 55%);
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        min-height: calc(100vh - 120px);
+        margin-top: -1.5rem;
+        margin-bottom: -3rem;
+        margin-left: -12px;
+        margin-right: -12px;
+        padding: 3rem 1.5rem 5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .auth-bento-container {
+        max-width: 1140px;
+        width: 100%;
+        display: grid;
+        grid-template-columns: 1fr 1.25fr;
+        gap: 2rem;
+        align-items: stretch;
+    }
+
+    /* Clay Radio Selector */
+    .clay-role-selector {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+        margin-bottom: 1.25rem;
+    }
+
+    .clay-role-option {
+        background: #FAFAFA;
+        border: 2px solid rgba(0,0,0,0.08);
+        border-radius: 16px;
+        padding: 14px 16px;
+        cursor: pointer;
+        transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        user-select: none;
+    }
+
+    .clay-role-option:hover {
+        transform: translateY(-2px);
+        border-color: rgba(255, 107, 53, 0.4);
+        box-shadow: 0 6px 16px rgba(0,0,0,0.05);
+    }
+
+    .clay-role-option.active {
+        background: #FFF;
+        border-color: #FF6B35;
+        box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.15), 0 8px 20px rgba(255, 107, 53, 0.12);
+        transform: scale(1.02);
+    }
+
+    .clay-role-option input[type="radio"] {
+        accent-color: #FF6B35;
+        width: 18px;
+        height: 18px;
+    }
+
+    /* Input Field Clay Styling */
+    .clay-input-group {
+        position: relative;
+        margin-bottom: 1.1rem;
+    }
+
+    .clay-input-label {
+        font-size: 0.78rem;
+        font-weight: 800;
+        color: #666;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        display: block;
+        margin-bottom: 6px;
+    }
+
+    .clay-input-wrapper {
+        position: relative;
+        display: flex;
+        align-items: center;
+    }
+
+    .clay-input-icon {
+        position: absolute;
+        left: 14px;
+        color: #888;
+        font-size: 1.05rem;
+        z-index: 2;
+        pointer-events: none;
+    }
+
+    .clay-input {
+        width: 100%;
+        padding: 12px 14px 12px 42px;
+        border: 1.5px solid rgba(0,0,0,0.12);
+        border-radius: 14px;
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: #141414;
+        background: #FAFAFA;
+        outline: none;
+        transition: all 0.2s ease;
+    }
+
+    .clay-input:focus {
+        background: #FFFFFF;
+        border-color: #FF6B35;
+        box-shadow: 0 0 0 4px rgba(255, 107, 53, 0.12);
+    }
+
+    .clay-input-btn-eye {
+        position: absolute;
+        right: 12px;
+        background: none;
+        border: none;
+        color: #888;
+        cursor: pointer;
+        padding: 4px 8px;
+        font-size: 1.1rem;
+        transition: color 0.2s ease;
+    }
+
+    .clay-input-btn-eye:hover {
+        color: #141414;
+    }
+
+    /* Floating animation */
+    @keyframes floatIcon {
+        0%   { transform: translateY(0px) rotate(0deg); }
+        50%  { transform: translateY(-8px) rotate(2deg); }
+        100% { transform: translateY(0px) rotate(0deg); }
+    }
+
+    .floating-3d-icon {
+        animation: floatIcon 4s ease-in-out infinite;
+    }
+
+    /* Responsive */
+    @media (max-width: 991px) {
+        .auth-bento-container {
+            grid-template-columns: 1fr;
+        }
+        .auth-bento-visual {
+            display: none;
+        }
+    }
+</style>
+{% endblock %}
 
 {% block contenido %}
-<!-- Rediseño Premium: Split Screen -->
-<div class="auth-wrapper" style="margin-top: -1.5rem; margin-bottom: -3rem; margin-left: -12px; margin-right: -12px;">
-    
-    <!-- Lado Izquierdo: Visual (Solo Escritorio) -->
-    <div class="auth-sidebar" style="background: linear-gradient(135deg, var(--secondary), #065F46);">
-        <div style="z-index: 1; text-align: center;">
-            <i class="bi bi-person-plus fade-up-enter" style="font-size: 5rem; text-shadow: 0 4px 15px rgba(0,0,0,0.2);"></i>
-            <h1 class="mt-4 fade-up-enter delay-100" style="font-weight: 800; font-size: 2.5rem;">Únete al Equipo</h1>
-            <p class="mt-3 text-white-50 fade-up-enter delay-200" style="font-size: 1.1rem; max-width: 400px; margin: 0 auto;">
-                Crea una cuenta en segundos y empieza a gestionar tus cotizaciones de manera profesional.
-            </p>
-        </div>
-    </div>
+<div class="auth-page-wrapper">
+    <div class="auth-bento-container">
 
-    <!-- Lado Derecho: Formulario -->
-    <div class="auth-main">
-        <div class="auth-card" style="max-width: 500px;">
+        <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+             LADO IZQUIERDO: VISUAL BENTO SHOWCASE (Claymorphism 3D)
+             ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+        <div class="auth-bento-visual" style="display: flex; flex-direction: column; gap: 1.25rem;" data-aos="fade-right">
             
-            <div class="text-center mb-4 fade-up-enter">
-                <h2 style="font-weight: 800; color: var(--dark);">Crear cuenta nueva</h2>
-                <p class="text-muted">Completa tus datos para registrarte</p>
+            <!-- Hero Card -->
+            <div class="clay-card clay-orange clay-shadow-lg" style="padding: 2.5rem 2rem; flex: 1; display: flex; flex-direction: column; justify-content: space-between; position: relative; overflow: hidden;">
+                <div style="position: relative; z-index: 2;">
+                    <div class="clay-icon-3d clay-icon-orange floating-3d-icon mb-4" style="width: 64px; height: 64px; font-size: 1.8rem; background: #FFF; color: #FF6B35; box-shadow: 0 10px 24px rgba(0,0,0,0.15);">
+                        <i class="bi bi-rocket-takeoff-fill"></i>
+                    </div>
+                    <h2 style="font-size: 2rem; font-weight: 900; letter-spacing: -0.03em; line-height: 1.15; margin-bottom: 1rem; color: #FFF;">
+                        Cotiza en minutos,<br>sin complicaciones.
+                    </h2>
+                    <p style="font-size: 0.95rem; opacity: 0.9; line-height: 1.6; color: #FFF; max-width: 360px;">
+                        Únete a la plataforma inteligente que automatiza precios, aplica IVA 13% y genera PDFs ejecutivos al instante.
+                    </p>
+                </div>
+
+                <!-- Decoración sutil de fondo -->
+                <div style="position: absolute; right: -40px; bottom: -40px; width: 200px; height: 200px; border-radius: 50%; background: rgba(255,255,255,0.1); pointer-events: none;"></div>
+
+                <div style="position: relative; z-index: 2; display: flex; align-items: center; gap: 8px; font-size: 0.82rem; font-weight: 700; color: #FFF; opacity: 0.95;">
+                    <span style="width: 8px; height: 8px; border-radius: 50%; background: #4ade80; display: inline-block;"></span>
+                    Sistema activo en Bolivia (UTC-4)
+                </div>
             </div>
 
-            <form action="/registro" method="post">
-                <!-- Selección de Rol -->
-                <div class="mb-4 fade-up-enter delay-100">
-                    <label class="form-label-custom mb-2">Tipo de Usuario</label>
-                    <div class="d-flex gap-3">
-                        <div class="form-check flex-fill bg-light p-3 border-0 rounded" style="border-radius: var(--radius-md) !important;">
-                            <input class="form-check-input ms-1" type="radio" name="rol" id="rol_standard" value="standard" checked>
-                            <label class="form-check-label ms-2 fw-semibold" for="rol_standard">Usuario Standard</label>
-                        </div>
-                        <div class="form-check flex-fill bg-light p-3 border-0 rounded" style="border-radius: var(--radius-md) !important;">
-                            <input class="form-check-input ms-1" type="radio" name="rol" id="rol_admin" value="admin">
-                            <label class="form-check-label ms-2 fw-semibold" for="rol_admin">Administrador</label>
-                        </div>
+            <!-- Mini Card Seguridad -->
+            <div class="clay-card clay-white clay-shadow-md" style="padding: 1.25rem 1.5rem; display: flex; align-items: center; gap: 14px;">
+                <div class="clay-icon-3d clay-icon-indigo" style="width: 44px; height: 44px; font-size: 1.1rem; flex-shrink: 0;">
+                    <i class="bi bi-shield-check"></i>
+                </div>
+                <div>
+                    <div style="font-size: 0.9rem; font-weight: 800; color: #141414;">Seguridad por PIN</div>
+                    <div style="font-size: 0.78rem; color: #666;">Cuentas de Administrador validadas por PIN de 30 días.</div>
+                </div>
+            </div>
+
+            <!-- Mini Card Setup -->
+            <div class="clay-card clay-white clay-shadow-md" style="padding: 1.25rem 1.5rem; display: flex; align-items: center; gap: 14px;">
+                <div class="clay-icon-3d clay-icon-green" style="width: 44px; height: 44px; font-size: 1.1rem; flex-shrink: 0;">
+                    <i class="bi bi-clock-history"></i>
+                </div>
+                <div>
+                    <div style="font-size: 0.9rem; font-weight: 800; color: #141414;">Setup en 60 Segundos</div>
+                    <div style="font-size: 0.78rem; color: #666;">Sin tarjeta de crédito. Acceso inmediato al sistema.</div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+             LADO DERECHO: FORMULARIO CLAYMORPHIC 3D
+             ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+        <div class="clay-card clay-white clay-shadow-lg" style="padding: 2.5rem; border: 1.5px solid rgba(0,0,0,0.07);" data-aos="fade-left">
+            
+            <!-- Encabezado Formulario -->
+            <div style="margin-bottom: 2rem;">
+                <div class="bento-headline-tag" style="margin-bottom: 0.6rem;">
+                    <span style="background: #FF6B35;"></span> Empezar ahora
+                </div>
+                <h2 style="font-size: 1.8rem; font-weight: 900; letter-spacing: -0.03em; color: #141414; margin: 0;">
+                    Crear cuenta nueva
+                </h2>
+                <p style="font-size: 0.88rem; color: #777; margin-top: 0.3rem;">Completa tus datos para registrarte en la plataforma</p>
+            </div>
+
+            <form action="/registro" method="post" id="registroForm">
+
+                <!-- Selector de Rol (Clay Style) -->
+                <div style="margin-bottom: 1.25rem;">
+                    <label class="clay-input-label">Tipo de Usuario</label>
+                    <div class="clay-role-selector">
+                        <label class="clay-role-option active" id="label_standard">
+                            <input type="radio" name="rol" id="rol_standard" value="standard" checked>
+                            <div>
+                                <div style="font-size: 0.88rem; font-weight: 800; color: #141414;">Standard</div>
+                                <div style="font-size: 0.72rem; color: #777;">Vendedor / Usuario</div>
+                            </div>
+                        </label>
+                        
+                        <label class="clay-role-option" id="label_admin">
+                            <input type="radio" name="rol" id="rol_admin" value="admin">
+                            <div>
+                                <div style="font-size: 0.88rem; font-weight: 800; color: #141414;">Administrador</div>
+                                <div style="font-size: 0.72rem; color: #777;">Control total (PIN)</div>
+                            </div>
+                        </label>
                     </div>
                 </div>
 
-                <!-- Campo PIN (visible solo si selecciona "admin") -->
-                <div class="form-floating-custom fade-up-enter delay-100" id="pin_admin_container" style="display: none;">
-                    <label class="form-label-custom text-danger"><i class="bi bi-shield-lock"></i> PIN de Administrador (Requerido)</label>
-                    <div class="input-group">
-                        <span class="input-group-text bg-light border-0 ps-4 pe-2 text-muted" style="border-radius: var(--radius-lg) 0 0 var(--radius-lg);"><i class="bi bi-key"></i></span>
-                        <input type="password" id="pin_input" name="pin_admin" class="form-control form-control-custom ps-2 border-0 bg-light" placeholder="Ingresa el PIN de seguridad" style="border-radius: 0;">
-                        <button type="button" class="btn-reveal" onclick="togglePassword('pin_input', 'eye_icon_pin')">
+                <!-- Campo PIN (con transición suave) -->
+                <div id="pin_admin_container" style="display: none; margin-bottom: 1.25rem; background: #fff5f2; border: 1.5px solid rgba(255,107,53,0.3); border-radius: 16px; padding: 1.1rem; transition: all 0.3s ease;">
+                    <label class="clay-input-label" style="color: #c94e1e;">
+                        <i class="bi bi-shield-lock-fill"></i> PIN de Administrador (Requerido)
+                    </label>
+                    <div class="clay-input-wrapper">
+                        <i class="bi bi-key-fill clay-input-icon" style="color: #FF6B35;"></i>
+                        <input type="password" id="pin_input" name="pin_admin" class="clay-input" placeholder="Ingresa el PIN de 6 dígitos" style="border-color: rgba(255,107,53,0.3); background: #FFF;">
+                        <button type="button" class="clay-input-btn-eye" onclick="togglePassword('pin_input', 'eye_icon_pin')">
                             <i id="eye_icon_pin" class="bi bi-eye"></i>
                         </button>
                     </div>
-                    <div class="mt-2 text-end">
-                        <small class="text-muted">¿No tienes un PIN? <a href="/suscripcion" style="color: var(--secondary); font-weight: 600; text-decoration: none;">Obtén tu suscripción aquí <i class="bi bi-arrow-right"></i></a></small>
+                    <div style="font-size: 0.78rem; margin-top: 6px; text-align: right; color: #666;">
+                        ¿No tienes un PIN? <a href="/suscripcion" style="color: #FF6B35; font-weight: 700; text-decoration: none;">Obtén tu suscripción aquí <i class="bi bi-arrow-right"></i></a>
                     </div>
                 </div>
 
-                <!-- Datos Personales -->
-                <div class="form-floating-custom fade-up-enter delay-200">
-                    <label class="form-label-custom">Nombre completo</label>
-                    <div class="input-group">
-                        <span class="input-group-text bg-light border-0 ps-4 pe-2 text-muted" style="border-radius: var(--radius-lg) 0 0 var(--radius-lg);"><i class="bi bi-person"></i></span>
-                        <input type="text" name="nombre" class="form-control form-control-custom ps-2 border-0 bg-light" required placeholder="Juan Pérez" style="border-radius: 0 var(--radius-lg) var(--radius-lg) 0;">
+                <!-- Nombre Completo -->
+                <div class="clay-input-group">
+                    <label class="clay-input-label">Nombre completo</label>
+                    <div class="clay-input-wrapper">
+                        <i class="bi bi-person-fill clay-input-icon"></i>
+                        <input type="text" name="nombre" class="clay-input" required placeholder="Ej: Juan Pérez">
                     </div>
                 </div>
 
-                <div class="row fade-up-enter delay-300">
-                    <div class="col-md-6">
-                        <div class="form-floating-custom">
-                            <label class="form-label-custom">Correo electrónico</label>
-                            <div class="input-group">
-                                <span class="input-group-text bg-light border-0 ps-3 pe-2 text-muted" style="border-radius: var(--radius-lg) 0 0 var(--radius-lg);"><i class="bi bi-envelope"></i></span>
-                                <input type="email" name="correo" class="form-control form-control-custom ps-2 border-0 bg-light" required placeholder="correo@ejemplo.com" style="border-radius: 0 var(--radius-lg) var(--radius-lg) 0;">
-                            </div>
+                <!-- Correo y Teléfono -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div class="clay-input-group">
+                        <label class="clay-input-label">Correo electrónico</label>
+                        <div class="clay-input-wrapper">
+                            <i class="bi bi-envelope-fill clay-input-icon"></i>
+                            <input type="email" name="correo" class="clay-input" required placeholder="correo@empresa.bo">
                         </div>
                     </div>
-                    <div class="col-md-6">
-                        <div class="form-floating-custom">
-                            <label class="form-label-custom">Teléfono</label>
-                            <div class="input-group">
-                                <span class="input-group-text bg-light border-0 ps-3 pe-2 text-muted" style="border-radius: var(--radius-lg) 0 0 var(--radius-lg);"><i class="bi bi-telephone"></i></span>
-                                <input type="tel" name="telefono" class="form-control form-control-custom ps-2 border-0 bg-light" placeholder="+12345678" style="border-radius: 0 var(--radius-lg) var(--radius-lg) 0;">
-                            </div>
-                        </div>
-                    </div>
-                </div>
 
-                <div class="row fade-up-enter delay-400">
-                    <div class="col-md-6">
-                        <div class="form-floating-custom">
-                            <label class="form-label-custom">Contraseña</label>
-                            <div class="input-group">
-                                <span class="input-group-text bg-light border-0 ps-3 pe-2 text-muted" style="border-radius: var(--radius-lg) 0 0 var(--radius-lg);"><i class="bi bi-lock"></i></span>
-                                <input type="password" id="password_input" name="contrasena" class="form-control form-control-custom ps-2 border-0 bg-light" required placeholder="••••••••" style="border-radius: 0;">
-                                <button type="button" class="btn-reveal" onclick="togglePassword('password_input', 'eye_icon_pw')">
-                                    <i id="eye_icon_pw" class="bi bi-eye"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="form-floating-custom">
-                            <label class="form-label-custom">Confirmar</label>
-                            <div class="input-group">
-                                <span class="input-group-text bg-light border-0 ps-3 pe-2 text-muted" style="border-radius: var(--radius-lg) 0 0 var(--radius-lg);"><i class="bi bi-lock-fill"></i></span>
-                                <input type="password" id="confirm_input" name="confirmar_contrasena" class="form-control form-control-custom ps-2 border-0 bg-light" required placeholder="••••••••" style="border-radius: 0;">
-                                <button type="button" class="btn-reveal" onclick="togglePassword('confirm_input', 'eye_icon_conf')">
-                                    <i id="eye_icon_conf" class="bi bi-eye"></i>
-                                </button>
-                            </div>
+                    <div class="clay-input-group">
+                        <label class="clay-input-label">Teléfono</label>
+                        <div class="clay-input-wrapper">
+                            <i class="bi bi-telephone-fill clay-input-icon"></i>
+                            <input type="tel" name="telefono" class="clay-input" placeholder="+591 70000000">
                         </div>
                     </div>
                 </div>
 
-                <div class="d-grid gap-2 mt-4 fade-up-enter delay-500">
-                    <button type="submit" class="btn btn-primary-custom btn-lg w-100" style="background: linear-gradient(135deg, var(--secondary), #047857); box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.2);">
-                        Crear Cuenta <i class="bi bi-check-circle ms-2"></i>
+                <!-- Contraseñas -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div class="clay-input-group">
+                        <label class="clay-input-label">Contraseña</label>
+                        <div class="clay-input-wrapper">
+                            <i class="bi bi-lock-fill clay-input-icon"></i>
+                            <input type="password" id="password_input" name="contrasena" class="clay-input" required placeholder="••••••••">
+                            <button type="button" class="clay-input-btn-eye" onclick="togglePassword('password_input', 'eye_icon_pw')">
+                                <i id="eye_icon_pw" class="bi bi-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="clay-input-group">
+                        <label class="clay-input-label">Confirmar Contraseña</label>
+                        <div class="clay-input-wrapper">
+                            <i class="bi bi-shield-lock-fill clay-input-icon"></i>
+                            <input type="password" id="confirm_input" name="confirmar_contrasena" class="clay-input" required placeholder="••••••••">
+                            <button type="button" class="clay-input-btn-eye" onclick="togglePassword('confirm_input', 'eye_icon_conf')">
+                                <i id="eye_icon_conf" class="bi bi-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Botones de Acción -->
+                <div style="margin-top: 1.5rem;">
+                    <button type="submit" class="btn-clay-orange" style="width: 100%; padding: 14px; font-size: 1.05rem; justify-content: center; border-radius: 16px;">
+                        <i class="bi bi-check-circle-fill"></i> Crear Cuenta
                     </button>
-                    <a href="/login" class="btn btn-light mt-2" style="border-radius: var(--radius-md); font-weight: 600;">
-                        Cancelar
-                    </a>
+
+                    <div style="text-align: center; margin-top: 1.25rem;">
+                        <span style="font-size: 0.88rem; color: #666;">¿Ya tienes una cuenta?</span>
+                        <a href="/login" style="font-size: 0.88rem; font-weight: 800; color: #FF6B35; text-decoration: none; margin-left: 4px;">Inicia sesión</a>
+                    </div>
                 </div>
+
             </form>
 
-            <div class="text-center mt-4 fade-up-enter delay-500">
-                <p class="text-muted mb-0">¿Ya tienes una cuenta? <a href="/login" class="text-success text-decoration-none fw-bold" style="color: var(--secondary) !important;">Inicia sesión</a></p>
-            </div>
         </div>
+
     </div>
 </div>
+{% endblock %}
 
+{% block scripts %}
+{{ super() }}
+<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
 <script>
-function togglePassword(inputId, iconId) {
-    const input = document.getElementById(inputId);
-    const icon = document.getElementById(iconId);
-    if (input.type === 'password') {
-        input.type = 'text';
-        icon.classList.remove('bi-eye');
-        icon.classList.add('bi-eye-slash');
-    } else {
-        input.type = 'password';
-        icon.classList.remove('bi-eye-slash');
-        icon.classList.add('bi-eye');
-    }
-}
+    document.addEventListener('DOMContentLoaded', function () {
+        AOS.init({ once: true, duration: 700, easing: 'ease-out-cubic' });
 
-document.addEventListener('DOMContentLoaded', function() {
-    const rolAdmin = document.getElementById('rol_admin');
-    const rolStandard = document.getElementById('rol_standard');
-    const pinContainer = document.getElementById('pin_admin_container');
-    const pinInput = document.querySelector('input[name="pin_admin"]');
+        var rolAdmin = document.getElementById('rol_admin');
+        var rolStandard = document.getElementById('rol_standard');
+        var labelAdmin = document.getElementById('label_admin');
+        var labelStandard = document.getElementById('label_standard');
+        var pinContainer = document.getElementById('pin_admin_container');
+        var pinInput = document.getElementById('pin_input');
 
-    function togglePin() {
-        if (rolAdmin.checked) {
-            pinContainer.style.display = 'block';
-            // Animación suave
-            pinContainer.style.opacity = '0';
-            setTimeout(() => {
-                pinContainer.style.transition = 'opacity 0.3s ease';
-                pinContainer.style.opacity = '1';
-            }, 10);
-            pinInput.setAttribute('required', 'required');
+        function updateRoleSelection() {
+            if (rolAdmin.checked) {
+                labelAdmin.classList.add('active');
+                labelStandard.classList.remove('active');
+                pinContainer.style.display = 'block';
+                pinInput.setAttribute('required', 'required');
+            } else {
+                labelStandard.classList.add('active');
+                labelAdmin.classList.remove('active');
+                pinContainer.style.display = 'none';
+                pinInput.removeAttribute('required');
+            }
+        }
+
+        rolAdmin.addEventListener('change', updateRoleSelection);
+        rolStandard.addEventListener('change', updateRoleSelection);
+        updateRoleSelection();
+    });
+
+    function togglePassword(inputId, iconId) {
+        var input = document.getElementById(inputId);
+        var icon = document.getElementById(iconId);
+        if (input.type === 'password') {
+            input.type = 'text';
+            icon.classList.remove('bi-eye');
+            icon.classList.add('bi-eye-slash');
         } else {
-            pinContainer.style.display = 'none';
-            pinInput.removeAttribute('required');
+            input.type = 'password';
+            icon.classList.remove('bi-eye-slash');
+            icon.classList.add('bi-eye');
         }
     }
-
-    rolAdmin.addEventListener('change', togglePin);
-    rolStandard.addEventListener('change', togglePin);
-});
 </script>
 {% endblock %}

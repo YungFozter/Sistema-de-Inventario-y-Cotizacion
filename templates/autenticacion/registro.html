@@ -393,14 +393,33 @@
                         </div>
                     </div>
 
-                    <div class="clay-input-group">
-                        <label class="clay-input-label" for="reg_telefono">Teléfono</label>
+                    <div class="clay-input-group" id="grupo_telefono">
+                        <label class="clay-input-label" for="reg_telefono">
+                            Teléfono Bolivia
+                            <span id="tel_status_icon" style="margin-left:6px; font-size:0.85rem;"></span>
+                        </label>
                         <div class="clay-input-wrapper">
+                            <!-- Prefijo +591 fijo -->
+                            <span id="tel_prefix"
+                                  style="position:absolute; left:42px; color:#666; font-size:0.9rem; font-weight:700;
+                                         pointer-events:none; z-index:3; line-height:1;
+                                         top:50%; transform:translateY(-50%); letter-spacing:0.01em;">
+                                +591
+                            </span>
                             <i class="bi bi-telephone-fill clay-input-icon"></i>
                             <input type="tel" id="reg_telefono" name="telefono" class="clay-input"
-                                   placeholder="+591 70000000">
+                                   placeholder="70000000" maxlength="8" inputmode="numeric"
+                                   style="padding-left:90px;"
+                                   autocomplete="tel">
+                        </div>
+                        <!-- Hint dinámico -->
+                        <div id="tel_hint"
+                             style="font-size:0.72rem; margin-top:5px; color:#888; display:flex; align-items:center; gap:5px;">
+                            <i class="bi bi-info-circle" style="font-size:0.7rem;"></i>
+                            Celular: 6x xxxxxxx · 7x xxxxxxx &nbsp;|  Fijo: 2/3/4 + 6 dígitos
                         </div>
                     </div>
+
                 </div>
 
                 <!-- Contraseñas -->
@@ -467,27 +486,131 @@
     document.addEventListener('DOMContentLoaded', function () {
         AOS.init({ once: true, duration: 700, easing: 'ease-out-cubic' });
 
-        // Validación client-side de contraseñas
-        var form = document.getElementById('registroForm');
-        var pwInput = document.getElementById('password_input');
+        // ── Validación client-side de contraseñas ─────────────────────
+        var form      = document.getElementById('registroForm');
+        var pwInput   = document.getElementById('password_input');
         var confInput = document.getElementById('confirm_input');
+        var telInput  = document.getElementById('reg_telefono');
 
+        // ── Validación de teléfono boliviano ─────────────────────
+        //  Celular: 8 dígitos, inicia en 6 o 7
+        //  Fijo:    7 dígitos, inicia en 2, 3 o 4
+        function validarTelefonoBoliviano(valor) {
+            var limpio = valor.replace(/\D/g, '');          // solo dígitos
+            // Si vino con prefijo 591 lo quitamos
+            if (limpio.startsWith('591') && limpio.length > 9) {
+                limpio = limpio.slice(3);
+            }
+            var rxCelular = /^[67]\d{7}$/;                 // 8 dígitos, 6x / 7x
+            var rxFijo    = /^[234]\d{6}$/;                // 7 dígitos, 2x / 3x / 4x
+            return rxCelular.test(limpio) || rxFijo.test(limpio)
+                ? limpio
+                : null;
+        }
+
+        function setTelEstado(estado) {
+            // estado: 'ok' | 'error' | 'vacio'
+            var icon  = document.getElementById('tel_status_icon');
+            var hint  = document.getElementById('tel_hint');
+            var grupo = document.getElementById('grupo_telefono');
+            var input = telInput;
+
+            if (estado === 'ok') {
+                input.style.borderColor  = '#10B981';
+                input.style.boxShadow    = '0 0 0 3px rgba(16,185,129,0.15)';
+                input.style.background   = '#f0fdf4';
+                if (icon) { icon.innerHTML = '<i class="bi bi-check-circle-fill" style="color:#10B981;"></i>'; }
+                if (hint)  { hint.style.color = '#10B981'; }
+            } else if (estado === 'error') {
+                input.style.borderColor  = '#ef4444';
+                input.style.boxShadow    = '0 0 0 3px rgba(239,68,68,0.14)';
+                input.style.background   = '#fef2f2';
+                if (icon) { icon.innerHTML = '<i class="bi bi-x-circle-fill" style="color:#ef4444;"></i>'; }
+                if (hint)  {
+                    hint.style.color = '#ef4444';
+                    hint.innerHTML   = '<i class="bi bi-exclamation-triangle" style="font-size:0.7rem;"></i> Formato inválido. Celular: 6x xxxxxxx · 7x xxxxxxx  |  Fijo: 2/3/4 + 6 dígitos';
+                }
+            } else {                                       // vacío
+                input.style.borderColor = '';
+                input.style.boxShadow   = '';
+                input.style.background  = '';
+                if (icon) { icon.innerHTML = ''; }
+                if (hint) {
+                    hint.style.color = '#888';
+                    hint.innerHTML   = '<i class="bi bi-info-circle" style="font-size:0.7rem;"></i> Celular: 6x\u202fxxxxxxx \u00b7 7x\u202fxxxxxxx &nbsp;|\u00a0 Fijo: 2/3/4 + 6\u202fd\u00edgitos';
+                }
+            }
+        }
+
+        // Solo permite dígitos en el campo de teléfono
+        telInput.addEventListener('keypress', function (e) {
+            if (!/\d/.test(e.key) && !['Backspace','Delete','Tab','ArrowLeft','ArrowRight'].includes(e.key)) {
+                e.preventDefault();
+            }
+        });
+
+        // Validación en tiempo real mientras escribe
+        telInput.addEventListener('input', function () {
+            // Eliminar caracteres no numéricos
+            var soloDigitos = telInput.value.replace(/\D/g, '');
+            if (soloDigitos.length > 8) { soloDigitos = soloDigitos.slice(0, 8); }
+            telInput.value = soloDigitos;           // mantener solo números (prefix es visual)
+
+            if (soloDigitos.length === 0) {
+                setTelEstado('vacio');
+            } else if (soloDigitos.length >= 7) {
+                var valid = validarTelefonoBoliviano(soloDigitos);
+                setTelEstado(valid ? 'ok' : 'error');
+            } else {
+                setTelEstado('vacio');              // aún escribiendo, no mostrar error
+            }
+        });
+
+        // Validación al perder el foco (blur)
+        telInput.addEventListener('blur', function () {
+            if (telInput.value.trim() !== '') {
+                var valid = validarTelefonoBoliviano(telInput.value);
+                setTelEstado(valid ? 'ok' : 'error');
+            }
+        });
+
+        // ── Validación al enviar el formulario ────────────────────
         form.addEventListener('submit', function (e) {
+            var bloqueado = false;
+
+            // 1. Validar contraseñas
             if (pwInput.value !== confInput.value) {
                 e.preventDefault();
+                bloqueado = true;
                 confInput.style.borderColor = '#ef4444';
-                confInput.style.boxShadow = '0 0 0 4px rgba(239,68,68,0.14)';
+                confInput.style.boxShadow   = '0 0 0 4px rgba(239,68,68,0.14)';
                 confInput.focus();
                 confInput.setCustomValidity('Las contraseñas no coinciden');
                 confInput.reportValidity();
             } else {
                 confInput.setCustomValidity('');
             }
+
+            // 2. Validar teléfono (solo si fue rellenado)
+            if (telInput.value.trim() !== '') {
+                var telValido = validarTelefonoBoliviano(telInput.value);
+                if (!telValido) {
+                    if (!bloqueado) { e.preventDefault(); }
+                    bloqueado = true;
+                    setTelEstado('error');
+                    telInput.setCustomValidity('Ingresa un número telefónico boliviano válido.');
+                    if (!confInput.validity.valueMissing) { telInput.reportValidity(); }
+                } else {
+                    // Guardar el número normalizado con prefijo para el backend
+                    telInput.value = '+591' + telValido;
+                    telInput.setCustomValidity('');
+                }
+            }
         });
 
         confInput.addEventListener('input', function () {
             confInput.style.borderColor = '';
-            confInput.style.boxShadow = '';
+            confInput.style.boxShadow   = '';
             confInput.setCustomValidity('');
         });
     });
@@ -504,4 +627,5 @@
         }
     }
 </script>
+
 {% endblock %}

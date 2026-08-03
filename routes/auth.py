@@ -53,9 +53,31 @@ def register_routes(app):
                 flash('La contraseña debe tener al menos 6 caracteres.', 'danger')
                 return redirect(url_for('registro'))
 
+            # Validación de teléfono boliviano (si fue ingresado)
+            if telefono:
+                import re as _re
+                # Normalizar: extraer solo dígitos y quitar prefijo 591 si viene
+                tel_digitos = _re.sub(r'\D', '', telefono)
+                if tel_digitos.startswith('591') and len(tel_digitos) > 9:
+                    tel_digitos = tel_digitos[3:]
+                # Celular: 8 dígitos empezando en 6 o 7
+                # Fijo:    7 dígitos empezando en 2, 3 o 4
+                es_celular = bool(_re.match(r'^[67]\d{7}$', tel_digitos))
+                es_fijo    = bool(_re.match(r'^[234]\d{6}$', tel_digitos))
+                if not (es_celular or es_fijo):
+                    flash(
+                        'El teléfono debe ser un número boliviano válido: '
+                        'celular (6x xxxxxxx / 7x xxxxxxx) o fijo (2, 3 o 4 + 6 dígitos).',
+                        'danger'
+                    )
+                    return redirect(url_for('registro'))
+                # Normalizar al formato +591XXXXXXXX
+                telefono = '+591' + tel_digitos
+
             # Todo registro público crea una cuenta de Administrador (modelo freemium)
             rol = 'admin'
             contrasena_hash = generate_password_hash(contrasena)
+
 
             conexion = get_db_connection()
             cursor = conexion.cursor()

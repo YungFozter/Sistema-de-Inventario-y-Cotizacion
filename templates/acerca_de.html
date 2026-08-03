@@ -1,0 +1,438 @@
+{% extends 'shared/layout.html' %}
+
+{% block titulo %}Acerca de | COTIZAPro - Sistema de Cotizaciones{% endblock %}
+
+{% block styles %}
+{{ super() }}
+<link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/landing.css') }}">
+<style>
+    /* Estilos personalizados para la página Acerca De */
+    .acerca-wrapper {
+        background-color: #F5F4F0;
+        background-image: radial-gradient(circle at 10% 20%, rgba(255, 107, 53, 0.05) 0%, transparent 50%),
+                          radial-gradient(circle at 90% 80%, rgba(79, 70, 229, 0.05) 0%, transparent 50%);
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        min-height: 100vh;
+        color: #141414;
+        padding: 3rem 1.5rem 5rem;
+    }
+
+    .acerca-container {
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    /* FAQ Accordion */
+    .faq-item {
+        background: #FFFFFF;
+        border-radius: 18px;
+        border: 1px solid rgba(0,0,0,0.07);
+        margin-bottom: 1rem;
+        overflow: hidden;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.03);
+        transition: all 0.25s ease;
+    }
+
+    .faq-header {
+        padding: 1.25rem 1.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        cursor: pointer;
+        font-weight: 800;
+        font-size: 1.05rem;
+        color: #141414;
+        user-select: none;
+    }
+
+    .faq-header i {
+        font-size: 1.1rem;
+        color: #FF6B35;
+        transition: transform 0.3s ease;
+    }
+
+    .faq-body {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.35s cubic-bezier(0, 1, 0, 1), padding 0.3s ease;
+        padding: 0 1.5rem;
+        font-size: 0.92rem;
+        color: #555;
+        line-height: 1.6;
+    }
+
+    .faq-item.active .faq-header i {
+        transform: rotate(180deg);
+    }
+
+    .faq-item.active .faq-body {
+        max-height: 300px;
+        padding: 0 1.5rem 1.25rem 1.5rem;
+    }
+
+    /* Roadmap Pills */
+    .roadmap-badge {
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 0.72rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+    }
+    .status-active { background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; }
+    .status-progress { background: #fef3c7; color: #b45309; border: 1px solid #fde68a; }
+    .status-planned { background: #e0e7ff; color: #4338ca; border: 1px solid #c7d2fe; }
+</style>
+{% endblock %}
+
+{% block contenido %}
+<div class="acerca-wrapper">
+    <div class="acerca-container">
+
+        <!-- ============================================================
+             1. HERO & NUESTRA HISTORIA / MISIÓN
+        ============================================================ -->
+        <div style="text-align: center; margin-bottom: 4rem;" data-aos="fade-up">
+            <div class="bento-headline-tag" style="justify-content: center; margin-bottom: 1.25rem;">
+                <span style="background: #FF6B35;"></span> Sobre COTIZAPro
+            </div>
+            <h1 style="font-size: clamp(2rem, 4.5vw, 3.4rem); font-weight: 900; letter-spacing: -0.04em; line-height: 1.1; color: #141414; max-width: 900px; margin: 0 auto 1.25rem;">
+                Nacimos para <span style="color: #FF6B35;">eliminar la burocracia</span> en el proceso de ventas boliviano.
+            </h1>
+            <p style="font-size: 1.1rem; color: #555; max-width: 720px; margin: 0 auto 2rem; line-height: 1.6;">
+                Transformamos horas de trabajo manual, archivos dispersos y cálculos propensos a error en un sistema ágil, automatizado y diseñado para cerrar negocios más rápido.
+            </p>
+        </div>
+
+        <!-- ============================================================
+             2. EL PROBLEMA VS. LA SOLUCIÓN (Comparativa Visual)
+        ============================================================ -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 2rem; margin-bottom: 5rem;" data-aos="fade-up">
+            
+            <!-- El Problema -->
+            <div class="clay-card clay-white clay-shadow-md" style="padding: 2.2rem; border-left: 5px solid #ef4444;">
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 1.25rem;">
+                    <div style="width: 40px; height: 40px; border-radius: 12px; background: #fee2e2; color: #dc2626; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; font-weight: 800;">
+                        ✕
+                    </div>
+                    <h3 style="font-size: 1.25rem; font-weight: 800; color: #141414; margin: 0;">El Problema (Excel / Manual)</h3>
+                </div>
+                <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.9rem; font-size: 0.92rem; color: #555;">
+                    <li style="display: flex; align-items: center; gap: 8px;">
+                        <i class="bi bi-x-circle-fill" style="color: #ef4444;"></i> ~45 minutos perdidos elaborando cada propuesta.
+                    </li>
+                    <li style="display: flex; align-items: center; gap: 8px;">
+                        <i class="bi bi-x-circle-fill" style="color: #ef4444;"></i> Errores humanos en cálculo de IVA 13% y subtotales.
+                    </li>
+                    <li style="display: flex; align-items: center; gap: 8px;">
+                        <i class="bi bi-x-circle-fill" style="color: #ef4444;"></i> Documentos desorganizados sin formato ni marca corporativa.
+                    </li>
+                    <li style="display: flex; align-items: center; gap: 8px;">
+                        <i class="bi bi-x-circle-fill" style="color: #ef4444;"></i> Precios desactualizados y catálogos traspapelados.
+                    </li>
+                </ul>
+            </div>
+
+            <!-- La Solución -->
+            <div class="clay-card clay-peach clay-shadow-lg" style="padding: 2.2rem; border-left: 5px solid #FF6B35;">
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 1.25rem;">
+                    <div style="width: 40px; height: 40px; border-radius: 12px; background: #FF6B35; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; font-weight: 800;">
+                        ✓
+                    </div>
+                    <h3 style="font-size: 1.25rem; font-weight: 800; color: #141414; margin: 0;">La Solución (COTIZAPro)</h3>
+                </div>
+                <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.9rem; font-size: 0.92rem; color: #141414;">
+                    <li style="display: flex; align-items: center; gap: 8px; font-weight: 600;">
+                        <i class="bi bi-check-circle-fill" style="color: #FF6B35;"></i> ~2 minutos promedio por cotización completa.
+                    </li>
+                    <li style="display: flex; align-items: center; gap: 8px; font-weight: 600;">
+                        <i class="bi bi-check-circle-fill" style="color: #FF6B35;"></i> Cálculo automático e impecable de IVA (13%) y totales.
+                    </li>
+                    <li style="display: flex; align-items: center; gap: 8px; font-weight: 600;">
+                        <i class="bi bi-check-circle-fill" style="color: #FF6B35;"></i> PDFs ejecutivos con logo, T&C y formato profesional.
+                    </li>
+                    <li style="display: flex; align-items: center; gap: 8px; font-weight: 600;">
+                        <i class="bi bi-check-circle-fill" style="color: #FF6B35;"></i> Extracción inteligente desde PDFs de proveedores con IA.
+                    </li>
+                </ul>
+            </div>
+
+        </div>
+
+        <!-- ============================================================
+             3. LOS 3 PILARES DEL SISTEMA
+        ============================================================ -->
+        <div style="margin-bottom: 5rem;" data-aos="fade-up">
+            <div style="text-align: center; margin-bottom: 2.5rem;">
+                <div class="bento-headline-tag" style="justify-content: center; margin-bottom: 0.75rem;">
+                    <span></span> Filosofía del producto
+                </div>
+                <h2 style="font-size: 2.2rem; font-weight: 900; letter-spacing: -0.03em; color: #141414;">
+                    Los 3 Pilares de COTIZAPro
+                </h2>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem;">
+                
+                <!-- Pilar 1 -->
+                <div class="clay-card clay-white clay-shadow-md" style="padding: 2rem; text-align: center;">
+                    <div class="clay-icon-3d clay-icon-orange mb-3" style="width: 56px; height: 56px; font-size: 1.4rem; margin: 0 auto 1.25rem;">
+                        <i class="bi bi-lightning-charge-fill"></i>
+                    </div>
+                    <h3 style="font-size: 1.2rem; font-weight: 800; color: #141414; margin-bottom: 0.6rem;">1. Rapidez (IA Mágica)</h3>
+                    <p style="font-size: 0.88rem; color: #555; line-height: 1.55; margin: 0;">
+                        Extracción automática de catálogos desde PDFs con Inteligencia Artificial. Búsqueda de productos en milisegundos.
+                    </p>
+                </div>
+
+                <!-- Pilar 2 -->
+                <div class="clay-card clay-white clay-shadow-md" style="padding: 2rem; text-align: center;">
+                    <div class="clay-icon-3d clay-icon-indigo mb-3" style="width: 56px; height: 56px; font-size: 1.4rem; margin: 0 auto 1.25rem;">
+                        <i class="bi bi-shield-lock-fill"></i>
+                    </div>
+                    <h3 style="font-size: 1.2rem; font-weight: 800; color: #141414; margin-bottom: 0.6rem;">2. Seguridad (PINs & Roles)</h3>
+                    <p style="font-size: 0.88rem; color: #555; line-height: 1.55; margin: 0;">
+                        Control total con PINs temporales de 30 días y permisos diferenciados para Superadmin, Admin, Vendedor y Bodeguero.
+                    </p>
+                </div>
+
+                <!-- Pilar 3 -->
+                <div class="clay-card clay-white clay-shadow-md" style="padding: 2rem; text-align: center;">
+                    <div class="clay-icon-3d clay-icon-sky mb-3" style="width: 56px; height: 56px; font-size: 1.4rem; margin: 0 auto 1.25rem;">
+                        <i class="bi bi-file-earmark-richtext-fill"></i>
+                    </div>
+                    <h3 style="font-size: 1.2rem; font-weight: 800; color: #141414; margin-bottom: 0.6rem;">3. Precisión (IVA & Normativa)</h3>
+                    <p style="font-size: 0.88rem; color: #555; line-height: 1.55; margin: 0;">
+                        Emisión formal en PDF con desglose de IVA (13%), Términos y Condiciones corporativos y hora local Bolivia (UTC-4).
+                    </p>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ============================================================
+             4. MÉTRICAS DE CONFIANZA
+        ============================================================ -->
+        <div class="clay-card clay-dark clay-shadow-lg" style="padding: 3rem 2rem; margin-bottom: 5rem; text-align: center;" data-aos="fade-up">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 2rem;">
+                <div>
+                    <div style="font-size: 2.8rem; font-weight: 900; color: #FF6B35; line-height: 1;">+10K</div>
+                    <div style="font-size: 0.88rem; color: rgba(255,255,255,0.7); margin-top: 0.5rem; font-weight: 600;">Cotizaciones Generadas</div>
+                </div>
+                <div>
+                    <div style="font-size: 2.8rem; font-weight: 900; color: #4ade80; line-height: 1;">99.9%</div>
+                    <div style="font-size: 0.88rem; color: rgba(255,255,255,0.7); margin-top: 0.5rem; font-weight: 600;">Disponibilidad (Uptime)</div>
+                </div>
+                <div>
+                    <div style="font-size: 2.8rem; font-weight: 900; color: #38bdf8; line-height: 1;">-60%</div>
+                    <div style="font-size: 0.88rem; color: rgba(255,255,255,0.7); margin-top: 0.5rem; font-weight: 600;">Tiempo por Cotización</div>
+                </div>
+                <div>
+                    <div style="font-size: 2.8rem; font-weight: 900; color: #a78bfa; line-height: 1;">100%</div>
+                    <div style="font-size: 0.88rem; color: rgba(255,255,255,0.7); margin-top: 0.5rem; font-weight: 600;">Datos Protegidos & Respaldados</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================================
+             5. ROADMAP DEL PRODUCTO (Centro de Transparencia)
+        ============================================================ -->
+        <div style="margin-bottom: 5rem;" data-aos="fade-up">
+            <div style="text-align: center; margin-bottom: 2.5rem;">
+                <div class="bento-headline-tag" style="justify-content: center; margin-bottom: 0.75rem;">
+                    <span style="background: #4F46E5;"></span> Transparencia & Futuro
+                </div>
+                <h2 style="font-size: 2.2rem; font-weight: 900; letter-spacing: -0.03em; color: #141414;">
+                    Roadmap del Producto
+                </h2>
+                <p style="font-size: 0.95rem; color: #666;">Conoce lo que ya construimos y lo que viene en camino.</p>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
+                
+                <!-- Activo -->
+                <div class="clay-card clay-white clay-shadow-md" style="padding: 1.75rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                        <span class="roadmap-badge status-active">🟢 Activo & Operativo</span>
+                    </div>
+                    <h4 style="font-size: 1.1rem; font-weight: 800; color: #141414; margin-bottom: 0.5rem;">Motor Principal & IA</h4>
+                    <ul style="padding-left: 1.2rem; margin: 0; font-size: 0.88rem; color: #555; line-height: 1.7;">
+                        <li>Extracción con IA desde PDFs</li>
+                        <li>Generador de PDF profesional con IVA (13%)</li>
+                        <li>Control de Roles & Permisos</li>
+                        <li>Respaldos DB PostgreSQL y auditoría</li>
+                        <li>Simulador de cotizaciones interactivo</li>
+                    </ul>
+                </div>
+
+                <!-- En Desarrollo -->
+                <div class="clay-card clay-white clay-shadow-md" style="padding: 1.75rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                        <span class="roadmap-badge status-progress">🟡 En Desarrollo</span>
+                    </div>
+                    <h4 style="font-size: 1.1rem; font-weight: 800; color: #141414; margin-bottom: 0.5rem;">Integraciones Avanzadas</h4>
+                    <ul style="padding-left: 1.2rem; margin: 0; font-size: 0.88rem; color: #555; line-height: 1.7;">
+                        <li>Módulo de Facturación Electrónica en Bolivia (SFV/SIAT)</li>
+                        <li>Envío directo de cotización por WhatsApp Business</li>
+                        <li>Notificaciones automáticas de vencimiento</li>
+                    </ul>
+                </div>
+
+                <!-- Próximamente -->
+                <div class="clay-card clay-white clay-shadow-md" style="padding: 1.75rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                        <span class="roadmap-badge status-planned">🔵 Próximamente</span>
+                    </div>
+                    <h4 style="font-size: 1.1rem; font-weight: 800; color: #141414; margin-bottom: 0.5rem;">Ecosistema Enterprise</h4>
+                    <ul style="padding-left: 1.2rem; margin: 0; font-size: 0.88rem; color: #555; line-height: 1.7;">
+                        <li>API REST pública para conectar con ERPs (SAP, Odoo)</li>
+                        <li>Multi-sucursal con inventarios independientes</li>
+                        <li>Firma digital de cotizaciones por el cliente</li>
+                    </ul>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ============================================================
+             6. PREGUNTAS FRECUENTES (FAQ - Acordeón)
+        ============================================================ -->
+        <div style="margin-bottom: 5rem; max-width: 860px; margin-left: auto; margin-right: auto;" data-aos="fade-up">
+            <div style="text-align: center; margin-bottom: 2.5rem;">
+                <div class="bento-headline-tag" style="justify-content: center; margin-bottom: 0.75rem;">
+                    <span style="background: #FF6B35;"></span> Respuestas rápidas
+                </div>
+                <h2 style="font-size: 2.2rem; font-weight: 900; letter-spacing: -0.03em; color: #141414;">
+                    Preguntas Frecuentes (FAQ)
+                </h2>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-header" onclick="toggleFaq(this)">
+                    <span>¿Necesito instalar algún programa en mi computadora?</span>
+                    <i class="bi bi-chevron-down"></i>
+                </div>
+                <div class="faq-body">
+                    No, COTIZAPro es 100% basado en la nube. Puedes acceder desde cualquier computadora, laptop, tablet o teléfono celular con conexión a internet navegando a través de tu explorador.
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-header" onclick="toggleFaq(this)">
+                    <span>¿Mis datos y catálogo de productos están seguros?</span>
+                    <i class="bi bi-chevron-down"></i>
+                </div>
+                <div class="faq-body">
+                    Totalmente. Toda tu información comercial, lista de clientes e inventario cuenta con encriptación y aislamiento multi-inquilino. Además, el sistema genera respaldos de base de datos continuos.
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-header" onclick="toggleFaq(this)">
+                    <span>¿Cómo funciona el registro y la prueba del sistema?</span>
+                    <i class="bi bi-chevron-down"></i>
+                </div>
+                <div class="faq-body">
+                    El registro es instantáneo y sin necesidad de ingresar tarjeta de crédito. Puedes crear tu cuenta de administrador en menos de 1 minuto y comenzar a emitir cotizaciones inmediatamente.
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-header" onclick="toggleFaq(this)">
+                    <span>¿Puedo personalizar los documentos PDF con mi branding?</span>
+                    <i class="bi bi-chevron-down"></i>
+                </div>
+                <div class="faq-body">
+                    Sí, puedes configurar el nombre de tu empresa, subir tu logotipo corporativo, definir tus Términos y Condiciones (T&C) y personalizar las notas del pie de página.
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-header" onclick="toggleFaq(this)">
+                    <span>¿Cómo funciona el cálculo del IVA 13% en Bolivia?</span>
+                    <i class="bi bi-chevron-down"></i>
+                </div>
+                <div class="faq-body">
+                    El sistema calcula automáticamente el Subtotal, el 13% de IVA oficial y el Total final tanto en pantalla como en el PDF generado, asegurando cumplimiento fiscal transparente.
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================================
+             7. CONTACTO & SOPORTE DIRECTO B2B
+        ============================================================ -->
+        <div class="clay-card clay-white clay-shadow-lg" style="padding: 2.5rem; margin-bottom: 5rem; border: 1.5px solid rgba(0,0,0,0.07);" data-aos="fade-up">
+            <div style="text-align: center; margin-bottom: 2rem;">
+                <div class="bento-headline-tag" style="justify-content: center; margin-bottom: 0.5rem;">
+                    <span></span> Estamos para ayudarte
+                </div>
+                <h3 style="font-size: 1.6rem; font-weight: 900; color: #141414; margin: 0;">Soporte Directo & Atención B2B</h3>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.5rem; text-align: center;">
+                <div style="padding: 1.25rem; background: #FAFAFA; border-radius: 16px; border: 1px solid rgba(0,0,0,0.05);">
+                    <div style="font-size: 1.8rem; color: #25D366; margin-bottom: 0.5rem;"><i class="bi bi-whatsapp"></i></div>
+                    <div style="font-size: 0.82rem; font-weight: 700; color: #888; text-transform: uppercase;">WhatsApp Soporte</div>
+                    <div style="font-size: 1.05rem; font-weight: 800; color: #141414; margin-top: 4px;">+591 700-00000</div>
+                </div>
+
+                <div style="padding: 1.25rem; background: #FAFAFA; border-radius: 16px; border: 1px solid rgba(0,0,0,0.05);">
+                    <div style="font-size: 1.8rem; color: #FF6B35; margin-bottom: 0.5rem;"><i class="bi bi-envelope-fill"></i></div>
+                    <div style="font-size: 0.82rem; font-weight: 700; color: #888; text-transform: uppercase;">Correo Técnico</div>
+                    <div style="font-size: 1.05rem; font-weight: 800; color: #141414; margin-top: 4px;">soporte@cotizapro.bo</div>
+                </div>
+
+                <div style="padding: 1.25rem; background: #FAFAFA; border-radius: 16px; border: 1px solid rgba(0,0,0,0.05);">
+                    <div style="font-size: 1.8rem; color: #4F46E5; margin-bottom: 0.5rem;"><i class="bi bi-geo-alt-fill"></i></div>
+                    <div style="font-size: 0.82rem; font-weight: 700; color: #888; text-transform: uppercase;">Ubicación & Cobertura</div>
+                    <div style="font-size: 1.05rem; font-weight: 800; color: #141414; margin-top: 4px;">Bolivia (UTC-4)</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================================
+             8. CTA FINAL HACIA PRUEBA GRATIS
+        ============================================================ -->
+        <div class="clay-card clay-white clay-shadow-lg bento-cta-sweep" style="padding: 3.5rem 2rem; border: 2px solid #141414; text-align: center; overflow: hidden; position: relative;" data-aos="fade-up">
+            <div style="position: relative; z-index: 1;">
+                <h2 style="font-size: clamp(1.8rem, 3.5vw, 2.6rem); font-weight: 900; letter-spacing: -0.03em; color: #141414; margin-bottom: 0.75rem;">
+                    ¿Listo para optimizar tus cotizaciones?
+                </h2>
+                <p style="font-size: 1rem; color: #555; max-width: 540px; margin: 0 auto 1.75rem; line-height: 1.6;">
+                    Únete a empresas en Bolivia que ya simplificaron su flujo comercial y aumentaron su velocidad de respuesta.
+                </p>
+                <a href="{{ url_for('registro') }}" class="btn-clay-orange" style="font-size: 1.1rem; padding: 16px 40px; display: inline-block;">
+                    <i class="bi bi-lightning-charge-fill"></i> Crear Cuenta Gratis
+                </a>
+                <div style="font-size: 0.8rem; color: #888; margin-top: 12px;">Sin tarjeta de crédito · Acceso inmediato</div>
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        AOS.init({ once: true, duration: 700, easing: 'ease-out-cubic' });
+    });
+
+    function toggleFaq(header) {
+        var item = header.parentElement;
+        var isActive = item.classList.contains('active');
+        
+        // Cerrar otros
+        document.querySelectorAll('.faq-item').forEach(function(el) {
+            el.classList.remove('active');
+        });
+
+        if (!isActive) {
+            item.classList.add('active');
+        }
+    }
+</script>
+{% endblock %}

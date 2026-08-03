@@ -51,6 +51,10 @@ def register_routes(app):
         # Si no está autenticado o el rol no es válido, mostrar landing
         return render_template('landing.html')
 
+    @app.route('/acerca-de')
+    def acerca_de():
+        return render_template('acerca_de.html')
+
     @app.route('/dashboard')
     @login_required
     def dashboard():

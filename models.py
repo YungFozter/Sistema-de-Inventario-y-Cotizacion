@@ -37,11 +37,13 @@ def crear_tablas():
                 contrasena TEXT,
                 rol TEXT NOT NULL DEFAULT 'standard',
                 tipo_cliente TEXT DEFAULT 'normal',
+                empresa_nombre TEXT,
                 fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 ultima_conexion TIMESTAMP,
                 session_token TEXT,
                 activo {"BOOLEAN DEFAULT TRUE" if is_postgres else "BOOLEAN DEFAULT 1"},
                 creador_id INTEGER,
+                cotizaciones_trial_usadas INTEGER DEFAULT 0,
                 FOREIGN KEY (creador_id) REFERENCES clientes(id)
             ){";" if is_postgres else ""}
         ''')
@@ -895,6 +897,16 @@ def migrar_columnas_nuevas_clientes():
                 print("[INFO] Agregando columna session_token en Postgres...")
                 cursor.execute("ALTER TABLE clientes ADD COLUMN session_token TEXT")
                 conexion.commit()
+
+            if 'empresa_nombre' not in columnas_existentes:
+                print("[INFO] Agregando columna empresa_nombre en Postgres...")
+                cursor.execute("ALTER TABLE clientes ADD COLUMN empresa_nombre TEXT")
+                conexion.commit()
+
+            if 'cotizaciones_trial_usadas' not in columnas_existentes:
+                print("[INFO] Agregando columna cotizaciones_trial_usadas en Postgres...")
+                cursor.execute("ALTER TABLE clientes ADD COLUMN cotizaciones_trial_usadas INTEGER DEFAULT 0")
+                conexion.commit()
         else:
             cursor.execute("PRAGMA table_info(clientes)")
             columnas = [col[1] for col in cursor.fetchall()]
@@ -910,6 +922,14 @@ def migrar_columnas_nuevas_clientes():
             if 'session_token' not in columnas:
                 print("[INFO] Agregando columna session_token en SQLite...")
                 cursor.execute("ALTER TABLE clientes ADD COLUMN session_token TEXT")
+
+            if 'empresa_nombre' not in columnas:
+                print("[INFO] Agregando columna empresa_nombre en SQLite...")
+                cursor.execute("ALTER TABLE clientes ADD COLUMN empresa_nombre TEXT")
+
+            if 'cotizaciones_trial_usadas' not in columnas:
+                print("[INFO] Agregando columna cotizaciones_trial_usadas en SQLite...")
+                cursor.execute("ALTER TABLE clientes ADD COLUMN cotizaciones_trial_usadas INTEGER DEFAULT 0")
 
             conexion.commit()
     except Exception as e:

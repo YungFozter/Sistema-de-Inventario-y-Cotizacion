@@ -7,12 +7,13 @@
 <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
 <style>
     /* ============================================================
-       REGISTRO - BENTO GRID + CLAYMORPHISM 3D (High Contrast)
+       REGISTRO - BENTO GRID + CLAYMORPHISM 3D (Freemium Model)
        ============================================================ */
     .auth-page-wrapper {
         background-color: #F4F3EE;
-        background-image: radial-gradient(circle at 15% 15%, rgba(255, 107, 53, 0.08) 0%, transparent 50%),
-                          radial-gradient(circle at 85% 85%, rgba(79, 70, 229, 0.08) 0%, transparent 50%);
+        background-image:
+            radial-gradient(circle at 15% 15%, rgba(255, 107, 53, 0.08) 0%, transparent 50%),
+            radial-gradient(circle at 85% 85%, rgba(79, 70, 229, 0.08) 0%, transparent 50%);
         font-family: 'Plus Jakarta Sans', sans-serif;
         min-height: calc(100vh - 120px);
         margin-top: -1.5rem;
@@ -29,12 +30,12 @@
         max-width: 1160px;
         width: 100%;
         display: grid;
-        grid-template-columns: 1fr 1.25fr;
+        grid-template-columns: 1fr 1.3fr;
         gap: 2rem;
         align-items: stretch;
     }
 
-    /* Target Cards on Left Visual Side */
+    /* ── Hero Card Oscura ──────────────────────────── */
     .bento-card-dark {
         background: linear-gradient(145deg, #1C1917 0%, #09090B 100%);
         border: 1.5px solid rgba(255, 255, 255, 0.12);
@@ -48,6 +49,7 @@
         overflow: hidden;
     }
 
+    /* ── Mini Features ─────────────────────────────── */
     .bento-card-feature {
         background: #FFFFFF;
         border: 1.5px solid rgba(0, 0, 0, 0.08);
@@ -65,7 +67,31 @@
         box-shadow: 0 14px 32px rgba(0, 0, 0, 0.08);
     }
 
-    /* Clay Radio Selector */
+    /* ── Badge Trial ───────────────────────────────── */
+    .trial-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: linear-gradient(135deg, rgba(255,107,53,0.15), rgba(255,107,53,0.08));
+        border: 1.5px solid rgba(255,107,53,0.35);
+        border-radius: 50px;
+        padding: 7px 16px;
+        font-size: 0.82rem;
+        font-weight: 800;
+        color: #c94e1e;
+        letter-spacing: 0.01em;
+    }
+
+    /* ── Form Card ─────────────────────────────────── */
+    .form-card {
+        background: #FFFFFF;
+        border: 1.5px solid rgba(0, 0, 0, 0.08);
+        border-radius: 28px;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.08);
+        padding: 2.5rem;
+    }
+
+    /* ── Clay Role Selector ────────────────────────── */
     .clay-role-selector {
         display: grid;
         grid-template-columns: 1fr 1fr;
@@ -75,7 +101,7 @@
 
     .clay-role-option {
         background: #F8F9FA;
-        border: 2px solid rgba(0,0,0,0.08);
+        border: 2px solid rgba(0, 0, 0, 0.08);
         border-radius: 16px;
         padding: 14px 16px;
         cursor: pointer;
@@ -89,7 +115,7 @@
     .clay-role-option:hover {
         transform: translateY(-2px);
         border-color: rgba(255, 107, 53, 0.4);
-        box-shadow: 0 6px 16px rgba(0,0,0,0.05);
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.05);
     }
 
     .clay-role-option.active {
@@ -99,17 +125,8 @@
         transform: scale(1.02);
     }
 
-    .clay-role-option input[type="radio"] {
-        accent-color: #FF6B35;
-        width: 18px;
-        height: 18px;
-    }
-
-    /* Input Field Clay Styling */
-    .clay-input-group {
-        position: relative;
-        margin-bottom: 1.1rem;
-    }
+    /* ── Inputs ────────────────────────────────────── */
+    .clay-input-group { position: relative; margin-bottom: 1.1rem; }
 
     .clay-input-label {
         font-size: 0.78rem;
@@ -121,11 +138,7 @@
         margin-bottom: 6px;
     }
 
-    .clay-input-wrapper {
-        position: relative;
-        display: flex;
-        align-items: center;
-    }
+    .clay-input-wrapper { position: relative; display: flex; align-items: center; }
 
     .clay-input-icon {
         position: absolute;
@@ -139,7 +152,7 @@
     .clay-input {
         width: 100%;
         padding: 12px 14px 12px 42px;
-        border: 1.5px solid rgba(0,0,0,0.12);
+        border: 1.5px solid rgba(0, 0, 0, 0.12);
         border-radius: 14px;
         font-family: 'Plus Jakarta Sans', sans-serif;
         font-size: 0.95rem;
@@ -168,29 +181,53 @@
         transition: color 0.2s ease;
     }
 
-    .clay-input-btn-eye:hover {
-        color: #141414;
-    }
+    .clay-input-btn-eye:hover { color: #141414; }
 
-    /* Floating 3D Icon Animation */
+    /* ── Float Animation ───────────────────────────── */
     @keyframes floatIcon {
         0%   { transform: translateY(0px) rotate(0deg); }
         50%  { transform: translateY(-8px) rotate(2deg); }
         100% { transform: translateY(0px) rotate(0deg); }
     }
 
-    .floating-3d-icon {
-        animation: floatIcon 4s ease-in-out infinite;
+    .floating-3d-icon { animation: floatIcon 4s ease-in-out infinite; }
+
+    /* ── Submit Button ─────────────────────────────── */
+    .btn-submit-clay {
+        width: 100%;
+        padding: 14px;
+        background: #FF6B35;
+        color: #FFFFFF;
+        border: none;
+        border-radius: 16px;
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        font-size: 1.05rem;
+        font-weight: 800;
+        cursor: pointer;
+        letter-spacing: -0.01em;
+        box-shadow: 0 4px 0 #c94e1e, 0 8px 24px rgba(255, 107, 53, 0.35);
+        transition: all 0.15s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
     }
 
-    /* Responsive */
+    .btn-submit-clay:hover {
+        background: #e85d24;
+        transform: translateY(-1px);
+        box-shadow: 0 6px 0 #c94e1e, 0 12px 28px rgba(255, 107, 53, 0.4);
+    }
+
+    .btn-submit-clay:active {
+        transform: translateY(3px);
+        box-shadow: 0 1px 0 #c94e1e, 0 4px 12px rgba(255, 107, 53, 0.2);
+    }
+
+    /* ── Responsive ────────────────────────────────── */
     @media (max-width: 991px) {
-        .auth-bento-container {
-            grid-template-columns: 1fr;
-        }
-        .auth-bento-visual {
-            display: none;
-        }
+        .auth-bento-container { grid-template-columns: 1fr; }
+        .auth-bento-visual { display: none; }
     }
 </style>
 {% endblock %}
@@ -199,188 +236,224 @@
 <div class="auth-page-wrapper">
     <div class="auth-bento-container">
 
-        <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-             LADO IZQUIERDO: VISUAL BENTO SHOWCASE (Claymorphism 3D Dark)
-             ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
-        <div class="auth-bento-visual" style="display: flex; flex-direction: column; gap: 1.25rem;" data-aos="fade-right">
-            
-            <!-- Hero Card Oscura de Alto Contraste -->
-            <div class="bento-card-dark" style="flex: 1;">
-                <div style="position: relative; z-index: 2;">
-                    <!-- Badge 3D Naranja -->
-                    <div class="floating-3d-icon mb-4" style="width: 60px; height: 60px; border-radius: 18px; background: #FF6B35; color: #FFF; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; box-shadow: 0 10px 24px rgba(255,107,53,0.4);">
+        <!-- ═══════════════════════════════════════════════════════
+             IZQUIERDA: VISUAL BENTO DARK (CLAYMORPHISM)
+             ═══════════════════════════════════════════════════════ -->
+        <div class="auth-bento-visual" style="display:flex; flex-direction:column; gap:1.25rem;" data-aos="fade-right">
+
+            <!-- Hero Dark Card -->
+            <div class="bento-card-dark" style="flex:1;">
+                <div style="position:relative; z-index:2;">
+
+                    <!-- Badge Trial -->
+                    <div class="trial-badge mb-3">
+                        <i class="bi bi-gift-fill" style="color:#FF6B35;"></i>
+                        5 Cotizaciones Gratuitas incluidas
+                    </div>
+
+                    <!-- Ícono Flotante -->
+                    <div class="floating-3d-icon mb-4"
+                         style="width:60px; height:60px; border-radius:18px; background:#FF6B35; color:#FFF;
+                                display:flex; align-items:center; justify-content:center; font-size:1.8rem;
+                                box-shadow:0 10px 24px rgba(255,107,53,0.4);">
                         <i class="bi bi-rocket-takeoff-fill"></i>
                     </div>
 
-                    <h2 style="font-size: 2rem; font-weight: 900; letter-spacing: -0.03em; line-height: 1.15; margin-bottom: 1rem; color: #FFFFFF;">
+                    <h2 style="font-size:2rem; font-weight:900; letter-spacing:-0.03em; line-height:1.15;
+                               margin-bottom:1rem; color:#FFFFFF;">
                         Cotiza en minutos,<br>
-                        <span style="color: #FF6B35;">sin complicaciones.</span>
+                        <span style="color:#FF6B35;">sin complicaciones.</span>
                     </h2>
 
-                    <p style="font-size: 0.95rem; color: rgba(255,255,255,0.75); line-height: 1.6; max-width: 360px; margin: 0;">
-                        Únete a la plataforma inteligente que automatiza precios, aplica IVA 13% y genera PDFs ejecutivos al instante.
+                    <p style="font-size:0.95rem; color:rgba(255,255,255,0.75); line-height:1.6;
+                              max-width:360px; margin:0 0 1.5rem;">
+                        Empieza <strong style="color:#FFF;">gratis</strong> con 5 cotizaciones de prueba.
+                        Cuando veas el poder del sistema, activa tu suscripción y cotiza sin límites.
                     </p>
+
+                    <!-- Pasos rápidos -->
+                    <div style="display:flex; flex-direction:column; gap:8px;">
+                        {% for step in [('1', '#FF6B35', 'Crea tu cuenta (10 segundos)'),
+                                        ('2', '#4F46E5', 'Carga tus productos o PDFs'),
+                                        ('3', '#10B981', '¡Genera cotizaciones al instante!')] %}
+                        <div style="display:flex; align-items:center; gap:10px;">
+                            <span style="width:24px; height:24px; border-radius:50%; background:{{ step[1] }};
+                                         color:#FFF; font-size:0.7rem; font-weight:900;
+                                         display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                                {{ step[0] }}
+                            </span>
+                            <span style="font-size:0.85rem; color:rgba(255,255,255,0.85); font-weight:600;">{{ step[2] }}</span>
+                        </div>
+                        {% endfor %}
+                    </div>
                 </div>
 
-                <!-- Decoración circular de fondo -->
-                <div style="position: absolute; right: -40px; bottom: -40px; width: 220px; height: 220px; border-radius: 50%; background: rgba(255,107,53,0.12); pointer-events: none;"></div>
+                <!-- Decoración circular -->
+                <div style="position:absolute; right:-40px; bottom:-40px; width:220px; height:220px;
+                            border-radius:50%; background:rgba(255,107,53,0.1); pointer-events:none;"></div>
 
-                <div style="position: relative; z-index: 2; margin-top: 2rem; display: flex; align-items: center; gap: 8px; font-size: 0.82rem; font-weight: 700; color: rgba(255,255,255,0.9);">
-                    <span style="width: 9px; height: 9px; border-radius: 50%; background: #4ade80; display: inline-block; box-shadow: 0 0 10px #4ade80;"></span>
+                <!-- Status bar -->
+                <div style="position:relative; z-index:2; margin-top:2rem; display:flex; align-items:center;
+                            gap:8px; font-size:0.82rem; font-weight:700; color:rgba(255,255,255,0.9);">
+                    <span style="width:9px; height:9px; border-radius:50%; background:#4ade80; display:inline-block;
+                                 box-shadow:0 0 10px #4ade80;"></span>
                     Sistema activo en Bolivia (UTC-4)
                 </div>
             </div>
 
-            <!-- Mini Card 1: Seguridad -->
+            <!-- Mini Card: Seguridad -->
             <div class="bento-card-feature">
-                <div style="width: 44px; height: 44px; border-radius: 14px; background: #e0e7ff; color: #4F46E5; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; flex-shrink: 0; box-shadow: 0 4px 12px rgba(79,70,229,0.15);">
+                <div style="width:44px; height:44px; border-radius:14px; background:#e0e7ff; color:#4F46E5;
+                            display:flex; align-items:center; justify-content:center; font-size:1.2rem;
+                            flex-shrink:0; box-shadow:0 4px 12px rgba(79,70,229,0.15);">
                     <i class="bi bi-shield-lock-fill"></i>
                 </div>
                 <div>
-                    <div style="font-size: 0.92rem; font-weight: 800; color: #141414;">Seguridad por PIN de 30 días</div>
-                    <div style="font-size: 0.78rem; color: #666; margin-top: 2px;">Cuentas de Administrador validadas de forma segura.</div>
+                    <div style="font-size:0.92rem; font-weight:800; color:#141414;">Datos 100% seguros</div>
+                    <div style="font-size:0.78rem; color:#666; margin-top:2px;">Tus cotizaciones y precios son privados y solo tuyos.</div>
                 </div>
             </div>
 
-            <!-- Mini Card 2: Setup -->
+            <!-- Mini Card: Sin tarjeta -->
             <div class="bento-card-feature">
-                <div style="width: 44px; height: 44px; border-radius: 14px; background: #dcfce7; color: #16a34a; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; flex-shrink: 0; box-shadow: 0 4px 12px rgba(22,163,74,0.15);">
+                <div style="width:44px; height:44px; border-radius:14px; background:#dcfce7; color:#16a34a;
+                            display:flex; align-items:center; justify-content:center; font-size:1.2rem;
+                            flex-shrink:0; box-shadow:0 4px 12px rgba(22,163,74,0.15);">
                     <i class="bi bi-lightning-charge-fill"></i>
                 </div>
                 <div>
-                    <div style="font-size: 0.92rem; font-weight: 800; color: #141414;">Setup en 60 Segundos</div>
-                    <div style="font-size: 0.78rem; color: #666;">Sin tarjeta de crédito. Acceso inmediato al sistema.</div>
+                    <div style="font-size:0.92rem; font-weight:800; color:#141414;">Sin tarjeta de crédito</div>
+                    <div style="font-size:0.78rem; color:#666;">Acceso inmediato. Paga solo si decides quedarte.</div>
                 </div>
             </div>
 
         </div>
 
-        <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-             LADO DERECHO: FORMULARIO CLAYMORPHIC 3D (Clean & High Contrast)
-             ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
-        <div style="background: #FFFFFF; border: 1.5px solid rgba(0,0,0,0.08); border-radius: 28px; box-shadow: 0 20px 50px rgba(0,0,0,0.08); padding: 2.5rem;" data-aos="fade-left">
-            
-            <!-- Encabezado Formulario -->
-            <div style="margin-bottom: 2rem;">
-                <div class="bento-headline-tag" style="margin-bottom: 0.6rem;">
-                    <span style="background: #FF6B35;"></span> Empezar ahora
+        <!-- ═══════════════════════════════════════════════════════
+             DERECHA: FORMULARIO CLAYMORPHIC 3D
+             ═══════════════════════════════════════════════════════ -->
+        <div class="form-card" data-aos="fade-left">
+
+            <!-- Encabezado -->
+            <div style="margin-bottom:2rem;">
+                <div class="bento-headline-tag" style="margin-bottom:0.6rem;">
+                    <span style="background:#FF6B35;"></span> Empieza gratis ahora
                 </div>
-                <h2 style="font-size: 1.85rem; font-weight: 900; letter-spacing: -0.03em; color: #141414; margin: 0;">
-                    Crear cuenta nueva
+                <h2 style="font-size:1.85rem; font-weight:900; letter-spacing:-0.03em; color:#141414; margin:0;">
+                    Crea tu cuenta de empresa
                 </h2>
-                <p style="font-size: 0.88rem; color: #666; margin-top: 0.3rem;">Completa tus datos para registrarte en la plataforma</p>
+                <p style="font-size:0.88rem; color:#666; margin-top:0.3rem;">
+                    Registra tu negocio y cotiza profesionalmente desde el primer día.
+                </p>
             </div>
 
-            <form action="/registro" method="post" id="registroForm">
-
-                <!-- Selector de Rol (Clay Style) -->
-                <div style="margin-bottom: 1.25rem;">
-                    <label class="clay-input-label">Tipo de Usuario</label>
-                    <div class="clay-role-selector">
-                        <label class="clay-role-option active" id="label_standard">
-                            <input type="radio" name="rol" id="rol_standard" value="standard" checked>
-                            <div>
-                                <div style="font-size: 0.88rem; font-weight: 800; color: #141414;">Standard</div>
-                                <div style="font-size: 0.72rem; color: #666;">Vendedor / Usuario</div>
-                            </div>
-                        </label>
-                        
-                        <label class="clay-role-option" id="label_admin">
-                            <input type="radio" name="rol" id="rol_admin" value="admin">
-                            <div>
-                                <div style="font-size: 0.88rem; font-weight: 800; color: #141414;">Administrador</div>
-                                <div style="font-size: 0.72rem; color: #666;">Control total (PIN)</div>
-                            </div>
-                        </label>
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                    <div class="alert alert-{{ 'danger' if category == 'danger' else 'success' }} d-flex align-items-center gap-2 mb-3"
+                         style="border-radius:14px; font-size:0.88rem; font-weight:600;">
+                        <i class="bi bi-{{ 'exclamation-triangle-fill' if category == 'danger' else 'check-circle-fill' }}"></i>
+                        {{ message }}
                     </div>
-                </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
 
-                <!-- Campo PIN (con transición suave) -->
-                <div id="pin_admin_container" style="display: none; margin-bottom: 1.25rem; background: #FFF5F2; border: 1.5px solid rgba(255,107,53,0.35); border-radius: 16px; padding: 1.1rem; transition: all 0.3s ease;">
-                    <label class="clay-input-label" style="color: #c94e1e;">
-                        <i class="bi bi-shield-lock-fill"></i> PIN de Administrador (Requerido)
-                    </label>
-                    <div class="clay-input-wrapper">
-                        <i class="bi bi-key-fill clay-input-icon" style="color: #FF6B35;"></i>
-                        <input type="password" id="pin_input" name="pin_admin" class="clay-input" placeholder="Ingresa el PIN de 6 dígitos" style="border-color: rgba(255,107,53,0.35); background: #FFFFFF;">
-                        <button type="button" class="clay-input-btn-eye" onclick="togglePassword('pin_input', 'eye_icon_pin')">
-                            <i id="eye_icon_pin" class="bi bi-eye"></i>
-                        </button>
-                    </div>
-                    <div style="font-size: 0.78rem; margin-top: 6px; text-align: right; color: #666;">
-                        ¿No tienes un PIN? <a href="/suscripcion" style="color: #FF6B35; font-weight: 700; text-decoration: none;">Obtén tu suscripción aquí <i class="bi bi-arrow-right"></i></a>
-                    </div>
-                </div>
+            <form action="/registro" method="post" id="registroForm" novalidate>
 
-                <!-- Nombre Completo -->
-                <div class="clay-input-group">
-                    <label class="clay-input-label">Nombre completo</label>
-                    <div class="clay-input-wrapper">
-                        <i class="bi bi-person-fill clay-input-icon"></i>
-                        <input type="text" name="nombre" class="clay-input" required placeholder="Ej: Juan Pérez">
-                    </div>
-                </div>
-
-                <!-- Correo y Teléfono -->
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <!-- Nombre Completo + Empresa (2 columnas) -->
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
                     <div class="clay-input-group">
-                        <label class="clay-input-label">Correo electrónico</label>
+                        <label class="clay-input-label" for="reg_nombre">Nombre completo</label>
                         <div class="clay-input-wrapper">
-                            <i class="bi bi-envelope-fill clay-input-icon"></i>
-                            <input type="email" name="correo" class="clay-input" required placeholder="correo@empresa.bo">
+                            <i class="bi bi-person-fill clay-input-icon"></i>
+                            <input type="text" id="reg_nombre" name="nombre" class="clay-input"
+                                   required placeholder="Ej: Juan Pérez">
                         </div>
                     </div>
 
                     <div class="clay-input-group">
-                        <label class="clay-input-label">Teléfono</label>
+                        <label class="clay-input-label" for="reg_empresa">Empresa / Negocio</label>
+                        <div class="clay-input-wrapper">
+                            <i class="bi bi-building-fill clay-input-icon"></i>
+                            <input type="text" id="reg_empresa" name="empresa_nombre" class="clay-input"
+                                   placeholder="Ej: Importadora Norte S.R.L.">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Correo y Teléfono -->
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
+                    <div class="clay-input-group">
+                        <label class="clay-input-label" for="reg_correo">Correo electrónico</label>
+                        <div class="clay-input-wrapper">
+                            <i class="bi bi-envelope-fill clay-input-icon"></i>
+                            <input type="email" id="reg_correo" name="correo" class="clay-input"
+                                   required placeholder="correo@empresa.bo">
+                        </div>
+                    </div>
+
+                    <div class="clay-input-group">
+                        <label class="clay-input-label" for="reg_telefono">Teléfono</label>
                         <div class="clay-input-wrapper">
                             <i class="bi bi-telephone-fill clay-input-icon"></i>
-                            <input type="tel" name="telefono" class="clay-input" placeholder="+591 70000000">
+                            <input type="tel" id="reg_telefono" name="telefono" class="clay-input"
+                                   placeholder="+591 70000000">
                         </div>
                     </div>
                 </div>
 
                 <!-- Contraseñas -->
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
                     <div class="clay-input-group">
-                        <label class="clay-input-label">Contraseña</label>
+                        <label class="clay-input-label" for="password_input">Contraseña</label>
                         <div class="clay-input-wrapper">
                             <i class="bi bi-lock-fill clay-input-icon"></i>
-                            <input type="password" id="password_input" name="contrasena" class="clay-input" required placeholder="••••••••">
-                            <button type="button" class="clay-input-btn-eye" onclick="togglePassword('password_input', 'eye_icon_pw')">
+                            <input type="password" id="password_input" name="contrasena" class="clay-input"
+                                   required placeholder="Mínimo 6 caracteres">
+                            <button type="button" class="clay-input-btn-eye"
+                                    onclick="togglePassword('password_input','eye_icon_pw')" tabindex="-1">
                                 <i id="eye_icon_pw" class="bi bi-eye"></i>
                             </button>
                         </div>
                     </div>
 
                     <div class="clay-input-group">
-                        <label class="clay-input-label">Confirmar Contraseña</label>
+                        <label class="clay-input-label" for="confirm_input">Confirmar contraseña</label>
                         <div class="clay-input-wrapper">
                             <i class="bi bi-shield-lock-fill clay-input-icon"></i>
-                            <input type="password" id="confirm_input" name="confirmar_contrasena" class="clay-input" required placeholder="••••••••">
-                            <button type="button" class="clay-input-btn-eye" onclick="togglePassword('confirm_input', 'eye_icon_conf')">
+                            <input type="password" id="confirm_input" name="confirmar_contrasena" class="clay-input"
+                                   required placeholder="Repite tu contraseña">
+                            <button type="button" class="clay-input-btn-eye"
+                                    onclick="togglePassword('confirm_input','eye_icon_conf')" tabindex="-1">
                                 <i id="eye_icon_conf" class="bi bi-eye"></i>
                             </button>
                         </div>
                     </div>
                 </div>
 
-                <!-- Botones de Acción -->
-                <div style="margin-top: 1.75rem;">
-                    <button type="submit" style="width: 100%; padding: 14px; background: #FF6B35; color: #FFFFFF; border: none; border-radius: 16px; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 1.05rem; font-weight: 800; cursor: pointer; letter-spacing: -0.01em; box-shadow: 0 4px 0 #c94e1e, 0 8px 24px rgba(255,107,53,0.35); transition: all 0.15s ease; display: flex; align-items: center; justify-content: center; gap: 8px;"
-                      onmousedown="this.style.transform='translateY(3px)';this.style.boxShadow='0 1px 0 #c94e1e, 0 4px 12px rgba(255,107,53,0.2)'"
-                      onmouseup="this.style.transform='';this.style.boxShadow='0 4px 0 #c94e1e, 0 8px 24px rgba(255,107,53,0.35)'">
-                        <i class="bi bi-check-circle-fill"></i> Crear Cuenta
-                    </button>
-
-                    <div style="text-align: center; margin-top: 1.25rem;">
-                        <span style="font-size: 0.88rem; color: #666;">¿Ya tienes una cuenta?</span>
-                        <a href="/login" style="font-size: 0.88rem; font-weight: 800; color: #FF6B35; text-decoration: none; margin-left: 4px;">Inicia sesión</a>
+                <!-- Info Freemium -->
+                <div style="background:#fff9f6; border:1.5px solid rgba(255,107,53,0.2); border-radius:14px;
+                            padding:12px 16px; margin-bottom:1.5rem; display:flex; align-items:flex-start; gap:10px;">
+                    <i class="bi bi-info-circle-fill" style="color:#FF6B35; font-size:1rem; margin-top:2px; flex-shrink:0;"></i>
+                    <div style="font-size:0.82rem; color:#664; line-height:1.5;">
+                        <strong style="color:#c94e1e;">Tu cuenta incluye 5 cotizaciones gratis</strong> para explorar todas las
+                        funcionalidades. Cuando estés listo, activa tu suscripción con un PIN para cotizar sin límites.
                     </div>
                 </div>
 
-            </form>
+                <!-- Botón Crear Cuenta -->
+                <button type="submit" class="btn-submit-clay" id="btn_crear_cuenta">
+                    <i class="bi bi-rocket-takeoff-fill"></i> Crear mi cuenta gratis
+                </button>
 
+                <div style="text-align:center; margin-top:1.25rem;">
+                    <span style="font-size:0.88rem; color:#666;">¿Ya tienes una cuenta?</span>
+                    <a href="/login" style="font-size:0.88rem; font-weight:800; color:#FF6B35;
+                                           text-decoration:none; margin-left:4px;">Inicia sesión</a>
+                </div>
+
+            </form>
         </div>
 
     </div>
@@ -394,43 +467,40 @@
     document.addEventListener('DOMContentLoaded', function () {
         AOS.init({ once: true, duration: 700, easing: 'ease-out-cubic' });
 
-        var rolAdmin = document.getElementById('rol_admin');
-        var rolStandard = document.getElementById('rol_standard');
-        var labelAdmin = document.getElementById('label_admin');
-        var labelStandard = document.getElementById('label_standard');
-        var pinContainer = document.getElementById('pin_admin_container');
-        var pinInput = document.getElementById('pin_input');
+        // Validación client-side de contraseñas
+        var form = document.getElementById('registroForm');
+        var pwInput = document.getElementById('password_input');
+        var confInput = document.getElementById('confirm_input');
 
-        function updateRoleSelection() {
-            if (rolAdmin.checked) {
-                labelAdmin.classList.add('active');
-                labelStandard.classList.remove('active');
-                pinContainer.style.display = 'block';
-                pinInput.setAttribute('required', 'required');
+        form.addEventListener('submit', function (e) {
+            if (pwInput.value !== confInput.value) {
+                e.preventDefault();
+                confInput.style.borderColor = '#ef4444';
+                confInput.style.boxShadow = '0 0 0 4px rgba(239,68,68,0.14)';
+                confInput.focus();
+                confInput.setCustomValidity('Las contraseñas no coinciden');
+                confInput.reportValidity();
             } else {
-                labelStandard.classList.add('active');
-                labelAdmin.classList.remove('active');
-                pinContainer.style.display = 'none';
-                pinInput.removeAttribute('required');
+                confInput.setCustomValidity('');
             }
-        }
+        });
 
-        rolAdmin.addEventListener('change', updateRoleSelection);
-        rolStandard.addEventListener('change', updateRoleSelection);
-        updateRoleSelection();
+        confInput.addEventListener('input', function () {
+            confInput.style.borderColor = '';
+            confInput.style.boxShadow = '';
+            confInput.setCustomValidity('');
+        });
     });
 
     function togglePassword(inputId, iconId) {
         var input = document.getElementById(inputId);
-        var icon = document.getElementById(iconId);
+        var icon  = document.getElementById(iconId);
         if (input.type === 'password') {
             input.type = 'text';
-            icon.classList.remove('bi-eye');
-            icon.classList.add('bi-eye-slash');
+            icon.classList.replace('bi-eye', 'bi-eye-slash');
         } else {
             input.type = 'password';
-            icon.classList.remove('bi-eye-slash');
-            icon.classList.add('bi-eye');
+            icon.classList.replace('bi-eye-slash', 'bi-eye');
         }
     }
 </script>

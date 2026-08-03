@@ -237,6 +237,63 @@ def register_routes(app):
                     if not (os.environ.get('DATABASE_URL') and os.environ.get('DATABASE_URL').startswith('postgres')):
                         cursor.execute("BEGIN IMMEDIATE TRANSACTION")
 
+                    # ── GATE FREEMIUM ─────────────────────────────────────────────
+                    # Los superadmin nunca tienen restricción de prueba.
+                    # Los standard heredan el estado de su admin creador.
+                    # Los admin sin suscripción activa tienen 5 cotizaciones de prueba.
+                    user_rol = session.get('user_rol')
+                    suscripcion_activa = True   # valor seguro por defecto
+                    admin_id_trial = None
+                    trial_usadas = 0
+                    LIMITE_TRIAL = 5
+
+                    if user_rol != 'superadmin':
+                        # Determinar el admin raíz responsable de esta cuenta
+                        if user_rol == 'admin':
+                            admin_id_trial = session['user_id']
+                        else:
+                            # standard: buscar su creador (el admin de la empresa)
+                            admin_id_trial = session.get('creador_id') or session['user_id']
+
+                        cursor.execute(
+                            'SELECT fecha_vencimiento_suscripcion, cotizaciones_trial_usadas FROM clientes WHERE id = ?',
+                            (admin_id_trial,)
+                        )
+                        admin_trial = cursor.fetchone()
+
+                        from models import obtener_fecha_bolivia
+                        now_bo = obtener_fecha_bolivia()
+
+                        # Verificar si la suscripción está activa
+                        suscripcion_activa = False
+                        if admin_trial and admin_trial[0]:
+                            try:
+                                from datetime import datetime as _dt
+                                fecha_venc = _dt.fromisoformat(str(admin_trial[0]))
+                                if fecha_venc.tzinfo is None:
+                                    from datetime import timezone, timedelta
+                                    fecha_venc = fecha_venc.replace(tzinfo=timezone(timedelta(hours=-4)))
+                                suscripcion_activa = fecha_venc > now_bo
+                            except Exception:
+                                suscripcion_activa = False
+
+                        trial_usadas = (admin_trial[1] or 0) if admin_trial else 0
+                        LIMITE_TRIAL = 5
+
+                        if not suscripcion_activa and trial_usadas >= LIMITE_TRIAL:
+                            # Revertir transacción abierta antes de retornar
+                            try:
+                                conn.rollback()
+                            except Exception:
+                                pass
+                            return jsonify({
+                                'paywall': True,
+                                'trial_usadas': trial_usadas,
+                                'limite': LIMITE_TRIAL,
+                                'msg': f'Has usado tus {LIMITE_TRIAL} cotizaciones de prueba. Activa tu suscripción para continuar.'
+                            }), 402
+                    # ── FIN GATE FREEMIUM ─────────────────────────────────────────
+
                     # 1. Verificar stock (excepto para superadmin)
                     if session.get('user_rol') != 'superadmin':
                         for producto_id, cantidad, _, _ in productos_cotizacion:
@@ -308,7 +365,27 @@ def register_routes(app):
                     )
 
                     conn.commit()
-                    flash('Cotización creada exitosamente', 'success')
+
+                    # ── POST-COMMIT: Incrementar contador freemium si está en prueba ──
+                    if user_rol != 'superadmin' and not suscripcion_activa:
+                        try:
+                            with get_db_connection() as conn_trial:
+                                conn_trial.cursor().execute(
+                                    'UPDATE clientes SET cotizaciones_trial_usadas = cotizaciones_trial_usadas + 1 WHERE id = ?',
+                                    (admin_id_trial,)
+                                )
+                                conn_trial.commit()
+                            restantes = max(0, LIMITE_TRIAL - (trial_usadas + 1))
+                            if restantes > 0:
+                                flash(f'Cotización creada. Te quedan {restantes} cotización(es) de prueba gratuita.', 'success')
+                            else:
+                                flash('Cotización creada. ¡Has usado todas tus cotizaciones de prueba! Activa tu suscripción para continuar.', 'warning')
+                        except Exception:
+                            flash('Cotización creada exitosamente.', 'success')
+                    else:
+                        flash('Cotización creada exitosamente.', 'success')
+                    # ── FIN POST-COMMIT ───────────────────────────────────────────────
+
                     return redirect(url_for('gestion_cotizaciones', exito=True))
 
             except sqlite3.OperationalError as e:

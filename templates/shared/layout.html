@@ -870,8 +870,23 @@
           </a>
 
           {% else %}
-          <!-- Con sesión: Avatar + menú desplegable -->
+          <!-- Con sesión: Badge Freemium (solo admins sin suscripción activa) + Avatar + menú desplegable -->
+
+          {# ── Badge de prueba gratuita ────────────────────────── #}
+          {% if session.get('user_rol') == 'admin' and session.get('trial_activo') %}
+          <a href="/suscripcion" id="freemiumBadgeNav"
+             style="display:inline-flex; align-items:center; gap:6px; background:linear-gradient(135deg,rgba(255,107,53,0.12),rgba(255,107,53,0.06));
+                    border:1.5px solid rgba(255,107,53,0.4); border-radius:50px; padding:5px 13px;
+                    font-size:0.78rem; font-weight:800; color:#c94e1e; text-decoration:none;
+                    transition:all 0.2s ease; white-space:nowrap;"
+             title="Activa tu suscripción para cotizar sin límites">
+            <i class="bi bi-gift-fill" style="color:#FF6B35;"></i>
+            Prueba: {{ session.get('trial_usadas', 0) }}/5
+          </a>
+          {% endif %}
+
           <div class="clay-simple-dropdown">
+
             <button class="clay-user-badge" onclick="toggleClayDropdown()" id="clayDropdownBtn" aria-expanded="false">
               <div class="clay-user-avatar">{{ session.get('user_nombre', 'U')[0] | upper }}</div>
               {{ session.get('user_nombre', 'Usuario').split(' ')[0] }}
@@ -1136,17 +1151,21 @@
   <!-- MODAL SEGURIDAD & PRIVACIDAD -->
   <div class="modal fade" id="privacyModal" tabindex="-1" aria-labelledby="privacyModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
-      <div class="modal-content" style="border-radius: 24px; border: 1.5px solid rgba(0,0,0,0.1); overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.2);">
-        
+      <div class="modal-content"
+        style="border-radius: 24px; border: 1.5px solid rgba(0,0,0,0.1); overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.2);">
+
         <!-- Header -->
         <div class="modal-header" style="background: #141414; color: #fff; border: none; padding: 1.5rem 2rem;">
           <div style="display: flex; align-items: center; gap: 12px;">
-            <div style="width: 42px; height: 42px; border-radius: 14px; background: rgba(255,107,53,0.15); color: #FF6B35; display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">
+            <div
+              style="width: 42px; height: 42px; border-radius: 14px; background: rgba(255,107,53,0.15); color: #FF6B35; display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">
               <i class="bi bi-shield-check"></i>
             </div>
             <div>
-              <h5 class="modal-title" id="privacyModalLabel" style="font-weight: 800; font-size: 1.25rem; margin: 0; color: #fff;">Seguridad & Privacidad B2B</h5>
-              <div style="font-size: 0.78rem; color: rgba(255,255,255,0.6);">Compromiso de protección de datos comerciales en COTIZAPro</div>
+              <h5 class="modal-title" id="privacyModalLabel"
+                style="font-weight: 800; font-size: 1.25rem; margin: 0; color: #fff;">Seguridad & Privacidad B2B</h5>
+              <div style="font-size: 0.78rem; color: rgba(255,255,255,0.6);">Compromiso de protección de datos
+                comerciales en COTIZAPro</div>
             </div>
           </div>
           <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
@@ -1155,56 +1174,72 @@
         <!-- Body -->
         <div class="modal-body" style="padding: 2rem; background: #FAFAFA;">
           <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.25rem;">
-            
+
             <!-- Item 1 -->
-            <div style="background: #FFF; border-radius: 16px; padding: 1.25rem; border: 1px solid rgba(0,0,0,0.06); box-shadow: 0 4px 12px rgba(0,0,0,0.02);">
+            <div
+              style="background: #FFF; border-radius: 16px; padding: 1.25rem; border: 1px solid rgba(0,0,0,0.06); box-shadow: 0 4px 12px rgba(0,0,0,0.02);">
               <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 0.6rem;">
-                <div style="width: 32px; height: 32px; border-radius: 10px; background: #e0e7ff; color: #4338ca; display: flex; align-items: center; justify-content: center; font-size: 1rem;">
+                <div
+                  style="width: 32px; height: 32px; border-radius: 10px; background: #e0e7ff; color: #4338ca; display: flex; align-items: center; justify-content: center; font-size: 1rem;">
                   <i class="bi bi-lock-fill"></i>
                 </div>
                 <h6 style="font-weight: 800; color: #141414; margin: 0; font-size: 0.95rem;">Confidencialidad B2B</h6>
               </div>
               <p style="font-size: 0.85rem; color: #555; line-height: 1.5; margin: 0;">
-                Tus datos de clientes, productos y precios pertenecen exclusivamente a tu empresa. No comercializamos ni compartimos tu información con terceros.
+                Tus datos de clientes, productos y precios pertenecen exclusivamente a tu empresa. No comercializamos ni
+                compartimos tu información con terceros.
               </p>
             </div>
 
             <!-- Item 2 -->
-            <div style="background: #FFF; border-radius: 16px; padding: 1.25rem; border: 1px solid rgba(0,0,0,0.06); box-shadow: 0 4px 12px rgba(0,0,0,0.02);">
+            <div
+              style="background: #FFF; border-radius: 16px; padding: 1.25rem; border: 1px solid rgba(0,0,0,0.06); box-shadow: 0 4px 12px rgba(0,0,0,0.02);">
               <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 0.6rem;">
-                <div style="width: 32px; height: 32px; border-radius: 10px; background: #fee2e2; color: #dc2626; display: flex; align-items: center; justify-content: center; font-size: 1rem;">
+                <div
+                  style="width: 32px; height: 32px; border-radius: 10px; background: #fee2e2; color: #dc2626; display: flex; align-items: center; justify-content: center; font-size: 1rem;">
                   <i class="bi bi-key-fill"></i>
                 </div>
-                <h6 style="font-weight: 800; color: #141414; margin: 0; font-size: 0.95rem;">Acceso Protegido por PINs</h6>
+                <h6 style="font-weight: 800; color: #141414; margin: 0; font-size: 0.95rem;">Acceso Protegido con
+                  Credenciales
+                </h6>
               </div>
               <p style="font-size: 0.85rem; color: #555; line-height: 1.5; margin: 0;">
-                El registro de administradores requiere un PIN de validación único con vigencia de 30 días, garantizando que solo personal autorizado cree cuentas.
+                Cuida tus datos de acceso a COTIZAPro, son tu responsabilidad y de tu empresa. No compartas tus datos de
+                acceso con nadie.
               </p>
             </div>
 
             <!-- Item 3 -->
-            <div style="background: #FFF; border-radius: 16px; padding: 1.25rem; border: 1px solid rgba(0,0,0,0.06); box-shadow: 0 4px 12px rgba(0,0,0,0.02);">
+            <div
+              style="background: #FFF; border-radius: 16px; padding: 1.25rem; border: 1px solid rgba(0,0,0,0.06); box-shadow: 0 4px 12px rgba(0,0,0,0.02);">
               <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 0.6rem;">
-                <div style="width: 32px; height: 32px; border-radius: 10px; background: #e0f2fe; color: #0284c7; display: flex; align-items: center; justify-content: center; font-size: 1rem;">
+                <div
+                  style="width: 32px; height: 32px; border-radius: 10px; background: #e0f2fe; color: #0284c7; display: flex; align-items: center; justify-content: center; font-size: 1rem;">
                   <i class="bi bi-database-fill-check"></i>
                 </div>
-                <h6 style="font-weight: 800; color: #141414; margin: 0; font-size: 0.95rem;">Respaldos de Seguridad DB</h6>
+                <h6 style="font-weight: 800; color: #141414; margin: 0; font-size: 0.95rem;">Respaldos de Seguridad DB
+                </h6>
               </div>
               <p style="font-size: 0.85rem; color: #555; line-height: 1.5; margin: 0;">
-                Se realizan copias de seguridad continuas de la base de datos PostgreSQL y logs de auditoría en tiempo real para evitar pérdida de datos.
+                Se realizan copias de seguridad continuas de la base de datos y logs de auditoría en tiempo real para
+                evitar pérdida de datos.
               </p>
             </div>
 
             <!-- Item 4 -->
-            <div style="background: #FFF; border-radius: 16px; padding: 1.25rem; border: 1px solid rgba(0,0,0,0.06); box-shadow: 0 4px 12px rgba(0,0,0,0.02);">
+            <div
+              style="background: #FFF; border-radius: 16px; padding: 1.25rem; border: 1px solid rgba(0,0,0,0.06); box-shadow: 0 4px 12px rgba(0,0,0,0.02);">
               <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 0.6rem;">
-                <div style="width: 32px; height: 32px; border-radius: 10px; background: #dcfce7; color: #15803d; display: flex; align-items: center; justify-content: center; font-size: 1rem;">
+                <div
+                  style="width: 32px; height: 32px; border-radius: 10px; background: #dcfce7; color: #15803d; display: flex; align-items: center; justify-content: center; font-size: 1rem;">
                   <i class="bi bi-patch-check-fill"></i>
                 </div>
-                <h6 style="font-weight: 800; color: #141414; margin: 0; font-size: 0.95rem;">Uso Exclusivo Operativo</h6>
+                <h6 style="font-weight: 800; color: #141414; margin: 0; font-size: 0.95rem;">Uso Exclusivo Operativo
+                </h6>
               </div>
               <p style="font-size: 0.85rem; color: #555; line-height: 1.5; margin: 0;">
-                La información almacenada se utiliza estrictamente para el cálculo de cotizaciones, gestión de inventario y generación de documentos PDF.
+                La información almacenada se utiliza estrictamente para el cálculo de cotizaciones, gestión de
+                inventario y generación de documentos PDF.
               </p>
             </div>
 
@@ -1212,18 +1247,123 @@
         </div>
 
         <!-- Footer -->
-        <div class="modal-footer" style="background: #FAFAFA; border-top: 1px solid rgba(0,0,0,0.06); padding: 1rem 2rem; justify-content: space-between;">
+        <div class="modal-footer"
+          style="background: #FAFAFA; border-top: 1px solid rgba(0,0,0,0.06); padding: 1rem 2rem; justify-content: space-between;">
           <div style="font-size: 0.78rem; color: #888; font-weight: 600;">
-            <i class="bi bi-geo-alt-fill" style="color:#FF6B35;"></i> COTIZAPro · Bolivia (UTC-4)
+            <i class="bi bi-geo-alt-fill" style="color:#FF6B35;"></i> COTIZAPro ·
           </div>
-          <button type="button" class="btn btn-dark" data-bs-dismiss="modal" style="border-radius: 12px; font-weight: 700; font-size: 0.88rem; padding: 8px 24px;">Entendido</button>
+          <button type="button" class="btn btn-dark" data-bs-dismiss="modal"
+            style="border-radius: 12px; font-weight: 700; font-size: 0.88rem; padding: 8px 24px;">Entendido</button>
         </div>
 
       </div>
     </div>
   </div>
 
-  <!-- JS -->
+  <!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       PAYWALL MODAL — Se activa cuando el usuario alcanza el límite
+       de 5 cotizaciones gratuitas de prueba.
+       ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+  <div class="modal fade" id="paywallModal" tabindex="-1" aria-labelledby="paywallModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" style="max-width:480px;">
+      <div class="modal-content" style="border-radius:24px; border:none; overflow:hidden; box-shadow:0 24px 60px rgba(0,0,0,0.18);">
+
+        <!-- Header naranja -->
+        <div class="modal-header" style="background:linear-gradient(135deg,#FF6B35,#e85d24); border:none; padding:1.75rem 2rem 1.25rem;">
+          <div style="display:flex; align-items:center; gap:12px; width:100%;">
+            <div style="width:44px; height:44px; border-radius:14px; background:rgba(255,255,255,0.2);
+                        display:flex; align-items:center; justify-content:center; font-size:1.3rem; color:#FFF; flex-shrink:0;">
+              <i class="bi bi-rocket-takeoff-fill"></i>
+            </div>
+            <div>
+              <h5 class="modal-title" id="paywallModalLabel"
+                  style="font-size:1.15rem; font-weight:900; color:#FFF; margin:0; letter-spacing:-0.02em;">
+                ¡Has llegado lejos con COTIZAPro!
+              </h5>
+              <div style="font-size:0.8rem; color:rgba(255,255,255,0.85); margin-top:2px;">
+                Has usado tus <strong>5 cotizaciones gratuitas</strong>
+              </div>
+            </div>
+          </div>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+
+        <!-- Body -->
+        <div class="modal-body" style="padding:1.75rem 2rem; background:#FFF;">
+          <p style="font-size:0.92rem; color:#444; line-height:1.6; margin-bottom:1.5rem;">
+            Ya experimentaste el poder de generar cotizaciones profesionales con IVA 13%,
+            exportación PDF y gestión de clientes. Activa tu suscripción para continuar
+            sin interrupciones.
+          </p>
+
+          <!-- Beneficios -->
+          <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:1.75rem;">
+            {% for item in [
+              ('bi-infinity',        '#FF6B35', 'Cotizaciones ilimitadas sin restricciones'),
+              ('bi-file-earmark-pdf','#4F46E5', 'Exportación PDF ejecutiva con tu logo'),
+              ('bi-people-fill',     '#10B981', 'Gestión de equipo y vendedores'),
+              ('bi-robot',           '#F59E0B', 'Extracción de precios desde PDF con IA')
+            ] %}
+            <div style="display:flex; align-items:center; gap:10px;">
+              <div style="width:32px; height:32px; border-radius:10px; background:{{ item[1] }}1a;
+                          color:{{ item[1] }}; display:flex; align-items:center; justify-content:center;
+                          font-size:0.95rem; flex-shrink:0;">
+                <i class="bi {{ item[0] }}"></i>
+              </div>
+              <span style="font-size:0.86rem; font-weight:600; color:#333;">{{ item[2] }}</span>
+            </div>
+            {% endfor %}
+          </div>
+
+          <!-- Input PIN -->
+          <div style="background:#FFF5F2; border:1.5px solid rgba(255,107,53,0.3); border-radius:16px; padding:1.1rem;">
+            <label style="font-size:0.75rem; font-weight:800; color:#c94e1e; text-transform:uppercase;
+                          letter-spacing:0.05em; display:block; margin-bottom:8px;">
+              <i class="bi bi-key-fill"></i> Ingresa tu PIN de Suscripción
+            </label>
+            <div style="display:flex; gap:8px;">
+              <input type="password" id="paywallPinInput" placeholder="PIN de 6 dígitos"
+                     style="flex:1; padding:10px 14px; border:1.5px solid rgba(255,107,53,0.35);
+                            border-radius:12px; font-family:'Plus Jakarta Sans',sans-serif;
+                            font-size:0.95rem; font-weight:600; color:#141414; background:#FFF; outline:none;"
+                     oninput="clearPaywallError()">
+              <button onclick="activarPinPaywall()" id="btnActivarPin"
+                      style="padding:10px 18px; background:#FF6B35; color:#FFF; border:none;
+                             border-radius:12px; font-weight:800; font-size:0.88rem; cursor:pointer;
+                             box-shadow:0 3px 0 #c94e1e; transition:all 0.15s ease;"
+                      onmousedown="this.style.transform='translateY(2px)';this.style.boxShadow='0 1px 0 #c94e1e'"
+                      onmouseup="this.style.transform='';this.style.boxShadow='0 3px 0 #c94e1e'">
+                Activar
+              </button>
+            </div>
+            <div id="paywallPinError" style="display:none; margin-top:8px; font-size:0.78rem;
+                                             font-weight:700; color:#ef4444;"></div>
+            <div style="font-size:0.75rem; color:#888; margin-top:8px;">
+              ¿No tienes un PIN?
+              <a href="/suscripcion" style="color:#FF6B35; font-weight:700; text-decoration:none;">Obtén tu suscripción aquí →</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="modal-footer"
+             style="background:#FAFAFA; border-top:1px solid rgba(0,0,0,0.06);
+                    padding:1rem 2rem; justify-content:space-between;">
+          <div style="font-size:0.78rem; color:#888; font-weight:600;">
+            <i class="bi bi-shield-check-fill" style="color:#10B981;"></i>
+            Pago seguro · Sin compromisos
+          </div>
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal"
+                  style="border-radius:12px; font-weight:700; font-size:0.85rem; padding:7px 20px;">
+            Más tarde
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   {% block scripts %}{% endblock %}
   <script>
@@ -1320,15 +1460,73 @@
       }
     });
     // ─── MODAL SEGURIDAD & PRIVACIDAD ─────────────────────────────────────────
-  function openPrivacyModal(e) {
-    if (e) e.preventDefault();
-    var modalEl = document.getElementById('privacyModal');
-    if (modalEl) {
-      var modal = new bootstrap.Modal(modalEl);
-      modal.show();
+    function openPrivacyModal(e) {
+      if (e) e.preventDefault();
+      var modalEl = document.getElementById('privacyModal');
+      if (modalEl) {
+        var modal = new bootstrap.Modal(modalEl);
+        modal.show();
+      }
     }
-  }
-</script>
+
+    // ─── PAYWALL MODAL ───────────────────────────────────────────────────────
+    function openPaywallModal() {
+      var modalEl = document.getElementById('paywallModal');
+      if (modalEl) {
+        var modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+        modal.show();
+      }
+    }
+
+    function clearPaywallError() {
+      var errEl = document.getElementById('paywallPinError');
+      if (errEl) { errEl.style.display = 'none'; errEl.textContent = ''; }
+    }
+
+    function activarPinPaywall() {
+      var pinInput = document.getElementById('paywallPinInput');
+      var errEl    = document.getElementById('paywallPinError');
+      var btn      = document.getElementById('btnActivarPin');
+      var pin      = (pinInput ? pinInput.value : '').trim();
+
+      if (!pin) {
+        if (errEl) { errEl.textContent = 'Ingresa tu PIN primero.'; errEl.style.display = 'block'; }
+        return;
+      }
+
+      if (btn) { btn.disabled = true; btn.textContent = 'Verificando...'; }
+
+      fetch('/suscripcion/activar-pin', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+        body: JSON.stringify({ pin: pin })
+      })
+      .then(function (res) { return res.json().then(function (d) { return { status: res.status, data: d }; }); })
+      .then(function (r) {
+        if (r.status === 200 && r.data.ok) {
+          window.location.reload();
+        } else {
+          if (errEl) {
+            errEl.textContent = r.data.msg || 'PIN inválido o ya utilizado.';
+            errEl.style.display = 'block';
+          }
+          if (btn) { btn.disabled = false; btn.textContent = 'Activar'; }
+        }
+      })
+      .catch(function () {
+        if (errEl) { errEl.textContent = 'Error de conexión. Inténtalo de nuevo.'; errEl.style.display = 'block'; }
+        if (btn) { btn.disabled = false; btn.textContent = 'Activar'; }
+      });
+    }
+
+    // Interceptar respuestas 402 de formularios vía fetch (usado por cotizaciones.js)
+    window._handlePaywallResponse = function (data) {
+      if (data && data.paywall) { openPaywallModal(); return true; }
+      return false;
+    };
+  </script>
+
+
 </body>
 
 </html>

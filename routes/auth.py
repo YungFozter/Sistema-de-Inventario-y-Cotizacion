@@ -33,81 +33,65 @@ def register_routes(app):
     @app.route('/registro', methods=['GET', 'POST'])
     def registro():
         if request.method == 'POST':
-            nombre = request.form.get('nombre')
-            correo = request.form.get('correo')
-            telefono = request.form.get('telefono')
-            contrasena = request.form.get('contrasena')
-            confirmar_contrasena = request.form.get('confirmar_contrasena')
-            rol = request.form.get('rol', 'standard')  # Por defecto: standard
-            pin_admin = request.form.get('pin_admin', '')
+            nombre = request.form.get('nombre', '').strip()
+            empresa_nombre = request.form.get('empresa_nombre', '').strip()
+            correo = request.form.get('correo', '').strip()
+            telefono = request.form.get('telefono', '').strip()
+            contrasena = request.form.get('contrasena', '')
+            confirmar_contrasena = request.form.get('confirmar_contrasena', '')
 
-            # Validar contraseñas
+            # Validaciones básicas
+            if not nombre or not correo or not contrasena:
+                flash('Nombre, correo y contraseña son obligatorios.', 'danger')
+                return redirect(url_for('registro'))
+
             if contrasena != confirmar_contrasena:
-                return "Las contraseñas no coinciden", 400
+                flash('Las contraseñas no coinciden.', 'danger')
+                return redirect(url_for('registro'))
+
+            if len(contrasena) < 6:
+                flash('La contraseña debe tener al menos 6 caracteres.', 'danger')
+                return redirect(url_for('registro'))
+
+            # Todo registro público crea una cuenta de Administrador (modelo freemium)
+            rol = 'admin'
+            contrasena_hash = generate_password_hash(contrasena)
 
             conexion = get_db_connection()
             cursor = conexion.cursor()
 
-            # Validar PIN si el rol es admin
-            pin_id_usado = None
-            if rol == 'admin':
-                if not pin_admin:
-                    conexion.close()
-                    flash('El PIN de Administrador es obligatorio', 'danger')
-                    return redirect(url_for('registro'))
-                
-                cursor.execute('SELECT id, usado FROM pines_admin WHERE pin = ?', (pin_admin,))
-                pin_record = cursor.fetchone()
-            
-                if not pin_record or pin_record[1]:
-                    conexion.close()
-                    flash('PIN inválido o ya utilizado. Adquiere una suscripción para obtener uno nuevo.', 'danger')
-                    return redirect(url_for('registro'))
-            
-                pin_id_usado = pin_record[0]
-
-            # Guardar en la base de datos
-            contrasena_hash = generate_password_hash(contrasena)
-        
-            from datetime import timedelta
-            from models import obtener_fecha_bolivia
-            fecha_vencimiento = None
-            if rol == 'admin':
-                now_bo = obtener_fecha_bolivia()
-                fecha_vencimiento = (now_bo + timedelta(days=30)).strftime('%Y-%m-%d %H:%M:%S')
-            
             try:
                 is_postgres = bool(os.environ.get('DATABASE_URL') and os.environ.get('DATABASE_URL').startswith('postgres'))
                 query_insert = '''
-                    INSERT INTO clientes (nombre, correo, telefono, contrasena, rol, fecha_vencimiento_suscripcion)
-                    VALUES (?, ?, ?, ?, ?, ?)
+                    INSERT INTO clientes
+                        (nombre, empresa_nombre, correo, telefono, contrasena, rol,
+                         fecha_vencimiento_suscripcion, cotizaciones_trial_usadas)
+                    VALUES (?, ?, ?, ?, ?, ?, NULL, 0)
                 '''
                 if is_postgres:
-                    query_insert += " RETURNING id"
-                    cursor.execute(query_insert, (nombre, correo, telefono, contrasena_hash, rol, fecha_vencimiento))
+                    query_insert = query_insert.replace('?', '%s')
+                    query_insert += ' RETURNING id'
+                    cursor.execute(query_insert, (nombre, empresa_nombre, correo, telefono, contrasena_hash, rol))
                     row_id = cursor.fetchone()
                     nuevo_usuario_id = row_id[0] if row_id else None
                 else:
-                    cursor.execute(query_insert, (nombre, correo, telefono, contrasena_hash, rol, fecha_vencimiento))
+                    cursor.execute(query_insert, (nombre, empresa_nombre, correo, telefono, contrasena_hash, rol))
                     nuevo_usuario_id = cursor.lastrowid
 
                 if not nuevo_usuario_id:
-                    cursor.execute("SELECT id FROM clientes WHERE correo = ?", (correo,))
+                    cursor.execute('SELECT id FROM clientes WHERE correo = ?', (correo,))
                     row_u = cursor.fetchone()
                     if row_u:
                         nuevo_usuario_id = row_u[0]
 
-                # Quemar el PIN si es admin
-                if pin_id_usado and nuevo_usuario_id:
-                    cursor.execute('UPDATE pines_admin SET usado = TRUE, usado_por = ? WHERE id = ?', (nuevo_usuario_id, pin_id_usado))
-                
                 conexion.commit()
-                flash('¡Cuenta creada exitosamente! Ya puedes iniciar sesión.', 'success')
+                flash('¡Cuenta creada exitosamente! Tienes 5 cotizaciones gratis para explorar el sistema.', 'success')
+
             except Exception as e:
                 conexion.rollback()
                 err_msg = str(e).lower()
-                if 'unique' in err_msg or 'duplicate' in err_msg or 'ya existe' in err_msg or 'correo' in err_msg:
-                    flash('El correo electrónico ya está registrado', 'danger')
+                if 'unique' in err_msg or 'duplicate' in err_msg or 'correo' in err_msg:
+                    flash('El correo electrónico ya está registrado.', 'danger')
                 else:
                     flash(f'Error al registrar la cuenta: {str(e)}', 'danger')
                 return redirect(url_for('registro'))
@@ -117,7 +101,9 @@ def register_routes(app):
             return redirect(url_for('login'))
 
         # Si es GET, mostrar el formulario de registro
-        return render_template('autenticacion/registro.html')  # ← ¡Asegúrate de que existe registro.html!
+        return render_template('autenticacion/registro.html')
+
+
 
     @app.route('/login', methods=['GET', 'POST'])
     def login():
@@ -216,6 +202,28 @@ def register_routes(app):
                 session['user_email'] = cliente['correo']
                 session['session_token'] = session_token
 
+                # Datos freemium (solo relevantes para rol admin)
+                if rol == 'admin':
+                    from models import obtener_fecha_bolivia
+                    from datetime import timedelta as _td
+                    trial_usadas = cliente['cotizaciones_trial_usadas'] if 'cotizaciones_trial_usadas' in cliente.keys() else 0
+                    fecha_venc = cliente['fecha_vencimiento_suscripcion']
+                    suscripcion_activa = False
+                    if fecha_venc:
+                        try:
+                            venc_dt = datetime.strptime(str(fecha_venc).split('.')[0], '%Y-%m-%d %H:%M:%S')
+                            suscripcion_activa = venc_dt > datetime.now()
+                        except Exception:
+                            pass
+                    session['trial_usadas'] = trial_usadas or 0
+                    session['trial_activo'] = (not suscripcion_activa)
+                    session['creador_id'] = None
+                elif rol == 'standard':
+                    session['creador_id'] = cliente['creador_id']
+                    session['trial_activo'] = False
+                else:
+                    session['trial_activo'] = False
+
                 # Redirigir según el rol
                 if rol == 'superadmin':
                     return redirect(url_for('dashboard')) 
@@ -247,6 +255,52 @@ def register_routes(app):
         session.clear()
         flash('Has cerrado sesión exitosamente', 'info')
         return redirect('/login')
+
+    @app.route('/suscripcion/activar-pin', methods=['POST'])
+    def activar_pin_paywall():
+        """Endpoint JSON para activar un PIN de suscripción desde el modal paywall."""
+        if 'user_id' not in session or session.get('user_rol') != 'admin':
+            return jsonify({'ok': False, 'msg': 'No autorizado'}), 403
+
+        data = request.get_json(silent=True) or {}
+        pin_ingresado = (data.get('pin') or '').strip()
+
+        if not pin_ingresado:
+            return jsonify({'ok': False, 'msg': 'Debes ingresar un PIN'}), 400
+
+        try:
+            conexion = get_db_connection()
+            cursor = conexion.cursor()
+
+            cursor.execute('SELECT id, usado FROM pines_admin WHERE pin = ?', (pin_ingresado,))
+            pin_rec = cursor.fetchone()
+
+            if not pin_rec or pin_rec[1]:
+                conexion.close()
+                return jsonify({'ok': False, 'msg': 'PIN inválido o ya utilizado'}), 400
+
+            from models import obtener_fecha_bolivia
+            from datetime import timedelta
+            now_bo = obtener_fecha_bolivia()
+            fecha_venc = (now_bo + timedelta(days=30)).strftime('%Y-%m-%d %H:%M:%S')
+
+            cursor.execute(
+                'UPDATE clientes SET fecha_vencimiento_suscripcion = ? WHERE id = ?',
+                (fecha_venc, session['user_id'])
+            )
+            cursor.execute(
+                'UPDATE pines_admin SET usado = 1, usado_por = ? WHERE id = ?',
+                (session['user_id'], pin_rec[0])
+            )
+            conexion.commit()
+            conexion.close()
+
+            # Actualizar session: suscripción activa
+            session['trial_activo'] = False
+            return jsonify({'ok': True, 'msg': 'Suscripción activada por 30 días'}), 200
+
+        except Exception as e:
+            return jsonify({'ok': False, 'msg': f'Error: {str(e)}'}), 500
 
     @app.route('/setup-superadmin')
     def setup_superadmin():

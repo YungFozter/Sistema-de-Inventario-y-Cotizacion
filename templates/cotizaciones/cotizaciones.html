@@ -186,7 +186,7 @@
         // Carga inicial
         buscarClientes(1);
 
-        // Validar cliente antes de enviar el formulario
+        // Validar cliente y manejar respuestas de Paywall Freemium
         const formCotizacion = document.querySelector('form[action="/cotizaciones"]');
         if (formCotizacion) {
           formCotizacion.addEventListener('submit', function(e) {
@@ -194,7 +194,6 @@
             if (!clienteId || clienteId === '') {
               e.preventDefault();
               e.stopPropagation();
-              // Mostrar alerta visual en el panel de cliente
               const panel = document.getElementById('panel-buscar-cliente');
               let alerta = document.getElementById('alerta-cliente-requerido');
               if (!alerta) {
@@ -207,8 +206,39 @@
               panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
               return false;
             }
+
+            // Interceptar el envío para detectar respuesta 402 (Paywall)
+            e.preventDefault();
+            const formData = new FormData(formCotizacion);
+            const submitBtn = formCotizacion.querySelector('[type="submit"]');
+            if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Guardando...'; }
+
+            fetch('/cotizaciones', {
+              method: 'POST',
+              body: formData,
+              headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            })
+            .then(function(res) {
+              if (res.status === 402) {
+                return res.json().then(function(data) {
+                  if (window._handlePaywallResponse && window._handlePaywallResponse(data)) {
+                    if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Guardar Cotización'; }
+                  }
+                });
+              } else if (res.redirected) {
+                window.location.href = res.url;
+              } else {
+                // Respuesta inesperada: recargar la página para mostrar flash messages
+                window.location.reload();
+              }
+            })
+            .catch(function() {
+              // Fallback: envío normal si fetch falla
+              formCotizacion.submit();
+            });
           });
         }
+
       });
     })();
     </script>

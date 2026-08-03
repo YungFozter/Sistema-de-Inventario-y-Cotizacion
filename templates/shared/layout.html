@@ -1117,7 +1117,7 @@
         <!-- Links centro/derecha -->
         <div class="clay-footer-links">
           <a href="/acerca-de" class="clay-footer-link">Acerca de</a>
-          <a href="/politica-privacidad" class="clay-footer-link">Privacidad</a>
+          <a href="#" onclick="openPrivacyModal(event)" class="clay-footer-link">Seguridad & Privacidad</a>
           {% if 'user_id' not in session %}
           <a href="/login" class="clay-footer-link">Iniciar Sesión</a>
           <a href="/registro" class="clay-footer-link"
@@ -1132,6 +1132,96 @@
       </div>
     </div>
   </footer>
+
+  <!-- MODAL SEGURIDAD & PRIVACIDAD -->
+  <div class="modal fade" id="privacyModal" tabindex="-1" aria-labelledby="privacyModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content" style="border-radius: 24px; border: 1.5px solid rgba(0,0,0,0.1); overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.2);">
+        
+        <!-- Header -->
+        <div class="modal-header" style="background: #141414; color: #fff; border: none; padding: 1.5rem 2rem;">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <div style="width: 42px; height: 42px; border-radius: 14px; background: rgba(255,107,53,0.15); color: #FF6B35; display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">
+              <i class="bi bi-shield-check"></i>
+            </div>
+            <div>
+              <h5 class="modal-title" id="privacyModalLabel" style="font-weight: 800; font-size: 1.25rem; margin: 0; color: #fff;">Seguridad & Privacidad B2B</h5>
+              <div style="font-size: 0.78rem; color: rgba(255,255,255,0.6);">Compromiso de protección de datos comerciales en COTIZAPro</div>
+            </div>
+          </div>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+
+        <!-- Body -->
+        <div class="modal-body" style="padding: 2rem; background: #FAFAFA;">
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.25rem;">
+            
+            <!-- Item 1 -->
+            <div style="background: #FFF; border-radius: 16px; padding: 1.25rem; border: 1px solid rgba(0,0,0,0.06); box-shadow: 0 4px 12px rgba(0,0,0,0.02);">
+              <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 0.6rem;">
+                <div style="width: 32px; height: 32px; border-radius: 10px; background: #e0e7ff; color: #4338ca; display: flex; align-items: center; justify-content: center; font-size: 1rem;">
+                  <i class="bi bi-lock-fill"></i>
+                </div>
+                <h6 style="font-weight: 800; color: #141414; margin: 0; font-size: 0.95rem;">Confidencialidad B2B</h6>
+              </div>
+              <p style="font-size: 0.85rem; color: #555; line-height: 1.5; margin: 0;">
+                Tus datos de clientes, productos y precios pertenecen exclusivamente a tu empresa. No comercializamos ni compartimos tu información con terceros.
+              </p>
+            </div>
+
+            <!-- Item 2 -->
+            <div style="background: #FFF; border-radius: 16px; padding: 1.25rem; border: 1px solid rgba(0,0,0,0.06); box-shadow: 0 4px 12px rgba(0,0,0,0.02);">
+              <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 0.6rem;">
+                <div style="width: 32px; height: 32px; border-radius: 10px; background: #fee2e2; color: #dc2626; display: flex; align-items: center; justify-content: center; font-size: 1rem;">
+                  <i class="bi bi-key-fill"></i>
+                </div>
+                <h6 style="font-weight: 800; color: #141414; margin: 0; font-size: 0.95rem;">Acceso Protegido por PINs</h6>
+              </div>
+              <p style="font-size: 0.85rem; color: #555; line-height: 1.5; margin: 0;">
+                El registro de administradores requiere un PIN de validación único con vigencia de 30 días, garantizando que solo personal autorizado cree cuentas.
+              </p>
+            </div>
+
+            <!-- Item 3 -->
+            <div style="background: #FFF; border-radius: 16px; padding: 1.25rem; border: 1px solid rgba(0,0,0,0.06); box-shadow: 0 4px 12px rgba(0,0,0,0.02);">
+              <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 0.6rem;">
+                <div style="width: 32px; height: 32px; border-radius: 10px; background: #e0f2fe; color: #0284c7; display: flex; align-items: center; justify-content: center; font-size: 1rem;">
+                  <i class="bi bi-database-fill-check"></i>
+                </div>
+                <h6 style="font-weight: 800; color: #141414; margin: 0; font-size: 0.95rem;">Respaldos de Seguridad DB</h6>
+              </div>
+              <p style="font-size: 0.85rem; color: #555; line-height: 1.5; margin: 0;">
+                Se realizan copias de seguridad continuas de la base de datos PostgreSQL y logs de auditoría en tiempo real para evitar pérdida de datos.
+              </p>
+            </div>
+
+            <!-- Item 4 -->
+            <div style="background: #FFF; border-radius: 16px; padding: 1.25rem; border: 1px solid rgba(0,0,0,0.06); box-shadow: 0 4px 12px rgba(0,0,0,0.02);">
+              <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 0.6rem;">
+                <div style="width: 32px; height: 32px; border-radius: 10px; background: #dcfce7; color: #15803d; display: flex; align-items: center; justify-content: center; font-size: 1rem;">
+                  <i class="bi bi-patch-check-fill"></i>
+                </div>
+                <h6 style="font-weight: 800; color: #141414; margin: 0; font-size: 0.95rem;">Uso Exclusivo Operativo</h6>
+              </div>
+              <p style="font-size: 0.85rem; color: #555; line-height: 1.5; margin: 0;">
+                La información almacenada se utiliza estrictamente para el cálculo de cotizaciones, gestión de inventario y generación de documentos PDF.
+              </p>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="modal-footer" style="background: #FAFAFA; border-top: 1px solid rgba(0,0,0,0.06); padding: 1rem 2rem; justify-content: space-between;">
+          <div style="font-size: 0.78rem; color: #888; font-weight: 600;">
+            <i class="bi bi-geo-alt-fill" style="color:#FF6B35;"></i> COTIZAPro · Bolivia (UTC-4)
+          </div>
+          <button type="button" class="btn btn-dark" data-bs-dismiss="modal" style="border-radius: 12px; font-weight: 700; font-size: 0.88rem; padding: 8px 24px;">Entendido</button>
+        </div>
+
+      </div>
+    </div>
+  </div>
 
   <!-- JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
@@ -1229,7 +1319,16 @@
         sessionStorage.clear();
       }
     });
-  </script>
+    // ─── MODAL SEGURIDAD & PRIVACIDAD ─────────────────────────────────────────
+  function openPrivacyModal(e) {
+    if (e) e.preventDefault();
+    var modalEl = document.getElementById('privacyModal');
+    if (modalEl) {
+      var modal = new bootstrap.Modal(modalEl);
+      modal.show();
+    }
+  }
+</script>
 </body>
 
 </html>

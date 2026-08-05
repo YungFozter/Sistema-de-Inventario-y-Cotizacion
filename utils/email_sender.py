@@ -90,10 +90,18 @@ def _build_email_html(nombre: str, codigo: str) -> str:
                 tu dirección de correo y activar tu cuenta en <strong>COTIZAPro</strong>:
               </p>
 
-              <!-- Código OTP -->
-              <div style="text-align:center; margin-bottom:24px;">
-                {digitos_html}
+              <!-- Código OTP destacado para fácil lectura y copia -->
+              <div style="text-align:center; margin-bottom:12px;">
+                <div style="display:inline-block; background:#F8F9FA; border:2px dashed #FF6B35; border-radius:16px; padding:14px 28px;">
+                  <span style="font-size:2.2rem; font-weight:900; color:#FF6B35; letter-spacing:8px; font-family:'Courier New',Courier,monospace; user-select:all; -webkit-user-select:all;">
+                    {codigo}
+                  </span>
+                </div>
               </div>
+              <p style="text-align:center; margin:0 0 24px 0; font-size:0.78rem; color:#888;">
+                💡 <em>Toca o mantén presionado el código para copiarlo fácilmente.</em>
+              </p>
+
 
               <!-- Info Expiración -->
               <div style="background:#FFF5F2; border:1.5px solid rgba(255,107,53,0.25);

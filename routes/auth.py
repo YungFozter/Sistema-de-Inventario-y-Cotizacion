@@ -185,26 +185,33 @@ def register_routes(app):
             cur.execute(query_select, (correo,))
             cliente = cur.fetchone()
             
+            session_token = uuid.uuid4().hex
+
             if cliente:
-                # Login
-                session.clear()
-                session['usuario_id'] = cliente['id']
-                session['nombre'] = cliente['nombre']
-                session['rol'] = cliente['rol']
-                session['empresa_nombre'] = cliente['empresa_nombre']
+                user_id = cliente['id']
+                rol = cliente['rol']
+                nombre_val = cliente['nombre']
                 
-                # Actualizar auth_provider si era local
-                if cliente['auth_provider'] != 'google':
-                    query_update = 'UPDATE clientes SET auth_provider = %s WHERE id = %s' if is_postgres else 'UPDATE clientes SET auth_provider = ? WHERE id = ?'
-                    cur.execute(query_update, ('google', cliente['id']))
+                query_up = '''
+                    UPDATE clientes 
+                    SET auth_provider = %s, ultima_conexion = CURRENT_TIMESTAMP, session_token = %s 
+                    WHERE id = %s
+                ''' if is_postgres else '''
+                    UPDATE clientes 
+                    SET auth_provider = ?, ultima_conexion = CURRENT_TIMESTAMP, session_token = ? 
+                    WHERE id = ?
+                '''
+                try:
+                    cur.execute(query_up, ('google', session_token, user_id))
+                    con.commit()
+                except Exception as ex_t:
+                    print(f"[WARN] Error actualizando token google: {ex_t}")
+                    con.rollback()
                 
-                registrar_log(cliente['id'], 'login_google', {'ip': request.remote_addr})
-                con.commit()
+                registrar_log(user_id, 'login_google', {'ip': request.remote_addr, 'rol': rol})
                 con.close()
-                flash('Has iniciado sesión correctamente con Google.', 'success')
-                return redirect(url_for('dashboard'))
             else:
-                # Registrar
+                # Registrar cliente nuevo via Google
                 nuevo_id = _insertar_cliente(
                     cur, con,
                     nombre=nombre,
@@ -216,17 +223,41 @@ def register_routes(app):
                     auth_provider='google'
                 )
                 con.commit()
+                user_id = nuevo_id
+                rol = 'admin'
+                nombre_val = nombre
                 
-                session.clear()
-                session['usuario_id'] = nuevo_id
-                session['nombre'] = nombre
-                session['rol'] = 'admin'
-                session['empresa_nombre'] = ''
+                query_tok = '''
+                    UPDATE clientes SET session_token = %s WHERE id = %s
+                ''' if is_postgres else '''
+                    UPDATE clientes SET session_token = ? WHERE id = ?
+                '''
+                try:
+                    cur.execute(query_tok, (session_token, user_id))
+                    con.commit()
+                except Exception:
+                    pass
                 
-                registrar_log(nuevo_id, 'registro_google', {'ip': request.remote_addr})
+                registrar_log(user_id, 'registro_google', {'ip': request.remote_addr, 'rol': rol})
                 con.close()
-                flash('¡Bienvenido! Tu cuenta ha sido creada con Google.', 'success')
-                return redirect(url_for('dashboard'))
+
+            # Guardar sesión idéntica a la vista login estándar
+            session.clear()
+            session['user_id'] = user_id
+            session['user_nombre'] = nombre_val
+            session['user_rol'] = rol
+            session['user_email'] = correo
+            session['session_token'] = session_token
+
+            if rol == 'admin':
+                session['trial_usadas'] = 0
+                session['trial_activo'] = True
+                session['creador_id'] = None
+            else:
+                session['trial_activo'] = False
+
+            flash('¡Sesión iniciada correctamente con Google!', 'success')
+            return redirect(url_for('dashboard'))
                 
         except Exception as e:
             print(f'[GOOGLE AUTH ERROR] {e}')

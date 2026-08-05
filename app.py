@@ -51,7 +51,7 @@ from flask import session, request, redirect, url_for, flash
 
 @app.before_request
 def verificar_sesion_unica():
-    if request.endpoint and (request.endpoint.startswith('static') or request.endpoint in ('login', 'registro', 'logout')):
+    if request.endpoint and (request.endpoint.startswith('static') or request.endpoint in ('login', 'registro', 'logout', 'auth_google', 'auth_google_callback')):
         return
 
     user_id = session.get('user_id')

@@ -613,10 +613,12 @@ MODAL OTP — Verificación de correo electrónico
   .otp-digit.ok  { border-color:#10B981 !important; background:#f0fdf4 !important; }
   .otp-digit.err { border-color:#ef4444 !important; background:#fef2f2 !important; }
   #otpInputsWrap.shake { animation:shakeOTP 0.45s ease; }
-</style>
+</div>
 
+{% endblock %}
 
 {% block scripts %}
+
 {{ super() }}
 <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
 <script>

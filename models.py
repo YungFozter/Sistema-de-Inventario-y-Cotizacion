@@ -972,6 +972,11 @@ def migrar_columnas_nuevas_clientes():
                 print("[INFO] Agregando columna cotizaciones_trial_usadas en Postgres...")
                 cursor.execute("ALTER TABLE clientes ADD COLUMN cotizaciones_trial_usadas INTEGER DEFAULT 0")
                 conexion.commit()
+
+            if 'auth_provider' not in columnas_existentes:
+                print("[INFO] Agregando columna auth_provider en Postgres...")
+                cursor.execute("ALTER TABLE clientes ADD COLUMN auth_provider VARCHAR(50) DEFAULT 'local'")
+                conexion.commit()
         else:
             cursor.execute("PRAGMA table_info(clientes)")
             columnas = [col[1] for col in cursor.fetchall()]
@@ -995,6 +1000,10 @@ def migrar_columnas_nuevas_clientes():
             if 'cotizaciones_trial_usadas' not in columnas:
                 print("[INFO] Agregando columna cotizaciones_trial_usadas en SQLite...")
                 cursor.execute("ALTER TABLE clientes ADD COLUMN cotizaciones_trial_usadas INTEGER DEFAULT 0")
+
+            if 'auth_provider' not in columnas:
+                print("[INFO] Agregando columna auth_provider en SQLite...")
+                cursor.execute("ALTER TABLE clientes ADD COLUMN auth_provider VARCHAR(50) DEFAULT 'local'")
 
             conexion.commit()
     except Exception as e:

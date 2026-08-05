@@ -10,3 +10,5 @@ Pillow
 pdfplumber
 gunicorn
 psycopg2-binary
+Authlib
+requests

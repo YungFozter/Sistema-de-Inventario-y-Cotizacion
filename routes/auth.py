@@ -175,7 +175,8 @@ def register_routes(app):
             cur = con.cursor()
             
             # Buscar si el usuario ya existe
-            cur.execute('SELECT * FROM clientes WHERE correo = ?', (correo,))
+            query_select = 'SELECT * FROM clientes WHERE correo = %s' if is_postgres else 'SELECT * FROM clientes WHERE correo = ?'
+            cur.execute(query_select, (correo,))
             cliente = cur.fetchone()
             
             if cliente:
@@ -188,7 +189,8 @@ def register_routes(app):
                 
                 # Actualizar auth_provider si era local
                 if cliente['auth_provider'] != 'google':
-                    cur.execute('UPDATE clientes SET auth_provider = ? WHERE id = ?', ('google', cliente['id']))
+                    query_update = 'UPDATE clientes SET auth_provider = %s WHERE id = %s' if is_postgres else 'UPDATE clientes SET auth_provider = ? WHERE id = ?'
+                    cur.execute(query_update, ('google', cliente['id']))
                 
                 registrar_log(cliente['id'], 'login_google', {'ip': request.remote_addr})
                 con.commit()

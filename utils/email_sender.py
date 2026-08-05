@@ -63,11 +63,15 @@ def _build_email_html(nombre: str, codigo: str) -> str:
           <tr>
             <td style="background:linear-gradient(135deg,#FF6B35,#e85d24);
                        padding:36px 40px 28px; text-align:center;">
-              <div style="width:56px; height:56px; background:rgba(255,255,255,0.2);
-                          border-radius:16px; margin:0 auto 16px; display:inline-flex;
-                          align-items:center; justify-content:center; font-size:28px;">
-                ✉️
-              </div>
+              <!-- Icono de correo perfectamente centrado (compatible con Gmail/Outlook) -->
+              <table align="center" border="0" cellpadding="0" cellspacing="0" style="margin:0 auto 16px auto; width:56px; height:56px; background:rgba(255,255,255,0.22); border-radius:18px;">
+                <tr>
+                  <td align="center" valign="middle" style="text-align:center; vertical-align:middle; font-size:28px; line-height:56px; height:56px; width:56px;">
+                    ✉️
+                  </td>
+                </tr>
+              </table>
+
               <h1 style="margin:0; font-size:1.5rem; font-weight:900; color:#FFFFFF;
                          letter-spacing:-0.03em; line-height:1.2;">
                 Verifica tu correo

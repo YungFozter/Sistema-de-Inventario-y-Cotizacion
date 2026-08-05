@@ -247,6 +247,135 @@
         box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06) !important;
     }
 
+    /* ── Claymorphism Carousel Deck ───────────────────────── */
+    .clay-carousel-card {
+        background: #FFFFFF;
+        border: 1.5px solid rgba(0, 0, 0, 0.08);
+        border-radius: 28px;
+        box-shadow: 0 20px 48px rgba(0, 0, 0, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+        padding: 2.5rem 2.25rem 1.75rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        height: 100%;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .clay-slide-content {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        min-height: 360px;
+    }
+
+    .clay-slide-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        border-radius: 50px;
+        padding: 6px 16px;
+        font-size: 0.82rem;
+        font-weight: 800;
+        margin-bottom: 1.25rem;
+    }
+    .clay-slide-badge.orange { background: rgba(255,107,53,0.09); border: 1.5px solid rgba(255,107,53,0.3); color: #FF6B35; }
+    .clay-slide-badge.green  { background: rgba(16,185,129,0.09); border: 1.5px solid rgba(16,185,129,0.3); color: #10B981; }
+    .clay-slide-badge.sky    { background: rgba(2,132,199,0.09);  border: 1.5px solid rgba(2,132,199,0.3);  color: #0284C7; }
+    .clay-slide-badge.indigo { background: rgba(79,70,229,0.09);  border: 1.5px solid rgba(79,70,229,0.3);  color: #4F46E5; }
+
+    .clay-slide-title {
+        font-size: 1.85rem;
+        font-weight: 900;
+        color: #141414;
+        line-height: 1.2;
+        letter-spacing: -0.03em;
+        margin-bottom: 0.6rem;
+    }
+
+    .clay-slide-desc {
+        font-size: 0.9rem;
+        color: #666;
+        line-height: 1.55;
+        margin-bottom: 1.5rem;
+    }
+
+    .clay-slide-tile {
+        background: #F8F9FA;
+        border: 1.5px solid rgba(0, 0, 0, 0.06);
+        border-radius: 20px;
+        padding: 1.1rem 1.3rem;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+        transition: all 0.22s ease;
+    }
+
+    .clay-tile-icon {
+        width: 46px;
+        height: 46px;
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.35rem;
+        flex-shrink: 0;
+    }
+    .clay-tile-icon.orange { background: linear-gradient(135deg, #FFF3ED, #FFE5D9); color: #FF6B35; border: 1px solid rgba(255,107,53,0.2); }
+    .clay-tile-icon.green  { background: linear-gradient(135deg, #ECFDF5, #D1FAE5); color: #10B981; border: 1px solid rgba(16,185,129,0.2); }
+    .clay-tile-icon.sky    { background: linear-gradient(135deg, #F0F9FF, #E0F2FE); color: #0284C7; border: 1px solid rgba(2,132,199,0.2); }
+    .clay-tile-icon.indigo { background: linear-gradient(135deg, #EEF2FF, #E0E7FF); color: #4F46E5; border: 1px solid rgba(79,70,229,0.2); }
+
+    .clay-tile-title { font-weight: 800; font-size: 0.92rem; color: #141414; }
+    .clay-tile-sub { font-size: 0.78rem; color: #777; margin-top: 2px; }
+
+    /* Carousel Indicators 3D Clay */
+    .clay-carousel-indicators {
+        display: flex;
+        justify-content: center;
+        gap: 8px;
+        margin-top: 1.25rem;
+        margin-bottom: 0.5rem;
+        position: relative;
+        z-index: 5;
+    }
+    .clay-carousel-indicators button {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: #E5E7EB;
+        border: none;
+        transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        cursor: pointer;
+    }
+    .clay-carousel-indicators button.active {
+        width: 32px;
+        border-radius: 50px;
+        background: #FF6B35;
+        box-shadow: 0 2px 8px rgba(255,107,53,0.4);
+    }
+
+    .clay-carousel-footer {
+        background: #FAFAFA;
+        border: 1.5px solid rgba(0, 0, 0, 0.06);
+        border-radius: 16px;
+        padding: 12px 18px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-top: 1rem;
+    }
+
+    .status-dot-pulse {
+        width: 9px;
+        height: 9px;
+        border-radius: 50%;
+        background: #10B981;
+        box-shadow: 0 0 8px #10B981;
+        flex-shrink: 0;
+    }
+
     /* ── Responsive ────────────────────────────────────────── */
     @media (max-width: 991px) {
         .auth-bento-container { grid-template-columns: 1fr; }
@@ -264,23 +393,11 @@
     <div class="auth-bento-container">
 
         <!-- ═══════════════════════════════════════════════════════
-             IZQUIERDA: BENTO CLAYMORPHISM DECK (REDISEÑADO)
+             IZQUIERDA: CARRUSEL DE FUNCIONALIDADES (CLAYMORPHISM 3D)
              ═══════════════════════════════════════════════════════ -->
         <div class="auth-bento-visual" data-aos="fade-right">
             
-            <div class="clay-card-light" style="
-                background: #FFFFFF;
-                border: 1.5px solid rgba(0, 0, 0, 0.08);
-                border-radius: 28px;
-                box-shadow: 0 20px 48px rgba(0, 0, 0, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.9);
-                padding: 2.5rem 2.25rem;
-                display: flex;
-                flex-direction: column;
-                justify-content: space-between;
-                height: 100%;
-                position: relative;
-                overflow: hidden;
-            ">
+            <div class="clay-carousel-card">
                 <!-- Ambient Glow Background Blob -->
                 <div style="
                     position: absolute;
@@ -293,178 +410,127 @@
                     pointer-events: none;
                 "></div>
 
-                <!-- 1. Encabezado & Badge -->
-                <div style="position: relative; z-index: 2;">
-                    <div style="
-                        display: inline-flex;
-                        align-items: center;
-                        gap: 8px;
-                        background: rgba(255, 107, 53, 0.08);
-                        border: 1.5px solid rgba(255, 107, 53, 0.3);
-                        border-radius: 50px;
-                        padding: 6px 16px;
-                        font-size: 0.82rem;
-                        font-weight: 800;
-                        color: #FF6B35;
-                        margin-bottom: 1.25rem;
-                    ">
-                        <i class="bi bi-shield-check-fill" style="color: #FF6B35;"></i>
-                        <span>Acceso B2B Encriptado</span>
+                <!-- Carousel Container -->
+                <div id="loginFeaturesCarousel" class="carousel slide carousel-fade" data-bs-ride="carousel" data-bs-interval="4500" style="position: relative; z-index: 2;">
+                    
+                    <!-- Slides Inner -->
+                    <div class="carousel-inner">
+
+                        <!-- SLIDE 1: Cotizaciones PDF Pro -->
+                        <div class="carousel-item active">
+                            <div class="clay-slide-content">
+                                <div>
+                                    <div class="clay-slide-badge orange">
+                                        <i class="bi bi-file-earmark-pdf-fill"></i> Documentación PDF Pro
+                                    </div>
+                                    <h2 class="clay-slide-title">Cotizaciones Rápidas con IVA & Marcas</h2>
+                                    <p class="clay-slide-desc">
+                                        Exporta presupuestos corporativos impecables en segundos con desgloses de impuestos, validez legal y membrete personalizado.
+                                    </p>
+                                </div>
+                                
+                                <div class="clay-slide-tile">
+                                    <div class="clay-tile-icon orange">
+                                        <i class="bi bi-lightning-charge-fill"></i>
+                                    </div>
+                                    <div>
+                                        <div class="clay-tile-title">Generación & Cálculos Automatizados</div>
+                                        <div class="clay-tile-sub">Calcula subtotal, IVA (13%) y totales automáticamente sin errores.</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- SLIDE 2: Búsqueda de Productos -->
+                        <div class="carousel-item">
+                            <div class="clay-slide-content">
+                                <div>
+                                    <div class="clay-slide-badge green">
+                                        <i class="bi bi-box-seam-fill"></i> Inventario & Catálogo
+                                    </div>
+                                    <h2 class="clay-slide-title">Búsqueda Inteligente de Productos</h2>
+                                    <p class="clay-slide-desc">
+                                        Encuentra cualquier artículo de tu catálogo en menos de 0.2 segundos gracias a nuestros filtros rápidos por código y descripción.
+                                    </p>
+                                </div>
+                                
+                                <div class="clay-slide-tile">
+                                    <div class="clay-tile-icon green">
+                                        <i class="bi bi-search"></i>
+                                    </div>
+                                    <div>
+                                        <div class="clay-tile-title">Control de Precios & Categorías</div>
+                                        <div class="clay-tile-sub">Actualización masiva de inventario y listas de precios unificadas.</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- SLIDE 3: Extracción IA -->
+                        <div class="carousel-item">
+                            <div class="clay-slide-content">
+                                <div>
+                                    <div class="clay-slide-badge sky">
+                                        <i class="bi bi-cpu-fill"></i> Extracción con IA
+                                    </div>
+                                    <h2 class="clay-slide-title">Importación Mágica desde PDF</h2>
+                                    <p class="clay-slide-desc">
+                                        Escanea automáticamente listas de proveedores y catálogos en PDF para registrar cientos de productos en 1 solo clic.
+                                    </p>
+                                </div>
+                                
+                                <div class="clay-slide-tile">
+                                    <div class="clay-tile-icon sky">
+                                        <i class="bi bi-magic"></i>
+                                    </div>
+                                    <div>
+                                        <div class="clay-tile-title">Ahorro de Tiempo Garantizado</div>
+                                        <div class="clay-tile-sub">Elimina la carga manual digitando filas repetitivas una por una.</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- SLIDE 4: Colaboración de Equipo -->
+                        <div class="carousel-item">
+                            <div class="clay-slide-content">
+                                <div>
+                                    <div class="clay-slide-badge indigo">
+                                        <i class="bi bi-people-fill"></i> Equipo & Seguridad
+                                    </div>
+                                    <h2 class="clay-slide-title">Gestión Comercial & Seguridad SSL</h2>
+                                    <p class="clay-slide-desc">
+                                        Monitorea la actividad de tu empresa, asigna accesos seguros y protege tu información con autenticación Google OAuth 2.0.
+                                    </p>
+                                </div>
+                                
+                                <div class="clay-slide-tile">
+                                    <div class="clay-tile-icon indigo">
+                                        <i class="bi bi-shield-lock-fill"></i>
+                                    </div>
+                                    <div>
+                                        <div class="clay-tile-title">Protección & Google OAuth 2.0</div>
+                                        <div class="clay-tile-sub">Acceso seguro con cifrado SSL 256-bit y sesión única activa.</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                     </div>
 
-                    <h2 style="
-                        font-size: 1.9rem;
-                        font-weight: 900;
-                        color: #141414;
-                        line-height: 1.2;
-                        letter-spacing: -0.03em;
-                        margin-bottom: 0.6rem;
-                    ">
-                        Tu ecosistema de cotizaciones<br>
-                        <span style="
-                            background: linear-gradient(135deg, #FF6B35 0%, #E8501A 100%);
-                            -webkit-background-clip: text;
-                            -webkit-text-fill-color: transparent;
-                        ">en tiempo real</span>
-                    </h2>
-
-                    <p style="
-                        font-size: 0.9rem;
-                        color: #666;
-                        line-height: 1.55;
-                        margin-bottom: 1.75rem;
-                    ">
-                        Accede a tu panel para crear presupuestos profesionales, gestionar tu catálogo e impulsar tus ventas.
-                    </p>
-                </div>
-
-                <!-- 2. Grid Bento Interno (Cards de Funcionalidades) -->
-                <div style="
-                    display: flex;
-                    flex-direction: column;
-                    gap: 0.9rem;
-                    position: relative;
-                    z-index: 2;
-                    margin-bottom: 1.75rem;
-                ">
-                    <!-- Tile 1: Exportación PDF Pro -->
-                    <div class="clay-bento-tile" style="
-                        background: #F8F9FA;
-                        border: 1.5px solid rgba(0, 0, 0, 0.06);
-                        border-radius: 18px;
-                        padding: 1rem 1.25rem;
-                        display: flex;
-                        align-items: center;
-                        gap: 14px;
-                        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
-                        transition: all 0.22s ease;
-                    ">
-                        <div style="
-                            width: 44px;
-                            height: 44px;
-                            border-radius: 14px;
-                            background: linear-gradient(135deg, #FFF3ED 0%, #FFE5D9 100%);
-                            border: 1px solid rgba(255, 107, 53, 0.2);
-                            display: flex;
-                            align-items: center;
-                            justify-content: center;
-                            flex-shrink: 0;
-                            box-shadow: 0 4px 10px rgba(255, 107, 53, 0.15);
-                        ">
-                            <i class="bi bi-file-earmark-pdf-fill" style="color: #FF6B35; font-size: 1.35rem;"></i>
-                        </div>
-                        <div>
-                            <div style="font-weight: 800; font-size: 0.92rem; color: #141414;">Exportación PDF Pro</div>
-                            <div style="font-size: 0.78rem; color: #777;">Con IVA, marcas de agua y Términos & Condiciones.</div>
-                        </div>
-                    </div>
-
-                    <!-- Tile 2: Google OAuth 2.0 -->
-                    <div class="clay-bento-tile" style="
-                        background: #F8F9FA;
-                        border: 1.5px solid rgba(0, 0, 0, 0.06);
-                        border-radius: 18px;
-                        padding: 1rem 1.25rem;
-                        display: flex;
-                        align-items: center;
-                        gap: 14px;
-                        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
-                        transition: all 0.22s ease;
-                    ">
-                        <div style="
-                            width: 44px;
-                            height: 44px;
-                            border-radius: 14px;
-                            background: linear-gradient(135deg, #EEF2FF 0%, #E0E7FF 100%);
-                            border: 1px solid rgba(79, 70, 229, 0.2);
-                            display: flex;
-                            align-items: center;
-                            justify-content: center;
-                            flex-shrink: 0;
-                            box-shadow: 0 4px 10px rgba(79, 70, 229, 0.15);
-                        ">
-                            <i class="bi bi-shield-fill-check" style="color: #4F46E5; font-size: 1.35rem;"></i>
-                        </div>
-                        <div>
-                            <div style="font-weight: 800; font-size: 0.92rem; color: #141414;">Google OAuth 2.0</div>
-                            <div style="font-size: 0.78rem; color: #777;">Acceso seguro en 1-clic con cifrado SSL.</div>
-                        </div>
-                    </div>
-
-                    <!-- Tile 3: Nube Operativa 24/7 -->
-                    <div class="clay-bento-tile" style="
-                        background: #F8F9FA;
-                        border: 1.5px solid rgba(0, 0, 0, 0.06);
-                        border-radius: 18px;
-                        padding: 1rem 1.25rem;
-                        display: flex;
-                        align-items: center;
-                        gap: 14px;
-                        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
-                        transition: all 0.22s ease;
-                    ">
-                        <div style="
-                            width: 44px;
-                            height: 44px;
-                            border-radius: 14px;
-                            background: linear-gradient(135deg, #ECFDF5 0%, #D1FAE5 100%);
-                            border: 1px solid rgba(16, 185, 129, 0.2);
-                            display: flex;
-                            align-items: center;
-                            justify-content: center;
-                            flex-shrink: 0;
-                            box-shadow: 0 4px 10px rgba(16, 185, 129, 0.15);
-                        ">
-                            <i class="bi bi-cloud-check-fill" style="color: #10B981; font-size: 1.35rem;"></i>
-                        </div>
-                        <div>
-                            <div style="font-weight: 800; font-size: 0.92rem; color: #141414;">Nube Operativa 24/7</div>
-                            <div style="font-size: 0.78rem; color: #777;">Sincronización instantánea de inventario en Bolivia.</div>
-                        </div>
+                    <!-- Indicators 3D Clay -->
+                    <div class="clay-carousel-indicators">
+                        <button type="button" data-bs-target="#loginFeaturesCarousel" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
+                        <button type="button" data-bs-target="#loginFeaturesCarousel" data-bs-slide-to="1" aria-label="Slide 2"></button>
+                        <button type="button" data-bs-target="#loginFeaturesCarousel" data-bs-slide-to="2" aria-label="Slide 3"></button>
+                        <button type="button" data-bs-target="#loginFeaturesCarousel" data-bs-slide-to="3" aria-label="Slide 4"></button>
                     </div>
                 </div>
 
-                <!-- 3. Bottom Status Pill Deck -->
-                <div style="
-                    position: relative;
-                    z-index: 2;
-                    background: #FAFAFA;
-                    border: 1.5px solid rgba(0, 0, 0, 0.06);
-                    border-radius: 16px;
-                    padding: 12px 18px;
-                    display: flex;
-                    align-items: center;
-                    justify-content: space-between;
-                ">
+                <!-- Footer status deck -->
+                <div class="clay-carousel-footer" style="position: relative; z-index: 2;">
                     <div style="display: flex; align-items: center; gap: 8px;">
-                        <span style="
-                            width: 9px;
-                            height: 9px;
-                            border-radius: 50%;
-                            background: #10B981;
-                            box-shadow: 0 0 8px #10B981;
-                            flex-shrink: 0;
-                        "></span>
+                        <span class="status-dot-pulse"></span>
                         <span style="font-size: 0.82rem; font-weight: 800; color: #141414;">Sistema Operativo</span>
                     </div>
                     <span style="font-size: 0.78rem; font-weight: 700; color: #888;">Bolivia (UTC-4)</span>

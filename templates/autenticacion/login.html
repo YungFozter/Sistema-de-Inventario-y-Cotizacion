@@ -7,47 +7,41 @@
 <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
 <style>
     /* ============================================================
-       LOGIN HORIZONTAL BENTO GRID + CLAYMORPHISM 3D
+       LOGIN - BENTO GRID + CLAYMORPHISM 3D
        ============================================================ */
-    .login-wrapper {
+    .auth-page-wrapper {
         background-color: #F4F3EE;
         background-image:
-            radial-gradient(circle at 10% 20%, rgba(255, 107, 53, 0.08) 0%, transparent 45%),
-            radial-gradient(circle at 90% 80%, rgba(79, 70, 229, 0.08) 0%, transparent 45%),
-            radial-gradient(circle at 50% 50%, rgba(16, 185, 129, 0.04) 0%, transparent 60%);
+            radial-gradient(circle at 15% 15%, rgba(255, 107, 53, 0.08) 0%, transparent 50%),
+            radial-gradient(circle at 85% 85%, rgba(79, 70, 229, 0.08) 0%, transparent 50%);
         font-family: 'Plus Jakarta Sans', sans-serif;
         min-height: calc(100vh - 120px);
         margin-top: -1.5rem;
         margin-bottom: -3rem;
         margin-left: -12px;
         margin-right: -12px;
-        padding: 3rem 1.5rem 4.5rem;
+        padding: 3.5rem 1.5rem 5rem;
         display: flex;
         align-items: center;
         justify-content: center;
     }
 
-    .login-horizontal-bento {
-        max-width: 1120px;
+    .auth-bento-container {
+        max-width: 1100px;
         width: 100%;
         display: grid;
-        grid-template-columns: 1fr 1.15fr;
+        grid-template-columns: 1fr 1.2fr;
         gap: 2rem;
         align-items: stretch;
     }
 
-    /* ── Tarjeta Izquierda (Horizontal Bento Showcase - Clara/Glass 3D) ── */
-    .bento-left-card {
-        background: rgba(255, 255, 255, 0.85);
-        backdrop-filter: blur(20px);
-        -webkit-backdrop-filter: blur(20px);
-        border: 1.5px solid rgba(255, 255, 255, 0.9);
-        border-radius: 28px;
-        padding: 2.5rem 2.25rem;
-        box-shadow:
-            0 4px 0 rgba(0, 0, 0, 0.02),
-            0 20px 48px rgba(0, 0, 0, 0.06),
-            inset 0 1px 0 rgba(255, 255, 255, 1);
+    /* ── Hero Card Oscura (Visual Izquierda) ─────────────────── */
+    .bento-card-dark {
+        background: linear-gradient(145deg, #1C1917 0%, #09090B 100%);
+        border: 1.5px solid rgba(255, 255, 255, 0.12);
+        border-radius: 26px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.18);
+        padding: 2.5rem 2rem;
         display: flex;
         flex-direction: column;
         justify-content: space-between;
@@ -55,108 +49,68 @@
         overflow: hidden;
     }
 
-    .bento-left-card::before {
+    .bento-card-dark::before {
         content: '';
         position: absolute;
-        top: -60px;
-        left: -60px;
-        width: 220px;
-        height: 220px;
+        top: -80px;
+        right: -80px;
+        width: 250px;
+        height: 250px;
         border-radius: 50%;
-        background: radial-gradient(circle, rgba(255,107,53,0.14) 0%, transparent 70%);
+        background: radial-gradient(circle, rgba(255,107,53,0.18) 0%, transparent 70%);
         pointer-events: none;
     }
 
-    .badge-bento-portal {
+    /* ── Mini Features Bento ───────────────────────────────── */
+    .bento-card-feature {
+        background: #FFFFFF;
+        border: 1.5px solid rgba(0, 0, 0, 0.08);
+        border-radius: 20px;
+        box-shadow: 0 10px 28px rgba(0, 0, 0, 0.04);
+        padding: 1.15rem 1.35rem;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        transition: transform 0.25s ease, box-shadow 0.25s ease;
+    }
+
+    .bento-card-feature:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 14px 32px rgba(0, 0, 0, 0.08);
+    }
+
+    /* ── Badge ─────────────────────────────────────────────── */
+    .trial-badge {
         display: inline-flex;
         align-items: center;
         gap: 8px;
-        background: #FFFFFF;
-        border: 1.5px solid rgba(255, 107, 53, 0.3);
+        background: linear-gradient(135deg, rgba(255,107,53,0.15), rgba(255,107,53,0.08));
+        border: 1.5px solid rgba(255,107,53,0.35);
         border-radius: 50px;
-        padding: 6px 16px;
+        padding: 7px 16px;
         font-size: 0.82rem;
         font-weight: 800;
-        color: #C94E1E;
-        box-shadow: 0 4px 12px rgba(255, 107, 53, 0.1);
-        margin-bottom: 1.25rem;
+        color: #c94e1e;
     }
 
-    /* Floating 3D Element */
-    .bento-3d-graphic {
-        position: relative;
-        text-align: center;
-        padding: 1.5rem 0;
-    }
-
-    .clay-floating-icon-box {
-        width: 86px;
-        height: 86px;
-        border-radius: 26px;
-        background: linear-gradient(135deg, #FF8A5C 0%, #E8501A 100%);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin: 0 auto;
-        box-shadow:
-            0 14px 30px rgba(255, 107, 53, 0.38),
-            inset 0 2px 0 rgba(255, 255, 255, 0.4);
-        font-size: 2.6rem;
-        color: #FFFFFF;
-        animation: floatClaySoft 4s ease-in-out infinite;
-    }
-
-    @keyframes floatClaySoft {
-        0%, 100% { transform: translateY(0px) rotate(0deg); }
-        50% { transform: translateY(-8px) rotate(3deg); }
-    }
-
-    /* Sub-grid Mini Bento Cards */
-    .bento-mini-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 1rem;
-        margin-top: 1.5rem;
-    }
-
-    .bento-mini-item {
-        background: #FFFFFF;
-        border: 1.5px solid rgba(0, 0, 0, 0.07);
-        border-radius: 18px;
-        padding: 1rem 1.15rem;
-        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.03);
-        transition: transform 0.22s ease, box-shadow 0.22s ease;
-    }
-
-    .bento-mini-item:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 10px 24px rgba(0, 0, 0, 0.06);
-    }
-
-    /* ── Tarjeta Derecha (Formulario Claymorphism 3D) ────────── */
-    .bento-right-card {
+    /* ── Form Card ─────────────────────────────────────────── */
+    .form-card {
         background: #FFFFFF;
         border: 1.5px solid rgba(0, 0, 0, 0.08);
         border-radius: 28px;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.08);
         padding: 2.5rem;
-        box-shadow:
-            0 4px 0 rgba(0, 0, 0, 0.02),
-            0 20px 50px rgba(0, 0, 0, 0.07),
-            inset 0 1px 0 rgba(255, 255, 255, 1);
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
     }
 
-    /* Selector de Rol Clay Segmented */
-    .clay-role-segmented {
+    /* ── Selector de Rol / Tipo Claymorphism ───────────────── */
+    .clay-role-selector {
         display: grid;
         grid-template-columns: 1fr 1fr;
-        gap: 6px;
-        background: #F4F3EE;
-        padding: 5px;
+        gap: 0.75rem;
+        background: #F4F4F6;
+        padding: 6px;
         border-radius: 16px;
-        margin-bottom: 1.75rem;
+        margin-bottom: 1.5rem;
         border: 1.5px solid rgba(0,0,0,0.06);
     }
 
@@ -165,7 +119,7 @@
         align-items: center;
         justify-content: center;
         gap: 8px;
-        padding: 11px 16px;
+        padding: 10px 16px;
         border-radius: 12px;
         font-size: 0.88rem;
         font-weight: 800;
@@ -177,65 +131,20 @@
 
     .clay-role-btn:hover {
         color: #141414;
-        background: rgba(255,255,255,0.7);
+        background: rgba(255,255,255,0.6);
     }
 
-    .clay-role-btn.active.user-mode {
+    .clay-role-btn.active {
         background: #FFFFFF;
         color: #FF6B35;
         border-color: rgba(255,107,53,0.3);
-        box-shadow: 0 4px 12px rgba(255,107,53,0.14), 0 1px 2px rgba(0,0,0,0.04);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
     }
 
-    .clay-role-btn.active.admin-mode {
-        background: #FFFFFF;
-        color: #4F46E5;
-        border-color: rgba(79, 70, 229, 0.3);
-        box-shadow: 0 4px 12px rgba(79,70,229,0.14), 0 1px 2px rgba(0,0,0,0.04);
-    }
+    /* ── Inputs ────────────────────────────────────────────── */
+    .clay-input-group { position: relative; margin-bottom: 1.25rem; }
 
-    /* Google OAuth 3D Button */
-    .btn-google-clay-3d {
-        width: 100%;
-        padding: 13px 18px;
-        background: #FFFFFF;
-        border: 1.5px solid rgba(0, 0, 0, 0.12);
-        border-radius: 16px;
-        font-family: 'Plus Jakarta Sans', sans-serif;
-        font-size: 0.94rem;
-        font-weight: 800;
-        color: #222;
-        text-decoration: none;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 10px;
-        box-shadow:
-            0 2px 0 rgba(0,0,0,0.04),
-            0 6px 16px rgba(0,0,0,0.04),
-            inset 0 1px 0 rgba(255,255,255,1);
-        transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
-    }
-
-    .btn-google-clay-3d:hover {
-        transform: translateY(-2px);
-        background: #FAFAFA;
-        border-color: rgba(0, 0, 0, 0.2);
-        box-shadow: 0 8px 20px rgba(0,0,0,0.08);
-        color: #141414;
-    }
-
-    .btn-google-clay-3d:active {
-        transform: translateY(1px);
-        box-shadow: 0 1px 0 rgba(0,0,0,0.04);
-    }
-
-    /* Inputs Clay */
-    .clay-group-field {
-        margin-bottom: 1.25rem;
-    }
-
-    .clay-group-label {
+    .clay-input-label {
         font-size: 0.78rem;
         font-weight: 800;
         color: #444;
@@ -245,22 +154,18 @@
         margin-bottom: 6px;
     }
 
-    .clay-group-wrapper {
-        position: relative;
-        display: flex;
-        align-items: center;
-    }
+    .clay-input-wrapper { position: relative; display: flex; align-items: center; }
 
-    .clay-group-icon {
+    .clay-input-icon {
         position: absolute;
         left: 14px;
         color: #777;
         font-size: 1.05rem;
+        z-index: 2;
         pointer-events: none;
-        transition: color 0.2s ease;
     }
 
-    .clay-group-input {
+    .clay-input {
         width: 100%;
         padding: 12px 14px 12px 42px;
         border: 1.5px solid rgba(0, 0, 0, 0.12);
@@ -269,23 +174,18 @@
         font-size: 0.95rem;
         font-weight: 600;
         color: #141414;
-        background: #FAFAFA;
+        background: #F8F9FA;
         outline: none;
         transition: all 0.2s ease;
     }
 
-    .clay-group-input:focus {
+    .clay-input:focus {
         background: #FFFFFF;
         border-color: #FF6B35;
         box-shadow: 0 0 0 4px rgba(255, 107, 53, 0.14);
     }
 
-    .clay-group-input:focus + .clay-group-icon,
-    .clay-group-wrapper:focus-within .clay-group-icon {
-        color: #FF6B35;
-    }
-
-    .clay-eye-btn {
+    .clay-input-btn-eye {
         position: absolute;
         right: 12px;
         background: none;
@@ -297,10 +197,10 @@
         transition: color 0.2s ease;
     }
 
-    .clay-eye-btn:hover { color: #141414; }
+    .clay-input-btn-eye:hover { color: #141414; }
 
-    /* Submit Button 3D */
-    .btn-submit-3d {
+    /* ── Submit Button ─────────────────────────────────────── */
+    .btn-submit-clay {
         width: 100%;
         padding: 14px;
         background: #FF6B35;
@@ -312,175 +212,303 @@
         font-weight: 800;
         cursor: pointer;
         letter-spacing: -0.01em;
-        box-shadow: 0 4px 0 #C44E1E, 0 8px 24px rgba(255, 107, 53, 0.35);
-        transition: all 0.18s ease;
+        box-shadow: 0 4px 0 #c94e1e, 0 8px 24px rgba(255, 107, 53, 0.35);
+        transition: all 0.15s ease;
         display: flex;
         align-items: center;
         justify-content: center;
         gap: 8px;
-        margin-top: 1.5rem;
     }
 
-    .btn-submit-3d:hover {
-        background: #E8501A;
-        transform: translateY(-1.5px);
-        box-shadow: 0 6px 0 #C44E1E, 0 12px 28px rgba(255, 107, 53, 0.42);
+    .btn-submit-clay:hover {
+        background: #e85d24;
+        transform: translateY(-1px);
+        box-shadow: 0 6px 0 #c94e1e, 0 12px 28px rgba(255, 107, 53, 0.4);
     }
 
-    .btn-submit-3d:active {
+    .btn-submit-clay:active {
         transform: translateY(3px);
-        box-shadow: 0 1px 0 #C44E1E, 0 4px 12px rgba(255, 107, 53, 0.2);
+        box-shadow: 0 1px 0 #c94e1e, 0 4px 12px rgba(255, 107, 53, 0.2);
     }
 
-    .btn-submit-3d.is-admin-cta {
-        background: #4F46E5;
-        box-shadow: 0 4px 0 #3730A3, 0 8px 24px rgba(79, 70, 229, 0.35);
+    /* ── Animations ────────────────────────────────────────── */
+    @keyframes floatIcon {
+        0%   { transform: translateY(0px) rotate(0deg); }
+        50%  { transform: translateY(-8px) rotate(2deg); }
+        100% { transform: translateY(0px) rotate(0deg); }
     }
 
-    .btn-submit-3d.is-admin-cta:hover {
-        background: #4338CA;
-        box-shadow: 0 6px 0 #3730A3, 0 12px 28px rgba(79, 70, 229, 0.42);
+    .floating-3d-icon { animation: floatIcon 4s ease-in-out infinite; }
+
+    .clay-bento-tile:hover {
+        transform: translateY(-2px);
+        background: #FFFFFF !important;
+        border-color: rgba(255, 107, 53, 0.25) !important;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06) !important;
     }
 
-    /* ── Responsive Rules (Móvil / Tablet) ────────────────────── */
+    /* ── Responsive ────────────────────────────────────────── */
     @media (max-width: 991px) {
-        .login-horizontal-bento {
-            grid-template-columns: 1fr;
-            gap: 1.5rem;
-        }
-
-        .bento-left-card {
-            padding: 2rem 1.5rem;
-        }
+        .auth-bento-container { grid-template-columns: 1fr; }
+        .auth-bento-visual { display: none; }
     }
 
     @media (max-width: 576px) {
-        .bento-left-card {
-            padding: 1.5rem 1.25rem;
-        }
-
-        .bento-right-card {
-            padding: 1.5rem 1.25rem !important;
-        }
-
-        .bento-mini-grid {
-            grid-template-columns: 1fr;
-            gap: 0.75rem;
-        }
+        .form-card { padding: 1.5rem 1.25rem !important; }
     }
 </style>
 {% endblock %}
 
 {% block contenido %}
-<div class="login-wrapper">
-    <div class="login-horizontal-bento">
+<div class="auth-page-wrapper">
+    <div class="auth-bento-container">
 
         <!-- ═══════════════════════════════════════════════════════
-             1. BENTO SHOWCASE CARD (HORIZONTAL IZQUIERDA)
+             IZQUIERDA: BENTO CLAYMORPHISM DECK (REDISEÑADO)
              ═══════════════════════════════════════════════════════ -->
-        <div class="bento-left-card" data-aos="fade-right">
-            <div>
-                <div class="badge-bento-portal">
-                    <i class="bi bi-shield-check" style="font-size:0.95rem;"></i>
-                    Acceso B2B Encriptado
+        <div class="auth-bento-visual" data-aos="fade-right">
+            
+            <div class="clay-card-light" style="
+                background: #FFFFFF;
+                border: 1.5px solid rgba(0, 0, 0, 0.08);
+                border-radius: 28px;
+                box-shadow: 0 20px 48px rgba(0, 0, 0, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+                padding: 2.5rem 2.25rem;
+                display: flex;
+                flex-direction: column;
+                justify-content: space-between;
+                height: 100%;
+                position: relative;
+                overflow: hidden;
+            ">
+                <!-- Ambient Glow Background Blob -->
+                <div style="
+                    position: absolute;
+                    top: -60px;
+                    left: -60px;
+                    width: 220px;
+                    height: 220px;
+                    border-radius: 50%;
+                    background: radial-gradient(circle, rgba(255, 107, 53, 0.12) 0%, transparent 70%);
+                    pointer-events: none;
+                "></div>
+
+                <!-- 1. Encabezado & Badge -->
+                <div style="position: relative; z-index: 2;">
+                    <div style="
+                        display: inline-flex;
+                        align-items: center;
+                        gap: 8px;
+                        background: rgba(255, 107, 53, 0.08);
+                        border: 1.5px solid rgba(255, 107, 53, 0.3);
+                        border-radius: 50px;
+                        padding: 6px 16px;
+                        font-size: 0.82rem;
+                        font-weight: 800;
+                        color: #FF6B35;
+                        margin-bottom: 1.25rem;
+                    ">
+                        <i class="bi bi-shield-check-fill" style="color: #FF6B35;"></i>
+                        <span>Acceso B2B Encriptado</span>
+                    </div>
+
+                    <h2 style="
+                        font-size: 1.9rem;
+                        font-weight: 900;
+                        color: #141414;
+                        line-height: 1.2;
+                        letter-spacing: -0.03em;
+                        margin-bottom: 0.6rem;
+                    ">
+                        Tu ecosistema de cotizaciones<br>
+                        <span style="
+                            background: linear-gradient(135deg, #FF6B35 0%, #E8501A 100%);
+                            -webkit-background-clip: text;
+                            -webkit-text-fill-color: transparent;
+                        ">en tiempo real</span>
+                    </h2>
+
+                    <p style="
+                        font-size: 0.9rem;
+                        color: #666;
+                        line-height: 1.55;
+                        margin-bottom: 1.75rem;
+                    ">
+                        Accede a tu panel para crear presupuestos profesionales, gestionar tu catálogo e impulsar tus ventas.
+                    </p>
                 </div>
 
-                <h2 style="font-size: 1.85rem; font-weight: 900; color: #141414; line-height: 1.2; letter-spacing: -0.03em; margin-bottom: 0.75rem;">
-                    Tu ecosistema de cotizaciones<br>
-                    <span style="color:#FF6B35;">en tiempo real</span>
-                </h2>
-
-                <p style="font-size: 0.9rem; color: #666; line-height: 1.55; margin-bottom: 1.25rem;">
-                    Accede a tu panel para crear presupuestos profesionales, gestionar tu catálogo e impulsar tus ventas.
-                </p>
-            </div>
-
-            <!-- Bento Live Widget Preview (Contenedor 3D enriquecido) -->
-            <div style="background: linear-gradient(135deg, #FFFFFF 0%, #FAFAFA 100%);
-                        border: 1.5px solid rgba(0, 0, 0, 0.08); border-radius: 22px;
-                        padding: 1.25rem; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.04), inset 0 1px 0 rgba(255, 255, 255, 1);
-                        display: flex; flex-direction: column; gap: 0.85rem; margin: 0.5rem 0 1.25rem;">
-                
-                <!-- Item A -->
-                <div style="display: flex; align-items: center; gap: 12px; background: #FFFFFF; border: 1px solid rgba(0,0,0,0.06); border-radius: 14px; padding: 10px 14px; box-shadow: 0 2px 6px rgba(0,0,0,0.02);">
-                    <div style="width: 36px; height: 36px; border-radius: 10px; background: #FFF7ED; color: #FF6B35; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 1.1rem;">
-                        <i class="bi bi-file-earmark-pdf-fill"></i>
+                <!-- 2. Grid Bento Interno (Cards de Funcionalidades) -->
+                <div style="
+                    display: flex;
+                    flex-direction: column;
+                    gap: 0.9rem;
+                    position: relative;
+                    z-index: 2;
+                    margin-bottom: 1.75rem;
+                ">
+                    <!-- Tile 1: Exportación PDF Pro -->
+                    <div class="clay-bento-tile" style="
+                        background: #F8F9FA;
+                        border: 1.5px solid rgba(0, 0, 0, 0.06);
+                        border-radius: 18px;
+                        padding: 1rem 1.25rem;
+                        display: flex;
+                        align-items: center;
+                        gap: 14px;
+                        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+                        transition: all 0.22s ease;
+                    ">
+                        <div style="
+                            width: 44px;
+                            height: 44px;
+                            border-radius: 14px;
+                            background: linear-gradient(135deg, #FFF3ED 0%, #FFE5D9 100%);
+                            border: 1px solid rgba(255, 107, 53, 0.2);
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            flex-shrink: 0;
+                            box-shadow: 0 4px 10px rgba(255, 107, 53, 0.15);
+                        ">
+                            <i class="bi bi-file-earmark-pdf-fill" style="color: #FF6B35; font-size: 1.35rem;"></i>
+                        </div>
+                        <div>
+                            <div style="font-weight: 800; font-size: 0.92rem; color: #141414;">Exportación PDF Pro</div>
+                            <div style="font-size: 0.78rem; color: #777;">Con IVA, marcas de agua y Términos & Condiciones.</div>
+                        </div>
                     </div>
-                    <div>
-                        <div style="font-size: 0.84rem; font-weight: 800; color: #141414;">Exportación PDF Pro</div>
-                        <div style="font-size: 0.74rem; color: #777;">Con IVA, marcas de agua y T&C</div>
+
+                    <!-- Tile 2: Google OAuth 2.0 -->
+                    <div class="clay-bento-tile" style="
+                        background: #F8F9FA;
+                        border: 1.5px solid rgba(0, 0, 0, 0.06);
+                        border-radius: 18px;
+                        padding: 1rem 1.25rem;
+                        display: flex;
+                        align-items: center;
+                        gap: 14px;
+                        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+                        transition: all 0.22s ease;
+                    ">
+                        <div style="
+                            width: 44px;
+                            height: 44px;
+                            border-radius: 14px;
+                            background: linear-gradient(135deg, #EEF2FF 0%, #E0E7FF 100%);
+                            border: 1px solid rgba(79, 70, 229, 0.2);
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            flex-shrink: 0;
+                            box-shadow: 0 4px 10px rgba(79, 70, 229, 0.15);
+                        ">
+                            <i class="bi bi-shield-fill-check" style="color: #4F46E5; font-size: 1.35rem;"></i>
+                        </div>
+                        <div>
+                            <div style="font-weight: 800; font-size: 0.92rem; color: #141414;">Google OAuth 2.0</div>
+                            <div style="font-size: 0.78rem; color: #777;">Acceso seguro en 1-clic con cifrado SSL.</div>
+                        </div>
+                    </div>
+
+                    <!-- Tile 3: Nube Operativa 24/7 -->
+                    <div class="clay-bento-tile" style="
+                        background: #F8F9FA;
+                        border: 1.5px solid rgba(0, 0, 0, 0.06);
+                        border-radius: 18px;
+                        padding: 1rem 1.25rem;
+                        display: flex;
+                        align-items: center;
+                        gap: 14px;
+                        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+                        transition: all 0.22s ease;
+                    ">
+                        <div style="
+                            width: 44px;
+                            height: 44px;
+                            border-radius: 14px;
+                            background: linear-gradient(135deg, #ECFDF5 0%, #D1FAE5 100%);
+                            border: 1px solid rgba(16, 185, 129, 0.2);
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            flex-shrink: 0;
+                            box-shadow: 0 4px 10px rgba(16, 185, 129, 0.15);
+                        ">
+                            <i class="bi bi-cloud-check-fill" style="color: #10B981; font-size: 1.35rem;"></i>
+                        </div>
+                        <div>
+                            <div style="font-weight: 800; font-size: 0.92rem; color: #141414;">Nube Operativa 24/7</div>
+                            <div style="font-size: 0.78rem; color: #777;">Sincronización instantánea de inventario en Bolivia.</div>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Item B -->
-                <div style="display: flex; align-items: center; gap: 12px; background: #FFFFFF; border: 1px solid rgba(0,0,0,0.06); border-radius: 14px; padding: 10px 14px; box-shadow: 0 2px 6px rgba(0,0,0,0.02);">
-                    <div style="width: 36px; height: 36px; border-radius: 10px; background: #EEF2FF; color: #4F46E5; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 1.1rem;">
-                        <i class="bi bi-shield-lock-fill"></i>
+                <!-- 3. Bottom Status Pill Deck -->
+                <div style="
+                    position: relative;
+                    z-index: 2;
+                    background: #FAFAFA;
+                    border: 1.5px solid rgba(0, 0, 0, 0.06);
+                    border-radius: 16px;
+                    padding: 12px 18px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                ">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <span style="
+                            width: 9px;
+                            height: 9px;
+                            border-radius: 50%;
+                            background: #10B981;
+                            box-shadow: 0 0 8px #10B981;
+                            flex-shrink: 0;
+                        "></span>
+                        <span style="font-size: 0.82rem; font-weight: 800; color: #141414;">Sistema Operativo</span>
                     </div>
-                    <div>
-                        <div style="font-size: 0.84rem; font-weight: 800; color: #141414;">Google OAuth 2.0</div>
-                        <div style="font-size: 0.74rem; color: #777;">Acceso seguro en 1-clic con SSL</div>
-                    </div>
+                    <span style="font-size: 0.78rem; font-weight: 700; color: #888;">Bolivia (UTC-4)</span>
                 </div>
 
-                <!-- Item C -->
-                <div style="display: flex; align-items: center; gap: 12px; background: #FFFFFF; border: 1px solid rgba(0,0,0,0.06); border-radius: 14px; padding: 10px 14px; box-shadow: 0 2px 6px rgba(0,0,0,0.02);">
-                    <div style="width: 36px; height: 36px; border-radius: 10px; background: #ECFDF5; color: #10B981; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 1.1rem;">
-                        <i class="bi bi-cloud-check-fill"></i>
-                    </div>
-                    <div>
-                        <div style="font-size: 0.84rem; font-weight: 800; color: #141414;">Nube Operativa 24/7</div>
-                        <div style="font-size: 0.74rem; color: #777;">Sincronización instantánea en Bolivia</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Footer Live Status Pill -->
-            <div style="display: flex; align-items: center; justify-content: space-between; background: #FAFAFA; border: 1.5px solid rgba(0,0,0,0.06); border-radius: 14px; padding: 10px 14px;">
-                <div style="display: flex; align-items: center; gap: 8px;">
-                    <span style="width: 8px; height: 8px; border-radius: 50%; background: #10B981; box-shadow: 0 0 8px #10B981; flex-shrink: 0;"></span>
-                    <span style="font-size: 0.78rem; font-weight: 800; color: #444;">Sistema Operativo</span>
-                </div>
-                <span style="font-size: 0.74rem; font-weight: 700; color: #888;">Bolivia (UTC-4)</span>
             </div>
         </div>
 
+
         <!-- ═══════════════════════════════════════════════════════
-             2. BENTO FORM CARD (HORIZONTAL DERECHA - CLAY 3D)
+             DERECHA: FORMULARIO DE LOGIN (CLAYMORPHISM 3D)
              ═══════════════════════════════════════════════════════ -->
-        <div class="bento-right-card" data-aos="fade-left" data-aos-delay="100">
+        <div class="form-card" data-aos="fade-left">
 
             <div style="margin-bottom: 1.5rem; text-align: center;">
-                <h3 style="font-size: 1.6rem; font-weight: 900; color: #141414; letter-spacing: -0.03em; margin-bottom: 4px;">
+                <h3 style="font-size: 1.6rem; font-weight: 900; color: #141414; letter-spacing: -0.02em; margin-bottom: 4px;">
                     Iniciar Sesión
                 </h3>
                 <p style="font-size: 0.88rem; color: #666; margin: 0;">
-                    Selecciona tu perfil e ingresa tus datos
+                    Ingresa tus datos para acceder a tu panel
                 </p>
             </div>
 
-            <!-- Selector de Tipo de Usuario Clay Segmented -->
-            <div class="clay-role-segmented">
+            <!-- Selector de Tipo de Usuario (Clay Role Buttons) -->
+            <div class="clay-role-selector">
                 <a href="{{ url_for('login', tipo='standard') }}"
-                   class="clay-role-btn user-mode {% if tipo == 'standard' %}active{% endif %}">
-                    <i class="bi bi-person-badge-fill"></i> Usuario
+                   class="clay-role-btn {% if tipo == 'standard' %}active{% endif %}">
+                    <i class="bi bi-person-fill"></i> Usuario
                 </a>
                 <a href="{{ url_for('login', tipo='admin') }}"
-                   class="clay-role-btn admin-mode {% if tipo == 'admin' %}active{% endif %}">
-                    <i class="bi bi-shield-fill"></i> Administrador
+                   class="clay-role-btn {% if tipo == 'admin' %}active{% endif %}">
+                    <i class="bi bi-shield-lock-fill"></i> Administrador
                 </a>
             </div>
 
-            <!-- Alertas de Error -->
             {% if error %}
                 <div class="alert alert-danger d-flex align-items-center gap-2 mb-4"
-                     style="border-radius:14px; font-size:0.88rem; font-weight:700; border:none; background:#FEF2F2; color:#DC2626;">
+                     style="border-radius:14px; font-size:0.88rem; font-weight:600; border:none; background:#FEF2F2; color:#DC2626;">
                     <i class="bi bi-exclamation-triangle-fill fs-5"></i>
                     <div>
                         {{ error }}
                         {% if error == 'Credenciales incorrectas' %}
                             <div class="mt-1">
-                                <a href="/reset-password" style="color:#DC2626; text-decoration:underline; font-weight:800;">¿Olvidaste tu contraseña?</a>
+                                <a href="/reset-password" style="color:#DC2626; text-decoration:underline; font-weight:700;">¿Olvidaste tu contraseña?</a>
                             </div>
                         {% endif %}
                     </div>
@@ -490,61 +518,58 @@
             <form method="post" action="{{ url_for('login') }}" id="loginForm">
                 <input type="hidden" name="tipo_login" value="{{ tipo }}">
 
-                <!-- Google OAuth 3D Button -->
-                <div class="mb-4">
-                    <a href="{{ url_for('auth_google') }}" class="btn-google-clay-3d">
+                <!-- Google OAuth -->
+                <div class="d-grid mb-4">
+                    <a href="{{ url_for('auth_google') }}" class="btn btn-outline-dark btn-lg" style="border-radius: 14px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 10px; background: #fff; border: 1.5px solid #e0e0e0; color: #333; transition: all 0.2s ease;">
                         <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" style="width: 20px;">
                         Continuar con Google
                     </a>
                 </div>
                 
                 <div class="d-flex align-items-center my-4">
-                    <hr class="flex-grow-1" style="border-top: 1px solid rgba(0,0,0,0.1);">
-                    <span class="mx-3 text-muted" style="font-size: 0.78rem; font-weight: 800; letter-spacing: 0.05em; color: #888;">
-                        O INICIA CON CORREO
-                    </span>
-                    <hr class="flex-grow-1" style="border-top: 1px solid rgba(0,0,0,0.1);">
+                    <hr class="flex-grow-1">
+                    <span class="mx-3 text-muted" style="font-size: 0.82rem; font-weight: 800; letter-spacing: 0.04em;">O INICIA SESIÓN CON TU CORREO</span>
+                    <hr class="flex-grow-1">
                 </div>
 
-                <!-- Campo Correo -->
-                <div class="clay-group-field">
-                    <label class="clay-group-label" for="login_correo">Correo electrónico</label>
-                    <div class="clay-group-wrapper">
-                        <i class="bi bi-envelope-fill clay-group-icon"></i>
-                        <input type="email" id="login_correo" name="correo" class="clay-group-input"
+                <!-- Correo Electrónico -->
+                <div class="clay-input-group">
+                    <label class="clay-input-label" for="login_correo">Correo electrónico</label>
+                    <div class="clay-input-wrapper">
+                        <i class="bi bi-envelope-fill clay-input-icon"></i>
+                        <input type="email" id="login_correo" name="correo" class="clay-input"
                                required placeholder="tu@correo.com" autocomplete="email">
                     </div>
                 </div>
 
-                <!-- Campo Contraseña -->
-                <div class="clay-group-field">
-                    <label class="clay-group-label" for="password_input">Contraseña</label>
-                    <div class="clay-group-wrapper">
-                        <i class="bi bi-lock-fill clay-group-icon"></i>
-                        <input type="password" id="password_input" name="contrasena" class="clay-group-input"
+                <!-- Contraseña -->
+                <div class="clay-input-group">
+                    <label class="clay-input-label" for="password_input">Contraseña</label>
+                    <div class="clay-input-wrapper">
+                        <i class="bi bi-lock-fill clay-input-icon"></i>
+                        <input type="password" id="password_input" name="contrasena" class="clay-input"
                                required placeholder="••••••••" autocomplete="current-password">
-                        <button type="button" class="clay-eye-btn"
-                                onclick="togglePassword('password_input', 'eye_icon_pw')" tabindex="-1" aria-label="Mostrar contraseña">
+                        <button type="button" class="clay-input-btn-eye"
+                                onclick="togglePassword('password_input', 'eye_icon_pw')" tabindex="-1">
                             <i id="eye_icon_pw" class="bi bi-eye"></i>
                         </button>
                     </div>
                 </div>
 
-                <!-- Botón CTA Iniciar Sesión 3D -->
-                <button type="submit" class="btn-submit-3d {% if tipo == 'admin' %}is-admin-cta{% endif %}" id="btn_login">
+                <!-- Botón Iniciar Sesión -->
+                <button type="submit" class="btn-submit-clay mt-4" id="btn_login">
                     <i class="bi bi-box-arrow-in-right"></i>
                     {% if tipo == 'admin' %}Acceder al Panel Admin{% else %}Iniciar Sesión{% endif %}
                 </button>
 
                 <div style="text-align:center; margin-top:1.5rem;">
-                    <span style="font-size:0.88rem; color:#666;">¿Aún no tienes cuenta?</span>
+                    <span style="font-size:0.88rem; color:#666;">¿No tienes una cuenta?</span>
                     <a href="{{ url_for('registro') }}" style="font-size:0.88rem; font-weight:800; color:#FF6B35;
                                                            text-decoration:none; margin-left:4px;">Regístrate gratis</a>
                 </div>
 
             </form>
         </div>
-
     </div>
 </div>
 {% endblock %}
@@ -554,7 +579,7 @@
 <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        AOS.init({ once: true, duration: 650, easing: 'ease-out-cubic' });
+        AOS.init({ once: true, duration: 700, easing: 'ease-out-cubic' });
     });
 
     function togglePassword(inputId, iconId) {

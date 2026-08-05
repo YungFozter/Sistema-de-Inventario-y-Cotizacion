@@ -632,6 +632,70 @@
       .clay-nav-links {
         display: none !important;
       }
+
+      .clay-nav-brand {
+        flex: 0 0 auto !important;
+        font-size: 1rem;
+      }
+
+      .clay-nav-actions {
+        flex: 0 0 auto !important;
+        gap: 8px;
+      }
+
+      .clay-navbar {
+        justify-content: space-between !important;
+        padding: 0 8px;
+      }
+
+      .clay-btn-cta {
+        padding: 7px 14px;
+        font-size: 0.8rem;
+      }
+    }
+
+    @media (max-width: 576px) {
+      .clay-nav-wrapper.pill-mode {
+        top: 12px;
+        width: calc(100% - 24px) !important;
+      }
+
+      .clay-nav-brand {
+        font-size: 0.92rem;
+        gap: 6px;
+      }
+
+      .clay-nav-brand-dot {
+        width: 7px;
+        height: 7px;
+      }
+
+      .clay-btn-cta {
+        padding: 6px 10px;
+        font-size: 0.75rem;
+        gap: 4px;
+        border-radius: 8px;
+      }
+
+      .clay-btn-cta i {
+        font-size: 0.75rem;
+      }
+
+      .clay-user-badge {
+        padding: 4px 8px 4px 4px;
+        font-size: 0.78rem;
+      }
+
+      .clay-user-avatar {
+        width: 24px;
+        height: 24px;
+        font-size: 0.7rem;
+      }
+
+      .clay-nav-toggler {
+        padding: 6px 9px;
+        font-size: 1rem;
+      }
     }
 
     nav.navbar.navbar-dark {
@@ -1027,12 +1091,13 @@
 
         {% else %}
         <div class="clay-mobile-section-title">Sistema</div>
-        <a href="/acerca-de" class="clay-mobile-item"><i class="bi bi-grid-3x3-gap-fill"></i> Funciones</a>
-        <a href="/#como-funciona" class="clay-mobile-item"><i class="bi bi-people-fill"></i> Cómo Funciona</a>
+        <a href="/#funciones" class="clay-mobile-item"><i class="bi bi-grid-3x3-gap-fill"></i> Funciones</a>
+        <a href="/#como-funciona" class="clay-mobile-item"><i class="bi bi-play-circle-fill"></i> Cómo Funciona</a>
+        <a href="/acerca-de" class="clay-mobile-item"><i class="bi bi-info-circle-fill"></i> Acerca de</a>
         <div class="clay-mobile-divider"></div>
         <div class="clay-mobile-section-title">Acceso</div>
         <a href="/login" class="clay-mobile-item"><i class="bi bi-box-arrow-in-right"></i> Iniciar Sesión</a>
-        <a href="/registro" class="clay-mobile-item" style="color:#FF6B35;"><i class="bi bi-lightning-charge-fill"></i>
+        <a href="/registro" class="clay-mobile-item" style="color:#FF6B35; font-weight:800;"><i class="bi bi-lightning-charge-fill"></i>
           Empezar Gratis</a>
         {% endif %}
       </div>

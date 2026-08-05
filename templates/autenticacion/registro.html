@@ -479,7 +479,8 @@
 MODAL OTP — Verificación de correo electrónico
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
 <div class="modal fade" id="otpModal" tabindex="-1" aria-labelledby="otpModalLabel"
-     aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+     aria-hidden="true">
+
   <div class="modal-dialog modal-dialog-centered" style="max-width:460px;">
     <div class="modal-content"
          style="border-radius:26px; border:none; overflow:hidden;
@@ -488,6 +489,9 @@ MODAL OTP — Verificación de correo electrónico
       <!-- Header -->
       <div id="otpHeader"
            style="background:linear-gradient(135deg,#FF6B35,#e85d24); padding:2rem 2rem 1.5rem; text-align:center; position:relative;">
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"
+                style="position:absolute; top:16px; right:16px; opacity:0.85; filter:brightness(0) invert(1); cursor:pointer;"
+                title="Cerrar ventana"></button>
         <div id="otpHeaderIcon"
              style="width:58px; height:58px; border-radius:18px; background:rgba(255,255,255,0.2);
                     margin:0 auto 1rem; display:flex; align-items:center; justify-content:center;
@@ -504,6 +508,7 @@ MODAL OTP — Verificación de correo electrónico
           <strong id="otpEmailDisplay" style="color:#FFF;"></strong>
         </p>
       </div>
+
 
       <!-- Body -->
       <div class="modal-body" style="padding:1.75rem 2rem; background:#FFF;">

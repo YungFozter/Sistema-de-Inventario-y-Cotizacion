@@ -240,6 +240,70 @@
 
     .floating-3d-icon { animation: floatIcon 4s ease-in-out infinite; }
 
+    /* ── Floating 3D Icon Deck ────────────────────────────── */
+    .clay-floating-deck {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin: 1.25rem 0 0.5rem;
+        position: relative;
+        z-index: 2;
+    }
+
+    .floating-clay-chip {
+        background: #FFFFFF;
+        border: 1.5px solid rgba(0, 0, 0, 0.08);
+        border-radius: 14px;
+        padding: 8px 14px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.82rem;
+        font-weight: 800;
+        color: #2D3748;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.04), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+        transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        cursor: pointer;
+        user-select: none;
+    }
+
+    .floating-clay-chip:hover {
+        transform: translateY(-6px) scale(1.08) rotate(0deg) !important;
+        border-color: rgba(255, 107, 53, 0.35) !important;
+        box-shadow: 0 12px 28px rgba(255, 107, 53, 0.18), inset 0 1px 0 #FFFFFF !important;
+    }
+
+    .floating-clay-chip i { font-size: 1.1rem; }
+    .floating-clay-chip .text-orange  { color: #FF6B35; }
+    .floating-clay-chip .text-amber   { color: #F59E0B; }
+    .floating-clay-chip .text-emerald { color: #10B981; }
+    .floating-clay-chip .text-indigo  { color: #6366F1; }
+
+    /* Tilts & Floating Animations */
+    .tilt-left     { transform: rotate(-5deg); animation: float1 3.8s ease-in-out infinite; }
+    .tilt-right    { transform: rotate(6deg);  animation: float2 4.2s ease-in-out infinite; }
+    .tilt-left-sm  { transform: rotate(-3deg); animation: float3 3.5s ease-in-out infinite; }
+    .tilt-right-sm { transform: rotate(4deg);  animation: float4 4.0s ease-in-out infinite; }
+
+    @keyframes float1 {
+        0%, 100% { transform: translateY(0px) rotate(-5deg); }
+        50%      { transform: translateY(-7px) rotate(-3deg); }
+    }
+    @keyframes float2 {
+        0%, 100% { transform: translateY(0px) rotate(6deg); }
+        50%      { transform: translateY(-9px) rotate(8deg); }
+    }
+    @keyframes float3 {
+        0%, 100% { transform: translateY(0px) rotate(-3deg); }
+        50%      { transform: translateY(-6px) rotate(-1deg); }
+    }
+    @keyframes float4 {
+        0%, 100% { transform: translateY(0px) rotate(4deg); }
+        50%      { transform: translateY(-8px) rotate(6deg); }
+    }
+
     .clay-bento-tile:hover {
         transform: translateY(-2px);
         background: #FFFFFF !important;
@@ -528,6 +592,26 @@
                         <button type="button" data-bs-target="#loginFeaturesCarousel" data-bs-slide-to="1" aria-label="Slide 2"></button>
                         <button type="button" data-bs-target="#loginFeaturesCarousel" data-bs-slide-to="2" aria-label="Slide 3"></button>
                         <button type="button" data-bs-target="#loginFeaturesCarousel" data-bs-slide-to="3" aria-label="Slide 4"></button>
+                    </div>
+                </div>
+
+                <!-- Chips / Iconos Flotantes 3D Animados & Inclinados -->
+                <div class="clay-floating-deck">
+                    <div class="floating-clay-chip tilt-left" title="Generación PDF Pro">
+                        <i class="bi bi-file-earmark-pdf-fill text-orange"></i>
+                        <span>PDF Pro</span>
+                    </div>
+                    <div class="floating-clay-chip tilt-right" title="Filtro instantáneo en < 0.2s">
+                        <i class="bi bi-lightning-charge-fill text-amber"></i>
+                        <span>< 0.2s</span>
+                    </div>
+                    <div class="floating-clay-chip tilt-left-sm" title="Seguridad SSL 256-bit">
+                        <i class="bi bi-shield-check-fill text-indigo"></i>
+                        <span>SSL 256</span>
+                    </div>
+                    <div class="floating-clay-chip tilt-right-sm" title="Sincronización Bolivia 24/7">
+                        <i class="bi bi-cloud-check-fill text-emerald"></i>
+                        <span>Cloud 24/7</span>
                     </div>
                 </div>
 

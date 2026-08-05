@@ -31,7 +31,26 @@ from reportlab.lib.pagesizes import letter
 import uuid
 
 
+from authlib.integrations.flask_client import OAuth
+oauth = OAuth()
+google = None
+
 def register_routes(app):
+
+    global google
+    oauth.init_app(app)
+    google = oauth.register(
+        name='google',
+        client_id=os.environ.get('GOOGLE_CLIENT_ID'),
+        client_secret=os.environ.get('GOOGLE_CLIENT_SECRET'),
+        access_token_url='https://accounts.google.com/o/oauth2/token',
+        access_token_params=None,
+        authorize_url='https://accounts.google.com/o/oauth2/auth',
+        authorize_params=None,
+        api_base_url='https://www.googleapis.com/oauth2/v1/',
+        server_metadata_url='https://accounts.google.com/.well-known/openid-configuration',
+        client_kwargs={'scope': 'openid email profile'},
+    )
 
 
     # ─── Helpers de validación reutilizables ──────────────────────────────────
@@ -47,7 +66,7 @@ def register_routes(app):
         return None
 
     def _insertar_cliente(cursor, conexion, nombre, empresa_nombre, correo, telefono,
-                          contrasena_hash, rol='admin'):
+                          contrasena_hash, rol='admin', auth_provider='local'):
         """Inserta un nuevo cliente y devuelve su ID."""
         is_postgres = bool(
             not os.environ.get('TESTING_DB') and
@@ -58,16 +77,16 @@ def register_routes(app):
         query = '''
             INSERT INTO clientes
                 (nombre, empresa_nombre, correo, telefono, contrasena, rol,
-                 fecha_vencimiento_suscripcion, cotizaciones_trial_usadas)
-            VALUES (?, ?, ?, ?, ?, ?, NULL, 0)
+                 fecha_vencimiento_suscripcion, cotizaciones_trial_usadas, auth_provider)
+            VALUES (?, ?, ?, ?, ?, ?, NULL, 0, ?)
         '''
         if is_postgres:
             query = query.replace('?', '%s') + ' RETURNING id'
-            cursor.execute(query, (nombre, empresa_nombre, correo, telefono, contrasena_hash, rol))
+            cursor.execute(query, (nombre, empresa_nombre, correo, telefono, contrasena_hash, rol, auth_provider))
             row = cursor.fetchone()
             nuevo_id = row[0] if row else None
         else:
-            cursor.execute(query, (nombre, empresa_nombre, correo, telefono, contrasena_hash, rol))
+            cursor.execute(query, (nombre, empresa_nombre, correo, telefono, contrasena_hash, rol, auth_provider))
             nuevo_id = cursor.lastrowid
 
         if not nuevo_id:
@@ -82,182 +101,129 @@ def register_routes(app):
     def registro():
         return render_template('autenticacion/registro.html')
 
-    # ─── /registro/enviar-codigo  POST (JSON) ────────────────────────────────
-    @app.route('/registro/enviar-codigo', methods=['POST'])
-    def registro_enviar_codigo():
-        """
-        Paso 1 del registro:
-        - Valida los campos del formulario
-        - Verifica que el correo no esté ya registrado
-        - Genera un código OTP de 6 dígitos
-        - Lo almacena en session['pending_registro'] con TTL de 10 minutos
-        - Envía el email con el código
-        """
-        data = request.get_json(silent=True) or {}
 
-        nombre         = (data.get('nombre') or '').strip()
-        empresa_nombre = (data.get('empresa_nombre') or '').strip()
-        correo         = (data.get('correo') or '').strip().lower()
-        telefono_raw   = (data.get('telefono') or '').strip()
-        contrasena     = data.get('contrasena') or ''
-        conf_pass      = data.get('confirmar_contrasena') or ''
+    # ─── /registro POST (Manual, sin verificación) ───────────────────────────
+    @app.route('/registro', methods=['POST'])
+    def registro_post():
+        data = request.form
+        nombre = data.get('nombre', '').strip()
+        empresa = data.get('empresa_nombre', '').strip()
+        correo = data.get('correo', '').strip().lower()
+        contrasena = data.get('contrasena', '')
+        telefono = data.get('telefono', '').strip()
 
-        # ── Validaciones ──────────────────────────────────────────────────────
         if not nombre or not correo or not contrasena:
-            return jsonify({'ok': False, 'msg': 'Nombre, correo y contraseña son obligatorios.'}), 400
+            flash('Faltan campos obligatorios.', 'danger')
+            return redirect(url_for('registro'))
 
-        if contrasena != conf_pass:
-            return jsonify({'ok': False, 'msg': 'Las contraseñas no coinciden.'}), 400
-
-        if len(contrasena) < 6:
-            return jsonify({'ok': False, 'msg': 'La contraseña debe tener al menos 6 caracteres.'}), 400
-
-        # Teléfono boliviano (opcional pero si viene debe ser válido)
-        telefono_norm = ''
-        if telefono_raw:
-            tel_ok = _validar_telefono_bo(telefono_raw)
-            if tel_ok is None:
-                return jsonify({
-                    'ok': False,
-                    'msg': 'Teléfono boliviano inválido. Celular: 6x/7x + 7 dígitos | Fijo: 2/3/4 + 6 dígitos.'
-                }), 400
-            telefono_norm = f'+591{tel_ok}' if tel_ok else ''
-
-        # ── Verificar correo duplicado en BD ──────────────────────────────────
         try:
             con = get_db_connection()
             cur = con.cursor()
             cur.execute('SELECT id FROM clientes WHERE correo = ?', (correo,))
             if cur.fetchone():
+                flash('Este correo ya está registrado.', 'warning')
                 con.close()
-                return jsonify({'ok': False, 'msg': 'Este correo ya tiene una cuenta registrada.'}), 409
-            con.close()
-        except Exception as e:
-            return jsonify({'ok': False, 'msg': f'Error al verificar el correo: {str(e)}'}), 500
+                return redirect(url_for('registro'))
+            
+            # Formatear telefono (opcional)
+            tel_ok = _validar_telefono_bo(telefono)
+            telefono_norm = f'+591{tel_ok}' if tel_ok else ''
 
-        # ── Generar OTP 6 dígitos ─────────────────────────────────────────────
-        codigo_otp = ''.join(random.choices(string.digits, k=6))
-        import time as _time
-        expira_en  = _time.time() + 600   # 10 minutos
-
-        # Guardar datos pendientes en session (cifrada por Flask)
-        session['pending_registro'] = {
-            'nombre':         nombre,
-            'empresa_nombre': empresa_nombre,
-            'correo':         correo,
-            'telefono':       telefono_norm,
-            'contrasena':     generate_password_hash(contrasena),
-            'codigo':         codigo_otp,
-            'expira_en':      expira_en,
-            'intentos':       0,
-        }
-
-        # ── Enviar email ──────────────────────────────────────────────────────
-        try:
-            from utils.email_sender import enviar_codigo_verificacion
-            enviado = enviar_codigo_verificacion(correo, codigo_otp, nombre)
-        except Exception as e:
-            print(f"[EMAIL ERROR] {e}")
-            enviado = False
-
-        if not enviado:
-            session.pop('pending_registro', None)
-            return jsonify({'ok': False, 'msg': 'No se pudo enviar el email de verificación. Inténtalo de nuevo.'}), 503
-
-        return jsonify({'ok': True, 'msg': f'Código enviado a {correo}. Revisa tu bandeja de entrada.'}), 200
-
-    # ─── /registro/verificar-codigo  POST (JSON) ─────────────────────────────
-    @app.route('/registro/verificar-codigo', methods=['POST'])
-    def registro_verificar_codigo():
-        """
-        Paso 2 del registro:
-        - Lee el pending_registro de session
-        - Verifica que el código coincida y no haya expirado
-        - Si OK: crea la cuenta en BD y redirige al login
-        """
-        data      = request.get_json(silent=True) or {}
-        codigo_in = (data.get('codigo') or '').strip()
-
-        pending = session.get('pending_registro')
-        if not pending:
-            return jsonify({'ok': False, 'msg': 'La sesión de verificación expiró. Inicia el registro nuevamente.'}), 400
-
-        import time as _time
-        # ── Verificar expiración ──────────────────────────────────────────────
-        if _time.time() > pending.get('expira_en', 0):
-            session.pop('pending_registro', None)
-            return jsonify({'ok': False, 'expired': True, 'msg': 'El código expiró. Por favor reinicia el registro.'}), 400
-
-        # ── Verificar intentos ────────────────────────────────────────────────
-        intentos = pending.get('intentos', 0)
-        if intentos >= 5:
-            session.pop('pending_registro', None)
-            return jsonify({'ok': False, 'blocked': True, 'msg': 'Demasiados intentos incorrectos. Reinicia el registro.'}), 429
-
-        # ── Comparar código ───────────────────────────────────────────────────
-        if codigo_in != pending.get('codigo', ''):
-            pending['intentos'] = intentos + 1
-            session['pending_registro'] = pending   # actualizar contador
-            restantes = 5 - (intentos + 1)
-            return jsonify({
-                'ok': False,
-                'msg': f'Código incorrecto. Te quedan {restantes} intento(s).',
-                'intentos_restantes': restantes
-            }), 400
-
-        # ── Código correcto → Crear cuenta ────────────────────────────────────
-        try:
-            con = get_db_connection()
-            cur = con.cursor()
             nuevo_id = _insertar_cliente(
                 cur, con,
-                nombre         = pending['nombre'],
-                empresa_nombre = pending.get('empresa_nombre', ''),
-                correo         = pending['correo'],
-                telefono       = pending.get('telefono', ''),
-                contrasena_hash= pending['contrasena'],
-                rol            = 'admin',
+                nombre=nombre,
+                empresa_nombre=empresa,
+                correo=correo,
+                telefono=telefono_norm,
+                contrasena_hash=generate_password_hash(contrasena),
+                rol='admin',
+                auth_provider='local'
             )
             con.commit()
             con.close()
+            
+            flash('¡Bienvenido a COTIZAPro! Tu cuenta ha sido creada.', 'success')
+            return redirect(url_for('login'))
         except Exception as e:
-            err = str(e).lower()
-            if 'unique' in err or 'duplicate' in err:
-                session.pop('pending_registro', None)
-                return jsonify({'ok': False, 'msg': 'Este correo ya tiene una cuenta. Inicia sesión.'}), 409
-            return jsonify({'ok': False, 'msg': f'Error al crear la cuenta: {str(e)}'}), 500
+            flash(f'Error: {str(e)}', 'danger')
+            return redirect(url_for('registro'))
 
-        session.pop('pending_registro', None)
+    # ─── Google OAuth 2.0 ────────────────────────────────────────────────────
+    @app.route('/auth/google')
+    def auth_google():
+        redirect_uri = url_for('auth_google_callback', _external=True)
+        return google.authorize_redirect(redirect_uri)
 
-        flash('¡Bienvenido a COTIZAPro! Tu cuenta fue verificada. Tienes 5 cotizaciones gratis para explorar el sistema.', 'success')
-        return jsonify({'ok': True, 'redirect': url_for('login')}), 200
-
-    # ─── /registro/reenviar-codigo  POST (JSON) ──────────────────────────────
-    @app.route('/registro/reenviar-codigo', methods=['POST'])
-    def registro_reenviar_codigo():
-        """Reenvía el OTP al mismo correo, generando un nuevo código."""
-        pending = session.get('pending_registro')
-        if not pending:
-            return jsonify({'ok': False, 'msg': 'Sesión expirada. Reinicia el registro.'}), 400
-
-        import time as _time
-        nuevo_codigo = ''.join(random.choices(string.digits, k=6))
-        pending['codigo']    = nuevo_codigo
-        pending['expira_en'] = _time.time() + 600
-        pending['intentos']  = 0
-        session['pending_registro'] = pending
-
+    @app.route('/auth/google/callback')
+    def auth_google_callback():
         try:
-            from utils.email_sender import enviar_codigo_verificacion
-            enviado = enviar_codigo_verificacion(pending['correo'], nuevo_codigo, pending['nombre'])
-        except Exception:
-            enviado = False
-
-        if not enviado:
-            return jsonify({'ok': False, 'msg': 'No se pudo reenviar el código. Inténtalo de nuevo.'}), 503
-
-        return jsonify({'ok': True, 'msg': 'Nuevo código enviado. Revisa tu bandeja.'}), 200
-
+            token = google.authorize_access_token()
+            user_info = token.get('userinfo')
+            if not user_info:
+                # Authlib fetch user info
+                user_info = google.get('https://openidconnect.googleapis.com/v1/userinfo').json()
+            
+            correo = user_info.get('email', '').lower()
+            nombre = user_info.get('name', '')
+            
+            if not correo:
+                flash('No se pudo obtener el correo de Google.', 'danger')
+                return redirect(url_for('login'))
+                
+            con = get_db_connection()
+            con.row_factory = sqlite3.Row
+            cur = con.cursor()
+            
+            # Buscar si el usuario ya existe
+            cur.execute('SELECT * FROM clientes WHERE correo = ?', (correo,))
+            cliente = cur.fetchone()
+            
+            if cliente:
+                # Login
+                session.clear()
+                session['usuario_id'] = cliente['id']
+                session['nombre'] = cliente['nombre']
+                session['rol'] = cliente['rol']
+                session['empresa_nombre'] = cliente['empresa_nombre']
+                
+                # Actualizar auth_provider si era local
+                if cliente['auth_provider'] != 'google':
+                    cur.execute('UPDATE clientes SET auth_provider = ? WHERE id = ?', ('google', cliente['id']))
+                
+                registrar_log(cliente['id'], 'login_google', {'ip': request.remote_addr})
+                con.commit()
+                con.close()
+                flash('Has iniciado sesión correctamente con Google.', 'success')
+                return redirect(url_for('dashboard'))
+            else:
+                # Registrar
+                nuevo_id = _insertar_cliente(
+                    cur, con,
+                    nombre=nombre,
+                    empresa_nombre='',
+                    correo=correo,
+                    telefono='',
+                    contrasena_hash='',
+                    rol='admin',
+                    auth_provider='google'
+                )
+                con.commit()
+                
+                session.clear()
+                session['usuario_id'] = nuevo_id
+                session['nombre'] = nombre
+                session['rol'] = 'admin'
+                session['empresa_nombre'] = ''
+                
+                registrar_log(nuevo_id, 'registro_google', {'ip': request.remote_addr})
+                con.close()
+                flash('¡Bienvenido! Tu cuenta ha sido creada con Google.', 'success')
+                return redirect(url_for('dashboard'))
+                
+        except Exception as e:
+            print(f'[GOOGLE AUTH ERROR] {e}')
+            flash('Error al iniciar sesión con Google.', 'danger')
+            return redirect(url_for('login'))
 
     @app.route('/login', methods=['GET', 'POST'])
 

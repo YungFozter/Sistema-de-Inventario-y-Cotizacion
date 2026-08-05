@@ -49,6 +49,7 @@ def crear_tablas():
                 activo {"BOOLEAN DEFAULT TRUE" if is_postgres else "BOOLEAN DEFAULT 1"},
                 creador_id INTEGER,
                 cotizaciones_trial_usadas INTEGER DEFAULT 0,
+                auth_provider TEXT DEFAULT 'local',
                 FOREIGN KEY (creador_id) REFERENCES clientes(id)
             ){";" if is_postgres else ""}
         ''')
@@ -254,10 +255,12 @@ def crear_tablas():
         
         for nombre, descripcion in categorias_defecto:
             if is_postgres:
-                cursor.execute(
-                    'INSERT INTO categorias (nombre, descripcion) VALUES (%s, %s) ON CONFLICT (nombre) DO NOTHING',
-                    (nombre, descripcion)
-                )
+                cursor.execute('SELECT id FROM categorias WHERE nombre = %s', (nombre,))
+                if not cursor.fetchone():
+                    cursor.execute(
+                        'INSERT INTO categorias (nombre, descripcion) VALUES (%s, %s)',
+                        (nombre, descripcion)
+                    )
             else:
                 cursor.execute(
                     'INSERT OR IGNORE INTO categorias (nombre, descripcion) VALUES (?, ?)',
@@ -529,6 +532,7 @@ def inicializar_base_datos():
         crear_tablas()
         migrar_clientes_existentes()
         migrar_columnas_nuevas_categorias()
+        migrar_columna_auth_provider()
 
         print("\n" + "=" * 50)
         print(" BASE DE DATOS PREPARADA CORRECTAMENTE")
@@ -537,6 +541,47 @@ def inicializar_base_datos():
         print(f"[ERROR] Error crítico durante inicialización: {str(e)}")
         raise
 
+def migrar_columna_auth_provider():
+    """Agrega la columna auth_provider a la tabla clientes si no existe"""
+    conexion = None
+    try:
+        conexion = get_db_connection()
+        cursor = conexion.cursor()
+        
+        is_postgres = bool(
+            not os.environ.get('TESTING_DB') and
+            os.environ.get('DATABASE_URL') and
+            os.environ.get('DATABASE_URL').startswith('postgres')
+        )
+
+        if is_postgres:
+            cursor.execute("SELECT column_name FROM information_schema.columns WHERE table_name='clientes'")
+            rows = cursor.fetchall()
+            columnas = [col[0] for col in rows if isinstance(col, (list, tuple))] if rows else []
+            if 'auth_provider' not in columnas:
+                cursor.execute("ALTER TABLE clientes ADD COLUMN auth_provider TEXT DEFAULT 'local'")
+                print("[OK] Columna auth_provider agregada en PostgreSQL")
+        else:
+            cursor.execute("PRAGMA table_info(clientes)")
+            columnas = [col[1] for col in cursor.fetchall()]
+            if 'auth_provider' not in columnas:
+                cursor.execute("ALTER TABLE clientes ADD COLUMN auth_provider TEXT DEFAULT 'local'")
+                print("[OK] Columna auth_provider agregada en SQLite")
+        
+        conexion.commit()
+    except Exception as e:
+        print(f"[ERROR] Error en migración auth_provider: {str(e)}")
+        if conexion:
+            try:
+                conexion.rollback()
+            except Exception:
+                pass
+    finally:
+        if conexion:
+            try:
+                conexion.close()
+            except Exception:
+                pass
 
 # =============================================
 # FUNCIONES PARA IMPORTACIÓN DE PRODUCTOS PDF

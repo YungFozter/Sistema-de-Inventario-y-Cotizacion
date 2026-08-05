@@ -63,9 +63,19 @@ def test_flujo_e2e_generacion_y_uso_pin_suscripcion(client, superadmin_user):
         'confirmar_contrasena': 'Password123!',
     }
 
-    res_reg = client.post('/registro', data=payload_registro, follow_redirects=True)
-    assert res_reg.status_code == 200
-    assert "¡Cuenta creada exitosamente!" in res_reg.get_data(as_text=True)
+    res_envio = client.post('/registro/enviar-codigo', json=payload_registro)
+    assert res_envio.status_code == 200
+    assert res_envio.get_json().get('ok') is True
+
+    with client.session_transaction() as sess:
+        pending = sess.get('pending_registro')
+        assert pending is not None
+        codigo_otp = pending['codigo']
+
+    res_verif = client.post('/registro/verificar-codigo', json={'codigo': codigo_otp})
+    assert res_verif.status_code == 200
+    assert res_verif.get_json().get('ok') is True
+
 
     # =========================================================================
     # PASO 3: Verificar que el usuario es admin freemium (sin suscripción)

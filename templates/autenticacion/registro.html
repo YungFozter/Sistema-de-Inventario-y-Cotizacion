@@ -72,8 +72,8 @@
         display: inline-flex;
         align-items: center;
         gap: 8px;
-        background: linear-gradient(135deg, rgba(255,107,53,0.15), rgba(255,107,53,0.08));
-        border: 1.5px solid rgba(255,107,53,0.35);
+        background: linear-gradient(135deg, rgba(255, 107, 53, 0.15), rgba(255, 107, 53, 0.08));
+        border: 1.5px solid rgba(255, 107, 53, 0.35);
         border-radius: 50px;
         padding: 7px 16px;
         font-size: 0.82rem;
@@ -126,7 +126,10 @@
     }
 
     /* ── Inputs ────────────────────────────────────── */
-    .clay-input-group { position: relative; margin-bottom: 1.1rem; }
+    .clay-input-group {
+        position: relative;
+        margin-bottom: 1.1rem;
+    }
 
     .clay-input-label {
         font-size: 0.78rem;
@@ -138,7 +141,11 @@
         margin-bottom: 6px;
     }
 
-    .clay-input-wrapper { position: relative; display: flex; align-items: center; }
+    .clay-input-wrapper {
+        position: relative;
+        display: flex;
+        align-items: center;
+    }
 
     .clay-input-icon {
         position: absolute;
@@ -181,16 +188,28 @@
         transition: color 0.2s ease;
     }
 
-    .clay-input-btn-eye:hover { color: #141414; }
+    .clay-input-btn-eye:hover {
+        color: #141414;
+    }
 
     /* ── Float Animation ───────────────────────────── */
     @keyframes floatIcon {
-        0%   { transform: translateY(0px) rotate(0deg); }
-        50%  { transform: translateY(-8px) rotate(2deg); }
-        100% { transform: translateY(0px) rotate(0deg); }
+        0% {
+            transform: translateY(0px) rotate(0deg);
+        }
+
+        50% {
+            transform: translateY(-8px) rotate(2deg);
+        }
+
+        100% {
+            transform: translateY(0px) rotate(0deg);
+        }
     }
 
-    .floating-3d-icon { animation: floatIcon 4s ease-in-out infinite; }
+    .floating-3d-icon {
+        animation: floatIcon 4s ease-in-out infinite;
+    }
 
     /* ── Submit Button ─────────────────────────────── */
     .btn-submit-clay {
@@ -226,8 +245,13 @@
 
     /* ── Responsive ────────────────────────────────── */
     @media (max-width: 991px) {
-        .auth-bento-container { grid-template-columns: 1fr; }
-        .auth-bento-visual { display: none; }
+        .auth-bento-container {
+            grid-template-columns: 1fr;
+        }
+
+        .auth-bento-visual {
+            display: none;
+        }
     }
 </style>
 {% endblock %}
@@ -252,8 +276,7 @@
                     </div>
 
                     <!-- Ícono Flotante -->
-                    <div class="floating-3d-icon mb-4"
-                         style="width:60px; height:60px; border-radius:18px; background:#FF6B35; color:#FFF;
+                    <div class="floating-3d-icon mb-4" style="width:60px; height:60px; border-radius:18px; background:#FF6B35; color:#FFF;
                                 display:flex; align-items:center; justify-content:center; font-size:1.8rem;
                                 box-shadow:0 10px 24px rgba(255,107,53,0.4);">
                         <i class="bi bi-rocket-takeoff-fill"></i>
@@ -274,15 +297,16 @@
                     <!-- Pasos rápidos -->
                     <div style="display:flex; flex-direction:column; gap:8px;">
                         {% for step in [('1', '#FF6B35', 'Crea tu cuenta (10 segundos)'),
-                                        ('2', '#4F46E5', 'Carga tus productos o PDFs'),
-                                        ('3', '#10B981', '¡Genera cotizaciones al instante!')] %}
+                        ('2', '#4F46E5', 'Carga tus productos o PDFs'),
+                        ('3', '#10B981', '¡Genera cotizaciones al instante!')] %}
                         <div style="display:flex; align-items:center; gap:10px;">
                             <span style="width:24px; height:24px; border-radius:50%; background:{{ step[1] }};
                                          color:#FFF; font-size:0.7rem; font-weight:900;
                                          display:flex; align-items:center; justify-content:center; flex-shrink:0;">
                                 {{ step[0] }}
                             </span>
-                            <span style="font-size:0.85rem; color:rgba(255,255,255,0.85); font-weight:600;">{{ step[2] }}</span>
+                            <span style="font-size:0.85rem; color:rgba(255,255,255,0.85); font-weight:600;">{{ step[2]
+                                }}</span>
                         </div>
                         {% endfor %}
                     </div>
@@ -310,7 +334,8 @@
                 </div>
                 <div>
                     <div style="font-size:0.92rem; font-weight:800; color:#141414;">Datos 100% seguros</div>
-                    <div style="font-size:0.78rem; color:#666; margin-top:2px;">Tus cotizaciones y precios son privados y solo tuyos.</div>
+                    <div style="font-size:0.78rem; color:#666; margin-top:2px;">Tus cotizaciones y precios son privados
+                        y solo tuyos.</div>
                 </div>
             </div>
 
@@ -348,15 +373,15 @@
             </div>
 
             {% with messages = get_flashed_messages(with_categories=true) %}
-                {% if messages %}
-                    {% for category, message in messages %}
-                    <div class="alert alert-{{ 'danger' if category == 'danger' else 'success' }} d-flex align-items-center gap-2 mb-3"
-                         style="border-radius:14px; font-size:0.88rem; font-weight:600;">
-                        <i class="bi bi-{{ 'exclamation-triangle-fill' if category == 'danger' else 'check-circle-fill' }}"></i>
-                        {{ message }}
-                    </div>
-                    {% endfor %}
-                {% endif %}
+            {% if messages %}
+            {% for category, message in messages %}
+            <div class="alert alert-{{ 'danger' if category == 'danger' else 'success' }} d-flex align-items-center gap-2 mb-3"
+                style="border-radius:14px; font-size:0.88rem; font-weight:600;">
+                <i class="bi bi-{{ 'exclamation-triangle-fill' if category == 'danger' else 'check-circle-fill' }}"></i>
+                {{ message }}
+            </div>
+            {% endfor %}
+            {% endif %}
             {% endwith %}
 
             <form action="/registro" method="post" id="registroForm" novalidate>
@@ -367,8 +392,8 @@
                         <label class="clay-input-label" for="reg_nombre">Nombre completo</label>
                         <div class="clay-input-wrapper">
                             <i class="bi bi-person-fill clay-input-icon"></i>
-                            <input type="text" id="reg_nombre" name="nombre" class="clay-input"
-                                   required placeholder="Ej: Juan Pérez">
+                            <input type="text" id="reg_nombre" name="nombre" class="clay-input" required
+                                placeholder="Ej: Juan Pérez">
                         </div>
                     </div>
 
@@ -377,7 +402,7 @@
                         <div class="clay-input-wrapper">
                             <i class="bi bi-building-fill clay-input-icon"></i>
                             <input type="text" id="reg_empresa" name="empresa_nombre" class="clay-input"
-                                   placeholder="Ej: Importadora Norte S.R.L.">
+                                placeholder="Ej: Importadora Norte S.R.L.">
                         </div>
                     </div>
                 </div>
@@ -388,33 +413,31 @@
                         <label class="clay-input-label" for="reg_correo">Correo electrónico</label>
                         <div class="clay-input-wrapper">
                             <i class="bi bi-envelope-fill clay-input-icon"></i>
-                            <input type="email" id="reg_correo" name="correo" class="clay-input"
-                                   required placeholder="correo@empresa.bo">
+                            <input type="email" id="reg_correo" name="correo" class="clay-input" required
+                                placeholder="correo@empresa.bo">
                         </div>
                     </div>
 
                     <div class="clay-input-group" id="grupo_telefono">
                         <label class="clay-input-label" for="reg_telefono">
-                            Teléfono Bolivia
+                            Teléfono
                             <span id="tel_status_icon" style="margin-left:6px; font-size:0.85rem;"></span>
                         </label>
                         <div class="clay-input-wrapper">
                             <!-- Prefijo +591 fijo -->
-                            <span id="tel_prefix"
-                                  style="position:absolute; left:42px; color:#666; font-size:0.9rem; font-weight:700;
+                            <span id="tel_prefix" style="position:absolute; left:42px; color:#666; font-size:0.9rem; font-weight:700;
                                          pointer-events:none; z-index:3; line-height:1;
                                          top:50%; transform:translateY(-50%); letter-spacing:0.01em;">
                                 +591
                             </span>
                             <i class="bi bi-telephone-fill clay-input-icon"></i>
                             <input type="tel" id="reg_telefono" name="telefono" class="clay-input"
-                                   placeholder="70000000" maxlength="8" inputmode="numeric"
-                                   style="padding-left:90px;"
-                                   autocomplete="tel">
+                                placeholder="70000000" maxlength="8" inputmode="numeric" style="padding-left:90px;"
+                                autocomplete="tel">
                         </div>
                         <!-- Hint dinámico -->
                         <div id="tel_hint"
-                             style="font-size:0.72rem; margin-top:5px; color:#888; display:flex; align-items:center; gap:5px;">
+                            style="font-size:0.72rem; margin-top:5px; color:#888; display:flex; align-items:center; gap:5px;">
                             <i class="bi bi-info-circle" style="font-size:0.7rem;"></i>
                             Celular: 6x xxxxxxx · 7x xxxxxxx &nbsp;|  Fijo: 2/3/4 + 6 dígitos
                         </div>
@@ -428,10 +451,10 @@
                         <label class="clay-input-label" for="password_input">Contraseña</label>
                         <div class="clay-input-wrapper">
                             <i class="bi bi-lock-fill clay-input-icon"></i>
-                            <input type="password" id="password_input" name="contrasena" class="clay-input"
-                                   required placeholder="Mínimo 6 caracteres">
+                            <input type="password" id="password_input" name="contrasena" class="clay-input" required
+                                placeholder="Mínimo 6 caracteres">
                             <button type="button" class="clay-input-btn-eye"
-                                    onclick="togglePassword('password_input','eye_icon_pw')" tabindex="-1">
+                                onclick="togglePassword('password_input','eye_icon_pw')" tabindex="-1">
                                 <i id="eye_icon_pw" class="bi bi-eye"></i>
                             </button>
                         </div>
@@ -442,9 +465,9 @@
                         <div class="clay-input-wrapper">
                             <i class="bi bi-shield-lock-fill clay-input-icon"></i>
                             <input type="password" id="confirm_input" name="confirmar_contrasena" class="clay-input"
-                                   required placeholder="Repite tu contraseña">
+                                required placeholder="Repite tu contraseña">
                             <button type="button" class="clay-input-btn-eye"
-                                    onclick="togglePassword('confirm_input','eye_icon_conf')" tabindex="-1">
+                                onclick="togglePassword('confirm_input','eye_icon_conf')" tabindex="-1">
                                 <i id="eye_icon_conf" class="bi bi-eye"></i>
                             </button>
                         </div>
@@ -454,9 +477,11 @@
                 <!-- Info Freemium -->
                 <div style="background:#fff9f6; border:1.5px solid rgba(255,107,53,0.2); border-radius:14px;
                             padding:12px 16px; margin-bottom:1.5rem; display:flex; align-items:flex-start; gap:10px;">
-                    <i class="bi bi-info-circle-fill" style="color:#FF6B35; font-size:1rem; margin-top:2px; flex-shrink:0;"></i>
+                    <i class="bi bi-info-circle-fill"
+                        style="color:#FF6B35; font-size:1rem; margin-top:2px; flex-shrink:0;"></i>
                     <div style="font-size:0.82rem; color:#664; line-height:1.5;">
-                        <strong style="color:#c94e1e;">Tu cuenta incluye 5 cotizaciones gratis</strong> para explorar todas las
+                        <strong style="color:#c94e1e;">Tu cuenta incluye 5 cotizaciones gratis</strong> para explorar
+                        todas las
                         funcionalidades. Cuando estés listo, activa tu suscripción con un PIN para cotizar sin límites.
                     </div>
                 </div>
@@ -464,6 +489,9 @@
                 <!-- Botón Crear Cuenta -->
                 <button type="submit" class="btn-submit-clay" id="btn_crear_cuenta">
                     <i class="bi bi-rocket-takeoff-fill"></i> Crear mi cuenta gratis
+                    <span id="btn_spinner" style="display:none;">
+                        <span class="spinner-border spinner-border-sm" role="status"></span>
+                    </span>
                 </button>
 
                 <div style="text-align:center; margin-top:1.25rem;">
@@ -477,155 +505,439 @@
 
     </div>
 </div>
-{% endblock %}
+
+<!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+MODAL OTP — Verificación de correo electrónico
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+<div class="modal fade" id="otpModal" tabindex="-1" aria-labelledby="otpModalLabel"
+     aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+  <div class="modal-dialog modal-dialog-centered" style="max-width:460px;">
+    <div class="modal-content"
+         style="border-radius:26px; border:none; overflow:hidden;
+                box-shadow:0 28px 70px rgba(0,0,0,0.18); font-family:'Plus Jakarta Sans',sans-serif;">
+
+      <!-- Header -->
+      <div id="otpHeader"
+           style="background:linear-gradient(135deg,#FF6B35,#e85d24); padding:2rem 2rem 1.5rem; text-align:center; position:relative;">
+        <!-- Icono animado -->
+        <div id="otpHeaderIcon"
+             style="width:58px; height:58px; border-radius:18px; background:rgba(255,255,255,0.2);
+                    margin:0 auto 1rem; display:flex; align-items:center; justify-content:center;
+                    font-size:1.8rem; animation:floatIcon 3s ease-in-out infinite;">
+          ✉️
+        </div>
+        <h5 id="otpModalLabel"
+            style="font-size:1.2rem; font-weight:900; color:#FFF; margin:0; letter-spacing:-0.02em;">
+          Verifica tu correo
+        </h5>
+        <p id="otpSubtitle"
+           style="font-size:0.82rem; color:rgba(255,255,255,0.88); margin:6px 0 0;">
+          Enviamos un código de 6 dígitos a<br>
+          <strong id="otpEmailDisplay" style="color:#FFF;"></strong>
+        </p>
+      </div>
+
+      <!-- Body -->
+      <div class="modal-body" style="padding:1.75rem 2rem; background:#FFF;">
+
+        <!-- 6 inputs OTP -->
+        <div id="otpInputsWrap" style="display:flex; gap:8px; justify-content:center; margin-bottom:1rem;">
+          {% for i in range(6) %}
+          <input type="tel" maxlength="1" inputmode="numeric" pattern="[0-9]"
+                 class="otp-digit"
+                 id="otp_d{{ i }}"
+                 style="width:48px; height:58px; text-align:center; font-size:1.6rem; font-weight:900;
+                        border:2px solid #e5e2da; border-radius:14px; background:#F8F9FA;
+                        outline:none; transition:all 0.2s ease; font-family:'Plus Jakarta Sans',monospace;
+                        color:#141414;">
+          {% endfor %}
+        </div>
+
+        <!-- Error / éxito -->
+        <div id="otpMsg"
+             style="min-height:24px; text-align:center; font-size:0.82rem; font-weight:700; margin-bottom:0.8rem;">
+        </div>
+
+        <!-- Countdown -->
+        <div style="text-align:center; margin-bottom:1.25rem;">
+          <span style="font-size:0.8rem; color:#888;">
+            Código válido por:
+            <strong id="otpCountdown" style="color:#FF6B35; font-variant-numeric:tabular-nums;">10:00</strong>
+          </span>
+        </div>
+
+        <!-- Botón verificar -->
+        <button id="btnVerificar"
+                onclick="verificarOTP()"
+                style="width:100%; padding:13px; background:#FF6B35; color:#FFF; border:none;
+                       border-radius:14px; font-family:'Plus Jakarta Sans',sans-serif;
+                       font-size:1rem; font-weight:800; cursor:pointer; letter-spacing:-0.01em;
+                       box-shadow:0 4px 0 #c94e1e; transition:all 0.15s ease;
+                       display:flex; align-items:center; justify-content:center; gap:8px;">
+          <i class="bi bi-shield-check-fill"></i>
+          Verificar código
+        </button>
+
+        <!-- Reenviar -->
+        <div style="text-align:center; margin-top:1rem;">
+          <span style="font-size:0.82rem; color:#888;">
+            ¿No llegaste el correo?
+          </span>
+          <button id="btnReenviar" onclick="reenviarCodigo()"
+                  disabled
+                  style="background:none; border:none; font-size:0.82rem; font-weight:800;
+                         color:#ccc; cursor:not-allowed; margin-left:4px;
+                         font-family:'Plus Jakarta Sans',sans-serif; transition:color 0.2s;">
+            Reenviar <span id="reenviarTimer">(60s)</span>
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  @keyframes shakeOTP {
+    0%,100% { transform:translateX(0); }
+    15%     { transform:translateX(-8px); }
+    45%     { transform:translateX(8px); }
+    75%     { transform:translateX(-5px); }
+  }
+  .otp-digit:focus {
+    border-color:#FF6B35 !important;
+    background:#FFFFFF !important;
+    box-shadow:0 0 0 3px rgba(255,107,53,0.18) !important;
+    transform:scale(1.06);
+  }
+  .otp-digit.ok  { border-color:#10B981 !important; background:#f0fdf4 !important; }
+  .otp-digit.err { border-color:#ef4444 !important; background:#fef2f2 !important; }
+  #otpInputsWrap.shake { animation:shakeOTP 0.45s ease; }
+</style>
+
 
 {% block scripts %}
 {{ super() }}
 <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        AOS.init({ once: true, duration: 700, easing: 'ease-out-cubic' });
+  document.addEventListener('DOMContentLoaded', function () {
+    AOS.init({ once: true, duration: 700, easing: 'ease-out-cubic' });
 
-        // ── Validación client-side de contraseñas ─────────────────────
-        var form      = document.getElementById('registroForm');
-        var pwInput   = document.getElementById('password_input');
-        var confInput = document.getElementById('confirm_input');
-        var telInput  = document.getElementById('reg_telefono');
+    var form      = document.getElementById('registroForm');
+    var pwInput   = document.getElementById('password_input');
+    var confInput = document.getElementById('confirm_input');
+    var telInput  = document.getElementById('reg_telefono');
+    var submitBtn = document.getElementById('btn_crear_cuenta');
 
-        // ── Validación de teléfono boliviano ─────────────────────
-        //  Celular: 8 dígitos, inicia en 6 o 7
-        //  Fijo:    7 dígitos, inicia en 2, 3 o 4
-        function validarTelefonoBoliviano(valor) {
-            var limpio = valor.replace(/\D/g, '');          // solo dígitos
-            // Si vino con prefijo 591 lo quitamos
-            if (limpio.startsWith('591') && limpio.length > 9) {
-                limpio = limpio.slice(3);
-            }
-            var rxCelular = /^[67]\d{7}$/;                 // 8 dígitos, 6x / 7x
-            var rxFijo    = /^[234]\d{6}$/;                // 7 dígitos, 2x / 3x / 4x
-            return rxCelular.test(limpio) || rxFijo.test(limpio)
-                ? limpio
-                : null;
-        }
+    // ── Validación teléfono boliviano ─────────────────────
+    function validarTelefonoBoliviano(valor) {
+      var limpio = valor.replace(/\D/g, '');
+      if (limpio.startsWith('591') && limpio.length > 9) limpio = limpio.slice(3);
+      return /^[67]\d{7}$/.test(limpio) || /^[234]\d{6}$/.test(limpio) ? limpio : null;
+    }
 
-        function setTelEstado(estado) {
-            // estado: 'ok' | 'error' | 'vacio'
-            var icon  = document.getElementById('tel_status_icon');
-            var hint  = document.getElementById('tel_hint');
-            var grupo = document.getElementById('grupo_telefono');
-            var input = telInput;
+    function setTelEstado(estado) {
+      var icon  = document.getElementById('tel_status_icon');
+      var hint  = document.getElementById('tel_hint');
+      if (estado === 'ok') {
+        telInput.style.cssText += 'border-color:#10B981;box-shadow:0 0 0 3px rgba(16,185,129,0.15);background:#f0fdf4;';
+        if (icon) icon.innerHTML = '<i class="bi bi-check-circle-fill" style="color:#10B981;"></i>';
+        if (hint) hint.style.color = '#10B981';
+      } else if (estado === 'error') {
+        telInput.style.cssText += 'border-color:#ef4444;box-shadow:0 0 0 3px rgba(239,68,68,0.14);background:#fef2f2;';
+        if (icon) icon.innerHTML = '<i class="bi bi-x-circle-fill" style="color:#ef4444;"></i>';
+        if (hint) { hint.style.color='#ef4444'; hint.innerHTML='<i class="bi bi-exclamation-triangle" style="font-size:0.7rem;"></i> Formato inválido.'; }
+      } else {
+        telInput.style.borderColor = ''; telInput.style.boxShadow = ''; telInput.style.background = '';
+        if (icon) icon.innerHTML = '';
+        if (hint) { hint.style.color='#888'; hint.innerHTML='<i class="bi bi-info-circle" style="font-size:0.7rem;"></i> Celular: 6x/7x + 7díg | Fijo: 2/3/4 + 6díg'; }
+      }
+    }
 
-            if (estado === 'ok') {
-                input.style.borderColor  = '#10B981';
-                input.style.boxShadow    = '0 0 0 3px rgba(16,185,129,0.15)';
-                input.style.background   = '#f0fdf4';
-                if (icon) { icon.innerHTML = '<i class="bi bi-check-circle-fill" style="color:#10B981;"></i>'; }
-                if (hint)  { hint.style.color = '#10B981'; }
-            } else if (estado === 'error') {
-                input.style.borderColor  = '#ef4444';
-                input.style.boxShadow    = '0 0 0 3px rgba(239,68,68,0.14)';
-                input.style.background   = '#fef2f2';
-                if (icon) { icon.innerHTML = '<i class="bi bi-x-circle-fill" style="color:#ef4444;"></i>'; }
-                if (hint)  {
-                    hint.style.color = '#ef4444';
-                    hint.innerHTML   = '<i class="bi bi-exclamation-triangle" style="font-size:0.7rem;"></i> Formato inválido. Celular: 6x xxxxxxx · 7x xxxxxxx  |  Fijo: 2/3/4 + 6 dígitos';
-                }
-            } else {                                       // vacío
-                input.style.borderColor = '';
-                input.style.boxShadow   = '';
-                input.style.background  = '';
-                if (icon) { icon.innerHTML = ''; }
-                if (hint) {
-                    hint.style.color = '#888';
-                    hint.innerHTML   = '<i class="bi bi-info-circle" style="font-size:0.7rem;"></i> Celular: 6x\u202fxxxxxxx \u00b7 7x\u202fxxxxxxx &nbsp;|\u00a0 Fijo: 2/3/4 + 6\u202fd\u00edgitos';
-                }
-            }
-        }
-
-        // Solo permite dígitos en el campo de teléfono
-        telInput.addEventListener('keypress', function (e) {
-            if (!/\d/.test(e.key) && !['Backspace','Delete','Tab','ArrowLeft','ArrowRight'].includes(e.key)) {
-                e.preventDefault();
-            }
-        });
-
-        // Validación en tiempo real mientras escribe
-        telInput.addEventListener('input', function () {
-            // Eliminar caracteres no numéricos
-            var soloDigitos = telInput.value.replace(/\D/g, '');
-            if (soloDigitos.length > 8) { soloDigitos = soloDigitos.slice(0, 8); }
-            telInput.value = soloDigitos;           // mantener solo números (prefix es visual)
-
-            if (soloDigitos.length === 0) {
-                setTelEstado('vacio');
-            } else if (soloDigitos.length >= 7) {
-                var valid = validarTelefonoBoliviano(soloDigitos);
-                setTelEstado(valid ? 'ok' : 'error');
-            } else {
-                setTelEstado('vacio');              // aún escribiendo, no mostrar error
-            }
-        });
-
-        // Validación al perder el foco (blur)
-        telInput.addEventListener('blur', function () {
-            if (telInput.value.trim() !== '') {
-                var valid = validarTelefonoBoliviano(telInput.value);
-                setTelEstado(valid ? 'ok' : 'error');
-            }
-        });
-
-        // ── Validación al enviar el formulario ────────────────────
-        form.addEventListener('submit', function (e) {
-            var bloqueado = false;
-
-            // 1. Validar contraseñas
-            if (pwInput.value !== confInput.value) {
-                e.preventDefault();
-                bloqueado = true;
-                confInput.style.borderColor = '#ef4444';
-                confInput.style.boxShadow   = '0 0 0 4px rgba(239,68,68,0.14)';
-                confInput.focus();
-                confInput.setCustomValidity('Las contraseñas no coinciden');
-                confInput.reportValidity();
-            } else {
-                confInput.setCustomValidity('');
-            }
-
-            // 2. Validar teléfono (solo si fue rellenado)
-            if (telInput.value.trim() !== '') {
-                var telValido = validarTelefonoBoliviano(telInput.value);
-                if (!telValido) {
-                    if (!bloqueado) { e.preventDefault(); }
-                    bloqueado = true;
-                    setTelEstado('error');
-                    telInput.setCustomValidity('Ingresa un número telefónico boliviano válido.');
-                    if (!confInput.validity.valueMissing) { telInput.reportValidity(); }
-                } else {
-                    // Guardar el número normalizado con prefijo para el backend
-                    telInput.value = '+591' + telValido;
-                    telInput.setCustomValidity('');
-                }
-            }
-        });
-
-        confInput.addEventListener('input', function () {
-            confInput.style.borderColor = '';
-            confInput.style.boxShadow   = '';
-            confInput.setCustomValidity('');
-        });
+    telInput.addEventListener('keypress', function(e) {
+      if (!/\d/.test(e.key) && !['Backspace','Delete','Tab','ArrowLeft','ArrowRight'].includes(e.key)) e.preventDefault();
+    });
+    telInput.addEventListener('input', function() {
+      var d = telInput.value.replace(/\D/g,'').slice(0,8);
+      telInput.value = d;
+      if (!d) setTelEstado('vacio');
+      else if (d.length >= 7) setTelEstado(validarTelefonoBoliviano(d) ? 'ok' : 'error');
+      else setTelEstado('vacio');
+    });
+    telInput.addEventListener('blur', function() {
+      if (telInput.value.trim()) setTelEstado(validarTelefonoBoliviano(telInput.value) ? 'ok' : 'error');
     });
 
-    function togglePassword(inputId, iconId) {
-        var input = document.getElementById(inputId);
-        var icon  = document.getElementById(iconId);
-        if (input.type === 'password') {
-            input.type = 'text';
-            icon.classList.replace('bi-eye', 'bi-eye-slash');
-        } else {
-            input.type = 'password';
-            icon.classList.replace('bi-eye-slash', 'bi-eye');
-        }
-    }
-</script>
+    // ── Submit: validar localmente y llamar /registro/enviar-codigo ───
+    form.addEventListener('submit', function(e) {
+      e.preventDefault();
 
+      // Validar contraseñas
+      if (pwInput.value !== confInput.value) {
+        confInput.style.borderColor = '#ef4444';
+        confInput.style.boxShadow   = '0 0 0 4px rgba(239,68,68,0.14)';
+        confInput.setCustomValidity('Las contraseñas no coinciden');
+        confInput.reportValidity();
+        return;
+      }
+      confInput.setCustomValidity('');
+
+      // Validar teléfono
+      var telFinal = '';
+      if (telInput.value.trim()) {
+        var tv = validarTelefonoBoliviano(telInput.value);
+        if (!tv) { setTelEstado('error'); telInput.focus(); return; }
+        telFinal = tv;   // solo dígitos sin prefijo
+      }
+
+      // Estado cargando
+      submitBtn.disabled = true;
+      submitBtn.querySelector('i').style.display = 'none';
+      document.getElementById('btn_spinner').style.display = 'inline-block';
+
+      // Payload al endpoint
+      fetch('/registro/enviar-codigo', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          nombre:               document.getElementById('reg_nombre').value.trim(),
+          empresa_nombre:       document.getElementById('reg_empresa').value.trim(),
+          correo:               document.getElementById('reg_correo').value.trim(),
+          telefono:             telFinal,
+          contrasena:           pwInput.value,
+          confirmar_contrasena: confInput.value,
+        })
+      })
+      .then(function(r) { return r.json().then(function(d){ return {st:r.status, d:d}; }); })
+      .then(function(r) {
+        submitBtn.disabled = false;
+        submitBtn.querySelector('i').style.display = '';
+        document.getElementById('btn_spinner').style.display = 'none';
+
+        if (r.d.ok) {
+          // Abrir modal OTP
+          document.getElementById('otpEmailDisplay').textContent =
+            document.getElementById('reg_correo').value.trim();
+          _otpAbrirModal();
+        } else {
+          // Mostrar error en el form
+          alert(r.d.msg || 'Ocurrió un error al procesar el registro.');
+        }
+      })
+      .catch(function() {
+        submitBtn.disabled = false;
+        submitBtn.querySelector('i').style.display = '';
+        document.getElementById('btn_spinner').style.display = 'none';
+        alert('Error de conexión al enviar el código de verificación.');
+      });
+    });
+
+    confInput.addEventListener('input', function() {
+      confInput.style.borderColor = ''; confInput.style.boxShadow = ''; confInput.setCustomValidity('');
+    });
+  });
+
+  // ── OTP MODAL LOGIC ──────────────────────────────────────
+  var _otpModal    = null;
+  var _otpTimer    = null;   // intervalo countdown
+  var _resendTimer = null;   // intervalo reenviar
+  var _secondsLeft = 600;    // 10 minutos
+  var _resendSecs  = 60;
+
+  function _otpAbrirModal() {
+    var el = document.getElementById('otpModal');
+    _otpModal = bootstrap.Modal.getOrCreateInstance(el);
+    _otpModal.show();
+    _resetOTPInputs();
+    _startCountdown();
+    _startResendTimer();
+    setTimeout(function() { document.getElementById('otp_d0').focus(); }, 400);
+  }
+
+  function _resetOTPInputs() {
+    for (var i = 0; i < 6; i++) {
+      var inp = document.getElementById('otp_d' + i);
+      inp.value = '';
+      inp.className = 'otp-digit';
+    }
+    document.getElementById('otpMsg').innerHTML = '';
+    document.getElementById('otpInputsWrap').classList.remove('shake');
+  }
+
+  // Auto-avance entre inputs OTP
+  document.addEventListener('DOMContentLoaded', function() {
+    for (var i = 0; i < 6; i++) {
+      (function(idx) {
+        var inp = document.getElementById('otp_d' + idx);
+        if (!inp) return;
+        inp.addEventListener('input', function() {
+          var v = inp.value.replace(/\D/g,'');
+          inp.value = v ? v[v.length-1] : '';
+          if (inp.value && idx < 5) document.getElementById('otp_d' + (idx+1)).focus();
+          _checkOTPComplete();
+        });
+        inp.addEventListener('keydown', function(e) {
+          if (e.key === 'Backspace' && !inp.value && idx > 0) document.getElementById('otp_d' + (idx-1)).focus();
+          if (e.key === 'Enter') verificarOTP();
+        });
+        inp.addEventListener('paste', function(e) {
+          var txt = (e.clipboardData || window.clipboardData).getData('text').replace(/\D/g,'').slice(0,6);
+          for (var j = 0; j < txt.length; j++) {
+            var el = document.getElementById('otp_d' + j);
+            if (el) el.value = txt[j];
+          }
+          e.preventDefault();
+          _checkOTPComplete();
+          if (txt.length === 6) document.getElementById('otp_d5').focus();
+        });
+      })(i);
+    }
+  });
+
+  function _checkOTPComplete() {
+    var full = true;
+    for (var i = 0; i < 6; i++) { if (!document.getElementById('otp_d' + i).value) { full = false; break; } }
+    document.getElementById('btnVerificar').style.opacity = full ? '1' : '0.7';
+  }
+
+  function _getOTPCode() {
+    var code = '';
+    for (var i = 0; i < 6; i++) code += (document.getElementById('otp_d' + i).value || '');
+    return code;
+  }
+
+  // ── Countdown timer ──
+  function _startCountdown() {
+    clearInterval(_otpTimer);
+    _secondsLeft = 600;
+    _updateCountdownDisplay();
+    _otpTimer = setInterval(function() {
+      _secondsLeft--;
+      _updateCountdownDisplay();
+      if (_secondsLeft <= 0) {
+        clearInterval(_otpTimer);
+        document.getElementById('otpMsg').innerHTML =
+          '<span style="color:#ef4444;"><i class="bi bi-clock"></i> El código expiró. Reinicia el registro.</span>';
+        document.getElementById('btnVerificar').disabled = true;
+      }
+    }, 1000);
+  }
+
+  function _updateCountdownDisplay() {
+    var m = Math.floor(_secondsLeft / 60), s = _secondsLeft % 60;
+    document.getElementById('otpCountdown').textContent =
+      (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s;
+  }
+
+  // ── Resend timer (60 s cooldown) ──
+  function _startResendTimer() {
+    clearInterval(_resendTimer);
+    _resendSecs = 60;
+    var btn = document.getElementById('btnReenviar');
+    btn.disabled = true; btn.style.color = '#ccc'; btn.style.cursor = 'not-allowed';
+    _resendTimer = setInterval(function() {
+      _resendSecs--;
+      var span = document.getElementById('reenviarTimer');
+      if (span) span.textContent = _resendSecs > 0 ? '(' + _resendSecs + 's)' : '';
+      if (_resendSecs <= 0) {
+        clearInterval(_resendTimer);
+        btn.disabled = false; btn.style.color = '#FF6B35'; btn.style.cursor = 'pointer';
+      }
+    }, 1000);
+  }
+
+  // ── Verificar código ──
+  function verificarOTP() {
+    var code = _getOTPCode();
+    if (code.length < 6) {
+      _showOTPMsg('Ingresa los 6 dígitos del código.', 'warn'); return;
+    }
+
+    var btn = document.getElementById('btnVerificar');
+    btn.disabled = true; btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Verificando...';
+
+    fetch('/registro/verificar-codigo', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ codigo: code })
+    })
+    .then(function(r) { return r.json().then(function(d) { return {st:r.status, d:d}; }); })
+    .then(function(r) {
+      btn.disabled = false;
+      btn.innerHTML = '<i class="bi bi-shield-check-fill"></i> Verificar código';
+
+      if (r.d.ok) {
+        clearInterval(_otpTimer);
+        _showOTPMsg('✔️ ¡Cuenta verificada! Redirigiendo...', 'ok');
+        for (var i=0;i<6;i++) document.getElementById('otp_d'+i).className='otp-digit ok';
+        setTimeout(function() { window.location.href = r.d.redirect || '/login'; }, 1200);
+      } else if (r.d.expired || r.d.blocked) {
+        _showOTPMsg(r.d.msg, 'err');
+        clearInterval(_otpTimer);
+        btn.disabled = true;
+      } else {
+        _showOTPMsg(r.d.msg, 'err');
+        for (var i=0;i<6;i++) document.getElementById('otp_d'+i).className='otp-digit err';
+        var wrap = document.getElementById('otpInputsWrap');
+        wrap.classList.remove('shake');
+        void wrap.offsetWidth;
+        wrap.classList.add('shake');
+        setTimeout(function() {
+          for (var i=0;i<6;i++) {
+            var el = document.getElementById('otp_d'+i);
+            el.value=''; el.className='otp-digit';
+          }
+          document.getElementById('otp_d0').focus();
+        }, 500);
+      }
+    })
+    .catch(function() {
+      btn.disabled = false;
+      btn.innerHTML = '<i class="bi bi-shield-check-fill"></i> Verificar código';
+      _showOTPMsg('Error de conexión. Inténtalo de nuevo.', 'err');
+    });
+  }
+
+  // ── Reenviar código ──
+  function reenviarCodigo() {
+    var btn = document.getElementById('btnReenviar');
+    btn.disabled = true; btn.style.color = '#ccc';
+
+    fetch('/registro/reenviar-codigo', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' }
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+      if (d.ok) {
+        _resetOTPInputs();
+        _startCountdown();
+        _startResendTimer();
+        _showOTPMsg('✉️ Nuevo código enviado. Revisa tu correo.', 'ok');
+        setTimeout(function() { document.getElementById('otp_d0').focus(); }, 200);
+      } else {
+        _showOTPMsg(d.msg, 'err');
+        btn.disabled = false; btn.style.color = '#FF6B35';
+      }
+    })
+    .catch(function() {
+      btn.disabled = false; btn.style.color = '#FF6B35';
+      _showOTPMsg('Error al reenviar. Inténtalo de nuevo.', 'err');
+    });
+  }
+
+  function _showOTPMsg(msg, type) {
+    var colors = { ok:'#10B981', err:'#ef4444', warn:'#F59E0B' };
+    var el = document.getElementById('otpMsg');
+    el.style.color = colors[type] || '#555';
+    el.innerHTML = msg;
+  }
+
+  function togglePassword(inputId, iconId) {
+    var input = document.getElementById(inputId);
+    var icon  = document.getElementById(iconId);
+    if (input.type === 'password') { input.type = 'text'; icon.classList.replace('bi-eye','bi-eye-slash'); }
+    else { input.type = 'password'; icon.classList.replace('bi-eye-slash','bi-eye'); }
+  }
+</script>
 {% endblock %}

@@ -1,4 +1,4 @@
-from flask import Flask, flash, render_template, request, redirect, session, url_for, make_response, jsonify
+from flask import flash, render_template, request, redirect, session, url_for, make_response, jsonify
 from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
 import pdfkit
@@ -11,16 +11,17 @@ import json
 import sqlite3
 import random
 import string
+import re as _re_global
 from db_wrapper import get_db_connection
-from sqlite3 import connect  # Esta es la importación que faltaba
+from sqlite3 import connect
 from markupsafe import Markup
 from threading import Lock
 from contextlib import contextmanager
 from models import (
     crear_tablas, registrar_log, migrar_clientes_existentes, migrar_productos_categorias,
     migrar_columnas_nuevas_clientes,
-    guardar_importacion_pdf, obtener_importaciones_pdf, obtener_importacion_por_id, registrar_productos_seleccionados,
-    eliminar_importacion_pdf
+    guardar_importacion_pdf, obtener_importaciones_pdf, obtener_importacion_por_id,
+    registrar_productos_seleccionados, eliminar_importacion_pdf
 )
 from utils.pdf_extractor import PDFProductExtractor
 import io
@@ -29,105 +30,235 @@ from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter
 import uuid
 
+
 def register_routes(app):
-    @app.route('/registro', methods=['GET', 'POST'])
+
+
+    # ─── Helpers de validación reutilizables ──────────────────────────────────
+    def _validar_telefono_bo(telefono: str):
+        """Devuelve el número normalizado (sin prefijo) o None si es inválido."""
+        if not telefono:
+            return ''  # opcional
+        tel = _re_global.sub(r'\D', '', telefono)
+        if tel.startswith('591') and len(tel) > 9:
+            tel = tel[3:]
+        if _re_global.match(r'^[67]\d{7}$', tel) or _re_global.match(r'^[234]\d{6}$', tel):
+            return tel
+        return None
+
+    def _insertar_cliente(cursor, conexion, nombre, empresa_nombre, correo, telefono,
+                          contrasena_hash, rol='admin'):
+        """Inserta un nuevo cliente y devuelve su ID."""
+        is_postgres = bool(
+            os.environ.get('DATABASE_URL') and
+            os.environ.get('DATABASE_URL').startswith('postgres')
+        )
+        query = '''
+            INSERT INTO clientes
+                (nombre, empresa_nombre, correo, telefono, contrasena, rol,
+                 fecha_vencimiento_suscripcion, cotizaciones_trial_usadas)
+            VALUES (?, ?, ?, ?, ?, ?, NULL, 0)
+        '''
+        if is_postgres:
+            query = query.replace('?', '%s') + ' RETURNING id'
+            cursor.execute(query, (nombre, empresa_nombre, correo, telefono, contrasena_hash, rol))
+            row = cursor.fetchone()
+            nuevo_id = row[0] if row else None
+        else:
+            cursor.execute(query, (nombre, empresa_nombre, correo, telefono, contrasena_hash, rol))
+            nuevo_id = cursor.lastrowid
+
+        if not nuevo_id:
+            cursor.execute('SELECT id FROM clientes WHERE correo = ?', (correo,))
+            row = cursor.fetchone()
+            if row:
+                nuevo_id = row[0]
+        return nuevo_id
+
+    # ─── /registro  GET ───────────────────────────────────────────────────────
+    @app.route('/registro', methods=['GET'])
     def registro():
-        if request.method == 'POST':
-            nombre = request.form.get('nombre', '').strip()
-            empresa_nombre = request.form.get('empresa_nombre', '').strip()
-            correo = request.form.get('correo', '').strip()
-            telefono = request.form.get('telefono', '').strip()
-            contrasena = request.form.get('contrasena', '')
-            confirmar_contrasena = request.form.get('confirmar_contrasena', '')
-
-            # Validaciones básicas
-            if not nombre or not correo or not contrasena:
-                flash('Nombre, correo y contraseña son obligatorios.', 'danger')
-                return redirect(url_for('registro'))
-
-            if contrasena != confirmar_contrasena:
-                flash('Las contraseñas no coinciden.', 'danger')
-                return redirect(url_for('registro'))
-
-            if len(contrasena) < 6:
-                flash('La contraseña debe tener al menos 6 caracteres.', 'danger')
-                return redirect(url_for('registro'))
-
-            # Validación de teléfono boliviano (si fue ingresado)
-            if telefono:
-                import re as _re
-                # Normalizar: extraer solo dígitos y quitar prefijo 591 si viene
-                tel_digitos = _re.sub(r'\D', '', telefono)
-                if tel_digitos.startswith('591') and len(tel_digitos) > 9:
-                    tel_digitos = tel_digitos[3:]
-                # Celular: 8 dígitos empezando en 6 o 7
-                # Fijo:    7 dígitos empezando en 2, 3 o 4
-                es_celular = bool(_re.match(r'^[67]\d{7}$', tel_digitos))
-                es_fijo    = bool(_re.match(r'^[234]\d{6}$', tel_digitos))
-                if not (es_celular or es_fijo):
-                    flash(
-                        'El teléfono debe ser un número boliviano válido: '
-                        'celular (6x xxxxxxx / 7x xxxxxxx) o fijo (2, 3 o 4 + 6 dígitos).',
-                        'danger'
-                    )
-                    return redirect(url_for('registro'))
-                # Normalizar al formato +591XXXXXXXX
-                telefono = '+591' + tel_digitos
-
-            # Todo registro público crea una cuenta de Administrador (modelo freemium)
-            rol = 'admin'
-            contrasena_hash = generate_password_hash(contrasena)
-
-
-            conexion = get_db_connection()
-            cursor = conexion.cursor()
-
-            try:
-                is_postgres = bool(os.environ.get('DATABASE_URL') and os.environ.get('DATABASE_URL').startswith('postgres'))
-                query_insert = '''
-                    INSERT INTO clientes
-                        (nombre, empresa_nombre, correo, telefono, contrasena, rol,
-                         fecha_vencimiento_suscripcion, cotizaciones_trial_usadas)
-                    VALUES (?, ?, ?, ?, ?, ?, NULL, 0)
-                '''
-                if is_postgres:
-                    query_insert = query_insert.replace('?', '%s')
-                    query_insert += ' RETURNING id'
-                    cursor.execute(query_insert, (nombre, empresa_nombre, correo, telefono, contrasena_hash, rol))
-                    row_id = cursor.fetchone()
-                    nuevo_usuario_id = row_id[0] if row_id else None
-                else:
-                    cursor.execute(query_insert, (nombre, empresa_nombre, correo, telefono, contrasena_hash, rol))
-                    nuevo_usuario_id = cursor.lastrowid
-
-                if not nuevo_usuario_id:
-                    cursor.execute('SELECT id FROM clientes WHERE correo = ?', (correo,))
-                    row_u = cursor.fetchone()
-                    if row_u:
-                        nuevo_usuario_id = row_u[0]
-
-                conexion.commit()
-                flash('¡Cuenta creada exitosamente! Tienes 5 cotizaciones gratis para explorar el sistema.', 'success')
-
-            except Exception as e:
-                conexion.rollback()
-                err_msg = str(e).lower()
-                if 'unique' in err_msg or 'duplicate' in err_msg or 'correo' in err_msg:
-                    flash('El correo electrónico ya está registrado.', 'danger')
-                else:
-                    flash(f'Error al registrar la cuenta: {str(e)}', 'danger')
-                return redirect(url_for('registro'))
-            finally:
-                conexion.close()
-
-            return redirect(url_for('login'))
-
-        # Si es GET, mostrar el formulario de registro
         return render_template('autenticacion/registro.html')
 
+    # ─── /registro/enviar-codigo  POST (JSON) ────────────────────────────────
+    @app.route('/registro/enviar-codigo', methods=['POST'])
+    def registro_enviar_codigo():
+        """
+        Paso 1 del registro:
+        - Valida los campos del formulario
+        - Verifica que el correo no esté ya registrado
+        - Genera un código OTP de 6 dígitos
+        - Lo almacena en session['pending_registro'] con TTL de 10 minutos
+        - Envía el email con el código
+        """
+        data = request.get_json(silent=True) or {}
+
+        nombre         = (data.get('nombre') or '').strip()
+        empresa_nombre = (data.get('empresa_nombre') or '').strip()
+        correo         = (data.get('correo') or '').strip().lower()
+        telefono_raw   = (data.get('telefono') or '').strip()
+        contrasena     = data.get('contrasena') or ''
+        conf_pass      = data.get('confirmar_contrasena') or ''
+
+        # ── Validaciones ──────────────────────────────────────────────────────
+        if not nombre or not correo or not contrasena:
+            return jsonify({'ok': False, 'msg': 'Nombre, correo y contraseña son obligatorios.'}), 400
+
+        if contrasena != conf_pass:
+            return jsonify({'ok': False, 'msg': 'Las contraseñas no coinciden.'}), 400
+
+        if len(contrasena) < 6:
+            return jsonify({'ok': False, 'msg': 'La contraseña debe tener al menos 6 caracteres.'}), 400
+
+        # Teléfono boliviano (opcional pero si viene debe ser válido)
+        telefono_norm = ''
+        if telefono_raw:
+            tel_ok = _validar_telefono_bo(telefono_raw)
+            if tel_ok is None:
+                return jsonify({
+                    'ok': False,
+                    'msg': 'Teléfono boliviano inválido. Celular: 6x/7x + 7 dígitos | Fijo: 2/3/4 + 6 dígitos.'
+                }), 400
+            telefono_norm = f'+591{tel_ok}' if tel_ok else ''
+
+        # ── Verificar correo duplicado en BD ──────────────────────────────────
+        try:
+            con = get_db_connection()
+            cur = con.cursor()
+            cur.execute('SELECT id FROM clientes WHERE correo = ?', (correo,))
+            if cur.fetchone():
+                con.close()
+                return jsonify({'ok': False, 'msg': 'Este correo ya tiene una cuenta registrada.'}), 409
+            con.close()
+        except Exception as e:
+            return jsonify({'ok': False, 'msg': f'Error al verificar el correo: {str(e)}'}), 500
+
+        # ── Generar OTP 6 dígitos ─────────────────────────────────────────────
+        codigo_otp = ''.join(random.choices(string.digits, k=6))
+        import time as _time
+        expira_en  = _time.time() + 600   # 10 minutos
+
+        # Guardar datos pendientes en session (cifrada por Flask)
+        session['pending_registro'] = {
+            'nombre':         nombre,
+            'empresa_nombre': empresa_nombre,
+            'correo':         correo,
+            'telefono':       telefono_norm,
+            'contrasena':     generate_password_hash(contrasena),
+            'codigo':         codigo_otp,
+            'expira_en':      expira_en,
+            'intentos':       0,
+        }
+
+        # ── Enviar email ──────────────────────────────────────────────────────
+        try:
+            from utils.email_sender import enviar_codigo_verificacion
+            enviado = enviar_codigo_verificacion(correo, codigo_otp, nombre)
+        except Exception as e:
+            print(f"[EMAIL ERROR] {e}")
+            enviado = False
+
+        if not enviado:
+            session.pop('pending_registro', None)
+            return jsonify({'ok': False, 'msg': 'No se pudo enviar el email de verificación. Inténtalo de nuevo.'}), 503
+
+        return jsonify({'ok': True, 'msg': f'Código enviado a {correo}. Revisa tu bandeja de entrada.'}), 200
+
+    # ─── /registro/verificar-codigo  POST (JSON) ─────────────────────────────
+    @app.route('/registro/verificar-codigo', methods=['POST'])
+    def registro_verificar_codigo():
+        """
+        Paso 2 del registro:
+        - Lee el pending_registro de session
+        - Verifica que el código coincida y no haya expirado
+        - Si OK: crea la cuenta en BD y redirige al login
+        """
+        data      = request.get_json(silent=True) or {}
+        codigo_in = (data.get('codigo') or '').strip()
+
+        pending = session.get('pending_registro')
+        if not pending:
+            return jsonify({'ok': False, 'msg': 'La sesión de verificación expiró. Inicia el registro nuevamente.'}), 400
+
+        import time as _time
+        # ── Verificar expiración ──────────────────────────────────────────────
+        if _time.time() > pending.get('expira_en', 0):
+            session.pop('pending_registro', None)
+            return jsonify({'ok': False, 'expired': True, 'msg': 'El código expiró. Por favor reinicia el registro.'}), 400
+
+        # ── Verificar intentos ────────────────────────────────────────────────
+        intentos = pending.get('intentos', 0)
+        if intentos >= 5:
+            session.pop('pending_registro', None)
+            return jsonify({'ok': False, 'blocked': True, 'msg': 'Demasiados intentos incorrectos. Reinicia el registro.'}), 429
+
+        # ── Comparar código ───────────────────────────────────────────────────
+        if codigo_in != pending.get('codigo', ''):
+            pending['intentos'] = intentos + 1
+            session['pending_registro'] = pending   # actualizar contador
+            restantes = 5 - (intentos + 1)
+            return jsonify({
+                'ok': False,
+                'msg': f'Código incorrecto. Te quedan {restantes} intento(s).',
+                'intentos_restantes': restantes
+            }), 400
+
+        # ── Código correcto → Crear cuenta ────────────────────────────────────
+        try:
+            con = get_db_connection()
+            cur = con.cursor()
+            nuevo_id = _insertar_cliente(
+                cur, con,
+                nombre         = pending['nombre'],
+                empresa_nombre = pending.get('empresa_nombre', ''),
+                correo         = pending['correo'],
+                telefono       = pending.get('telefono', ''),
+                contrasena_hash= pending['contrasena'],
+                rol            = 'admin',
+            )
+            con.commit()
+            con.close()
+        except Exception as e:
+            err = str(e).lower()
+            if 'unique' in err or 'duplicate' in err:
+                session.pop('pending_registro', None)
+                return jsonify({'ok': False, 'msg': 'Este correo ya tiene una cuenta. Inicia sesión.'}), 409
+            return jsonify({'ok': False, 'msg': f'Error al crear la cuenta: {str(e)}'}), 500
+
+        session.pop('pending_registro', None)
+
+        flash('¡Bienvenido a COTIZAPro! Tu cuenta fue verificada. Tienes 5 cotizaciones gratis para explorar el sistema.', 'success')
+        return jsonify({'ok': True, 'redirect': url_for('login')}), 200
+
+    # ─── /registro/reenviar-codigo  POST (JSON) ──────────────────────────────
+    @app.route('/registro/reenviar-codigo', methods=['POST'])
+    def registro_reenviar_codigo():
+        """Reenvía el OTP al mismo correo, generando un nuevo código."""
+        pending = session.get('pending_registro')
+        if not pending:
+            return jsonify({'ok': False, 'msg': 'Sesión expirada. Reinicia el registro.'}), 400
+
+        import time as _time
+        nuevo_codigo = ''.join(random.choices(string.digits, k=6))
+        pending['codigo']    = nuevo_codigo
+        pending['expira_en'] = _time.time() + 600
+        pending['intentos']  = 0
+        session['pending_registro'] = pending
+
+        try:
+            from utils.email_sender import enviar_codigo_verificacion
+            enviado = enviar_codigo_verificacion(pending['correo'], nuevo_codigo, pending['nombre'])
+        except Exception:
+            enviado = False
+
+        if not enviado:
+            return jsonify({'ok': False, 'msg': 'No se pudo reenviar el código. Inténtalo de nuevo.'}), 503
+
+        return jsonify({'ok': True, 'msg': 'Nuevo código enviado. Revisa tu bandeja.'}), 200
 
 
     @app.route('/login', methods=['GET', 'POST'])
+
     def login():
         tipo_login = request.args.get('tipo', 'standard')  # Valor por defecto 'standard'
         error = None

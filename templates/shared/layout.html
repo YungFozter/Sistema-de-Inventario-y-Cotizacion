@@ -916,9 +916,19 @@
         <div class="clay-nav-actions">
 
           {% if 'user_id' not in session %}
+          {% if request.path == '/registro' or request.endpoint == 'registro' %}
+          <a href="{{ url_for('login') }}" class="clay-btn-cta">
+            <i class="bi bi-box-arrow-in-right"></i> Iniciar Sesión
+          </a>
+          {% elif request.path == '/login' or request.endpoint == 'login' %}
+          <a href="{{ url_for('registro') }}" class="clay-btn-cta">
+            <i class="bi bi-person-plus-fill"></i> Registrarse
+          </a>
+          {% else %}
           <a href="{{ url_for('registro') }}" class="clay-btn-cta">
             <i class="bi bi-lightning-charge-fill"></i> Acceder
           </a>
+          {% endif %}
 
 
 

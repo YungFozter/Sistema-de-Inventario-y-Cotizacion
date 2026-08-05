@@ -7,109 +7,149 @@
 <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
 <style>
     /* ============================================================
-       LOGIN DISTINCT - BENTO GRID & CLAYMORPHISM 3D PORTAL
+       LOGIN HORIZONTAL BENTO GRID + CLAYMORPHISM 3D
        ============================================================ */
-    .login-page-wrapper {
-        background-color: #F5F4F0;
+    .login-wrapper {
+        background-color: #F4F3EE;
         background-image:
-            radial-gradient(circle at 50% 10%, rgba(255, 107, 53, 0.09) 0%, transparent 60%),
-            radial-gradient(circle at 85% 90%, rgba(79, 70, 229, 0.08) 0%, transparent 50%),
-            radial-gradient(circle at 10% 80%, rgba(16, 185, 129, 0.06) 0%, transparent 45%);
+            radial-gradient(circle at 10% 20%, rgba(255, 107, 53, 0.08) 0%, transparent 45%),
+            radial-gradient(circle at 90% 80%, rgba(79, 70, 229, 0.08) 0%, transparent 45%),
+            radial-gradient(circle at 50% 50%, rgba(16, 185, 129, 0.04) 0%, transparent 60%);
         font-family: 'Plus Jakarta Sans', sans-serif;
         min-height: calc(100vh - 120px);
         margin-top: -1.5rem;
         margin-bottom: -3rem;
         margin-left: -12px;
         margin-right: -12px;
-        padding: 3rem 1.25rem 4.5rem;
+        padding: 3rem 1.5rem 4.5rem;
         display: flex;
         align-items: center;
         justify-content: center;
     }
 
-    .login-bento-layout {
-        max-width: 580px;
+    .login-horizontal-bento {
+        max-width: 1120px;
         width: 100%;
-        display: flex;
-        flex-direction: column;
-        gap: 1.5rem;
+        display: grid;
+        grid-template-columns: 1fr 1.15fr;
+        gap: 2rem;
+        align-items: stretch;
     }
 
-    /* ── Top Header Bento Card ─────────────────────────────── */
-    .bento-header-card {
-        background: #FFFFFF;
-        border: 1.5px solid rgba(0, 0, 0, 0.08);
-        border-radius: 24px;
-        padding: 1.75rem 2rem;
+    /* ── Tarjeta Izquierda (Horizontal Bento Showcase - Clara/Glass 3D) ── */
+    .bento-left-card {
+        background: rgba(255, 255, 255, 0.85);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1.5px solid rgba(255, 255, 255, 0.9);
+        border-radius: 28px;
+        padding: 2.5rem 2.25rem;
         box-shadow:
-            0 2px 0 rgba(0, 0, 0, 0.02),
-            0 12px 30px rgba(0, 0, 0, 0.05),
-            inset 0 1px 0 rgba(255, 255, 255, 0.9);
-        text-align: center;
+            0 4px 0 rgba(0, 0, 0, 0.02),
+            0 20px 48px rgba(0, 0, 0, 0.06),
+            inset 0 1px 0 rgba(255, 255, 255, 1);
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
         position: relative;
         overflow: hidden;
     }
 
-    .bento-header-card::before {
+    .bento-left-card::before {
         content: '';
         position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 4px;
-        background: linear-gradient(90deg, #FF6B35 0%, #4F46E5 100%);
+        top: -60px;
+        left: -60px;
+        width: 220px;
+        height: 220px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(255,107,53,0.14) 0%, transparent 70%);
+        pointer-events: none;
     }
 
-    .clay-avatar-lock {
-        width: 68px;
-        height: 68px;
-        border-radius: 20px;
+    .badge-bento-portal {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: #FFFFFF;
+        border: 1.5px solid rgba(255, 107, 53, 0.3);
+        border-radius: 50px;
+        padding: 6px 16px;
+        font-size: 0.82rem;
+        font-weight: 800;
+        color: #C94E1E;
+        box-shadow: 0 4px 12px rgba(255, 107, 53, 0.1);
+        margin-bottom: 1.25rem;
+    }
+
+    /* Floating 3D Element */
+    .bento-3d-graphic {
+        position: relative;
+        text-align: center;
+        padding: 1.5rem 0;
+    }
+
+    .clay-floating-icon-box {
+        width: 86px;
+        height: 86px;
+        border-radius: 26px;
         background: linear-gradient(135deg, #FF8A5C 0%, #E8501A 100%);
         display: flex;
         align-items: center;
         justify-content: center;
-        margin: 0 auto 1.25rem;
+        margin: 0 auto;
         box-shadow:
-            0 8px 20px rgba(255, 107, 53, 0.35),
+            0 14px 30px rgba(255, 107, 53, 0.38),
             inset 0 2px 0 rgba(255, 255, 255, 0.4);
-        font-size: 2rem;
+        font-size: 2.6rem;
         color: #FFFFFF;
-        animation: floatClayIcon 4s ease-in-out infinite;
+        animation: floatClaySoft 4s ease-in-out infinite;
     }
 
-    @keyframes floatClayIcon {
+    @keyframes floatClaySoft {
         0%, 100% { transform: translateY(0px) rotate(0deg); }
-        50% { transform: translateY(-6px) rotate(3deg); }
+        50% { transform: translateY(-8px) rotate(3deg); }
     }
 
-    .bento-badge-live {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        background: rgba(16, 185, 129, 0.1);
-        border: 1.2px solid rgba(16, 185, 129, 0.3);
-        border-radius: 50px;
-        padding: 4px 12px;
-        font-size: 0.76rem;
-        font-weight: 800;
-        color: #059669;
-        margin-bottom: 0.75rem;
+    /* Sub-grid Mini Bento Cards */
+    .bento-mini-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+        margin-top: 1.5rem;
     }
 
-    /* ── Main Form Bento Card ──────────────────────────────── */
-    .bento-form-card {
+    .bento-mini-item {
+        background: #FFFFFF;
+        border: 1.5px solid rgba(0, 0, 0, 0.07);
+        border-radius: 18px;
+        padding: 1rem 1.15rem;
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.03);
+        transition: transform 0.22s ease, box-shadow 0.22s ease;
+    }
+
+    .bento-mini-item:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 24px rgba(0, 0, 0, 0.06);
+    }
+
+    /* ── Tarjeta Derecha (Formulario Claymorphism 3D) ────────── */
+    .bento-right-card {
         background: #FFFFFF;
         border: 1.5px solid rgba(0, 0, 0, 0.08);
         border-radius: 28px;
-        padding: 2.25rem;
+        padding: 2.5rem;
         box-shadow:
             0 4px 0 rgba(0, 0, 0, 0.02),
-            0 20px 48px rgba(0, 0, 0, 0.07),
+            0 20px 50px rgba(0, 0, 0, 0.07),
             inset 0 1px 0 rgba(255, 255, 255, 1);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
     }
 
-    /* ── Clay Role Toggle Segmented ────────────────────────── */
-    .clay-segmented-toggle {
+    /* Selector de Rol Clay Segmented */
+    .clay-role-segmented {
         display: grid;
         grid-template-columns: 1fr 1fr;
         gap: 6px;
@@ -120,14 +160,14 @@
         border: 1.5px solid rgba(0,0,0,0.06);
     }
 
-    .clay-toggle-btn {
+    .clay-role-btn {
         display: flex;
         align-items: center;
         justify-content: center;
         gap: 8px;
-        padding: 10px 14px;
+        padding: 11px 16px;
         border-radius: 12px;
-        font-size: 0.86rem;
+        font-size: 0.88rem;
         font-weight: 800;
         color: #666;
         text-decoration: none;
@@ -135,34 +175,34 @@
         border: 1.5px solid transparent;
     }
 
-    .clay-toggle-btn:hover {
+    .clay-role-btn:hover {
         color: #141414;
         background: rgba(255,255,255,0.7);
     }
 
-    .clay-toggle-btn.active.user-mode {
+    .clay-role-btn.active.user-mode {
         background: #FFFFFF;
         color: #FF6B35;
         border-color: rgba(255,107,53,0.3);
-        box-shadow: 0 4px 12px rgba(255,107,53,0.12), 0 1px 2px rgba(0,0,0,0.04);
+        box-shadow: 0 4px 12px rgba(255,107,53,0.14), 0 1px 2px rgba(0,0,0,0.04);
     }
 
-    .clay-toggle-btn.active.admin-mode {
+    .clay-role-btn.active.admin-mode {
         background: #FFFFFF;
         color: #4F46E5;
         border-color: rgba(79, 70, 229, 0.3);
-        box-shadow: 0 4px 12px rgba(79,70,229,0.12), 0 1px 2px rgba(0,0,0,0.04);
+        box-shadow: 0 4px 12px rgba(79,70,229,0.14), 0 1px 2px rgba(0,0,0,0.04);
     }
 
-    /* ── Google OAuth Button ───────────────────────────────── */
-    .btn-google-clay {
+    /* Google OAuth 3D Button */
+    .btn-google-clay-3d {
         width: 100%;
-        padding: 12px 18px;
+        padding: 13px 18px;
         background: #FFFFFF;
         border: 1.5px solid rgba(0, 0, 0, 0.12);
         border-radius: 16px;
         font-family: 'Plus Jakarta Sans', sans-serif;
-        font-size: 0.92rem;
+        font-size: 0.94rem;
         font-weight: 800;
         color: #222;
         text-decoration: none;
@@ -172,55 +212,55 @@
         gap: 10px;
         box-shadow:
             0 2px 0 rgba(0,0,0,0.04),
-            0 4px 12px rgba(0,0,0,0.04),
+            0 6px 16px rgba(0,0,0,0.04),
             inset 0 1px 0 rgba(255,255,255,1);
         transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
 
-    .btn-google-clay:hover {
+    .btn-google-clay-3d:hover {
         transform: translateY(-2px);
         background: #FAFAFA;
         border-color: rgba(0, 0, 0, 0.2);
-        box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.08);
         color: #141414;
     }
 
-    .btn-google-clay:active {
+    .btn-google-clay-3d:active {
         transform: translateY(1px);
         box-shadow: 0 1px 0 rgba(0,0,0,0.04);
     }
 
-    /* ── Clay Inputs ───────────────────────────────────────── */
-    .clay-field-group {
+    /* Inputs Clay */
+    .clay-group-field {
         margin-bottom: 1.25rem;
     }
 
-    .clay-field-label {
+    .clay-group-label {
         font-size: 0.78rem;
         font-weight: 800;
-        color: #555;
+        color: #444;
         text-transform: uppercase;
         letter-spacing: 0.05em;
         display: block;
         margin-bottom: 6px;
     }
 
-    .clay-field-wrapper {
+    .clay-group-wrapper {
         position: relative;
         display: flex;
         align-items: center;
     }
 
-    .clay-field-icon {
+    .clay-group-icon {
         position: absolute;
         left: 14px;
-        color: #888;
+        color: #777;
         font-size: 1.05rem;
         pointer-events: none;
         transition: color 0.2s ease;
     }
 
-    .clay-field-input {
+    .clay-group-input {
         width: 100%;
         padding: 12px 14px 12px 42px;
         border: 1.5px solid rgba(0, 0, 0, 0.12);
@@ -234,18 +274,18 @@
         transition: all 0.2s ease;
     }
 
-    .clay-field-input:focus {
+    .clay-group-input:focus {
         background: #FFFFFF;
         border-color: #FF6B35;
         box-shadow: 0 0 0 4px rgba(255, 107, 53, 0.14);
     }
 
-    .clay-field-input:focus + .clay-field-icon,
-    .clay-field-wrapper:focus-within .clay-field-icon {
+    .clay-group-input:focus + .clay-group-icon,
+    .clay-group-wrapper:focus-within .clay-group-icon {
         color: #FF6B35;
     }
 
-    .clay-eye-toggle {
+    .clay-eye-btn {
         position: absolute;
         right: 12px;
         background: none;
@@ -257,10 +297,10 @@
         transition: color 0.2s ease;
     }
 
-    .clay-eye-toggle:hover { color: #141414; }
+    .clay-eye-btn:hover { color: #141414; }
 
-    /* ── Submit CTA ────────────────────────────────────────── */
-    .btn-login-cta {
+    /* Submit Button 3D */
+    .btn-submit-3d {
         width: 100%;
         padding: 14px;
         background: #FF6B35;
@@ -268,7 +308,7 @@
         border: none;
         border-radius: 16px;
         font-family: 'Plus Jakarta Sans', sans-serif;
-        font-size: 1.02rem;
+        font-size: 1.05rem;
         font-weight: 800;
         cursor: pointer;
         letter-spacing: -0.01em;
@@ -281,105 +321,131 @@
         margin-top: 1.5rem;
     }
 
-    .btn-login-cta:hover {
+    .btn-submit-3d:hover {
         background: #E8501A;
         transform: translateY(-1.5px);
         box-shadow: 0 6px 0 #C44E1E, 0 12px 28px rgba(255, 107, 53, 0.42);
     }
 
-    .btn-login-cta:active {
+    .btn-submit-3d:active {
         transform: translateY(3px);
         box-shadow: 0 1px 0 #C44E1E, 0 4px 12px rgba(255, 107, 53, 0.2);
     }
 
-    .btn-login-cta.is-admin-cta {
+    .btn-submit-3d.is-admin-cta {
         background: #4F46E5;
         box-shadow: 0 4px 0 #3730A3, 0 8px 24px rgba(79, 70, 229, 0.35);
     }
 
-    .btn-login-cta.is-admin-cta:hover {
+    .btn-submit-3d.is-admin-cta:hover {
         background: #4338CA;
         box-shadow: 0 6px 0 #3730A3, 0 12px 28px rgba(79, 70, 229, 0.42);
     }
 
-    /* ── Bottom Mini Bento Features Row ───────────────────── */
-    .bento-features-row {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 0.85rem;
+    /* ── Responsive Rules (Móvil / Tablet) ────────────────────── */
+    @media (max-width: 991px) {
+        .login-horizontal-bento {
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+
+        .bento-left-card {
+            padding: 2rem 1.5rem;
+        }
     }
 
-    .bento-mini-card {
-        background: #FFFFFF;
-        border: 1.5px solid rgba(0, 0, 0, 0.07);
-        border-radius: 18px;
-        padding: 1rem 0.85rem;
-        text-align: center;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
-    }
-
-    .bento-mini-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
-    }
-
-    .bento-mini-icon {
-        width: 34px;
-        height: 34px;
-        border-radius: 10px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin: 0 auto 6px;
-        font-size: 1rem;
-    }
-
-    /* ── Responsive ────────────────────────────────────────── */
     @media (max-width: 576px) {
-        .bento-header-card { padding: 1.5rem 1.25rem; }
-        .bento-form-card { padding: 1.5rem 1.25rem; }
-        .bento-features-row { grid-template-columns: 1fr; gap: 0.65rem; }
-        .bento-mini-card { display: flex; align-items: center; gap: 10px; text-align: left; padding: 0.85rem 1rem; }
-        .bento-mini-icon { margin: 0; flex-shrink: 0; }
+        .bento-left-card {
+            padding: 1.5rem 1.25rem;
+        }
+
+        .bento-right-card {
+            padding: 1.5rem 1.25rem !important;
+        }
+
+        .bento-mini-grid {
+            grid-template-columns: 1fr;
+            gap: 0.75rem;
+        }
     }
 </style>
 {% endblock %}
 
 {% block contenido %}
-<div class="login-page-wrapper">
-    <div class="login-bento-layout">
+<div class="login-wrapper">
+    <div class="login-horizontal-bento">
 
-        <!-- ❶ BENTO HEADER CARD (CON ECOSISTEMA B2B Y ESTATUS SSL) -->
-        <div class="bento-header-card" data-aos="fade-down">
-            <div class="clay-avatar-lock">
-                <i class="bi bi-shield-lock-fill"></i>
-            </div>
-            
-            <div class="bento-badge-live">
-                <span style="width:7px; height:7px; border-radius:50%; background:#10B981; box-shadow:0 0 8px #10B981;"></span>
-                Conexión Encriptada SSL 256-bit
+        <!-- ═══════════════════════════════════════════════════════
+             1. BENTO SHOWCASE CARD (HORIZONTAL IZQUIERDA)
+             ═══════════════════════════════════════════════════════ -->
+        <div class="bento-left-card" data-aos="fade-right">
+            <div>
+                <div class="badge-bento-portal">
+                    <i class="bi bi-shield-check" style="font-size:0.95rem;"></i>
+                    Acceso B2B Encriptado
+                </div>
+
+                <h2 style="font-size: 1.9rem; font-weight: 900; color: #141414; line-height: 1.2; letter-spacing: -0.03em; margin-bottom: 0.85rem;">
+                    Accede a tu cuenta en<br>
+                    <span style="color:#FF6B35;">COTIZAPro</span>
+                </h2>
+
+                <p style="font-size: 0.92rem; color: #666; line-height: 1.6; margin-bottom: 1.5rem;">
+                    Gestiona tus cotizaciones, catálogos de productos y cartera de clientes en tiempo real.
+                </p>
             </div>
 
-            <h2 style="font-size: 1.6rem; font-weight: 900; color: #141414; letter-spacing: -0.03em; margin: 0 0 4px;">
-                Portal de Acceso COTIZA<span style="color:#FF6B35;">Pro</span>
-            </h2>
-            <p style="font-size: 0.88rem; color: #666; margin: 0;">
-                Ingresa con tu perfil autorizado para gestionar cotizaciones y clientes
-            </p>
+            <!-- Visual Graphic 3D Floating -->
+            <div class="bento-3d-graphic">
+                <div class="clay-floating-icon-box">
+                    <i class="bi bi-box-arrow-in-right"></i>
+                </div>
+            </div>
+
+            <!-- Mini Bento Grid Sub-cards -->
+            <div class="bento-mini-grid">
+                <div class="bento-mini-item">
+                    <div style="width:32px; height:32px; border-radius:10px; background:#FFF7ED; color:#FF6B35;
+                                display:flex; align-items:center; justify-content:center; margin-bottom:8px;">
+                        <i class="bi bi-lightning-charge-fill" style="font-size:0.9rem;"></i>
+                    </div>
+                    <div style="font-size:0.84rem; font-weight:800; color:#141414;">Ingreso Rápido</div>
+                    <div style="font-size:0.75rem; color:#777; margin-top:2px;">Autenticación en 1-clic</div>
+                </div>
+
+                <div class="bento-mini-item">
+                    <div style="width:32px; height:32px; border-radius:10px; background:#EEF2FF; color:#4F46E5;
+                                display:flex; align-items:center; justify-content:center; margin-bottom:8px;">
+                        <i class="bi bi-cloud-check-fill" style="font-size:0.9rem;"></i>
+                    </div>
+                    <div style="font-size:0.84rem; font-weight:800; color:#141414;">Cloud Bolivia</div>
+                    <div style="font-size:0.75rem; color:#777; margin-top:2px;">Sincronizado 24/7</div>
+                </div>
+            </div>
         </div>
 
-        <!-- ❷ MAIN BENTO FORM CARD (CLAYMORPHISM 3D) -->
-        <div class="bento-form-card" data-aos="fade-up" data-aos-delay="100">
+        <!-- ═══════════════════════════════════════════════════════
+             2. BENTO FORM CARD (HORIZONTAL DERECHA - CLAY 3D)
+             ═══════════════════════════════════════════════════════ -->
+        <div class="bento-right-card" data-aos="fade-left" data-aos-delay="100">
 
-            <!-- Selector de Tipo de Usuario (Bento Segmented Toggle) -->
-            <div class="clay-segmented-toggle">
+            <div style="margin-bottom: 1.5rem; text-align: center;">
+                <h3 style="font-size: 1.6rem; font-weight: 900; color: #141414; letter-spacing: -0.03em; margin-bottom: 4px;">
+                    Iniciar Sesión
+                </h3>
+                <p style="font-size: 0.88rem; color: #666; margin: 0;">
+                    Selecciona tu perfil e ingresa tus datos
+                </p>
+            </div>
+
+            <!-- Selector de Tipo de Usuario Clay Segmented -->
+            <div class="clay-role-segmented">
                 <a href="{{ url_for('login', tipo='standard') }}"
-                   class="clay-toggle-btn user-mode {% if tipo == 'standard' %}active{% endif %}">
+                   class="clay-role-btn user-mode {% if tipo == 'standard' %}active{% endif %}">
                     <i class="bi bi-person-badge-fill"></i> Usuario
                 </a>
                 <a href="{{ url_for('login', tipo='admin') }}"
-                   class="clay-toggle-btn admin-mode {% if tipo == 'admin' %}active{% endif %}">
+                   class="clay-role-btn admin-mode {% if tipo == 'admin' %}active{% endif %}">
                     <i class="bi bi-shield-fill"></i> Administrador
                 </a>
             </div>
@@ -403,9 +469,9 @@
             <form method="post" action="{{ url_for('login') }}" id="loginForm">
                 <input type="hidden" name="tipo_login" value="{{ tipo }}">
 
-                <!-- Botón Google OAuth 3D Clay -->
+                <!-- Google OAuth 3D Button -->
                 <div class="mb-4">
-                    <a href="{{ url_for('auth_google') }}" class="btn-google-clay">
+                    <a href="{{ url_for('auth_google') }}" class="btn-google-clay-3d">
                         <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" style="width: 20px;">
                         Continuar con Google
                     </a>
@@ -420,23 +486,23 @@
                 </div>
 
                 <!-- Campo Correo -->
-                <div class="clay-field-group">
-                    <label class="clay-field-label" for="login_correo">Correo electrónico</label>
-                    <div class="clay-field-wrapper">
-                        <i class="bi bi-envelope-fill clay-field-icon"></i>
-                        <input type="email" id="login_correo" name="correo" class="clay-field-input"
+                <div class="clay-group-field">
+                    <label class="clay-group-label" for="login_correo">Correo electrónico</label>
+                    <div class="clay-group-wrapper">
+                        <i class="bi bi-envelope-fill clay-group-icon"></i>
+                        <input type="email" id="login_correo" name="correo" class="clay-group-input"
                                required placeholder="tu@correo.com" autocomplete="email">
                     </div>
                 </div>
 
                 <!-- Campo Contraseña -->
-                <div class="clay-field-group">
-                    <label class="clay-field-label" for="password_input">Contraseña</label>
-                    <div class="clay-field-wrapper">
-                        <i class="bi bi-lock-fill clay-field-icon"></i>
-                        <input type="password" id="password_input" name="contrasena" class="clay-field-input"
+                <div class="clay-group-field">
+                    <label class="clay-group-label" for="password_input">Contraseña</label>
+                    <div class="clay-group-wrapper">
+                        <i class="bi bi-lock-fill clay-group-icon"></i>
+                        <input type="password" id="password_input" name="contrasena" class="clay-group-input"
                                required placeholder="••••••••" autocomplete="current-password">
-                        <button type="button" class="clay-eye-toggle"
+                        <button type="button" class="clay-eye-btn"
                                 onclick="togglePassword('password_input', 'eye_icon_pw')" tabindex="-1" aria-label="Mostrar contraseña">
                             <i id="eye_icon_pw" class="bi bi-eye"></i>
                         </button>
@@ -444,7 +510,7 @@
                 </div>
 
                 <!-- Botón CTA Iniciar Sesión 3D -->
-                <button type="submit" class="btn-login-cta {% if tipo == 'admin' %}is-admin-cta{% endif %}" id="btn_login">
+                <button type="submit" class="btn-submit-3d {% if tipo == 'admin' %}is-admin-cta{% endif %}" id="btn_login">
                     <i class="bi bi-box-arrow-in-right"></i>
                     {% if tipo == 'admin' %}Acceder al Panel Admin{% else %}Iniciar Sesión{% endif %}
                 </button>
@@ -452,43 +518,10 @@
                 <div style="text-align:center; margin-top:1.5rem;">
                     <span style="font-size:0.88rem; color:#666;">¿Aún no tienes cuenta?</span>
                     <a href="{{ url_for('registro') }}" style="font-size:0.88rem; font-weight:800; color:#FF6B35;
-                                                           text-decoration:none; margin-left:4px;">Regístrate gratis aquí</a>
+                                                           text-decoration:none; margin-left:4px;">Regístrate gratis</a>
                 </div>
 
             </form>
-        </div>
-
-        <!-- ❸ BOTTOM BENTO FEATURES ROW (3 MINI BENTO WIDGETS) -->
-        <div class="bento-features-row" data-aos="fade-up" data-aos-delay="200">
-            <div class="bento-mini-card">
-                <div class="bento-mini-icon" style="background:#FFF7ED; color:#FF6B35;">
-                    <i class="bi bi-lightning-charge-fill"></i>
-                </div>
-                <div>
-                    <div style="font-size:0.82rem; font-weight:800; color:#141414;">Ingreso Rápido</div>
-                    <div style="font-size:0.72rem; color:#777;">Sin esperas ni demoras</div>
-                </div>
-            </div>
-
-            <div class="bento-mini-card">
-                <div class="bento-mini-icon" style="background:#EEF2FF; color:#4F46E5;">
-                    <i class="bi bi-shield-check"></i>
-                </div>
-                <div>
-                    <div style="font-size:0.82rem; font-weight:800; color:#141414;">Datos Encriptados</div>
-                    <div style="font-size:0.72rem; color:#777;">Protección de cartera B2B</div>
-                </div>
-            </div>
-
-            <div class="bento-mini-card">
-                <div class="bento-mini-icon" style="background:#ECFDF5; color:#10B981;">
-                    <i class="bi bi-cloud-check-fill"></i>
-                </div>
-                <div>
-                    <div style="font-size:0.82rem; font-weight:800; color:#141414;">Nube Bolivia</div>
-                    <div style="font-size:0.72rem; color:#777;">Sincronizado 24/7</div>
-                </div>
-            </div>
         </div>
 
     </div>

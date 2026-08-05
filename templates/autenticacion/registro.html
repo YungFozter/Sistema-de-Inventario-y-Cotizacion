@@ -224,10 +224,27 @@
         box-shadow: 0 1px 0 #c94e1e, 0 4px 12px rgba(255, 107, 53, 0.2);
     }
 
+    .reg-form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
     /* ── Responsive ────────────────────────────────── */
     @media (max-width: 991px) {
         .auth-bento-container { grid-template-columns: 1fr; }
         .auth-bento-visual { display: none; }
+    }
+
+    @media (max-width: 640px) {
+        .reg-form-row {
+            grid-template-columns: 1fr !important;
+            gap: 0.85rem !important;
+        }
+        .form-card {
+            padding: 1.5rem 1.25rem !important;
+        }
     }
 </style>
 {% endblock %}
@@ -376,7 +393,7 @@
 <form action="/registro" method="post" id="registroForm" novalidate>
 
                 <!-- Nombre Completo + Empresa (2 columnas) -->
-                <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
+                <div class="reg-form-row">
                     <div class="clay-input-group">
                         <label class="clay-input-label" for="reg_nombre">Nombre completo</label>
                         <div class="clay-input-wrapper">
@@ -397,7 +414,7 @@
                 </div>
 
                 <!-- Correo y Teléfono -->
-                <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
+                <div class="reg-form-row">
                     <div class="clay-input-group">
                         <label class="clay-input-label" for="reg_correo">Correo electrónico</label>
                         <div class="clay-input-wrapper">
@@ -437,7 +454,7 @@
                 </div>
 
                 <!-- Contraseñas -->
-                <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
+                <div class="reg-form-row">
                     <div class="clay-input-group">
                         <label class="clay-input-label" for="password_input">Contraseña</label>
                         <div class="clay-input-wrapper">

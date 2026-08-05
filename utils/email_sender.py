@@ -33,13 +33,12 @@ MAIL_FROM_NAME = os.environ.get('MAIL_FROM_NAME', 'COTIZAPro')
 
 # ─── Template HTML del email ──────────────────────────────────────────────────
 def _build_email_html(nombre: str, codigo: str) -> str:
-    """Genera el cuerpo HTML del correo de verificación."""
-    # Separar el código en dígitos individuales para visualización
+    """Genera el cuerpo HTML del correo de verificación enriquecido."""
     digitos_html = ''.join(
-        f'<span style="display:inline-block; width:48px; height:58px; line-height:58px;'
-        f' text-align:center; font-size:1.8rem; font-weight:900; color:#1C1917;'
+        f'<span style="display:inline-block; width:46px; height:56px; line-height:56px;'
+        f' text-align:center; font-size:1.75rem; font-weight:900; color:#1C1917;'
         f' background:#F4F3EE; border:2px solid #e5e2da; border-radius:12px;'
-        f' margin:0 4px; letter-spacing:0; font-family:monospace;">{d}</span>'
+        f' margin:0 3px; letter-spacing:0; font-family:monospace;">{d}</span>'
         for d in codigo
     )
 
@@ -74,49 +73,73 @@ def _build_email_html(nombre: str, codigo: str) -> str:
                 Verifica tu correo
               </h1>
               <p style="margin:8px 0 0; font-size:0.9rem; color:rgba(255,255,255,0.88);">
-                Hola <strong>{nombre}</strong>, aquí está tu código
+                Hola <strong>{nombre}</strong>, aquí está tu código de acceso
               </p>
             </td>
           </tr>
 
           <!-- Cuerpo -->
           <tr>
-            <td style="padding:36px 40px 28px;">
-              <p style="margin:0 0 24px; font-size:0.95rem; color:#555; line-height:1.6;">
+            <td style="padding:32px 40px 28px;">
+              <p style="margin:0 0 20px; font-size:0.95rem; color:#444; line-height:1.6;">
                 Ingresa el siguiente código en la ventana de verificación para confirmar
-                tu dirección de correo y completar el registro en <strong>COTIZAPro</strong>.
+                tu dirección de correo y activar tu cuenta en <strong>COTIZAPro</strong>:
               </p>
 
-              <!-- Código -->
-              <div style="text-align:center; margin-bottom:28px;">
+              <!-- Código OTP -->
+              <div style="text-align:center; margin-bottom:24px;">
                 {digitos_html}
               </div>
 
-              <!-- Info de expiración -->
+              <!-- Info Expiración -->
               <div style="background:#FFF5F2; border:1.5px solid rgba(255,107,53,0.25);
-                          border-radius:14px; padding:14px 18px; margin-bottom:24px;
+                          border-radius:14px; padding:12px 18px; margin-bottom:24px;
                           display:flex; align-items:center; gap:10px;">
                 <span style="font-size:1.1rem;">⏱️</span>
                 <span style="font-size:0.84rem; color:#664; line-height:1.5;">
                   Este código es válido por <strong style="color:#c94e1e;">10 minutos</strong>.
-                  Si no solicitaste esto, puedes ignorar este correo.
                 </span>
               </div>
 
-              <p style="margin:0; font-size:0.82rem; color:#aaa; line-height:1.6;">
-                Por razones de seguridad, <strong>nunca compartiremos</strong> tu código contigo
-                por teléfono o chat. Si alguien te lo pide, es un intento de fraude.
+              <!-- Beneficios de Prueba Gratis -->
+              <div style="background:#F9FAFB; border:1px solid #E5E7EB; border-radius:16px; padding:20px; margin-bottom:24px;">
+                <h4 style="margin:0 0 10px; font-size:0.92rem; font-weight:800; color:#111827; display:flex; align-items:center; gap:6px;">
+                  🎁 ¡Tu cuenta incluye 5 cotizaciones 100% gratis!
+                </h4>
+                <p style="margin:0 0 12px; font-size:0.84rem; color:#4B5563; line-height:1.5;">
+                  Al completar la verificación, tendrás acceso inmediato a:
+                </p>
+                <ul style="margin:0; padding-left:18px; font-size:0.84rem; color:#374151; line-height:1.7;">
+                  <li>📄 <strong>Cotizaciones en PDF:</strong> Diseños profesionales listos para enviar.</li>
+                  <li>📲 <strong>Envío por WhatsApp:</strong> Comparte presupuestos en 1 clic.</li>
+                  <li>🏢 <strong>Perfil de Empresa:</strong> Personaliza con tu logo y datos de contacto.</li>
+                </ul>
+              </div>
+
+              <!-- Canal de Soporte por WhatsApp -->
+              <div style="background:#F0FDF4; border:1px solid rgba(16,185,129,0.3); border-radius:14px; padding:14px 18px; margin-bottom:24px;">
+                <div style="font-size:0.86rem; color:#065F46; line-height:1.5; display:flex; align-items:center; gap:8px;">
+                  <span style="font-size:1.2rem;">💬</span>
+                  <div>
+                    <strong>¿Necesitas ayuda o tienes consultas?</strong><br>
+                    Contáctanos por WhatsApp al <a href="https://wa.me/59172125280" style="color:#059669; font-weight:800; text-decoration:none;">+591 72125280</a> o respondiendo a este correo.
+                  </div>
+                </div>
+              </div>
+
+              <!-- Aviso de seguridad -->
+              <p style="margin:0; font-size:0.78rem; color:#9CA3AF; line-height:1.5; text-align:center;">
+                🔒 Por razones de seguridad, <strong>nunca compartas este código</strong> con nadie.
               </p>
             </td>
           </tr>
 
           <!-- Footer -->
           <tr>
-            <td style="background:#FAFAFA; border-top:1px solid #f0ede8;
+            <td style="background:#FAFAFA; border-top:1px solid #F3F4F6;
                        padding:20px 40px; text-align:center;">
-              <p style="margin:0; font-size:0.78rem; color:#aaa;">
-                📍 COTIZAPro · Bolivia &nbsp;·&nbsp;
-                <a href="#" style="color:#FF6B35; text-decoration:none;">cotizapro.app</a>
+              <p style="margin:0; font-size:0.8rem; color:#6B7280; font-weight:700;">
+                📍 COTIZAPro · Bolivia
               </p>
             </td>
           </tr>
@@ -131,7 +154,7 @@ def _build_email_html(nombre: str, codigo: str) -> str:
 """
 
 
-# ─── Función principal de envío ───────────────────────────────────────────────
+
 def enviar_codigo_verificacion(correo: str, codigo: str, nombre: str = 'Usuario') -> bool:
     """
     Envía el código OTP al correo dado.
@@ -139,11 +162,15 @@ def enviar_codigo_verificacion(correo: str, codigo: str, nombre: str = 'Usuario'
     Returns:
         True  → email enviado con éxito
         False → fallo en el envío (ver logs del servidor)
-
-    Modo Desarrollo (MAIL_USERNAME no configurado):
-        Imprime el código en consola y retorna True.
     """
-    if not MAIL_USERNAME or not MAIL_PASSWORD:
+    mail_server   = os.environ.get('MAIL_SERVER', 'smtp.gmail.com')
+    mail_port     = int(os.environ.get('MAIL_PORT', '587'))
+    mail_username = os.environ.get('MAIL_USERNAME', '').strip()
+    mail_password = os.environ.get('MAIL_PASSWORD', '').strip()
+    mail_from_name = os.environ.get('MAIL_FROM_NAME', 'COTIZAPro')
+
+
+    if not mail_username or not mail_password:
         # ── Modo Desarrollo ──────────────────────────────────────────────────
         print("=" * 60)
         print(f"[DEV EMAIL] Código de verificación para: {correo}")
@@ -156,8 +183,9 @@ def enviar_codigo_verificacion(correo: str, codigo: str, nombre: str = 'Usuario'
     # ── Construir el mensaje MIME ────────────────────────────────────────────
     msg = MIMEMultipart('alternative')
     msg['Subject'] = f'🔐 Tu código de verificación COTIZAPro: {codigo}'
-    msg['From']    = f'{MAIL_FROM_NAME} <{MAIL_USERNAME}>'
+    msg['From']    = f'{mail_from_name} <{mail_username}>'
     msg['To']      = correo
+
 
     # Parte texto plano (fallback para clientes sin HTML)
     texto_plano = (
@@ -174,12 +202,12 @@ def enviar_codigo_verificacion(correo: str, codigo: str, nombre: str = 'Usuario'
     # ── Enviar via SMTP con TLS ──────────────────────────────────────────────
     try:
         context = ssl.create_default_context()
-        with smtplib.SMTP(MAIL_SERVER, MAIL_PORT, timeout=10) as server:
+        with smtplib.SMTP(mail_server, mail_port, timeout=10) as server:
             server.ehlo()
             server.starttls(context=context)
             server.ehlo()
-            server.login(MAIL_USERNAME, MAIL_PASSWORD)
-            server.sendmail(MAIL_USERNAME, correo, msg.as_string())
+            server.login(mail_username, mail_password)
+            server.sendmail(mail_username, correo, msg.as_string())
         print(f"[EMAIL] Código OTP enviado exitosamente a: {correo}")
         return True
     except smtplib.SMTPAuthenticationError:
@@ -191,3 +219,4 @@ def enviar_codigo_verificacion(correo: str, codigo: str, nombre: str = 'Usuario'
     except Exception as e:
         print(f"[EMAIL ERROR] Error inesperado al enviar email: {e}")
         return False
+

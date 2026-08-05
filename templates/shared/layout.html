@@ -882,17 +882,31 @@
           <a href="/dashboard" class="clay-nav-link {% if request.path == '/dashboard' or request.endpoint == 'dashboard' %}active{% endif %}">
             <i class="bi bi-speedometer2" style="color:inherit;"></i> Dashboard
           </a>
-          <a href="/clientes" class="clay-nav-link {% if request.path.startswith('/clientes') %}active{% endif %}">Clientes</a>
-          <a href="/productos" class="clay-nav-link {% if request.path.startswith('/productos') %}active{% endif %}">Productos</a>
-          <a href="{{ url_for('gestion_cotizaciones') }}" class="clay-nav-link {% if request.path.startswith('/cotizaciones') %}active{% endif %}">Cotizaciones</a>
-          <a href="/equipo" class="clay-nav-link {% if request.path.startswith('/equipo') %}active{% endif %}">Equipo</a>
+          <a href="/clientes" class="clay-nav-link {% if request.path.startswith('/clientes') %}active{% endif %}">
+            <i class="bi bi-person-vcard-fill" style="color:inherit;"></i> Clientes
+          </a>
+          <a href="/productos" class="clay-nav-link {% if request.path.startswith('/productos') %}active{% endif %}">
+            <i class="bi bi-box-seam-fill" style="color:inherit;"></i> Productos
+          </a>
+          <a href="{{ url_for('gestion_cotizaciones') }}" class="clay-nav-link {% if request.path.startswith('/cotizaciones') %}active{% endif %}">
+            <i class="bi bi-file-earmark-text-fill" style="color:inherit;"></i> Cotizaciones
+          </a>
+          <a href="/equipo" class="clay-nav-link {% if request.path.startswith('/equipo') %}active{% endif %}">
+            <i class="bi bi-people-fill" style="color:inherit;"></i> Equipo
+          </a>
           {% elif session.get('user_rol') == 'standard' %}
           <a href="/standard/dashboard" class="clay-nav-link {% if request.path == '/standard/dashboard' %}active{% endif %}">
             <i class="bi bi-speedometer2" style="color:inherit;"></i> Panel
           </a>
-          <a href="/cotizar" class="clay-nav-link {% if request.path == '/cotizar' %}active{% endif %}">Nueva Cotización</a>
-          <a href="{{ url_for('standard_cotizaciones') }}" class="clay-nav-link {% if request.path.startswith('/standard/cotizaciones') %}active{% endif %}">Mis Cotizaciones</a>
-          <a href="/equipo" class="clay-nav-link {% if request.path.startswith('/equipo') %}active{% endif %}">Equipo & Chat</a>
+          <a href="/cotizar" class="clay-nav-link {% if request.path == '/cotizar' %}active{% endif %}">
+            <i class="bi bi-plus-circle-fill" style="color:inherit;"></i> Nueva Cotización
+          </a>
+          <a href="{{ url_for('standard_cotizaciones') }}" class="clay-nav-link {% if request.path.startswith('/standard/cotizaciones') %}active{% endif %}">
+            <i class="bi bi-file-earmark-text-fill" style="color:inherit;"></i> Mis Cotizaciones
+          </a>
+          <a href="/equipo" class="clay-nav-link {% if request.path.startswith('/equipo') %}active{% endif %}">
+            <i class="bi bi-people-fill" style="color:inherit;"></i> Equipo & Chat
+          </a>
           {% endif %}
           {% endif %}
 

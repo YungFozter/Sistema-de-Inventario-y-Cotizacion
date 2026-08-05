@@ -48,12 +48,8 @@ def register_routes(app):
         authorize_url='https://accounts.google.com/o/oauth2/auth',
         authorize_params=None,
         api_base_url='https://www.googleapis.com/oauth2/v1/',
-        server_metadata_url='https://accounts.google.com/.well-known/openid-configuration',
         client_kwargs={
-            'scope': 'openid email profile',
-            'claims_options': {
-                'iss': {'values': ['https://accounts.google.com', 'accounts.google.com']}
-            }
+            'scope': 'email profile'
         }
     )
 
@@ -163,10 +159,9 @@ def register_routes(app):
     def auth_google_callback():
         try:
             token = google.authorize_access_token()
-            user_info = token.get('userinfo')
-            if not user_info:
-                # Authlib fetch user info
-                user_info = google.get('https://openidconnect.googleapis.com/v1/userinfo').json()
+            resp = google.get('https://www.googleapis.com/oauth2/v2/userinfo')
+            resp.raise_for_status()
+            user_info = resp.json()
             
             correo = user_info.get('email', '').lower()
             nombre = user_info.get('name', '')

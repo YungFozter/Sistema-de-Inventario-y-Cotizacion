@@ -2,7 +2,13 @@ from flask import Flask
 import os
 import sqlite3
 from datetime import datetime
+from dotenv import load_dotenv
+
+# Cargar variables de entorno desde .env
+load_dotenv(override=True)
+
 from db_wrapper import get_db_connection
+
 from models import crear_tablas, migrar_columnas_nuevas_clientes, migrar_esquema_productos, migrar_tablas_equipo, migrar_columnas_nuevas_categorias
 
 import logging

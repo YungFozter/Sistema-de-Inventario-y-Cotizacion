@@ -21,7 +21,12 @@ def crear_tablas():
     conexion = get_db_connection()
     cursor = conexion.cursor()
     
-    is_postgres = bool(os.environ.get('DATABASE_URL') and os.environ.get('DATABASE_URL').startswith('postgres'))
+    is_postgres = bool(
+        not os.environ.get('TESTING_DB') and
+        os.environ.get('DATABASE_URL') and
+        os.environ.get('DATABASE_URL').startswith('postgres')
+    )
+
 
     try:
         # Tabla de clientes/usuarios
@@ -379,7 +384,12 @@ def migrar_esquema_productos():
         conexion = get_db_connection()
         cursor = conexion.cursor()
         
-        is_postgres = bool(os.environ.get('DATABASE_URL') and os.environ.get('DATABASE_URL').startswith('postgres'))
+        is_postgres = bool(
+            not os.environ.get('TESTING_DB') and
+            os.environ.get('DATABASE_URL') and
+            os.environ.get('DATABASE_URL').startswith('postgres')
+        )
+
         
         if is_postgres:
             cursor.execute("SELECT column_name FROM information_schema.columns WHERE table_name='productos'")
@@ -436,7 +446,12 @@ def migrar_columnas_nuevas_categorias():
         conexion = get_db_connection()
         cursor = conexion.cursor()
         
-        is_postgres = bool(os.environ.get('DATABASE_URL') and os.environ.get('DATABASE_URL').startswith('postgres'))
+        is_postgres = bool(
+            not os.environ.get('TESTING_DB') and
+            os.environ.get('DATABASE_URL') and
+            os.environ.get('DATABASE_URL').startswith('postgres')
+        )
+
         
         if is_postgres:
             cursor.execute("SELECT column_name FROM information_schema.columns WHERE table_name='categorias'")
@@ -871,7 +886,12 @@ def migrar_columnas_nuevas_clientes():
         conexion = get_db_connection()
         cursor = conexion.cursor()
         
-        is_postgres = bool(os.environ.get('DATABASE_URL') and os.environ.get('DATABASE_URL').startswith('postgres'))
+        is_postgres = bool(
+            not os.environ.get('TESTING_DB') and
+            os.environ.get('DATABASE_URL') and
+            os.environ.get('DATABASE_URL').startswith('postgres')
+        )
+
         
         if is_postgres:
             cursor.execute("SELECT column_name FROM information_schema.columns WHERE table_name='clientes'")

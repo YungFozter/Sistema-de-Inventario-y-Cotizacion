@@ -50,9 +50,11 @@ def register_routes(app):
                           contrasena_hash, rol='admin'):
         """Inserta un nuevo cliente y devuelve su ID."""
         is_postgres = bool(
+            not os.environ.get('TESTING_DB') and
             os.environ.get('DATABASE_URL') and
             os.environ.get('DATABASE_URL').startswith('postgres')
         )
+
         query = '''
             INSERT INTO clientes
                 (nombre, empresa_nombre, correo, telefono, contrasena, rol,

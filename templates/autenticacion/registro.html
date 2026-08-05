@@ -782,24 +782,34 @@ MODAL OTP — Verificación de correo electrónico
                     inp.value = v ? v[v.length-1] : '';
                     if (inp.value && idx < 5) document.getElementById('otp_d' + (idx+1)).focus();
                     _checkOTPComplete();
+                    if (_getOTPCode().length === 6) verificarOTP();
                 });
                 inp.addEventListener('keydown', function(e) {
                     if (e.key === 'Backspace' && !inp.value && idx > 0) document.getElementById('otp_d' + (idx-1)).focus();
                     if (e.key === 'Enter') verificarOTP();
                 });
                 inp.addEventListener('paste', function(e) {
-                    var txt = (e.clipboardData || window.clipboardData).getData('text').replace(/\D/g,'').slice(0,6);
-                    for (var j = 0; j < txt.length; j++) {
-                        var el = document.getElementById('otp_d' + j);
-                        if (el) el.value = txt[j];
+                    var rawText = (e.clipboardData || window.clipboardData).getData('text') || '';
+                    // Extraer únicamente los 6 dígitos numéricos ignorando espacios/caracteres ocultos
+                    var txt = rawText.replace(/\D/g, '').slice(0, 6);
+                    if (txt.length > 0) {
+                        e.preventDefault();
+                        for (var j = 0; j < 6; j++) {
+                            var el = document.getElementById('otp_d' + j);
+                            if (el) el.value = txt[j] || '';
+                        }
+                        _checkOTPComplete();
+                        if (txt.length === 6) {
+                            var lastEl = document.getElementById('otp_d5');
+                            if (lastEl) lastEl.focus();
+                            verificarOTP();
+                        }
                     }
-                    e.preventDefault();
-                    _checkOTPComplete();
-                    if (txt.length === 6) document.getElementById('otp_d5').focus();
                 });
             })(i);
         }
     });
+
 
     function _checkOTPComplete() {
         var full = true;

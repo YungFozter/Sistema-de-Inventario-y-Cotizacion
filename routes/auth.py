@@ -224,7 +224,7 @@ def register_routes(app):
                 
         except Exception as e:
             print(f'[GOOGLE AUTH ERROR] {e}')
-            flash('Error al iniciar sesión con Google.', 'danger')
+            flash(f'Error al iniciar sesión con Google: {str(e)}', 'danger')
             return redirect(url_for('login'))
 
     @app.route('/login', methods=['GET', 'POST'])

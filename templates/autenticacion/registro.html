@@ -678,9 +678,15 @@ MODAL OTP — Verificación de correo electrónico
             }
         });
 
-        // ── Validación y envío de OTP al enviar el formulario ────────────────────
+        // ── Validación y envío AJAX al servidor ────────────────────
         form.addEventListener('submit', function (e) {
             e.preventDefault();
+
+            // Validar HTML5 nativo (campos required)
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                return;
+            }
 
             // 1. Validar contraseñas
             if (pwInput.value !== confInput.value) {
@@ -707,7 +713,11 @@ MODAL OTP — Verificación de correo electrónico
             }
 
             var submitBtn = document.getElementById('btn_crear_cuenta');
-            if (submitBtn) submitBtn.disabled = true;
+            var btnTextOriginal = submitBtn ? submitBtn.innerHTML : '';
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> Enviando código de verificación...';
+            }
 
             // 3. Enviar AJAX a /registro/enviar-codigo
             fetch('/registro/enviar-codigo', {
@@ -724,7 +734,10 @@ MODAL OTP — Verificación de correo electrónico
             })
             .then(function(r) { return r.json(); })
             .then(function(data) {
-                if (submitBtn) submitBtn.disabled = false;
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = btnTextOriginal;
+                }
                 if (data.ok) {
                     document.getElementById('otpEmailDisplay').textContent =
                         document.getElementById('reg_correo').value.trim();
@@ -733,11 +746,15 @@ MODAL OTP — Verificación de correo electrónico
                     alert(data.msg || 'Ocurrió un error al procesar el registro.');
                 }
             })
-            .catch(function() {
-                if (submitBtn) submitBtn.disabled = false;
-                alert('Error de conexión al enviar el código de verificación.');
+            .catch(function(err) {
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = btnTextOriginal;
+                }
+                alert('Error de conexión con el servidor. Inténtalo de nuevo.');
             });
         });
+
 
         confInput.addEventListener('input', function () {
             confInput.style.borderColor = '';

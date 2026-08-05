@@ -15,7 +15,10 @@ import logging
 for _log_name in ['pdfminer', 'pdfminer.pdfinterp', 'pdfminer.pdfpage', 'pdfminer.converter', 'pdfminer.layout', 'PyPDF2', 'pypdf', 'pdfplumber']:
     logging.getLogger(_log_name).setLevel(logging.ERROR)
 
+from werkzeug.middleware.proxy_fix import ProxyFix
+
 app = Flask(__name__)
+app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
 app.secret_key = 'tu_clave_secreta_aqui'
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 

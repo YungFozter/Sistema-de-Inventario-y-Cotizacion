@@ -37,6 +37,12 @@ google = None
 
 def register_routes(app):
 
+    is_postgres = bool(
+        not os.environ.get('TESTING_DB') and
+        os.environ.get('DATABASE_URL') and
+        os.environ.get('DATABASE_URL').startswith('postgres')
+    )
+
     global google
     oauth.init_app(app)
     google = oauth.register(

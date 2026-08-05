@@ -444,9 +444,26 @@
             </div>
 
             <!-- Widget -->
-            <div class="clay-card clay-white clay-shadow-lg"
+            <style>
+              .sim-grid-wrapper {
+                  display: grid;
+                  grid-template-columns: 1fr 1fr;
+                  gap: 2rem;
+                  align-items: start;
+              }
+              @media (max-width: 768px) {
+                  .sim-widget-card {
+                      padding: 1.25rem !important;
+                  }
+                  .sim-grid-wrapper {
+                      grid-template-columns: 1fr !important;
+                      gap: 1.5rem !important;
+                  }
+              }
+            </style>
+            <div class="clay-card clay-white clay-shadow-lg sim-widget-card"
                 style="padding: 2rem; border: 1.5px solid rgba(0,0,0,0.07);">
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; align-items: start;">
+                <div class="sim-grid-wrapper">
 
                     <!-- Formulario izquierda -->
                     <div>

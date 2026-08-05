@@ -608,7 +608,12 @@
             }
         });
 
-        function togglePassword(inputId, iconId) {
+        });
+
+        // Toggle password outside DOMContentLoaded or inside, either way works.
+        // It needs to be global for onclick attributes to find it.
+        // But let's just close the DOMContentLoaded block here.
+        window.togglePassword = function(inputId, iconId) {
         var input = document.getElementById(inputId);
         var icon  = document.getElementById(iconId);
         if (input.type === 'password') {

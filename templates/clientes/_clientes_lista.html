@@ -62,7 +62,6 @@
                         <th>NIT / CI</th>
                         <th>Código</th>
                         <th>Teléfono</th>
-                        <th>Tipo</th>
                         <th>Referencia</th>
                         {% if session.user_rol == 'superadmin' %}
                         <th>Creador</th>
@@ -100,16 +99,6 @@
                             {% endif %}
                         </td>
                         <td>
-                            <span class="badge px-3 py-2 rounded-pill
-                                {% if c[6] == 'frecuente' %}badge-tipo-frecuente
-                                {% elif c[6] == 'corporativo' %}badge-tipo-corporativo
-                                {% else %}badge-tipo-normal{% endif %}">
-                                {% if c[6] == 'frecuente' %}⭐ Frecuente
-                                {% elif c[6] == 'corporativo' %}🏢 Corporativo
-                                {% else %}👤 Normal{% endif %}
-                            </span>
-                        </td>
-                        <td>
                             {% if c[5] and c[5] != '-' %}
                             <span class="small text-muted"><i class="bi bi-bookmark me-1"></i>{{ c[5] }}</span>
                             {% else %}
@@ -128,7 +117,7 @@
                         <td class="text-end pe-3">
                             <div class="btn-group shadow-sm rounded-3">
                                 <button type="button" class="btn btn-sm btn-outline-info btn-pro-action" 
-                                        onclick="verDetallesCliente('{{ c[0] }}', '{{ c[1]|e }}', '{{ c[2]|e }}', '{{ c[3]|e }}', '{{ c[4]|e }}', '{{ c[6]|e }}', '{{ c[5]|e }}')" 
+                                        onclick="verDetallesCliente('{{ c[0] }}', '{{ c[1]|e }}', '{{ c[2]|e }}', '{{ c[3]|e }}', '{{ c[4]|e }}', '{{ c[5]|e }}')" 
                                         title="Ver Detalles">
                                     <i class="bi bi-eye-fill"></i>
                                 </button>
@@ -159,14 +148,6 @@
                             <div class="avatar-3d">
                                 <i class="bi bi-building fs-3"></i>
                             </div>
-                            <span class="badge px-3 py-2 rounded-pill
-                                {% if c[6] == 'frecuente' %}badge-tipo-frecuente
-                                {% elif c[6] == 'corporativo' %}badge-tipo-corporativo
-                                {% else %}badge-tipo-normal{% endif %}">
-                                {% if c[6] == 'frecuente' %}⭐ Frecuente
-                                {% elif c[6] == 'corporativo' %}🏢 Corporativo
-                                {% else %}👤 Normal{% endif %}
-                            </span>
                         </div>
                         <h5 class="fw-bold text-dark mb-1">{{ c[1] }}</h5>
                         <div class="mb-3">
@@ -198,7 +179,7 @@
                         
                         <div class="btn-group">
                             <button type="button" class="btn btn-sm btn-outline-info rounded-circle" 
-                                    onclick="verDetallesCliente('{{ c[0] }}', '{{ c[1]|e }}', '{{ c[2]|e }}', '{{ c[3]|e }}', '{{ c[4]|e }}', '{{ c[6]|e }}', '{{ c[5]|e }}')" title="Ver Detalles">
+                                    onclick="verDetallesCliente('{{ c[0] }}', '{{ c[1]|e }}', '{{ c[2]|e }}', '{{ c[3]|e }}', '{{ c[4]|e }}', '{{ c[5]|e }}')" title="Ver Detalles">
                                 <i class="bi bi-eye-fill"></i>
                             </button>
                             <a href="/clientes/editar/{{ c[0] }}" class="btn btn-sm btn-outline-warning rounded-circle ms-1" title="Editar">

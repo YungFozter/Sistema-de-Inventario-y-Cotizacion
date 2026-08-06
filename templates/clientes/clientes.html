@@ -54,7 +54,7 @@
                 </div>
 
                 <!-- Código de Cliente generado automático -->
-                <div class="col-md-4">
+                <div class="col-md-6">
                     <label class="form-label fw-semibold text-dark">
                         <i class="bi bi-hash text-primary me-1"></i> Código de Cliente
                     </label>
@@ -66,7 +66,7 @@
                 </div>
 
                 <!-- Teléfono/Contacto (Opcional) -->
-                <div class="col-md-4">
+                <div class="col-md-6">
                     <label class="form-label fw-semibold text-dark">
                         <i class="bi bi-telephone-fill text-primary me-1"></i> Teléfono / Contacto <small class="text-muted">(Opcional)</small>
                     </label>
@@ -75,21 +75,6 @@
                         <input type="tel" name="telefono" class="form-control border-start-0 shadow-none" placeholder="Dejar en blanco para S/A">
                     </div>
                     <small class="text-muted d-block mt-1">Si se deja en blanco se registrará como <strong>S/A (Sin Asignar)</strong>.</small>
-                </div>
-
-                <!-- Tipo de Cliente -->
-                <div class="col-md-4">
-                    <label class="form-label fw-semibold text-dark">
-                        <i class="bi bi-star-fill text-primary me-1"></i> Tipo de Cliente
-                    </label>
-                    <div class="input-group">
-                        <span class="input-group-text bg-white border-end-0"><i class="bi bi-tag text-muted"></i></span>
-                        <select class="form-select border-start-0 shadow-none fw-semibold" name="tipo_cliente">
-                            <option value="normal">👤 Normal</option>
-                            <option value="frecuente">⭐ Frecuente</option>
-                            <option value="corporativo">🏢 Corporativo</option>
-                        </select>
-                    </div>
                 </div>
 
                 <!-- Referencia interno -->
@@ -154,10 +139,6 @@
                     <div class="list-group-item d-flex justify-content-between align-items-center py-3">
                         <span class="text-muted"><i class="bi bi-telephone me-2 text-primary"></i>Teléfono:</span>
                         <strong class="text-dark" id="detTelefono">--</strong>
-                    </div>
-                    <div class="list-group-item d-flex justify-content-between align-items-center py-3">
-                        <span class="text-muted"><i class="bi bi-tag me-2 text-primary"></i>Tipo:</span>
-                        <span id="detTipo">--</span>
                     </div>
                     <div class="list-group-item d-flex justify-content-between align-items-center py-3">
                         <span class="text-muted"><i class="bi bi-bookmark me-2 text-primary"></i>Referencia:</span>
@@ -265,20 +246,12 @@ function limpiarBusquedaClientes() {
     cargarPaginaClientes(null, 1);
 }
 
-function verDetallesCliente(id, nombre, nit, codigo, telefono, tipo, referencia) {
+function verDetallesCliente(id, nombre, nit, codigo, telefono, referencia) {
     document.getElementById('detNombre').textContent = nombre || 'Sin Nombre';
     document.getElementById('detCodigo').textContent = codigo || 'CLI-----';
     document.getElementById('detNit').textContent = nit || 'S/A';
     document.getElementById('detTelefono').textContent = telefono || 'Sin Teléfono';
     document.getElementById('detReferencia').textContent = referencia || 'Sin Referencia';
-
-    const detTipo = document.getElementById('detTipo');
-    let badgeClass = 'badge bg-secondary rounded-pill px-3 py-2';
-    let label = 'Normal';
-    if (tipo === 'frecuente') { badgeClass = 'badge badge-tipo-frecuente rounded-pill px-3 py-2'; label = '⭐ Frecuente'; }
-    if (tipo === 'corporativo') { badgeClass = 'badge badge-tipo-corporativo rounded-pill px-3 py-2'; label = '🏢 Corporativo'; }
-    detTipo.className = badgeClass;
-    detTipo.textContent = label;
 
     const modal = new bootstrap.Modal(document.getElementById('modalDetallesCliente'));
     modal.show();

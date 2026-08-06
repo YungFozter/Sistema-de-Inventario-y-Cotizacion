@@ -121,23 +121,6 @@
 }
 
 /* Badges personalizados */
-.badge-tipo-normal {
-    background-color: #f1f3f5;
-    color: #495057;
-    font-weight: 600;
-}
-
-.badge-tipo-frecuente {
-    background-color: #fff3cd;
-    color: #856404;
-    font-weight: 600;
-}
-
-.badge-tipo-corporativo {
-    background-color: #cff4fc;
-    color: #055160;
-    font-weight: 600;
-}
 
 /* Botones Pro */
 .btn-pro-action {

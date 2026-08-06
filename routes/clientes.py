@@ -76,7 +76,6 @@ def register_routes(app):
                 if not telefono:
                     telefono = 'S/A'
                 referencia = request.form.get('referencia', '').strip()
-                tipo_cliente = request.form.get('tipo_cliente', 'normal').strip()
 
                 # Validaciones
                 if not razon_social:
@@ -102,11 +101,11 @@ def register_routes(app):
                 cursor.execute('''
                     INSERT INTO clientes (
                         nombre, nit, codigo_cliente, telefono, referencia, 
-                        tipo_cliente, creador_id, rol
-                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                        creador_id, rol
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?)
                 ''', (
                     razon_social, nit, codigo_cliente, telefono,
-                    referencia, tipo_cliente, session['user_id'], 'cliente'
+                    referencia, session['user_id'], 'cliente'
                 ))
 
                 conexion.commit()

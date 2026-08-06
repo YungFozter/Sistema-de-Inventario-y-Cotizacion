@@ -17,6 +17,7 @@ from sqlite3 import connect
 from markupsafe import Markup
 from threading import Lock
 from contextlib import contextmanager
+from utils.decorators import login_required
 from models import (
     crear_tablas, registrar_log, migrar_clientes_existentes, migrar_productos_categorias,
     migrar_columnas_nuevas_clientes,

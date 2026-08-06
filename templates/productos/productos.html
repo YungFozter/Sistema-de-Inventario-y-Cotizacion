@@ -333,7 +333,7 @@
     <div class="row align-items-center g-4">
       
       <!-- COLUMNA 1: VISTA PREVIA EN TIEMPO REAL DEL PRODUCTO -->
-      <div class="col-lg-7">
+      <div class="col-xl-5 col-lg-6">
         <div class="preview-summary-card d-flex align-items-center justify-content-between flex-wrap gap-3">
           <div class="d-flex align-items-center gap-3">
             <div class="rounded-circle bg-warning bg-opacity-20 border border-warning text-warning p-3 d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
@@ -344,7 +344,7 @@
                 <span class="badge bg-warning text-dark fw-extrabold rounded-pill px-2.5 py-1" id="previewCodigo">COD-000</span>
                 <span class="small text-white-50" id="previewMarcaUM">Sin Marca | Pza</span>
               </div>
-              <h5 class="fw-bold text-white mb-0 text-truncate mt-1" style="max-width: 320px;" id="previewNombre">
+              <h5 class="fw-bold text-white mb-0 text-truncate mt-1" style="max-width: 280px;" id="previewNombre">
                 Nuevo Producto...
               </h5>
             </div>
@@ -359,21 +359,21 @@
         </div>
       </div>
 
-      <!-- COLUMNA 2: BOTONES DE ACCIÓN PILL 3D -->
-      <div class="col-lg-5 text-lg-end d-flex align-items-center justify-content-lg-end justify-content-start flex-wrap gap-2.5">
-        <button type="button" id="btnMostrarModal" class="clay-pill-btn-primary">
+      <!-- COLUMNA 2: BOTONES DE ACCIÓN PILL 3D CON ESPACIADO HOLGADO Y SEPARACIÓN CLARA -->
+      <div class="col-xl-7 col-lg-6 text-lg-end d-flex align-items-center justify-content-lg-end justify-content-start flex-wrap gap-3" style="row-gap: 14px !important; column-gap: 12px !important;">
+        <button type="button" id="btnMostrarModal" class="clay-pill-btn-primary my-1">
           <i class="bi bi-plus-circle-fill"></i> Registrar Producto
         </button>
 
-        <button type="button" id="btnGestionarCategorias" class="clay-pill-btn-secondary" style="background: rgba(255,255,255,0.15); color: #FFF !important; border: 1px solid rgba(255,255,255,0.25);">
+        <button type="button" id="btnGestionarCategorias" class="clay-pill-btn-secondary my-1" style="background: rgba(255,255,255,0.15); color: #FFF !important; border: 1px solid rgba(255,255,255,0.25);">
           <i class="bi bi-tags-fill"></i> Categorías
         </button>
 
-        <button type="button" id="btnImportarPDF" class="clay-pill-btn-primary" style="background: #059669; box-shadow: 0 4px 14px rgba(5, 150, 105, 0.4);" data-bs-toggle="modal" data-bs-target="#modalImportarPDF">
+        <button type="button" id="btnImportarPDF" class="clay-pill-btn-primary my-1" style="background: #059669; box-shadow: 0 4px 14px rgba(5, 150, 105, 0.4);" data-bs-toggle="modal" data-bs-target="#modalImportarPDF">
           <i class="bi bi-file-earmark-pdf-fill"></i> Importar PDF
         </button>
 
-        <button type="button" id="btnVerHistorialImportaciones" class="clay-pill-btn-secondary" style="background: rgba(255,255,255,0.1); color: #FFF !important;" data-bs-toggle="modal" data-bs-target="#modalHistorialImportaciones" onclick="cargarHistorialImportaciones()">
+        <button type="button" id="btnVerHistorialImportaciones" class="clay-pill-btn-secondary my-1" style="background: rgba(255,255,255,0.1); color: #FFF !important;" data-bs-toggle="modal" data-bs-target="#modalHistorialImportaciones" onclick="cargarHistorialImportaciones()">
           <i class="bi bi-clock-history"></i> Historial
         </button>
       </div>

@@ -124,9 +124,11 @@ def register_routes(app):
 
             # Parámetros de paginación
             page = request.args.get('page', 1, type=int)
-            per_page = 5  # Mostrar 5 clientes por página
+            per_page = request.args.get('per_page', 15, type=int)
+            if per_page not in [15, 30, 50]:
+                per_page = 15
+
             offset = (page - 1) * per_page
-        
             busqueda = request.args.get('buscar', '').strip()
 
             # Consulta base diferente para superadmin
@@ -155,20 +157,27 @@ def register_routes(app):
             # Obtener el total de registros para la paginación
             cursor.execute(count_query, params)
             total_clientes = cursor.fetchone()[0]
-        
+
+            # Calcular el número total de páginas
+            total_pages = max(1, (total_clientes + per_page - 1) // per_page)
+            if page > total_pages:
+                page = total_pages
+                offset = (page - 1) * per_page
+            if page < 1:
+                page = 1
+                offset = 0
+
             # Obtener los clientes para la página actual
             query += " ORDER BY nombre LIMIT ? OFFSET ?"
             cursor.execute(query, params + [per_page, offset])
             clientes = cursor.fetchall()
-        
-            # Calcular el número total de páginas
-            total_pages = (total_clientes + per_page - 1) // per_page
 
         except Exception as e:
             flash(f'Error al cargar clientes: {str(e)}', 'danger')
             clientes = []
             total_pages = 1
             page = 1
+            total_clientes = 0
         finally:
             if 'conexion' in locals():
                 conexion.close()
@@ -181,15 +190,18 @@ def register_routes(app):
             'hasta': '',
             'estado': ''
         }
-    
+
         # Datos de paginación
         pagination = {
             'page': page,
             'per_page': per_page,
             'total_pages': total_pages,
-            'total_items': total_clientes if 'total_clientes' in locals() else 0
+            'total_items': total_clientes
         }
-    
+
+        if request.args.get('ajax') == '1' or request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return render_template('clientes/_clientes_lista.html', clientes=clientes, filtros=filtros, pagination=pagination)
+
         return render_template('clientes/clientes.html', clientes=clientes, filtros=filtros, pagination=pagination)
 
     @app.route('/clientes/editar/<int:id>', methods=['GET', 'POST'])

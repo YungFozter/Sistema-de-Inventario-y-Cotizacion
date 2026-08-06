@@ -122,253 +122,8 @@
     </div>
 
     <!-- SECCIÓN DE CLIENTES REGISTRADOS CON SWITCHER DE VISTA Y CASCADA -->
-    <div class="glass-panel">
-        <div class="glass-header d-flex justify-content-between align-items-center flex-wrap gap-3">
-            <div class="d-flex align-items-center">
-                <div class="avatar-3d me-3" style="width: 46px; height: 46px;">
-                    <i class="bi bi-people-fill fs-4"></i>
-                </div>
-                <div>
-                    <h4 class="fw-bold mb-0 text-white">Clientes Registrados</h4>
-                    <small class="text-white-50">Página {{ pagination.page }} de {{ pagination.total_pages }} | Mostrando {{ clientes|length }} cliente(s)</small>
-                </div>
-            </div>
-
-            <!-- CONTROLES: CONMUTADOR DE VISTA [ ☰ Tabla | ▦ Tarjetas 3D ] & BÚSQUEDA -->
-            <div class="d-flex align-items-center gap-3 flex-wrap">
-                <div class="view-toggle-wrapper" aria-label="Conmutador de Vista">
-                    <button type="button" class="view-toggle-btn active" id="btnVistaTabla" onclick="cambiarVistaClientes('tabla')">
-                        <i class="bi bi-list-ul"></i> Tabla
-                    </button>
-                    <button type="button" class="view-toggle-btn" id="btnVistaTarjetas" onclick="cambiarVistaClientes('tarjetas')">
-                        <i class="bi bi-grid-3x3-gap-fill"></i> Tarjetas 3D
-                    </button>
-                </div>
-
-                <form method="get" action="{{ url_for('clientes') }}" class="input-group shadow-sm" style="max-width: 320px;">
-                    <input type="text" class="form-control border-0" placeholder="Buscar cliente..."
-                        name="buscar" value="{{ request.args.get('buscar', '') }}" id="buscarClienteInput">
-                    <button class="btn btn-light text-primary fw-bold px-3 border-0" type="submit">
-                        <i class="bi bi-search"></i>
-                    </button>
-                    {% if request.args.get('buscar') %}
-                    <a href="{{ url_for('clientes') }}" class="btn btn-outline-light" title="Limpiar búsqueda">
-                        <i class="bi bi-x-circle-fill"></i>
-                    </a>
-                    {% endif %}
-                </form>
-            </div>
-        </div>
-        
-        <div class="card-body p-4">
-            {% if clientes %}
-            
-            <!-- VISTA 1: TABLA CON ENTRADA ESCALONADA EN CASCADA -->
-            <div id="vistaTablaContainer">
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0 pro-table" id="tablaClientes">
-                        <thead>
-                            <tr>
-                                <th class="ps-3" style="width: 60px;">#</th>
-                                <th>Nombre / Razón Social</th>
-                                <th>NIT / CI</th>
-                                <th>Código</th>
-                                <th>Teléfono</th>
-                                <th>Tipo</th>
-                                <th>Referencia</th>
-                                {% if session.user_rol == 'superadmin' %}
-                                <th>Creador</th>
-                                {% endif %}
-                                <th class="text-end pe-3" style="width: 140px;">Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for c in clientes %}
-                            <!-- ANIMACIÓN ESCALONADA EN CASCADA -->
-                            <tr class="stagger-item" style="animation-delay: {{ loop.index0 * 0.07 }}s;">
-                                <td class="ps-3 fw-bold text-muted">{{ (pagination.page - 1) * pagination.per_page + loop.index }}</td>
-                                <td>
-                                    <div class="fw-bold text-dark fs-6">{{ c[1] }}</div>
-                                </td>
-                                <td>
-                                    {% if c[2] and c[2] not in ('S/N', 'S/A') %}
-                                    <span class="badge bg-light text-dark border px-2 py-1"><i class="bi bi-card-text me-1 text-muted"></i>{{ c[2] }}</span>
-                                    {% else %}
-                                    <span class="badge bg-secondary bg-opacity-25 text-secondary border px-2 py-1">S/A</span>
-                                    {% endif %}
-                                </td>
-                                <td>
-                                    {% if c[3] %}
-                                    <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 px-2 py-1 rounded-pill fw-bold">{{ c[3] }}</span>
-                                    {% else %}
-                                    <span class="badge bg-secondary rounded-pill">Pendiente</span>
-                                    {% endif %}
-                                </td>
-                                <td>
-                                    {% if c[4] %}
-                                    <a href="tel:{{ c[4] }}" class="text-decoration-none text-dark"><i class="bi bi-telephone text-success me-1"></i>{{ c[4] }}</a>
-                                    {% else %}
-                                    <span class="text-muted">-</span>
-                                    {% endif %}
-                                </td>
-                                <td>
-                                    <span class="badge px-3 py-2 rounded-pill
-                                        {% if c[6] == 'frecuente' %}badge-tipo-frecuente
-                                        {% elif c[6] == 'corporativo' %}badge-tipo-corporativo
-                                        {% else %}badge-tipo-normal{% endif %}">
-                                        {% if c[6] == 'frecuente' %}⭐ Frecuente
-                                        {% elif c[6] == 'corporativo' %}🏢 Corporativo
-                                        {% else %}👤 Normal{% endif %}
-                                    </span>
-                                </td>
-                                <td>
-                                    {% if c[5] and c[5] != '-' %}
-                                    <span class="small text-muted"><i class="bi bi-bookmark me-1"></i>{{ c[5] }}</span>
-                                    {% else %}
-                                    <span class="text-muted">-</span>
-                                    {% endif %}
-                                </td>
-                                {% if session.user_rol == 'superadmin' %}
-                                <td>
-                                    {% if c.creador_id %}
-                                    <span class="badge bg-dark bg-opacity-10 text-dark border px-2 py-1"><i class="bi bi-person-gear me-1"></i>ID {{ c.creador_id }}</span>
-                                    {% else %}
-                                    <span class="badge bg-warning bg-opacity-25 text-dark border border-warning px-2 py-1">Sistema</span>
-                                    {% endif %}
-                                </td>
-                                {% endif %}
-                                <td class="text-end pe-3">
-                                    <div class="btn-group shadow-sm rounded-3">
-                                        <button type="button" class="btn btn-sm btn-outline-info btn-pro-action" 
-                                                onclick="verDetallesCliente('{{ c[0] }}', '{{ c[1]|e }}', '{{ c[2]|e }}', '{{ c[3]|e }}', '{{ c[4]|e }}', '{{ c[6]|e }}', '{{ c[5]|e }}')" 
-                                                title="Ver Detalles">
-                                            <i class="bi bi-eye-fill"></i>
-                                        </button>
-                                        <a href="/clientes/editar/{{ c[0] }}" class="btn btn-sm btn-outline-warning btn-pro-action" title="Editar Cliente">
-                                            <i class="bi bi-pencil-fill"></i>
-                                        </a>
-                                        <a href="/clientes/eliminar/{{ c[0] }}" class="btn btn-sm btn-outline-danger btn-pro-action" 
-                                           title="Eliminar Cliente" onclick="return confirm('¿Está seguro de eliminar este cliente?')">
-                                            <i class="bi bi-trash-fill"></i>
-                                        </a>
-                                    </div>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- VISTA 2: REJILLA DE TARJETAS 3D CON CASCADA ESCALONADA -->
-            <div id="vistaTarjetasContainer" style="display: none;">
-                <div class="row g-4">
-                    {% for c in clientes %}
-                    <div class="col-md-6 col-lg-4 stagger-item" style="animation-delay: {{ loop.index0 * 0.08 }}s;">
-                        <div class="client-3d-card p-4 h-100 d-flex flex-column justify-content-between">
-                            <div>
-                                <div class="d-flex justify-content-between align-items-start mb-3">
-                                    <div class="avatar-3d">
-                                        <i class="bi bi-building fs-3"></i>
-                                    </div>
-                                    <span class="badge px-3 py-2 rounded-pill
-                                        {% if c[6] == 'frecuente' %}badge-tipo-frecuente
-                                        {% elif c[6] == 'corporativo' %}badge-tipo-corporativo
-                                        {% else %}badge-tipo-normal{% endif %}">
-                                        {% if c[6] == 'frecuente' %}⭐ Frecuente
-                                        {% elif c[6] == 'corporativo' %}🏢 Corporativo
-                                        {% else %}👤 Normal{% endif %}
-                                    </span>
-                                </div>
-                                <h5 class="fw-bold text-dark mb-1">{{ c[1] }}</h5>
-                                <div class="mb-3">
-                                    <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 px-2 py-1 rounded-pill fw-bold me-1">
-                                        {{ c[3] if c[3] else 'CLI-----' }}
-                                    </span>
-                                    <span class="badge bg-light text-dark border px-2 py-1">
-                                        NIT: {{ c[2] if c[2] else 'S/A' }}
-                                    </span>
-                                </div>
-                                <div class="small text-muted mb-2">
-                                    <i class="bi bi-telephone text-success me-2"></i>{{ c[4] if c[4] else 'Sin Teléfono' }}
-                                </div>
-                                {% if c[5] and c[5] != '-' %}
-                                <div class="small text-muted mb-2">
-                                    <i class="bi bi-bookmark me-2 text-primary"></i>Ref: {{ c[5] }}
-                                </div>
-                                {% endif %}
-                            </div>
-
-                            <div class="pt-3 border-top mt-3 d-flex justify-content-between align-items-center">
-                                {% if c[4] %}
-                                <a href="tel:{{ c[4] }}" class="btn btn-sm btn-outline-success rounded-pill px-3">
-                                    <i class="bi bi-telephone-fill me-1"></i> Llamar
-                                </a>
-                                {% else %}
-                                <span></span>
-                                {% endif %}
-                                
-                                <div class="btn-group">
-                                    <button type="button" class="btn btn-sm btn-outline-info rounded-circle" 
-                                            onclick="verDetallesCliente('{{ c[0] }}', '{{ c[1]|e }}', '{{ c[2]|e }}', '{{ c[3]|e }}', '{{ c[4]|e }}', '{{ c[6]|e }}', '{{ c[5]|e }}')" title="Ver Detalles">
-                                        <i class="bi bi-eye-fill"></i>
-                                    </button>
-                                    <a href="/clientes/editar/{{ c[0] }}" class="btn btn-sm btn-outline-warning rounded-circle ms-1" title="Editar">
-                                        <i class="bi bi-pencil-fill"></i>
-                                    </a>
-                                    <a href="/clientes/eliminar/{{ c[0] }}" class="btn btn-sm btn-outline-danger rounded-circle ms-1" 
-                                       title="Eliminar" onclick="return confirm('¿Eliminar este cliente?')">
-                                        <i class="bi bi-trash-fill"></i>
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    {% endfor %}
-                </div>
-            </div>
-
-            <!-- PAGINACIÓN PRO -->
-            {% if pagination.total_pages > 1 %}
-            <div class="pt-4 border-top mt-4">
-                <nav aria-label="Navegación de clientes">
-                    <ul class="pagination pagination-sm justify-content-center mb-0">
-                        <li class="page-item {% if pagination.page == 1 %}disabled{% endif %}">
-                            <a class="page-link rounded-start-3" href="{{ url_for('clientes', page=pagination.page-1, buscar=request.args.get('buscar', '')) }}">
-                                <i class="bi bi-chevron-left me-1"></i> Anterior
-                            </a>
-                        </li>
-
-                        {% for i in range(1, pagination.total_pages + 1) %}
-                            {% if i == pagination.page %}
-                                <li class="page-item active"><span class="page-link fw-bold">{{ i }}</span></li>
-                            {% elif i >= pagination.page - 2 and i <= pagination.page + 2 or i == 1 or i == pagination.total_pages %}
-                                <li class="page-item"><a class="page-link" href="{{ url_for('clientes', page=i, buscar=request.args.get('buscar', '')) }}">{{ i }}</a></li>
-                            {% elif i == pagination.page - 3 or i == pagination.page + 3 %}
-                                <li class="page-item disabled"><span class="page-link">...</span></li>
-                            {% endif %}
-                        {% endfor %}
-
-                        <li class="page-item {% if pagination.page == pagination.total_pages %}disabled{% endif %}">
-                            <a class="page-link rounded-end-3" href="{{ url_for('clientes', page=pagination.page+1, buscar=request.args.get('buscar', '')) }}">
-                                Siguiente <i class="bi bi-chevron-right ms-1"></i>
-                            </a>
-                        </li>
-                    </ul>
-                </nav>
-            </div>
-            {% endif %}
-
-            {% else %}
-            <div class="p-5 text-center">
-                <div class="avatar-3d mx-auto mb-3" style="width: 70px; height: 70px;">
-                    <i class="bi bi-people fs-2"></i>
-                </div>
-                <h5 class="fw-bold text-dark">No se encontraron clientes</h5>
-                <p class="text-muted mb-0">Registra un nuevo cliente con el formulario superior o limpia el filtro de búsqueda.</p>
-            </div>
-            {% endif %}
-        </div>
+    <div class="glass-panel" id="clientesContainer">
+        {% include 'clientes/_clientes_lista.html' %}
     </div>
 </div>
 
@@ -423,18 +178,24 @@
 {% block scripts %}
 <script src="{{ url_for('static', filename='js/clientes.js') }}"></script>
 <script>
+window.vistaClientesActual = 'tabla';
+let debounceBuscarClientesTimer = null;
+
 function cambiarVistaClientes(vista) {
+    window.vistaClientesActual = vista;
     const tablaContainer = document.getElementById('vistaTablaContainer');
     const tarjetasContainer = document.getElementById('vistaTarjetasContainer');
     const btnTabla = document.getElementById('btnVistaTabla');
     const btnTarjetas = document.getElementById('btnVistaTarjetas');
 
+    if (!tablaContainer || !tarjetasContainer) return;
+
     if (vista === 'tarjetas') {
         tablaContainer.style.display = 'none';
         tarjetasContainer.style.display = 'block';
 
-        btnTabla.classList.remove('active');
-        btnTarjetas.classList.add('active');
+        if (btnTabla) btnTabla.classList.remove('active');
+        if (btnTarjetas) btnTarjetas.classList.add('active');
 
         // Re-disparar animación de cascada para tarjetas 3D
         tarjetasContainer.querySelectorAll('.stagger-item').forEach(el => {
@@ -446,8 +207,8 @@ function cambiarVistaClientes(vista) {
         tarjetasContainer.style.display = 'none';
         tablaContainer.style.display = 'block';
 
-        btnTarjetas.classList.remove('active');
-        btnTabla.classList.add('active');
+        if (btnTarjetas) btnTarjetas.classList.remove('active');
+        if (btnTabla) btnTabla.classList.add('active');
 
         // Re-disparar animación de cascada para tabla
         tablaContainer.querySelectorAll('.stagger-item').forEach(el => {
@@ -456,6 +217,52 @@ function cambiarVistaClientes(vista) {
             el.style.animation = '';
         });
     }
+}
+
+function cargarPaginaClientes(event, pageNum) {
+    if (event) event.preventDefault();
+    const perPageSelect = document.getElementById('selectPerPageClientes');
+    const perPage = perPageSelect ? perPageSelect.value : 15;
+    const buscarInput = document.getElementById('buscarClienteInput');
+    const buscar = buscarInput ? buscarInput.value : '';
+
+    const container = document.getElementById('clientesContainer');
+    if (!container) return;
+
+    container.style.opacity = '0.5';
+
+    fetch(`/clientes?page=${pageNum}&per_page=${perPage}&buscar=${encodeURIComponent(buscar)}&ajax=1`, {
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    })
+    .then(res => res.text())
+    .then(html => {
+        container.innerHTML = html;
+        container.style.opacity = '1';
+        cambiarVistaClientes(window.vistaClientesActual);
+    })
+    .catch(err => {
+        console.error('Error al cargar clientes:', err);
+        container.style.opacity = '1';
+    });
+}
+
+function cambiarItemsPorPaginaClientes(perPage) {
+    cargarPaginaClientes(null, 1);
+}
+
+function buscarClienteDebounce(query) {
+    clearTimeout(debounceBuscarClientesTimer);
+    debounceBuscarClientesTimer = setTimeout(() => {
+        cargarPaginaClientes(null, 1);
+    }, 350);
+}
+
+function limpiarBusquedaClientes() {
+    const buscarInput = document.getElementById('buscarClienteInput');
+    if (buscarInput) {
+        buscarInput.value = '';
+    }
+    cargarPaginaClientes(null, 1);
 }
 
 function verDetallesCliente(id, nombre, nit, codigo, telefono, tipo, referencia) {

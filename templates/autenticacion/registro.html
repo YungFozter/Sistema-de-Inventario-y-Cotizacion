@@ -72,8 +72,8 @@
         display: inline-flex;
         align-items: center;
         gap: 8px;
-        background: linear-gradient(135deg, rgba(255,107,53,0.15), rgba(255,107,53,0.08));
-        border: 1.5px solid rgba(255,107,53,0.35);
+        background: linear-gradient(135deg, rgba(255, 107, 53, 0.15), rgba(255, 107, 53, 0.08));
+        border: 1.5px solid rgba(255, 107, 53, 0.35);
         border-radius: 50px;
         padding: 7px 16px;
         font-size: 0.82rem;
@@ -175,7 +175,7 @@
         padding-top: 12px !important;
         padding-bottom: 12px !important;
         padding-right: 16px !important;
-        padding-left: 48px !important;
+        padding-left: 24px !important;
         border: 1.5px solid rgba(0, 0, 0, 0.12) !important;
         border-radius: 14px !important;
         font-family: 'Plus Jakarta Sans', sans-serif;
@@ -213,16 +213,28 @@
         z-index: 5;
     }
 
-    .clay-input-btn-eye:hover { color: #141414; }
+    .clay-input-btn-eye:hover {
+        color: #141414;
+    }
 
     /* ── Float Animation ───────────────────────────── */
     @keyframes floatIcon {
-        0%   { transform: translateY(0px) rotate(0deg); }
-        50%  { transform: translateY(-8px) rotate(2deg); }
-        100% { transform: translateY(0px) rotate(0deg); }
+        0% {
+            transform: translateY(0px) rotate(0deg);
+        }
+
+        50% {
+            transform: translateY(-8px) rotate(2deg);
+        }
+
+        100% {
+            transform: translateY(0px) rotate(0deg);
+        }
     }
 
-    .floating-3d-icon { animation: floatIcon 4s ease-in-out infinite; }
+    .floating-3d-icon {
+        animation: floatIcon 4s ease-in-out infinite;
+    }
 
     /* ── Submit Button ─────────────────────────────── */
     .btn-submit-clay {
@@ -265,8 +277,13 @@
 
     /* ── Responsive ────────────────────────────────── */
     @media (max-width: 991px) {
-        .auth-bento-container { grid-template-columns: 1fr; }
-        .auth-bento-visual { display: none; }
+        .auth-bento-container {
+            grid-template-columns: 1fr;
+        }
+
+        .auth-bento-visual {
+            display: none;
+        }
     }
 
     @media (max-width: 640px) {
@@ -274,6 +291,7 @@
             grid-template-columns: 1fr !important;
             gap: 0.85rem !important;
         }
+
         .form-card {
             padding: 1.5rem 1.25rem !important;
         }
@@ -301,8 +319,7 @@
                     </div>
 
                     <!-- Ícono Flotante -->
-                    <div class="floating-3d-icon mb-4"
-                         style="width:60px; height:60px; border-radius:18px; background:#FF6B35; color:#FFF;
+                    <div class="floating-3d-icon mb-4" style="width:60px; height:60px; border-radius:18px; background:#FF6B35; color:#FFF;
                                 display:flex; align-items:center; justify-content:center; font-size:1.8rem;
                                 box-shadow:0 10px 24px rgba(255,107,53,0.4);">
                         <i class="bi bi-rocket-takeoff-fill"></i>
@@ -323,15 +340,16 @@
                     <!-- Pasos rápidos -->
                     <div style="display:flex; flex-direction:column; gap:8px;">
                         {% for step in [('1', '#FF6B35', 'Crea tu cuenta (10 segundos)'),
-                                        ('2', '#4F46E5', 'Carga tus productos o PDFs'),
-                                        ('3', '#10B981', '¡Genera cotizaciones al instante!')] %}
+                        ('2', '#4F46E5', 'Carga tus productos o PDFs'),
+                        ('3', '#10B981', '¡Genera cotizaciones al instante!')] %}
                         <div style="display:flex; align-items:center; gap:10px;">
                             <span style="width:24px; height:24px; border-radius:50%; background:{{ step[1] }};
                                          color:#FFF; font-size:0.7rem; font-weight:900;
                                          display:flex; align-items:center; justify-content:center; flex-shrink:0;">
                                 {{ step[0] }}
                             </span>
-                            <span style="font-size:0.85rem; color:rgba(255,255,255,0.85); font-weight:600;">{{ step[2] }}</span>
+                            <span style="font-size:0.85rem; color:rgba(255,255,255,0.85); font-weight:600;">{{ step[2]
+                                }}</span>
                         </div>
                         {% endfor %}
                     </div>
@@ -359,7 +377,8 @@
                 </div>
                 <div>
                     <div style="font-size:0.92rem; font-weight:800; color:#141414;">Datos 100% seguros</div>
-                    <div style="font-size:0.78rem; color:#666; margin-top:2px;">Tus cotizaciones y precios son privados y solo tuyos.</div>
+                    <div style="font-size:0.78rem; color:#666; margin-top:2px;">Tus cotizaciones y precios son privados
+                        y solo tuyos.</div>
                 </div>
             </div>
 
@@ -397,32 +416,35 @@
             </div>
 
             {% with messages = get_flashed_messages(with_categories=true) %}
-                {% if messages %}
-                    {% for category, message in messages %}
-                    <div class="alert alert-{{ 'danger' if category == 'danger' else 'success' }} d-flex align-items-center gap-2 mb-3"
-                         style="border-radius:14px; font-size:0.88rem; font-weight:600;">
-                        <i class="bi bi-{{ 'exclamation-triangle-fill' if category == 'danger' else 'check-circle-fill' }}"></i>
-                        {{ message }}
-                    </div>
-                    {% endfor %}
-                {% endif %}
+            {% if messages %}
+            {% for category, message in messages %}
+            <div class="alert alert-{{ 'danger' if category == 'danger' else 'success' }} d-flex align-items-center gap-2 mb-3"
+                style="border-radius:14px; font-size:0.88rem; font-weight:600;">
+                <i class="bi bi-{{ 'exclamation-triangle-fill' if category == 'danger' else 'check-circle-fill' }}"></i>
+                {{ message }}
+            </div>
+            {% endfor %}
+            {% endif %}
             {% endwith %}
 
-            
-                <!-- Google OAuth -->
-                <div class="d-grid mt-4 mb-4 fade-up-enter delay-400">
-                    <a href="{{ url_for('auth_google') }}" class="btn btn-outline-dark btn-lg" style="border-radius: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 10px; background: #fff; border: 1.5px solid #e0e0e0; color: #333;">
-                        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" style="width: 20px;">
-                        Continuar con Google
-                    </a>
-                </div>
-                
-                <div class="d-flex align-items-center my-4 fade-up-enter delay-400">
-                    <hr class="flex-grow-1">
-                    <span class="mx-3 text-muted" style="font-size: 0.85rem; font-weight: 700;">O REGÍSTRATE CON TU CORREO</span>
-                    <hr class="flex-grow-1">
-                </div>
-<form action="/registro" method="post" id="registroForm" novalidate>
+
+            <!-- Google OAuth -->
+            <div class="d-grid mt-4 mb-4 fade-up-enter delay-400">
+                <a href="{{ url_for('auth_google') }}" class="btn btn-outline-dark btn-lg"
+                    style="border-radius: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 10px; background: #fff; border: 1.5px solid #e0e0e0; color: #333;">
+                    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google"
+                        style="width: 20px;">
+                    Continuar con Google
+                </a>
+            </div>
+
+            <div class="d-flex align-items-center my-4 fade-up-enter delay-400">
+                <hr class="flex-grow-1">
+                <span class="mx-3 text-muted" style="font-size: 0.85rem; font-weight: 700;">O REGÍSTRATE CON TU
+                    CORREO</span>
+                <hr class="flex-grow-1">
+            </div>
+            <form action="/registro" method="post" id="registroForm" novalidate>
 
                 <!-- Nombre Completo + Empresa (2 columnas) -->
                 <div class="reg-form-row">
@@ -430,8 +452,8 @@
                         <label class="clay-input-label" for="reg_nombre">Nombre completo</label>
                         <div class="clay-input-wrapper">
                             <i class="bi bi-person-fill clay-input-icon"></i>
-                            <input type="text" id="reg_nombre" name="nombre" class="clay-input"
-                                   required placeholder="Ej: Juan Pérez">
+                            <input type="text" id="reg_nombre" name="nombre" class="clay-input" required
+                                placeholder="Ej: Juan Pérez">
                         </div>
                     </div>
 
@@ -440,7 +462,7 @@
                         <div class="clay-input-wrapper">
                             <i class="bi bi-building-fill clay-input-icon"></i>
                             <input type="text" id="reg_empresa" name="empresa_nombre" class="clay-input"
-                                   placeholder="Ej: Importadora Norte S.R.L.">
+                                placeholder="Ej: Importadora Norte S.R.L.">
                         </div>
                     </div>
                 </div>
@@ -451,8 +473,8 @@
                         <label class="clay-input-label" for="reg_correo">Correo electrónico</label>
                         <div class="clay-input-wrapper">
                             <i class="bi bi-envelope-fill clay-input-icon"></i>
-                            <input type="email" id="reg_correo" name="correo" class="clay-input"
-                                   required placeholder="correo@empresa.bo">
+                            <input type="email" id="reg_correo" name="correo" class="clay-input" required
+                                placeholder="correo@empresa.bo">
                         </div>
                     </div>
 
@@ -463,21 +485,19 @@
                         </label>
                         <div class="clay-input-wrapper">
                             <!-- Prefijo +591 fijo -->
-                            <span id="tel_prefix"
-                                  style="position:absolute; left:42px; color:#666; font-size:0.9rem; font-weight:700;
+                            <span id="tel_prefix" style="position:absolute; left:42px; color:#666; font-size:0.9rem; font-weight:700;
                                          pointer-events:none; z-index:3; line-height:1;
                                          top:50%; transform:translateY(-50%); letter-spacing:0.01em;">
                                 +591
                             </span>
                             <i class="bi bi-telephone-fill clay-input-icon"></i>
                             <input type="tel" id="reg_telefono" name="telefono" class="clay-input"
-                                   placeholder="70000000" maxlength="8" inputmode="numeric"
-                                   style="padding-left:90px;"
-                                   autocomplete="tel">
+                                placeholder="70000000" maxlength="8" inputmode="numeric" style="padding-left:90px;"
+                                autocomplete="tel">
                         </div>
                         <!-- Hint dinámico -->
                         <div id="tel_hint"
-                             style="font-size:0.72rem; margin-top:5px; color:#888; display:flex; align-items:center; gap:5px;">
+                            style="font-size:0.72rem; margin-top:5px; color:#888; display:flex; align-items:center; gap:5px;">
                             <i class="bi bi-info-circle" style="font-size:0.7rem;"></i>
                             Celular: 6x xxxxxxx · 7x xxxxxxx &nbsp;|  Fijo: 2/3/4 + 6 dígitos
                         </div>
@@ -491,10 +511,10 @@
                         <label class="clay-input-label" for="password_input">Contraseña</label>
                         <div class="clay-input-wrapper">
                             <i class="bi bi-lock-fill clay-input-icon"></i>
-                            <input type="password" id="password_input" name="contrasena" class="clay-input"
-                                   required placeholder="Mínimo 6 caracteres">
+                            <input type="password" id="password_input" name="contrasena" class="clay-input" required
+                                placeholder="Mínimo 6 caracteres">
                             <button type="button" class="clay-input-btn-eye"
-                                    onclick="togglePassword('password_input','eye_icon_pw')" tabindex="-1">
+                                onclick="togglePassword('password_input','eye_icon_pw')" tabindex="-1">
                                 <i id="eye_icon_pw" class="bi bi-eye"></i>
                             </button>
                         </div>
@@ -505,9 +525,9 @@
                         <div class="clay-input-wrapper">
                             <i class="bi bi-shield-lock-fill clay-input-icon"></i>
                             <input type="password" id="confirm_input" name="confirmar_contrasena" class="clay-input"
-                                   required placeholder="Repite tu contraseña">
+                                required placeholder="Repite tu contraseña">
                             <button type="button" class="clay-input-btn-eye"
-                                    onclick="togglePassword('confirm_input','eye_icon_conf')" tabindex="-1">
+                                onclick="togglePassword('confirm_input','eye_icon_conf')" tabindex="-1">
                                 <i id="eye_icon_conf" class="bi bi-eye"></i>
                             </button>
                         </div>
@@ -517,9 +537,11 @@
                 <!-- Info Freemium -->
                 <div style="background:#fff9f6; border:1.5px solid rgba(255,107,53,0.2); border-radius:14px;
                             padding:12px 16px; margin-bottom:1.5rem; display:flex; align-items:flex-start; gap:10px;">
-                    <i class="bi bi-info-circle-fill" style="color:#FF6B35; font-size:1rem; margin-top:2px; flex-shrink:0;"></i>
+                    <i class="bi bi-info-circle-fill"
+                        style="color:#FF6B35; font-size:1rem; margin-top:2px; flex-shrink:0;"></i>
                     <div style="font-size:0.82rem; color:#664; line-height:1.5;">
-                        <strong style="color:#c94e1e;">Tu cuenta incluye 5 cotizaciones gratis</strong> para explorar todas las
+                        <strong style="color:#c94e1e;">Tu cuenta incluye 5 cotizaciones gratis</strong> para explorar
+                        todas las
                         funcionalidades. Cuando estés listo, activa tu suscripción con un PIN para cotizar sin límites.
                     </div>
                 </div>
@@ -543,21 +565,46 @@
 
 
 <style>
-  @keyframes shakeOTP {
-    0%,100% { transform:translateX(0); }
-    15%     { transform:translateX(-8px); }
-    45%     { transform:translateX(8px); }
-    75%     { transform:translateX(-5px); }
-  }
-  .otp-digit:focus {
-    border-color:#FF6B35 !important;
-    background:#FFFFFF !important;
-    box-shadow:0 0 0 3px rgba(255,107,53,0.18) !important;
-    transform:scale(1.06);
-  }
-  .otp-digit.ok  { border-color:#10B981 !important; background:#f0fdf4 !important; }
-  .otp-digit.err { border-color:#ef4444 !important; background:#fef2f2 !important; }
-  #otpInputsWrap.shake { animation:shakeOTP 0.45s ease; }
+    @keyframes shakeOTP {
+
+        0%,
+        100% {
+            transform: translateX(0);
+        }
+
+        15% {
+            transform: translateX(-8px);
+        }
+
+        45% {
+            transform: translateX(8px);
+        }
+
+        75% {
+            transform: translateX(-5px);
+        }
+    }
+
+    .otp-digit:focus {
+        border-color: #FF6B35 !important;
+        background: #FFFFFF !important;
+        box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.18) !important;
+        transform: scale(1.06);
+    }
+
+    .otp-digit.ok {
+        border-color: #10B981 !important;
+        background: #f0fdf4 !important;
+    }
+
+    .otp-digit.err {
+        border-color: #ef4444 !important;
+        background: #fef2f2 !important;
+    }
+
+    #otpInputsWrap.shake {
+        animation: shakeOTP 0.45s ease;
+    }
 </style>
 {% endblock %}
 
@@ -570,10 +617,10 @@
         AOS.init({ once: true, duration: 700, easing: 'ease-out-cubic' });
 
         // ── Validación client-side de contraseñas ─────────────────────
-        var form      = document.getElementById('registroForm');
-        var pwInput   = document.getElementById('password_input');
+        var form = document.getElementById('registroForm');
+        var pwInput = document.getElementById('password_input');
         var confInput = document.getElementById('confirm_input');
-        var telInput  = document.getElementById('reg_telefono');
+        var telInput = document.getElementById('reg_telefono');
 
         // ── Validación de teléfono boliviano ─────────────────────
         //  Celular: 8 dígitos, inicia en 6 o 7
@@ -585,7 +632,7 @@
                 limpio = limpio.slice(3);
             }
             var rxCelular = /^[67]\d{7}$/;                 // 8 dígitos, 6x / 7x
-            var rxFijo    = /^[234]\d{6}$/;                // 7 dígitos, 2x / 3x / 4x
+            var rxFijo = /^[234]\d{6}$/;                // 7 dígitos, 2x / 3x / 4x
             return rxCelular.test(limpio) || rxFijo.test(limpio)
                 ? limpio
                 : null;
@@ -593,41 +640,41 @@
 
         function setTelEstado(estado) {
             // estado: 'ok' | 'error' | 'vacio'
-            var icon  = document.getElementById('tel_status_icon');
-            var hint  = document.getElementById('tel_hint');
+            var icon = document.getElementById('tel_status_icon');
+            var hint = document.getElementById('tel_hint');
             var grupo = document.getElementById('grupo_telefono');
             var input = telInput;
 
             if (estado === 'ok') {
-                input.style.borderColor  = '#10B981';
-                input.style.boxShadow    = '0 0 0 3px rgba(16,185,129,0.15)';
-                input.style.background   = '#f0fdf4';
+                input.style.borderColor = '#10B981';
+                input.style.boxShadow = '0 0 0 3px rgba(16,185,129,0.15)';
+                input.style.background = '#f0fdf4';
                 if (icon) { icon.innerHTML = '<i class="bi bi-check-circle-fill" style="color:#10B981;"></i>'; }
-                if (hint)  { hint.style.color = '#10B981'; }
+                if (hint) { hint.style.color = '#10B981'; }
             } else if (estado === 'error') {
-                input.style.borderColor  = '#ef4444';
-                input.style.boxShadow    = '0 0 0 3px rgba(239,68,68,0.14)';
-                input.style.background   = '#fef2f2';
+                input.style.borderColor = '#ef4444';
+                input.style.boxShadow = '0 0 0 3px rgba(239,68,68,0.14)';
+                input.style.background = '#fef2f2';
                 if (icon) { icon.innerHTML = '<i class="bi bi-x-circle-fill" style="color:#ef4444;"></i>'; }
-                if (hint)  {
+                if (hint) {
                     hint.style.color = '#ef4444';
-                    hint.innerHTML   = '<i class="bi bi-exclamation-triangle" style="font-size:0.7rem;"></i> Formato inválido. Celular: 6x xxxxxxx · 7x xxxxxxx  |  Fijo: 2/3/4 + 6 dígitos';
+                    hint.innerHTML = '<i class="bi bi-exclamation-triangle" style="font-size:0.7rem;"></i> Formato inválido. Celular: 6x xxxxxxx · 7x xxxxxxx  |  Fijo: 2/3/4 + 6 dígitos';
                 }
             } else {                                       // vacío
                 input.style.borderColor = '';
-                input.style.boxShadow   = '';
-                input.style.background  = '';
+                input.style.boxShadow = '';
+                input.style.background = '';
                 if (icon) { icon.innerHTML = ''; }
                 if (hint) {
                     hint.style.color = '#888';
-                    hint.innerHTML   = '<i class="bi bi-info-circle" style="font-size:0.7rem;"></i> Celular: 6x\u202fxxxxxxx \u00b7 7x\u202fxxxxxxx &nbsp;|\u00a0 Fijo: 2/3/4 + 6\u202fd\u00edgitos';
+                    hint.innerHTML = '<i class="bi bi-info-circle" style="font-size:0.7rem;"></i> Celular: 6x\u202fxxxxxxx \u00b7 7x\u202fxxxxxxx &nbsp;|\u00a0 Fijo: 2/3/4 + 6\u202fd\u00edgitos';
                 }
             }
         }
 
         // Solo permite dígitos en el campo de teléfono
         telInput.addEventListener('keypress', function (e) {
-            if (!/\d/.test(e.key) && !['Backspace','Delete','Tab','ArrowLeft','ArrowRight'].includes(e.key)) {
+            if (!/\d/.test(e.key) && !['Backspace', 'Delete', 'Tab', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
                 e.preventDefault();
             }
         });
@@ -657,14 +704,14 @@
             }
         });
 
-        });
+    });
 
-        // Toggle password outside DOMContentLoaded or inside, either way works.
-        // It needs to be global for onclick attributes to find it.
-        // But let's just close the DOMContentLoaded block here.
-        window.togglePassword = function(inputId, iconId) {
+    // Toggle password outside DOMContentLoaded or inside, either way works.
+    // It needs to be global for onclick attributes to find it.
+    // But let's just close the DOMContentLoaded block here.
+    window.togglePassword = function (inputId, iconId) {
         var input = document.getElementById(inputId);
-        var icon  = document.getElementById(iconId);
+        var icon = document.getElementById(iconId);
         if (input.type === 'password') {
             input.type = 'text';
             icon.classList.replace('bi-eye', 'bi-eye-slash');

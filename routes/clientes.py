@@ -37,21 +37,36 @@ def generar_codigo_cliente_unico(cursor, creador_id=None):
     Genera un código secuencial sin saltos (rellenando huecos de clientes eliminados)
     y garantizando cero duplicados por empresa/admin. Formato: CLI-0001, CLI-0002, etc.
     """
-    if creador_id:
-        cursor.execute("SELECT codigo_cliente FROM clientes WHERE creador_id = ? AND rol = 'cliente' AND codigo_cliente LIKE 'CLI-%'", (creador_id,))
-    else:
-        cursor.execute("SELECT codigo_cliente FROM clientes WHERE rol = 'cliente' AND codigo_cliente LIKE 'CLI-%'")
-    rows = cursor.fetchall()
     usados = set()
-    for row in rows:
-        cod = row[0]
-        if cod:
+    try:
+        if creador_id:
+            cursor.execute("SELECT codigo_cliente FROM clientes WHERE creador_id = ? AND rol = 'cliente' AND codigo_cliente LIKE 'CLI-%'", (creador_id,))
+        else:
+            cursor.execute("SELECT codigo_cliente FROM clientes WHERE rol = 'cliente' AND codigo_cliente LIKE 'CLI-%'")
+        rows = cursor.fetchall() or []
+        for row in rows:
+            if not row:
+                continue
             try:
-                parts = cod.split('-')
-                if len(parts) >= 2 and parts[1].isdigit():
-                    usados.add(int(parts[1]))
-            except (ValueError, IndexError):
+                cod = None
+                if isinstance(row, (tuple, list)):
+                    cod = row[0] if len(row) > 0 else None
+                elif isinstance(row, dict):
+                    cod = row.get('codigo_cliente')
+                elif hasattr(row, 'keys'):
+                    keys = row.keys()
+                    cod = row['codigo_cliente'] if 'codigo_cliente' in keys else (row[0] if len(row) > 0 else None)
+                else:
+                    cod = row[0] if len(row) > 0 else None
+
+                if cod and isinstance(cod, str):
+                    parts = cod.split('-')
+                    if len(parts) >= 2 and parts[1].isdigit():
+                        usados.add(int(parts[1]))
+            except (ValueError, IndexError, KeyError, TypeError):
                 pass
+    except Exception as e:
+        print(f"[WARN] Error generando codigo cliente unico: {e}")
 
     num = 1
     while num in usados:
@@ -82,8 +97,6 @@ def register_routes(app):
                     flash('El nombre/razón social es obligatorio', 'danger')
                     return redirect(url_for('clientes'))
 
-
-                # Insertar nuevo cliente con el ID del admin que lo registra
                 conexion = get_db_connection()
                 cursor = conexion.cursor()
 
@@ -133,14 +146,14 @@ def register_routes(app):
             offset = (page - 1) * per_page
             busqueda = request.args.get('buscar', '').strip()
 
-            # Consulta base diferente para superadmin
+            # Consulta base diferente para superadmin - Seleccionar columnas explícitas para asegurar posiciones en _clientes_lista.html
             if session.get('user_rol') == 'superadmin':
                 count_query = "SELECT COUNT(*) FROM clientes WHERE rol = 'cliente'"
-                query = "SELECT * FROM clientes WHERE rol = 'cliente'"
+                query = "SELECT id, nombre, nit, codigo_cliente, telefono, referencia, creador_id FROM clientes WHERE rol = 'cliente'"
                 params = []
             else:
                 count_query = "SELECT COUNT(*) FROM clientes WHERE creador_id = ? AND rol = 'cliente'"
-                query = "SELECT * FROM clientes WHERE creador_id = ? AND rol = 'cliente'"
+                query = "SELECT id, nombre, nit, codigo_cliente, telefono, referencia, creador_id FROM clientes WHERE creador_id = ? AND rol = 'cliente'"
                 params = [session['user_id']]
 
             if busqueda:
@@ -158,7 +171,8 @@ def register_routes(app):
 
             # Obtener el total de registros para la paginación
             cursor.execute(count_query, params)
-            total_clientes = cursor.fetchone()[0]
+            res_count = cursor.fetchone()
+            total_clientes = res_count[0] if (res_count and len(res_count) > 0) else 0
 
             # Calcular el número total de páginas
             total_pages = max(1, (total_clientes + per_page - 1) // per_page)

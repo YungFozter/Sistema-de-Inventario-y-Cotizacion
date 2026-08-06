@@ -32,12 +32,15 @@ import logging
 from utils.decorators import login_required, superadmin_required, admin_required, standard_required
 from utils.helpers import format_date, aplicar_fondos_por_pagina, generar_pdf_margenes_dinamicos
 
-def generar_codigo_cliente_unico(cursor):
+def generar_codigo_cliente_unico(cursor, creador_id=None):
     """
     Genera un código secuencial sin saltos (rellenando huecos de clientes eliminados)
-    y garantizando cero duplicados. Formato: CLI-0001, CLI-0002, etc.
+    y garantizando cero duplicados por empresa/admin. Formato: CLI-0001, CLI-0002, etc.
     """
-    cursor.execute("SELECT codigo_cliente FROM clientes WHERE rol = 'cliente' AND codigo_cliente LIKE 'CLI-%'")
+    if creador_id:
+        cursor.execute("SELECT codigo_cliente FROM clientes WHERE creador_id = ? AND rol = 'cliente' AND codigo_cliente LIKE 'CLI-%'", (creador_id,))
+    else:
+        cursor.execute("SELECT codigo_cliente FROM clientes WHERE rol = 'cliente' AND codigo_cliente LIKE 'CLI-%'")
     rows = cursor.fetchall()
     usados = set()
     for row in rows:
@@ -85,14 +88,14 @@ def register_routes(app):
                 conexion = get_db_connection()
                 cursor = conexion.cursor()
 
-                # Generar código de cliente automático sin saltos y sin duplicados
+                # Generar código de cliente automático aislado por empresa/admin
                 if not codigo_cliente:
-                    codigo_cliente = generar_codigo_cliente_unico(cursor)
+                    codigo_cliente = generar_codigo_cliente_unico(cursor, creador_id=session['user_id'])
                 else:
-                    # Validar que el código de cliente no se repita
-                    cursor.execute("SELECT id FROM clientes WHERE codigo_cliente = ? AND rol = 'cliente'", (codigo_cliente,))
+                    # Validar que el código de cliente no se repita en esta misma empresa/admin
+                    cursor.execute("SELECT id FROM clientes WHERE creador_id = ? AND codigo_cliente = ? AND rol = 'cliente'", (session['user_id'], codigo_cliente))
                     if cursor.fetchone():
-                        flash(f'El código de cliente "{codigo_cliente}" ya está registrado. Usa uno diferente.', 'danger')
+                        flash(f'El código de cliente "{codigo_cliente}" ya está registrado en tu empresa. Usa uno diferente.', 'danger')
                         conexion.close()
                         return redirect(url_for('clientes'))
 
@@ -232,12 +235,13 @@ def register_routes(app):
                 telefono = 'S/A'
             referencia = request.form.get('referencia', '').strip()
 
+            creador_target = cliente[0] if session.get('user_rol') == 'superadmin' else session['user_id']
             if not codigo_cliente:
-                codigo_cliente = generar_codigo_cliente_unico(cursor)
+                codigo_cliente = generar_codigo_cliente_unico(cursor, creador_id=creador_target)
             else:
-                cursor.execute("SELECT id FROM clientes WHERE codigo_cliente = ? AND id != ? AND rol = 'cliente'", (codigo_cliente, id))
+                cursor.execute("SELECT id FROM clientes WHERE creador_id = ? AND codigo_cliente = ? AND id != ? AND rol = 'cliente'", (creador_target, codigo_cliente, id))
                 if cursor.fetchone():
-                    flash(f'El código de cliente "{codigo_cliente}" ya pertenece a otro cliente.', 'danger')
+                    flash(f'El código de cliente "{codigo_cliente}" ya pertenece a otro cliente en tu empresa.', 'danger')
                     conexion.close()
                     return redirect(url_for('editar_cliente', id=id))
 

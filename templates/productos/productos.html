@@ -2729,7 +2729,7 @@
               if (badge) badge.textContent = 'Items extraídos: 0 | Marcados: 0';
             }
 
-            window.tipoCambioParaleloBolivia = {{ tipo_cambio_paralelo or 9.50 }};
+            window.tipoCambioParaleloBolivia = {{ tipo_cambio_paralelo or 10.32 }};
 
             function actualizarVistaPreviaProducto() {
                 const nombre = document.getElementById('empresa')?.value || 'Nuevo Producto...';
@@ -2739,7 +2739,7 @@
                 const tm = document.getElementById('tm')?.value || 'Bs';
                 const cantidad = document.getElementById('cantidad')?.value || '1';
                 const precioVal = parseFloat(document.getElementById('precio_unitario')?.value || '0');
-                const tcParalelo = window.tipoCambioParaleloBolivia || 9.50; // TC Paralelo en vivo
+                const tcParalelo = window.tipoCambioParaleloBolivia || 10.32; // TC Paralelo en vivo
 
                 const pNombre = document.getElementById('previewNombre');
                 const pCodigo = document.getElementById('previewCodigo');

@@ -286,7 +286,10 @@
           </label>
           <div class="clay-pill-input-group">
             <span class="clay-pill-input-icon"><i class="bi bi-cash-coin"></i></span>
-            <input type="text" name="tm" id="tm" class="clay-pill-input" value="Bs" placeholder="Bs / $US" oninput="actualizarVistaPreviaProducto()">
+            <select name="tm" id="tm" class="clay-pill-input form-select" onchange="actualizarVistaPreviaProducto()">
+              <option value="Bs" selected>Bs (Bolivianos)</option>
+              <option value="$USD">$USD (Dólares)</option>
+            </select>
           </div>
         </div>
 
@@ -2726,6 +2729,8 @@
               if (badge) badge.textContent = 'Items extraídos: 0 | Marcados: 0';
             }
 
+            window.tipoCambioParaleloBolivia = {{ tipo_cambio_paralelo or 9.50 }};
+
             function actualizarVistaPreviaProducto() {
                 const nombre = document.getElementById('empresa')?.value || 'Nuevo Producto...';
                 const codigo = document.getElementById('codigo')?.value || 'COD-000';
@@ -2733,7 +2738,8 @@
                 const um = document.getElementById('um')?.value || 'Pza';
                 const tm = document.getElementById('tm')?.value || 'Bs';
                 const cantidad = document.getElementById('cantidad')?.value || '1';
-                const precio = document.getElementById('precio_unitario')?.value || '0.00';
+                const precioVal = parseFloat(document.getElementById('precio_unitario')?.value || '0');
+                const tcParalelo = window.tipoCambioParaleloBolivia || 9.50; // TC Paralelo en vivo
 
                 const pNombre = document.getElementById('previewNombre');
                 const pCodigo = document.getElementById('previewCodigo');
@@ -2743,7 +2749,15 @@
                 if (pNombre) pNombre.textContent = nombre;
                 if (pCodigo) pCodigo.textContent = codigo;
                 if (pMarcaUM) pMarcaUM.textContent = `${marca} | ${um}`;
-                if (pPrecioStock) pPrecioStock.textContent = `${precio} ${tm} (Stock: ${cantidad})`;
+                
+                if (pPrecioStock) {
+                    if (tm === '$USD') {
+                        const equivBs = (precioVal * tcParalelo).toFixed(2);
+                        pPrecioStock.innerHTML = `$ ${precioVal.toFixed(2)} USD <small class="d-block text-white-50 fs-6" style="font-weight: 500;">(≈ ${equivBs} Bs @ TC ${tcParalelo}) | Stock: ${cantidad}</small>`;
+                    } else {
+                        pPrecioStock.innerHTML = `${precioVal.toFixed(2)} Bs <small class="d-block text-white-50 fs-6" style="font-weight: 500;">(Stock: ${cantidad})</small>`;
+                    }
+                }
             }
 
             function aplicarPlantillaProducto(tipo) {

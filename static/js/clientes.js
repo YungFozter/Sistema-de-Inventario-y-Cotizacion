@@ -24,7 +24,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 feedbackEl = document.createElement('div');
                 feedbackEl.id = 'nitFeedbackMsg';
                 feedbackEl.className = 'mt-2 small fw-bold';
-                nitInput.closest('.col-md-6').appendChild(feedbackEl);
+                const parentBox = nitInput.closest('.bento-clay-box') || nitInput.closest('.col-md-6') || nitInput.parentElement.parentElement;
+                parentBox.appendChild(feedbackEl);
             }
 
             fetch('/api/validar-nit?nit=' + encodeURIComponent(nit))

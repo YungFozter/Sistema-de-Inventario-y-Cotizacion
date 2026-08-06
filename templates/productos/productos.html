@@ -2,6 +2,11 @@
 
 {% block titulo %}Productos{% endblock %}
 
+{% block styles %}
+{{ super() }}
+<link href="{{ url_for('static', filename='css/productos.css') }}" rel="stylesheet">
+{% endblock %}
+
 {% block contenido %}
 
 {% if session.get('user_rol') == 'superadmin' %}
@@ -75,50 +80,108 @@
 </script>
 {% endif %}
 
-<!-- Formulario de Búsqueda -->
-<div class="card mb-4 shadow">
-  <div class="card-header bg-primary text-white">
-    <h5 class="mb-0"><i class="bi bi-search"></i> Buscar Productos</h5>
+<!-- SECCIÓN DE BÚSQUEDA BENTO GRID + CLAYMORPHISM 3D EDITORIAL -->
+<div class="editorial-bento-hero">
+  
+  <!-- PANEL OSCURO EDITORIAL (IZQUIERDA) -->
+  <div class="editorial-dark-panel">
+    <div class="editorial-tag-badge mb-4">
+      <span class="editorial-dot-orange"></span>
+      CATÁLOGO INTELIGENTE
+    </div>
+    
+    <div>
+      <h3 class="serif-editorial-title">Explora y Filtra tus Productos</h3>
+      <p class="editorial-subtitle mb-0">
+        Filtra instantáneamente tu inventario con precisión editorial, códigos únicos y marcas registradas.
+      </p>
+    </div>
+
+    <div class="pt-4 mt-auto">
+      <div class="d-flex align-items-center gap-2 text-white-50 small">
+        <i class="bi bi-shield-check text-warning"></i>
+        <span>Búsqueda Aislada en Tiempo Real</span>
+      </div>
+    </div>
   </div>
-  <div class="card-body">
-    <form method="get" action="/productos" class="row g-3">
-      <div class="col-md-3">
-        <label class="form-label">Nombre del Producto</label>
-        <input type="text" name="empresa" class="form-control" value="{{ request.args.get('empresa', '') }}"
-          placeholder="Ej: ElectroRed">
+
+  <!-- PANEL CLARO FORMULARIO BENTO GRID (DERECHA) -->
+  <div class="editorial-light-panel">
+    <form method="get" action="/productos">
+      <div class="editorial-bento-grid mb-4">
+        
+        <!-- BENTO ITEM 1: Nombre del Producto -->
+        <div class="editorial-bento-item">
+          <label class="editorial-bento-label">
+            <i class="bi bi-box-seam text-orange-pro"></i> Nombre del Producto
+          </label>
+          <div class="clay-pill-input-group">
+            <span class="clay-pill-input-icon"><i class="bi bi-search"></i></span>
+            <input type="text" name="empresa" class="clay-pill-input" value="{{ request.args.get('empresa', '') }}" placeholder="Ej: ElectroRed / Cable 12AWG">
+          </div>
+        </div>
+
+        <!-- BENTO ITEM 2: Código -->
+        <div class="editorial-bento-item">
+          <label class="editorial-bento-label">
+            <i class="bi bi-qr-code text-orange-pro"></i> Código Único
+          </label>
+          <div class="clay-pill-input-group">
+            <span class="clay-pill-input-icon"><i class="bi bi-hash"></i></span>
+            <input type="text" name="codigo" class="clay-pill-input" value="{{ request.args.get('codigo', '') }}" placeholder="Ej: ERD-001">
+          </div>
+        </div>
+
+        <!-- BENTO ITEM 3: Descripción -->
+        <div class="editorial-bento-item">
+          <label class="editorial-bento-label">
+            <i class="bi bi-text-paragraph text-orange-pro"></i> Descripción
+          </label>
+          <div class="clay-pill-input-group">
+            <span class="clay-pill-input-icon"><i class="bi bi-card-text"></i></span>
+            <input type="text" name="descripcion" class="clay-pill-input" value="{{ request.args.get('descripcion', '') }}" placeholder="Palabras clave">
+          </div>
+        </div>
+
+        <!-- BENTO ITEM 4: Marca -->
+        <div class="editorial-bento-item">
+          <label class="editorial-bento-label">
+            <i class="bi bi-tag-fill text-orange-pro"></i> Marca / Fabricante
+          </label>
+          <div class="clay-pill-input-group">
+            <span class="clay-pill-input-icon"><i class="bi bi-building"></i></span>
+            <input type="text" name="marca" class="clay-pill-input" value="{{ request.args.get('marca', '') }}" placeholder="Ej: Siemens / Schneider">
+          </div>
+        </div>
+
+        <!-- BENTO ITEM 5: Categoría -->
+        <div class="editorial-bento-item">
+          <label class="editorial-bento-label">
+            <i class="bi bi-folder-fill text-orange-pro"></i> Categoría
+          </label>
+          <div class="clay-pill-input-group">
+            <span class="clay-pill-input-icon"><i class="bi bi-diagram-3"></i></span>
+            <select name="categoria" id="categoriaBusqueda" class="clay-pill-input form-select">
+              <option value="">Todas las categorías</option>
+              <!-- Las opciones se cargarán dinámicamente -->
+            </select>
+          </div>
+        </div>
+
       </div>
-      <div class="col-md-3">
-        <label class="form-label">Código</label>
-        <input type="text" name="codigo" class="form-control" value="{{ request.args.get('codigo', '') }}"
-          placeholder="Ej: ERD-001">
-      </div>
-      <div class="col-md-3">
-        <label class="form-label">Descripción</label>
-        <input type="text" name="descripcion" class="form-control" value="{{ request.args.get('descripcion', '') }}"
-          placeholder="Palabras clave">
-      </div>
-      <div class="col-md-3">
-        <label class="form-label">Marca</label>
-        <input type="text" name="marca" class="form-control" value="{{ request.args.get('marca', '') }}"
-          placeholder="Ej: Siemens">
-      </div>
-      <div class="col-md-3">
-        <label class="form-label">Categoría</label>
-        <select name="categoria" id="categoriaBusqueda" class="form-select">
-          <option value="">Todas las categorías</option>
-          <!-- Las opciones se cargarán dinámicamente -->
-        </select>
-      </div>
-      <div class="col-12">
-        <button type="submit" class="btn btn-primary">
-          <i class="bi bi-search"></i> Buscar
+
+      <!-- BOTONES DE ACCIÓN CLAYMORPHIC PILL 3D -->
+      <div class="d-flex gap-3 justify-content-start flex-wrap align-items-center">
+        <button type="submit" class="clay-pill-btn-primary">
+          <i class="bi bi-search"></i> Buscar Productos
         </button>
-        <a href="/productos" class="btn btn-outline-secondary">
-          <i class="bi bi-arrow-counterclockwise"></i> Limpiar
+        <a href="/productos" class="clay-pill-btn-secondary">
+          <i class="bi bi-arrow-counterclockwise"></i> Limpiar Filtros
         </a>
       </div>
     </form>
   </div>
+
 </div>
 
 <!-- Formulario de Registro -->

@@ -319,13 +319,13 @@ def register_routes(app):
     @app.route('/login', methods=['GET', 'POST'])
 
     def login():
-        tipo_login = request.args.get('tipo', 'standard')  # Valor por defecto 'standard'
+        tipo_login = request.args.get('tipo', 'admin')  # Valor por defecto 'admin'
         error = None
 
         if request.method == 'POST':
             correo = request.form['correo']
             contrasena = request.form['contrasena']
-            tipo_login = request.form.get('tipo_login', 'standard')  # Valor por defecto 'standard'
+            tipo_login = request.form.get('tipo_login', 'admin')  # Valor por defecto 'admin'
             pin_admin = request.form.get('pin_admin', '')
 
             # Conexión a DB

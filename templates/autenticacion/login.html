@@ -669,13 +669,13 @@
 
             <!-- Selector de Tipo de Usuario (Clay Role Buttons) -->
             <div class="clay-role-selector">
-                <a href="{{ url_for('login', tipo='standard') }}"
-                   class="clay-role-btn {% if tipo == 'standard' %}active{% endif %}">
-                    <i class="bi bi-person-fill"></i> Usuario
-                </a>
                 <a href="{{ url_for('login', tipo='admin') }}"
                    class="clay-role-btn {% if tipo == 'admin' %}active{% endif %}">
                     <i class="bi bi-shield-lock-fill"></i> Administrador
+                </a>
+                <a href="{{ url_for('login', tipo='standard') }}"
+                   class="clay-role-btn {% if tipo == 'standard' %}active{% endif %}">
+                    <i class="bi bi-person-fill"></i> Usuario
                 </a>
             </div>
 

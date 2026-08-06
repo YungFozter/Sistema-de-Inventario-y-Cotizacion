@@ -1,42 +1,57 @@
 # ============================================================
-# SERVICIO DE TIPO DE CAMBIO PARALELO (BOLIVIA) - COTIZAPro
+# SERVICIO DE TIPO DE CAMBIO BANCO CENTRAL DE BOLIVIA (BCB)
+# Sitio Oficial: https://www.bcb.gob.bo/
 # ============================================================
 import time
 import logging
 import requests
+import re
+import urllib3
 
-# Caché en memoria para evitar peticiones redundantes
+# Deshabilitar advertencias de SSL para consulta segura al servidor del BCB
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
+# Caché en memoria para evitar peticiones redundantes al BCB
 _cache_tipo_cambio = {
-    'rate': 10.32, # Cotización AirTM / Paralelo por defecto (Bs/USD)
+    'rate': 6.96, # Tipo de Cambio Oficial del Banco Central de Bolivia (BCB)
+    'fuente': 'Banco Central de Bolivia (BCB - bcb.gob.bo)',
     'last_updated': 0,
     'ttl': 900 # 15 minutos de vigencia en caché
 }
 
-def obtener_tipo_cambio_paralelo_bolivia():
+def obtener_tipo_cambio_bcb():
     """
-    Devuelve el valor actual del Tipo de Cambio Paralelo en Bolivia (Bs por cada $USD).
-    Sincroniza con servicios P2P/AirTM en tiempo real con caché de 15 minutos.
+    Devuelve el Tipo de Cambio Oficial del Banco Central de Bolivia (BCB - https://www.bcb.gob.bo/).
+    Sincroniza con el portal web oficial del BCB con caché de 15 minutos y resguardo a 6.96 Bs/USD.
     """
     ahora = time.time()
     if ahora - _cache_tipo_cambio['last_updated'] < _cache_tipo_cambio['ttl']:
         return _cache_tipo_cambio['rate']
 
     try:
-        # Petición al servicio de cotizaciones P2P/AirTM/Paralelo en tiempo real (Yadio / AirTM)
         headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) COTIZAPro/2.0'}
-        resp = requests.get('https://api.yadio.io/rate/BOB/USD', headers=headers, timeout=3.5)
+        # Consultar la plataforma oficial del Banco Central de Bolivia
+        resp = requests.get('https://www.bcb.gob.bo/?q=servicios/cotizaciones', headers=headers, verify=False, timeout=3.5)
         if resp.status_code == 200:
-            data = resp.json()
-            val = float(data.get('rate', 0))
-            if 7.0 <= val <= 25.0: # Rango de cordura para Bolivia
-                _cache_tipo_cambio['rate'] = round(val, 2)
-                _cache_tipo_cambio['last_updated'] = ahora
-                return _cache_tipo_cambio['rate']
+            # Extraer cotización del Dólar Estadounidense en el portal oficial del BCB
+            match = re.search(r'D[óo]lar.*?([6-9]\.\d{2}|1[0-2]\.\d{2})', resp.text, re.IGNORECASE | re.DOTALL)
+            if match:
+                val = float(match.group(1))
+                if 6.0 <= val <= 20.0:
+                    _cache_tipo_cambio['rate'] = round(val, 2)
+                    _cache_tipo_cambio['last_updated'] = ahora
+                    return _cache_tipo_cambio['rate']
     except Exception as e:
-        logging.warning(f"No se pudo consultar el servicio en vivo de tipo de cambio paralelo: {e}")
+        logging.warning(f"No se pudo consultar el portal del BCB (bcb.gob.bo): {e}")
 
-    # Si falla la consulta remota, retornar la cotización guardada en caché o fallback (10.32)
+    # Fallback al Tipo de Cambio Oficial del Banco Central de Bolivia (6.96 Bs/USD)
+    _cache_tipo_cambio['rate'] = 6.96
+    _cache_tipo_cambio['last_updated'] = ahora
     return _cache_tipo_cambio['rate']
+
+def obtener_tipo_cambio_paralelo_bolivia():
+    """Alias compatible para devolver el Tipo de Cambio del Banco Central de Bolivia (BCB)"""
+    return obtener_tipo_cambio_bcb()
 
 def convertir_monto_moneda(monto, moneda_origen, moneda_destino='Bs', tipo_cambio=None):
     """

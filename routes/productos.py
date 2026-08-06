@@ -23,6 +23,7 @@ from models import (
     eliminar_importacion_pdf
 )
 from utils.pdf_extractor import PDFProductExtractor
+from utils.exchange_rate import obtener_tipo_cambio_paralelo
 import io
 from PyPDF2 import PdfReader, PdfWriter
 from reportlab.pdfgen import canvas
@@ -30,7 +31,6 @@ from reportlab.lib.pagesizes import letter
 from PIL import Image
 import logging
 from utils.decorators import login_required, superadmin_required, admin_required, standard_required
-from utils.exchange_rate import obtener_tipo_cambio_paralelo_bolivia
 def _obtener_columnas_productos(cursor):
     """Devuelve los nombres de las columnas de la tabla productos de forma compatible con SQLite y PostgreSQL"""
     try:
@@ -273,7 +273,7 @@ def register_routes(app):
             tab_activa=tab_activa,
             clientes=clientes,
             lista_empresas=lista_empresas,
-            tipo_cambio_paralelo=obtener_tipo_cambio_paralelo_bolivia()
+            tipo_cambio_live=obtener_tipo_cambio_paralelo()
         )
 
     @app.route('/productos/editar/<int:id>', methods=['GET', 'POST'])

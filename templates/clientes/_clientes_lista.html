@@ -124,10 +124,11 @@
                                 <a href="/clientes/editar/{{ c[0] }}" class="btn btn-sm btn-outline-warning btn-pro-action" title="Editar Cliente">
                                     <i class="bi bi-pencil-fill"></i>
                                 </a>
-                                <a href="/clientes/eliminar/{{ c[0] }}" class="btn btn-sm btn-outline-danger btn-pro-action" 
-                                   title="Eliminar Cliente" onclick="return confirm('¿Está seguro de eliminar este cliente?')">
+                                <button type="button" class="btn btn-sm btn-outline-danger btn-pro-action" 
+                                        title="Eliminar Cliente" 
+                                        onclick="confirmarEliminarCliente(event, '{{ c[0] }}', '{{ c[1]|e }}', '{{ c[3]|e }}', '{{ c[2]|e }}')">
                                     <i class="bi bi-trash-fill"></i>
-                                </a>
+                                </button>
                             </div>
                         </td>
                     </tr>
@@ -185,10 +186,11 @@
                             <a href="/clientes/editar/{{ c[0] }}" class="btn btn-sm btn-outline-warning rounded-circle ms-1" title="Editar">
                                 <i class="bi bi-pencil-fill"></i>
                             </a>
-                            <a href="/clientes/eliminar/{{ c[0] }}" class="btn btn-sm btn-outline-danger rounded-circle ms-1" 
-                               title="Eliminar" onclick="return confirm('¿Eliminar este cliente?')">
+                            <button type="button" class="btn btn-sm btn-outline-danger rounded-circle ms-1" 
+                                    title="Eliminar" 
+                                    onclick="confirmarEliminarCliente(event, '{{ c[0] }}', '{{ c[1]|e }}', '{{ c[3]|e }}', '{{ c[2]|e }}')">
                                 <i class="bi bi-trash-fill"></i>
-                            </a>
+                            </button>
                         </div>
                     </div>
                 </div>

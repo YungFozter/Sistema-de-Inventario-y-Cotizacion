@@ -373,5 +373,24 @@
 .text-indigo { color: #4F46E5 !important; }
 .text-amber { color: #D97706 !important; }
 .text-emerald { color: #059669 !important; }
+
+/* Keyframe Animations para Modales Bento 3D */
+@keyframes modalScaleBounce {
+    0% { transform: scale(0.92); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+.modal.show .bento-clay-modal-content {
+    animation: modalScaleBounce 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes avatarPulse {
+    0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 107, 53, 0.4); }
+    50% { transform: scale(1.05); box-shadow: 0 0 0 8px rgba(255, 107, 53, 0); }
+}
+
+.clay-avatar-3d-pulse {
+    animation: avatarPulse 2.5s infinite ease-in-out;
+}
 .text-purple { color: #8B5CF6 !important; }
 .fs-xs { font-size: 0.78rem !important; }

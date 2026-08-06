@@ -182,6 +182,68 @@
         </div>
     </div>
 </div>
+
+<!-- MODAL DE CONFIRMACIÓN DE ELIMINACIÓN DE CLIENTE (SENCILLO: BLANCO, NEGRO Y NARANJA CON ANIMACIONES 3D) -->
+<div class="modal fade" id="modalConfirmarEliminarCliente" tabindex="-1" aria-labelledby="modalEliminarClienteLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 480px;">
+        <div class="modal-content bento-clay-modal-content" style="background: #FFFFFF; border: 2.5px solid #141414; border-radius: 24px; box-shadow: 12px 12px 30px rgba(0, 0, 0, 0.25), -6px -6px 20px #ffffff; overflow: hidden;">
+            
+            <!-- CABECERA EN NEGRO SOBRIO CON DETALLE DE BORDE INFERIOR NARANJA -->
+            <div class="d-flex align-items-center justify-content-between px-4 py-3" style="background: #141414; border-bottom: 3.5px solid #FF6B35;">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="clay-avatar-3d-pulse" style="width: 44px; height: 44px; background: #FFFFFF; color: #FF6B35; border: 2px solid #141414; border-radius: 14px; display: flex; align-items: center; justify-content: center; box-shadow: 3px 3px 8px rgba(255, 107, 53, 0.4);">
+                        <i class="bi bi-person-x-fill fs-4"></i>
+                    </div>
+                    <div>
+                        <h5 class="modal-title fw-bold text-white mb-0 fs-6" id="modalEliminarClienteLabel">
+                            ¿Eliminar Cliente?
+                        </h5>
+                        <small class="text-white-50" style="font-size: 0.78rem;">Confirmación de Seguridad</small>
+                    </div>
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <!-- CUERPO BENTO GRID SENCILLO Y EFECTIVO -->
+            <div class="p-4" style="background: #F8FAFC;">
+                
+                <!-- BENTO BOX 1: INFORMACIÓN CLAVE DEL CLIENTE SELECCIONADO -->
+                <div class="bento-clay-box mb-3" style="background: #FFFFFF; border: 2px solid #141414; border-radius: 18px; padding: 1.25rem; box-shadow: 4px 4px 12px rgba(0, 0, 0, 0.06), inset 2px 2px 4px rgba(255, 255, 255, 0.9);">
+                    <div class="d-flex align-items-center justify-content-between mb-2 pb-2 border-bottom">
+                        <span class="fw-extrabold text-uppercase" style="font-size: 0.72rem; letter-spacing: 0.06em; color: #FF6B35;">
+                            <i class="bi bi-exclamation-circle-fill me-1"></i> Cliente Seleccionado
+                        </span>
+                        <span class="badge text-white rounded-pill px-3 py-1 fw-bold" style="background: #141414; border: 1px solid #141414; font-size: 0.75rem;" id="eliminarClienteCodigo">CLI-0000</span>
+                    </div>
+                    
+                    <div class="fs-5 fw-extrabold text-dark mb-1" id="eliminarClienteNombre">--</div>
+                    
+                    <div class="small text-secondary" id="eliminarClienteNitWrapper">
+                        <i class="bi bi-card-text me-1 text-dark"></i> NIT / CI: <strong class="text-dark" id="eliminarClienteNit">--</strong>
+                    </div>
+                </div>
+
+                <!-- AVISO CLAVE DE ADVERTENCIA -->
+                <div class="p-3 mb-3 rounded-3" style="background: #141414; color: #FFFFFF; border-left: 4px solid #FF6B35; font-size: 0.83rem; font-weight: 600;">
+                    <i class="bi bi-info-circle-fill me-1 text-orange-pro"></i>
+                    Esta acción eliminará permanentemente al cliente y sus cotizaciones asociadas.
+                </div>
+
+                <!-- BOTONES 3D CLAY EN BLANCO, NEGRO Y NARANJA -->
+                <div class="d-flex gap-3 justify-content-end align-items-center pt-2">
+                    <button type="button" class="clay-btn-secondary py-2.5 px-4" data-bs-dismiss="modal" style="border: 2px solid #141414; font-size: 0.9rem; font-weight: 700; background: #FFFFFF; color: #141414;">
+                        Cancelar
+                    </button>
+                    <a href="#" id="btnConfirmarEliminarHref" class="clay-btn-primary py-2.5 px-4" style="background: #FF6B35; color: #FFFFFF; border: 2px solid #141414; box-shadow: 0 4px 0 #C44E1E, 0 8px 18px rgba(255, 107, 53, 0.4); text-decoration: none; font-size: 0.9rem; font-weight: 800; border-radius: 12px; display: inline-flex; align-items: center; gap: 8px;">
+                        <i class="bi bi-trash-fill"></i> Sí, Eliminar
+                    </a>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+</div>
 {% endblock %}
 
 {% block scripts %}
@@ -282,6 +344,17 @@ function verDetallesCliente(id, nombre, nit, codigo, telefono, referencia) {
     document.getElementById('detReferencia').textContent = referencia || 'Sin Referencia';
 
     const modal = new bootstrap.Modal(document.getElementById('modalDetallesCliente'));
+    modal.show();
+}
+
+function confirmarEliminarCliente(event, id, nombre, codigo, nit) {
+    if (event) event.preventDefault();
+    document.getElementById('eliminarClienteNombre').textContent = nombre || 'Sin Nombre';
+    document.getElementById('eliminarClienteCodigo').textContent = codigo || 'CLI-----';
+    document.getElementById('eliminarClienteNit').textContent = nit || 'S/A';
+    document.getElementById('btnConfirmarEliminarHref').href = `/clientes/eliminar/${id}`;
+
+    const modal = new bootstrap.Modal(document.getElementById('modalConfirmarEliminarCliente'));
     modal.show();
 }
 </script>

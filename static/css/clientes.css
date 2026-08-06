@@ -153,7 +153,7 @@
     background: #f8fafc;
     border-radius: 1.5rem;
     box-shadow: 12px 12px 28px rgba(166, 180, 200, 0.35), -12px -12px 28px #ffffff;
-    border: 1px solid rgba(255, 255, 255, 0.8);
+    border: 2px solid #141414;
     overflow: hidden;
     max-width: 1380px;
     margin-left: auto;
@@ -165,6 +165,7 @@
     background: linear-gradient(135deg, #FF6B35 0%, #E8501A 100%);
     padding: 1.5rem 2rem;
     color: #ffffff;
+    border-bottom: 2px solid #141414;
     box-shadow: inset 0 -2px 6px rgba(0, 0, 0, 0.12);
 }
 
@@ -177,6 +178,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    border: 1.5px solid #141414;
     box-shadow: 4px 4px 12px rgba(0, 0, 0, 0.18), inset -2px -2px 4px rgba(0, 0, 0, 0.05);
 }
 
@@ -187,6 +189,7 @@
     border-radius: 50px;
     font-size: 0.9rem;
     font-weight: 700;
+    border: 1.5px solid #141414;
     box-shadow: 4px 4px 12px rgba(0, 0, 0, 0.15), inset 2px 2px 4px rgba(255, 255, 255, 0.95);
 }
 
@@ -208,18 +211,18 @@
     border-radius: 1.25rem;
     padding: 1.25rem 1.5rem;
     box-shadow: 6px 6px 14px rgba(180, 190, 205, 0.25), -6px -6px 14px #ffffff, inset 2px 2px 4px rgba(255, 255, 255, 0.8);
-    border: 1px solid rgba(226, 232, 240, 0.8);
+    border: 1.5px solid #141414;
     transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
 }
 
 .bento-clay-box:hover {
     transform: translateY(-3px);
-    box-shadow: 8px 12px 20px rgba(255, 107, 53, 0.12), -6px -6px 14px #ffffff;
-    border-color: rgba(255, 107, 53, 0.3);
+    box-shadow: 8px 12px 20px rgba(255, 107, 53, 0.18), -6px -6px 14px #ffffff;
+    border-color: #FF6B35;
 }
 
 .bento-item-featured {
-    border-left: 5px solid #FF6B35;
+    border-left: 6px solid #FF6B35 !important;
 }
 
 .bento-item-full {
@@ -242,7 +245,7 @@
     background: #f8fafc;
     border-radius: 0.85rem;
     box-shadow: inset 3px 3px 6px rgba(180, 190, 205, 0.35), inset -3px -3px 6px #ffffff;
-    border: 1.5px solid #e2e8f0;
+    border: 1.5px solid #141414;
     transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
     overflow: hidden;
 }

@@ -8,98 +8,126 @@
 
 {% block contenido %}
 <div class="container-fluid py-4">
-    <!-- FORMULARIO DE REGISTRO DE CLIENTE (GLASSMORPHISM) -->
-    <div class="glass-panel mb-5">
-        <div class="glass-header d-flex justify-content-between align-items-center">
+    <!-- FORMULARIO DE REGISTRO DE CLIENTE (BENTO GRID + CLAYMORPHISM 3D) -->
+    <div class="clay-bento-card mb-5">
+        <div class="clay-bento-header d-flex justify-content-between align-items-center flex-wrap gap-3">
             <div class="d-flex align-items-center">
-                <div class="avatar-3d me-3">
+                <div class="clay-avatar-3d me-3">
                     <i class="bi bi-person-plus-fill fs-4"></i>
                 </div>
                 <div>
                     <h3 class="fw-bold mb-0 text-white">Registrar Nuevo Cliente</h3>
-                    <small class="text-white-50">Gestiona y guarda tus clientes comerciales con diseño Glassmorphic.</small>
+                    <small class="text-white-50">Gestión comercial interactiva con diseño Bento Grid + Claymorphism 3D.</small>
                 </div>
             </div>
-            <span class="badge bg-white text-primary fs-6 px-3 py-2 rounded-pill shadow-sm">
-                <i class="bi bi-people me-1"></i> Total: {{ pagination.total_items }}
-            </span>
+            <div class="clay-pill-badge">
+                <i class="bi bi-people-fill me-1 text-primary"></i> Total Clientes: <strong class="ms-1 text-dark fs-6">{{ pagination.total_items }}</strong>
+            </div>
         </div>
-        <div class="card-body p-4">
-            <form id="clienteForm" action="/clientes" method="post" class="row g-3 needs-validation" novalidate>
-                <!-- Nombre/Razón Social -->
-                <div class="col-md-6">
-                    <label class="form-label fw-semibold text-dark">
-                        <i class="bi bi-building text-primary me-1"></i> Nombre / Razón Social <span class="text-danger">*</span>
-                    </label>
-                    <div class="input-group">
-                        <span class="input-group-text bg-white border-end-0"><i class="bi bi-person text-muted"></i></span>
-                        <input type="text" name="razon_social" class="form-control border-start-0 shadow-none" placeholder="Ej: Constructora Santa Cruz S.R.L." required>
+
+        <div class="card-body p-4 p-md-5">
+            <form id="clienteForm" action="/clientes" method="post" class="needs-validation" novalidate>
+                <!-- BENTO GRID CONTAINERS -->
+                <div class="bento-grid-container">
+                    
+                    <!-- BENTO ITEM 1: Nombre / Razón Social -->
+                    <div class="bento-clay-box bento-item-featured">
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <label class="bento-label">
+                                <i class="bi bi-building text-primary me-2 fs-5"></i>
+                                <span>Nombre / Razón Social</span>
+                                <span class="text-danger ms-1">*</span>
+                            </label>
+                            <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-2 py-1 small">Requerido</span>
+                        </div>
+                        <div class="clay-input-group">
+                            <span class="clay-input-icon"><i class="bi bi-person-badge text-muted"></i></span>
+                            <input type="text" name="razon_social" class="clay-input" placeholder="Ej: Constructora Santa Cruz S.R.L." required>
+                        </div>
+                        <div class="invalid-feedback ps-2">Por favor ingrese el nombre o razón social.</div>
                     </div>
-                    <div class="invalid-feedback">Por favor ingrese el nombre o razón social.</div>
+
+                    <!-- BENTO ITEM 2: NIT / CI (con botón Validar 3D) -->
+                    <div class="bento-clay-box">
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <label class="bento-label">
+                                <i class="bi bi-card-heading text-indigo me-2 fs-5"></i>
+                                <span>NIT / CI</span>
+                                <small class="text-muted fw-normal ms-1">(Opcional)</small>
+                            </label>
+                        </div>
+                        <div class="clay-input-group">
+                            <span class="clay-input-icon"><i class="bi bi-file-text text-muted"></i></span>
+                            <input type="text" name="nit" class="clay-input" placeholder="Dejar en blanco para S/A">
+                            <button class="clay-btn-validar" type="button" id="btnValidarNit">
+                                <i class="bi bi-shield-check me-1"></i> Validar
+                            </button>
+                        </div>
+                        <small class="text-muted d-block mt-2 ps-1 fs-xs">Si se deja en blanco se guardará como <strong>S/A (Sin Asignar)</strong>.</small>
+                    </div>
+
+                    <!-- BENTO ITEM 3: Código de Cliente Autogenerado -->
+                    <div class="bento-clay-box">
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <label class="bento-label">
+                                <i class="bi bi-hash text-amber me-2 fs-5"></i>
+                                <span>Código de Cliente</span>
+                            </label>
+                            <span class="badge bg-warning bg-opacity-25 text-dark rounded-pill px-2 py-1 small fw-bold">Automático</span>
+                        </div>
+                        <div class="clay-input-group">
+                            <span class="clay-input-icon"><i class="bi bi-qr-code text-muted"></i></span>
+                            <input type="text" name="codigo_cliente" class="clay-input clay-input-readonly fw-bold text-primary" id="codigoCliente" placeholder="Autogenerado al guardar" readonly>
+                        </div>
+                        <small class="text-muted d-block mt-2 ps-1 fs-xs">Secuencial inteligente (reutiliza huecos borrados).</small>
+                    </div>
+
+                    <!-- BENTO ITEM 4: Teléfono / Contacto -->
+                    <div class="bento-clay-box">
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <label class="bento-label">
+                                <i class="bi bi-telephone-fill text-emerald me-2 fs-5"></i>
+                                <span>Teléfono / Contacto</span>
+                                <small class="text-muted fw-normal ms-1">(Opcional)</small>
+                            </label>
+                        </div>
+                        <div class="clay-input-group">
+                            <span class="clay-input-icon"><i class="bi bi-telephone text-muted"></i></span>
+                            <input type="tel" name="telefono" class="clay-input" placeholder="Dejar en blanco para S/A">
+                        </div>
+                        <small class="text-muted d-block mt-2 ps-1 fs-xs">Si se deja en blanco se guardará como <strong>S/A (Sin Asignar)</strong>.</small>
+                    </div>
+
+                    <!-- BENTO ITEM 5: Referencia Interna (Ancho Completo) -->
+                    <div class="bento-clay-box bento-item-full">
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <label class="bento-label">
+                                <i class="bi bi-bookmark-star-fill text-purple me-2 fs-5"></i>
+                                <span>Referencia Interna / Código de Seguimiento</span>
+                                <small class="text-muted fw-normal ms-1">(Opcional)</small>
+                            </label>
+                        </div>
+                        <div class="clay-input-group">
+                            <span class="clay-input-icon"><i class="bi bi-info-square text-muted"></i></span>
+                            <input type="text" name="referencia" class="clay-input" list="referenciasSugeridas" placeholder="Ej: Recomendado por Gerencia / CLT-2026">
+                        </div>
+                        <datalist id="referenciasSugeridas">
+                            <option value="A1B2C3">
+                            <option value="XYZ-001">
+                            <option value="CLT-2026">
+                        </datalist>
+                        <small class="text-muted d-block mt-2 ps-1 fs-xs">Nota o código interno para seguimiento de ventas.</small>
+                    </div>
+
                 </div>
 
-                <!-- NIT/CI (Opcional) -->
-                <div class="col-md-6">
-                    <label class="form-label fw-semibold text-dark">
-                        <i class="bi bi-card-heading text-primary me-1"></i> NIT / CI <small class="text-muted">(Opcional)</small>
-                    </label>
-                    <div class="input-group">
-                        <span class="input-group-text bg-white border-end-0"><i class="bi bi-file-text text-muted"></i></span>
-                        <input type="text" name="nit" class="form-control border-start-0 shadow-none" placeholder="Dejar en blanco para S/A">
-                        <button class="btn btn-outline-primary fw-semibold px-3" type="button" id="btnValidarNit">
-                            <i class="bi bi-shield-check me-1"></i> Validar
-                        </button>
-                    </div>
-                    <small class="text-muted d-block mt-1">Si se deja en blanco se registrará como <strong>S/A (Sin Asignar)</strong>.</small>
-                </div>
-
-                <!-- Código de Cliente generado automático -->
-                <div class="col-md-6">
-                    <label class="form-label fw-semibold text-dark">
-                        <i class="bi bi-hash text-primary me-1"></i> Código de Cliente
-                    </label>
-                    <div class="input-group">
-                        <span class="input-group-text bg-white border-end-0"><i class="bi bi-qr-code text-muted"></i></span>
-                        <input type="text" name="codigo_cliente" class="form-control border-start-0 bg-light text-primary fw-bold" id="codigoCliente" placeholder="Autogenerado al guardar" readonly>
-                    </div>
-                    <small class="text-muted">Secuencial automático (reutiliza huecos borrados).</small>
-                </div>
-
-                <!-- Teléfono/Contacto (Opcional) -->
-                <div class="col-md-6">
-                    <label class="form-label fw-semibold text-dark">
-                        <i class="bi bi-telephone-fill text-primary me-1"></i> Teléfono / Contacto <small class="text-muted">(Opcional)</small>
-                    </label>
-                    <div class="input-group">
-                        <span class="input-group-text bg-white border-end-0"><i class="bi bi-telephone text-muted"></i></span>
-                        <input type="tel" name="telefono" class="form-control border-start-0 shadow-none" placeholder="Dejar en blanco para S/A">
-                    </div>
-                    <small class="text-muted d-block mt-1">Si se deja en blanco se registrará como <strong>S/A (Sin Asignar)</strong>.</small>
-                </div>
-
-                <!-- Referencia interno -->
-                <div class="col-12">
-                    <label class="form-label fw-semibold text-dark">
-                        <i class="bi bi-bookmark-fill text-primary me-1"></i> Referencia Interna <small class="text-muted">(Opcional)</small>
-                    </label>
-                    <div class="input-group">
-                        <span class="input-group-text bg-white border-end-0"><i class="bi bi-info-square text-muted"></i></span>
-                        <input type="text" name="referencia" class="form-control border-start-0 shadow-none" list="referenciasSugeridas" placeholder="Ej: Recomendado por Gerencia / CLT-2026">
-                    </div>
-                    <datalist id="referenciasSugeridas">
-                        <option value="A1B2C3">
-                        <option value="XYZ-001">
-                        <option value="CLT-2026">
-                    </datalist>
-                    <small class="text-muted">Código o nota interna para seguimiento comercial.</small>
-                </div>
-
-                <div class="col-12 d-flex gap-2 pt-2">
-                    <button type="submit" class="btn btn-primary px-4 py-2 rounded-3 shadow-sm btn-pro-action fw-bold">
-                        <i class="bi bi-check-circle-fill me-1"></i> Guardar Cliente
+                <!-- BOTONES DE ACCIÓN CLAYMORPHISM 3D -->
+                <div class="d-flex gap-3 pt-4 justify-content-start flex-wrap">
+                    <button type="submit" class="clay-btn-primary">
+                        <i class="bi bi-check-circle-fill me-2 fs-6"></i> Guardar Cliente
                     </button>
-                    <button type="reset" class="btn btn-outline-secondary px-4 py-2 rounded-3 btn-pro-action">
-                        <i class="bi bi-eraser-fill me-1"></i> Limpiar Campos
+                    <button type="reset" class="clay-btn-secondary">
+                        <i class="bi bi-eraser-fill me-2 fs-6"></i> Limpiar Campos
                     </button>
                 </div>
             </form>

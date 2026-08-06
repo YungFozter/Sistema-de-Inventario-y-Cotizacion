@@ -1,5 +1,5 @@
 <div class="glass-header d-flex justify-content-between align-items-center flex-wrap gap-3">
-    <div class="d-flex align-items-center">
+    <div class="d-flex align-items-center me-auto">
         <div class="avatar-3d me-3" style="width: 46px; height: 46px;">
             <i class="bi bi-people-fill fs-4"></i>
         </div>
@@ -9,12 +9,12 @@
         </div>
     </div>
 
-    <!-- CONTROLES: CONMUTADOR DE VISTA [ ☰ Tabla | ▦ Tarjetas 3D ], SECTOR FILTRO 15-30-50 & BÚSQUEDA -->
-    <div class="d-flex align-items-center gap-3 flex-wrap">
+    <!-- CONTROLES ALINEADOS AL COSTADO DERECHO: MOSTRAR 15-30-50 | CONMUTADOR VISTA | BÚSQUEDA -->
+    <div class="d-flex align-items-center gap-2 flex-wrap ms-auto justify-content-end">
         <!-- Selector Items Por Página (15, 30, 50) -->
-        <div class="d-flex align-items-center gap-2">
-            <span class="text-white-50 small fw-bold"><i class="bi bi-funnel-fill me-1"></i>Mostrar:</span>
-            <select id="selectPerPageClientes" class="form-select form-select-sm border-0 bg-white fw-bold text-dark shadow-sm rounded-3" style="width: 120px; cursor: pointer;" onchange="cambiarItemsPorPaginaClientes(this.value)">
+        <div class="d-flex align-items-center gap-1">
+            <span class="text-white-50 small fw-bold text-nowrap"><i class="bi bi-funnel-fill me-1"></i>Mostrar:</span>
+            <select id="selectPerPageClientes" class="form-select form-select-sm border-0 bg-white fw-bold text-dark shadow-sm rounded-3" style="width: 115px; cursor: pointer;" onchange="cambiarItemsPorPaginaClientes(this.value)">
                 <option value="15" {% if pagination.per_page == 15 %}selected{% endif %}>15 por pág.</option>
                 <option value="30" {% if pagination.per_page == 30 %}selected{% endif %}>30 por pág.</option>
                 <option value="50" {% if pagination.per_page == 50 %}selected{% endif %}>50 por pág.</option>
@@ -32,15 +32,15 @@
         </div>
 
         <!-- Buscador Ajax -->
-        <form method="get" action="{{ url_for('clientes') }}" class="input-group shadow-sm" style="max-width: 300px;" onsubmit="event.preventDefault(); cargarPaginaClientes(event, 1);">
-            <input type="text" class="form-control border-0" placeholder="Buscar cliente..."
+        <form method="get" action="{{ url_for('clientes') }}" class="input-group shadow-sm" style="width: 220px;" onsubmit="event.preventDefault(); cargarPaginaClientes(event, 1);">
+            <input type="text" class="form-control form-control-sm border-0" placeholder="Buscar cliente..."
                 name="buscar" value="{{ request.args.get('buscar', '') }}" id="buscarClienteInput"
                 oninput="buscarClienteDebounce(this.value)" autocomplete="off">
-            <button class="btn btn-light text-primary fw-bold px-3 border-0" type="submit">
+            <button class="btn btn-light btn-sm text-primary fw-bold px-2 border-0" type="submit">
                 <i class="bi bi-search"></i>
             </button>
             {% if request.args.get('buscar') %}
-            <button type="button" class="btn btn-outline-light" onclick="limpiarBusquedaClientes()" title="Limpiar búsqueda">
+            <button type="button" class="btn btn-outline-light btn-sm" onclick="limpiarBusquedaClientes()" title="Limpiar búsqueda">
                 <i class="bi bi-x-circle-fill"></i>
             </button>
             {% endif %}

@@ -184,72 +184,204 @@
 
 </div>
 
-<!-- Formulario de Registro -->
-<h2 class="mb-4">Registrar Producto</h2>
+<!-- SECCIÓN DE REGISTRO DE PRODUCTOS - IDEA 3: BENTO SUPERIOR & PANEL INFERIOR DE SUMMARY -->
+<div class="editorial-register-container">
+  
+  <!-- PARTE SUPERIOR: PANEL CLARO CON BENTO GRID DE CAMPOS Y BOTONERA DE PLANTILLAS -->
+  <div class="editorial-register-top">
+    
+    <div class="d-flex align-items-center justify-content-between flex-wrap gap-3 mb-4">
+      <div>
+        <div class="editorial-tag-badge mb-2">
+          <span class="editorial-dot-orange"></span>
+          GESTIÓN DE CATALOGO
+        </div>
+        <h3 class="serif-editorial-title text-dark mb-1" style="font-size: 2.2rem;">Registrar Nuevo Producto</h3>
+        <p class="text-secondary mb-0" style="font-size: 0.9rem;">
+          Ingresa los datos manualmente o selecciona una plantilla para auto-completar rápidamente.
+        </p>
+      </div>
 
-{% if mensaje_error %}
-<div class="alert alert-danger">{{ mensaje_error }}</div>
-{% endif %}
+      <!-- PLANTILLAS RÁPIDAS (BOTONERA PILL CÁLIDA) -->
+      <div class="d-flex align-items-center gap-2 flex-wrap">
+        <span class="fw-bold text-uppercase text-muted me-1" style="font-size: 0.72rem; letter-spacing: 0.06em;">
+          <i class="bi bi-magic text-orange-pro"></i> Plantillas:
+        </span>
+        <button type="button" class="preset-pill-dark" onclick="aplicarPlantillaProducto('electricidad')">
+          ⚡ Electricidad
+        </button>
+        <button type="button" class="preset-pill-dark" onclick="aplicarPlantillaProducto('herramientas')">
+          🛠️ Herramientas
+        </button>
+        <button type="button" class="preset-pill-dark" onclick="aplicarPlantillaProducto('insumos')">
+          📦 Insumos
+        </button>
+        <button type="button" class="preset-pill-dark" onclick="aplicarPlantillaProducto('servicios')">
+          💻 Servicios
+        </button>
+        <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-2.5" onclick="limpiarFormularioProducto()" title="Restablecer">
+          <i class="bi bi-arrow-counterclockwise"></i>
+        </button>
+      </div>
+    </div>
 
-<form id="formProducto" class="row g-3">
-  <input type="hidden" name="categoria_id" id="categoria_id">
-  <div class="col-md-6">
-    <label class="form-label">Nombre del Producto:</label>
-    <input type="text" name="empresa" id="empresa" class="form-control">
+    {% if mensaje_error %}
+    <div class="alert alert-danger rounded-4 border-0 mb-4 shadow-sm">{{ mensaje_error }}</div>
+    {% endif %}
+
+    <!-- FORMULARIO BENTO GRID -->
+    <form id="formProducto">
+      <input type="hidden" name="categoria_id" id="categoria_id">
+
+      <div class="editorial-bento-grid mb-2">
+        
+        <!-- BENTO ITEM 1: Nombre del Producto -->
+        <div class="editorial-bento-item">
+          <label class="editorial-bento-label">
+            <i class="bi bi-box-seam text-orange-pro"></i> Nombre del Producto
+          </label>
+          <div class="clay-pill-input-group">
+            <span class="clay-pill-input-icon"><i class="bi bi-pencil-square"></i></span>
+            <input type="text" name="empresa" id="empresa" class="clay-pill-input" placeholder="Ej: Cable Cobre 12AWG Multifilar" oninput="actualizarVistaPreviaProducto()">
+          </div>
+        </div>
+
+        <!-- BENTO ITEM 2: Código Único -->
+        <div class="editorial-bento-item">
+          <label class="editorial-bento-label">
+            <i class="bi bi-qr-code text-orange-pro"></i> Código Único <span class="text-danger">*</span>
+          </label>
+          <div class="clay-pill-input-group">
+            <span class="clay-pill-input-icon"><i class="bi bi-hash"></i></span>
+            <input type="text" name="codigo" id="codigo" class="clay-pill-input" placeholder="Ej: ERD-001" required oninput="actualizarVistaPreviaProducto()">
+          </div>
+        </div>
+
+        <!-- BENTO ITEM 3: Descripción -->
+        <div class="editorial-bento-item">
+          <label class="editorial-bento-label">
+            <i class="bi bi-text-paragraph text-orange-pro"></i> Descripción
+          </label>
+          <div class="clay-pill-input-group">
+            <span class="clay-pill-input-icon"><i class="bi bi-card-text"></i></span>
+            <input type="text" name="descripcion" id="descripcion" class="clay-pill-input" placeholder="Detalles técnicos" oninput="actualizarVistaPreviaProducto()">
+          </div>
+        </div>
+
+        <!-- BENTO ITEM 4: Marca / Fabricante -->
+        <div class="editorial-bento-item">
+          <label class="editorial-bento-label">
+            <i class="bi bi-tag-fill text-orange-pro"></i> Marca / Fabricante
+          </label>
+          <div class="clay-pill-input-group">
+            <span class="clay-pill-input-icon"><i class="bi bi-building"></i></span>
+            <input type="text" name="marca" id="marca" class="clay-pill-input" placeholder="Ej: Siemens / Conduspar" oninput="actualizarVistaPreviaProducto()">
+          </div>
+        </div>
+
+        <!-- BENTO ITEM 5: Tipo Moneda (TM) -->
+        <div class="editorial-bento-item">
+          <label class="editorial-bento-label">
+            <i class="bi bi-currency-dollar text-orange-pro"></i> Tipo Moneda (TM)
+          </label>
+          <div class="clay-pill-input-group">
+            <span class="clay-pill-input-icon"><i class="bi bi-cash-coin"></i></span>
+            <input type="text" name="tm" id="tm" class="clay-pill-input" value="Bs" placeholder="Bs / $US" oninput="actualizarVistaPreviaProducto()">
+          </div>
+        </div>
+
+        <!-- BENTO ITEM 6: Unidad Medida (UM) -->
+        <div class="editorial-bento-item">
+          <label class="editorial-bento-label">
+            <i class="bi bi-rulers text-orange-pro"></i> Unidad Medida (UM)
+          </label>
+          <div class="clay-pill-input-group">
+            <span class="clay-pill-input-icon"><i class="bi bi-bounding-box-circles"></i></span>
+            <input type="text" name="um" id="um" class="clay-pill-input" placeholder="Ej: Metros / Pza / Caja" oninput="actualizarVistaPreviaProducto()">
+          </div>
+        </div>
+
+        <!-- BENTO ITEM 7: Cantidad Stock -->
+        <div class="editorial-bento-item">
+          <label class="editorial-bento-label">
+            <i class="bi bi-stack text-orange-pro"></i> Cantidad Stock
+          </label>
+          <div class="clay-pill-input-group">
+            <span class="clay-pill-input-icon"><i class="bi bi-layers"></i></span>
+            <input type="number" name="cantidad" id="cantidad" class="clay-pill-input" min="1" value="1" oninput="actualizarVistaPreviaProducto()">
+          </div>
+        </div>
+
+        <!-- BENTO ITEM 8: Precio Unitario -->
+        <div class="editorial-bento-item">
+          <label class="editorial-bento-label">
+            <i class="bi bi-tag-val-fill text-orange-pro"></i> Precio Unitario <span class="text-danger">*</span>
+          </label>
+          <div class="clay-pill-input-group">
+            <span class="clay-pill-input-icon"><i class="bi bi-currency-exchange"></i></span>
+            <input type="number" name="precio_unitario" id="precio_unitario" class="clay-pill-input" step="any" placeholder="0.00" required oninput="actualizarVistaPreviaProducto()">
+          </div>
+        </div>
+
+      </div>
+    </form>
+
   </div>
 
-  <div class="col-md-6">
-    <label class="form-label">Código:</label>
-    <input type="text" name="codigo" id="codigo" class="form-control" required>
+  <!-- PARTE INFERIOR: PANEL OSCURO DE VISTA PREVIA EN VIVO & ACCIONES PILL 3D -->
+  <div class="editorial-register-bottom">
+    <div class="row align-items-center g-4">
+      
+      <!-- COLUMNA 1: VISTA PREVIA EN TIEMPO REAL DEL PRODUCTO -->
+      <div class="col-lg-7">
+        <div class="preview-summary-card d-flex align-items-center justify-content-between flex-wrap gap-3">
+          <div class="d-flex align-items-center gap-3">
+            <div class="rounded-circle bg-warning bg-opacity-20 border border-warning text-warning p-3 d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
+              <i class="bi bi-box-seam-fill fs-4"></i>
+            </div>
+            <div>
+              <div class="d-flex align-items-center gap-2">
+                <span class="badge bg-warning text-dark fw-extrabold rounded-pill px-2.5 py-1" id="previewCodigo">COD-000</span>
+                <span class="small text-white-50" id="previewMarcaUM">Sin Marca | Pza</span>
+              </div>
+              <h5 class="fw-bold text-white mb-0 text-truncate mt-1" style="max-width: 320px;" id="previewNombre">
+                Nuevo Producto...
+              </h5>
+            </div>
+          </div>
+
+          <div class="text-end">
+            <small class="text-white-50 d-block" style="font-size: 0.75rem;">PRECIO & STOCK</small>
+            <div class="fs-4 fw-extrabold text-orange-pro" id="previewPrecioStock">
+              0.00 Bs
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- COLUMNA 2: BOTONES DE ACCIÓN PILL 3D -->
+      <div class="col-lg-5 text-lg-end d-flex align-items-center justify-content-lg-end justify-content-start flex-wrap gap-2.5">
+        <button type="button" id="btnMostrarModal" class="clay-pill-btn-primary">
+          <i class="bi bi-plus-circle-fill"></i> Registrar Producto
+        </button>
+
+        <button type="button" id="btnGestionarCategorias" class="clay-pill-btn-secondary" style="background: rgba(255,255,255,0.15); color: #FFF !important; border: 1px solid rgba(255,255,255,0.25);">
+          <i class="bi bi-tags-fill"></i> Categorías
+        </button>
+
+        <button type="button" id="btnImportarPDF" class="clay-pill-btn-primary" style="background: #059669; box-shadow: 0 4px 14px rgba(5, 150, 105, 0.4);" data-bs-toggle="modal" data-bs-target="#modalImportarPDF">
+          <i class="bi bi-file-earmark-pdf-fill"></i> Importar PDF
+        </button>
+
+        <button type="button" id="btnVerHistorialImportaciones" class="clay-pill-btn-secondary" style="background: rgba(255,255,255,0.1); color: #FFF !important;" data-bs-toggle="modal" data-bs-target="#modalHistorialImportaciones" onclick="cargarHistorialImportaciones()">
+          <i class="bi bi-clock-history"></i> Historial
+        </button>
+      </div>
+
+    </div>
   </div>
 
-  <div class="col-md-6">
-    <label class="form-label">Descripción:</label>
-    <input type="text" name="descripcion" id="descripcion" class="form-control">
-  </div>
-
-  <div class="col-md-6">
-    <label class="form-label">Marca:</label>
-    <input type="text" name="marca" id="marca" class="form-control">
-  </div>
-
-  <div class="col-md-4">
-    <label class="form-label">Tipo de Moneda (TM):</label>
-    <input type="text" name="tm" id="tm" class="form-control" value="Bs">
-  </div>
-
-  <div class="col-md-4">
-    <label class="form-label">Unidad de Medida (UM):</label>
-    <input type="text" name="um" id="um" class="form-control">
-  </div>
-
-  <div class="col-md-4">
-    <label class="form-label">Cantidad:</label>
-    <input type="number" name="cantidad" id="cantidad" class="form-control" min="1" value="1">
-  </div>
-
-  <div class="col-md-4">
-    <label class="form-label">Precio Unitario:</label>
-    <input type="number" name="precio_unitario" id="precio_unitario" class="form-control" step="any" required>
-  </div>
-
-  <div class="col-12">
-    <button type="button" id="btnMostrarModal" class="btn btn-primary">
-      <i class="bi bi-plus-circle"></i> Registrar Producto
-    </button>
-    <button type="button" id="btnGestionarCategorias" class="btn btn-outline-secondary ms-2">
-      <i class="bi bi-tags"></i> Gestionar Categorías
-    </button>
-    <button type="button" id="btnImportarPDF" class="btn btn-success ms-2" data-bs-toggle="modal"
-      data-bs-target="#modalImportarPDF">
-      <i class="bi bi-file-earmark-pdf-fill"></i> Importar PDF de Productos
-    </button>
-    <button type="button" id="btnVerHistorialImportaciones" class="btn btn-outline-info ms-2" data-bs-toggle="modal"
-      data-bs-target="#modalHistorialImportaciones" onclick="cargarHistorialImportaciones()">
-      <i class="bi bi-clock-history"></i> Historial Importaciones
-    </button>
-  </div>
-</form>
+</div>
 
 
 <hr class="my-5">
@@ -2592,6 +2724,62 @@
               // 8. Reiniciar contador de items
               const badge = document.getElementById('badgeContadorItems');
               if (badge) badge.textContent = 'Items extraídos: 0 | Marcados: 0';
+            }
+
+            function actualizarVistaPreviaProducto() {
+                const nombre = document.getElementById('empresa')?.value || 'Nuevo Producto...';
+                const codigo = document.getElementById('codigo')?.value || 'COD-000';
+                const marca = document.getElementById('marca')?.value || 'Sin Marca';
+                const um = document.getElementById('um')?.value || 'Pza';
+                const tm = document.getElementById('tm')?.value || 'Bs';
+                const cantidad = document.getElementById('cantidad')?.value || '1';
+                const precio = document.getElementById('precio_unitario')?.value || '0.00';
+
+                const pNombre = document.getElementById('previewNombre');
+                const pCodigo = document.getElementById('previewCodigo');
+                const pMarcaUM = document.getElementById('previewMarcaUM');
+                const pPrecioStock = document.getElementById('previewPrecioStock');
+
+                if (pNombre) pNombre.textContent = nombre;
+                if (pCodigo) pCodigo.textContent = codigo;
+                if (pMarcaUM) pMarcaUM.textContent = `${marca} | ${um}`;
+                if (pPrecioStock) pPrecioStock.textContent = `${precio} ${tm} (Stock: ${cantidad})`;
+            }
+
+            function aplicarPlantillaProducto(tipo) {
+                const tmInput = document.getElementById('tm');
+                const umInput = document.getElementById('um');
+                const marcaInput = document.getElementById('marca');
+                const descInput = document.getElementById('descripcion');
+
+                if (tipo === 'electricidad') {
+                    if (tmInput) tmInput.value = 'Bs';
+                    if (umInput) umInput.value = 'Metros (m)';
+                    if (marcaInput) marcaInput.value = 'Conduspar / Siemens';
+                    if (descInput) descInput.value = 'Cable eléctrico conductor multifilar de cobre aislado';
+                } else if (tipo === 'herramientas') {
+                    if (tmInput) tmInput.value = 'Bs';
+                    if (umInput) umInput.value = 'Pieza (Pza)';
+                    if (marcaInput) marcaInput.value = 'Bosch / Makita';
+                    if (descInput) descInput.value = 'Herramienta industrial / equipo de protección y corte';
+                } else if (tipo === 'insumos') {
+                    if (tmInput) tmInput.value = 'Bs';
+                    if (umInput) umInput.value = 'Caja (Caj)';
+                    if (marcaInput) marcaInput.value = 'Genérico / Importado';
+                    if (descInput) descInput.value = 'Caja de insumos y consumibles de oficina/taller';
+                } else if (tipo === 'servicios') {
+                    if (tmInput) tmInput.value = '$US';
+                    if (umInput) umInput.value = 'Servicio (Glb)';
+                    if (marcaInput) marcaInput.value = 'COTIZAPro Services';
+                    if (descInput) descInput.value = 'Servicio técnico especializado / Licencia y configuración';
+                }
+                actualizarVistaPreviaProducto();
+            }
+
+            function limpiarFormularioProducto() {
+                const form = document.getElementById('formProducto');
+                if (form) form.reset();
+                actualizarVistaPreviaProducto();
             }
           </script>
           {% endblock %}

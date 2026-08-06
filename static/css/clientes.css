@@ -236,7 +236,7 @@
 }
 
 /* Inputs 3D Claymorphic */
-.clay-input-group {
+.bento-clay-box .clay-input-group {
     display: flex;
     align-items: center;
     background: #f8fafc;
@@ -247,7 +247,7 @@
     overflow: hidden;
 }
 
-.clay-input-group:focus-within {
+.bento-clay-box .clay-input-group:focus-within {
     border-color: #FF6B35;
     background: #ffffff;
     box-shadow: inset 2px 2px 4px rgba(255, 107, 53, 0.1), 0 0 0 3px rgba(255, 107, 53, 0.2);

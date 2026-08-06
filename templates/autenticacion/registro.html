@@ -126,7 +126,19 @@
     }
 
     /* ── Inputs ────────────────────────────────────── */
-    .clay-input-group { position: relative; margin-bottom: 1.1rem; }
+    .clay-input-group {
+        position: relative;
+        margin-bottom: 1.15rem;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: stretch !important;
+        width: 100% !important;
+        background: transparent !important;
+        box-shadow: none !important;
+        border: none !important;
+        padding: 0 !important;
+        overflow: visible !important;
+    }
 
     .clay-input-label {
         font-size: 0.78rem;
@@ -134,11 +146,17 @@
         color: #444;
         text-transform: uppercase;
         letter-spacing: 0.05em;
-        display: block;
+        display: block !important;
         margin-bottom: 6px;
+        width: 100% !important;
     }
 
-    .clay-input-wrapper { position: relative; display: flex; align-items: center; }
+    .clay-input-wrapper {
+        position: relative;
+        display: flex !important;
+        align-items: center;
+        width: 100% !important;
+    }
 
     .clay-input-icon {
         position: absolute;
@@ -150,10 +168,10 @@
     }
 
     .clay-input {
-        width: 100%;
+        width: 100% !important;
         padding: 12px 14px 12px 42px;
-        border: 1.5px solid rgba(0, 0, 0, 0.12);
-        border-radius: 14px;
+        border: 1.5px solid rgba(0, 0, 0, 0.12) !important;
+        border-radius: 14px !important;
         font-family: 'Plus Jakarta Sans', sans-serif;
         font-size: 0.95rem;
         font-weight: 600;
@@ -161,6 +179,7 @@
         background: #F8F9FA;
         outline: none;
         transition: all 0.2s ease;
+        box-shadow: none;
     }
 
     .clay-input:focus {

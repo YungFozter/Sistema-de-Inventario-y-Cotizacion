@@ -187,6 +187,7 @@ def register_routes(app):
             
             session_token = uuid.uuid4().hex
 
+            es_nuevo_registro = False
             if cliente:
                 user_id = cliente['id']
                 rol = cliente['rol']
@@ -212,6 +213,7 @@ def register_routes(app):
                 con.close()
             else:
                 # Registrar cliente nuevo via Google
+                es_nuevo_registro = True
                 nuevo_id = _insertar_cliente(
                     cur, con,
                     nombre=nombre,
@@ -256,6 +258,10 @@ def register_routes(app):
             else:
                 session['trial_activo'] = False
 
+            if es_nuevo_registro:
+                flash('¡Bienvenido a COTIZAPro! Tu cuenta fue creada exitosamente.', 'success')
+                return redirect(url_for('bienvenida_google'))
+
             flash('¡Sesión iniciada correctamente con Google!', 'success')
             return redirect(url_for('dashboard'))
                 
@@ -263,6 +269,51 @@ def register_routes(app):
             print(f'[GOOGLE AUTH ERROR] {e}')
             flash(f'Error al iniciar sesión con Google: {str(e)}', 'danger')
             return redirect(url_for('login'))
+
+    @app.route('/auth/bienvenida-google', methods=['GET', 'POST'])
+    @login_required
+    def bienvenida_google():
+        user_id = session.get('user_id')
+        if not user_id:
+            return redirect(url_for('login'))
+        
+        con = get_db_connection()
+        con.row_factory = sqlite3.Row
+        cur = con.cursor()
+
+        if request.method == 'POST':
+            empresa = request.form.get('empresa_nombre', '').strip()
+            telefono = request.form.get('telefono', '').strip()
+            nombre = request.form.get('nombre', '').strip()
+
+            query_up = '''
+                UPDATE clientes SET empresa_nombre = ?, telefono = ?, nombre = ? WHERE id = ?
+            ''' if not is_postgres else '''
+                UPDATE clientes SET empresa_nombre = %s, telefono = %s, nombre = %s WHERE id = %s
+            '''
+            try:
+                cur.execute(query_up, (empresa, telefono, nombre or session.get('user_nombre'), user_id))
+                con.commit()
+                if nombre:
+                    session['user_nombre'] = nombre
+                flash('¡Datos de tu empresa guardados correctamente!', 'success')
+            except Exception as ex:
+                print(f"[WARN] Error actualizando perfil inicial Google: {ex}")
+                con.rollback()
+            finally:
+                con.close()
+
+            return redirect(url_for('dashboard'))
+
+        query_sel = 'SELECT * FROM clientes WHERE id = %s' if is_postgres else 'SELECT * FROM clientes WHERE id = ?'
+        cur.execute(query_sel, (user_id,))
+        usuario = cur.fetchone()
+        con.close()
+
+        if not usuario:
+            return redirect(url_for('login'))
+
+        return render_template('autenticacion/bienvenida_google.html', usuario=dict(usuario))
 
     @app.route('/login', methods=['GET', 'POST'])
 

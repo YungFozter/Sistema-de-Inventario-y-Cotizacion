@@ -1,0 +1,324 @@
+{% extends 'shared/layout.html' %}
+
+{% block titulo %}Ficha de Credenciales | COTIZAPro{% endblock %}
+
+{% block styles %}
+{{ super() }}
+<style>
+    /* ============================================================
+       BIENVENIDA GOOGLE - BENTO GRID + CLAYMORPHISM 3D
+       ============================================================ */
+    .welcome-page-wrapper {
+        background-color: #F4F3EE;
+        background-image:
+            radial-gradient(circle at 15% 15%, rgba(255, 107, 53, 0.09) 0%, transparent 50%),
+            radial-gradient(circle at 85% 85%, rgba(79, 70, 229, 0.08) 0%, transparent 50%);
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        min-height: calc(100vh - 120px);
+        margin-top: -1.5rem;
+        margin-bottom: -3rem;
+        margin-left: -12px;
+        margin-right: -12px;
+        padding: 3rem 1.5rem 5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .welcome-bento-container {
+        max-width: 960px;
+        width: 100%;
+    }
+
+    /* ── Main Bento Card ───────────────────────────────────────── */
+    .clay-welcome-card {
+        background: #FFFFFF;
+        border: 2px solid #141414;
+        border-radius: 28px;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.08), 12px 12px 28px rgba(166, 180, 200, 0.35);
+        overflow: hidden;
+    }
+
+    .clay-welcome-header {
+        background: linear-gradient(135deg, #FF6B35 0%, #E8501A 100%);
+        padding: 2rem 2.5rem;
+        color: #ffffff;
+        border-bottom: 2.5px solid #141414;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 1.25rem;
+    }
+
+    .clay-avatar-badge {
+        width: 60px;
+        height: 60px;
+        border-radius: 18px;
+        background: #FFFFFF;
+        color: #FF6B35;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.8rem;
+        border: 2px solid #141414;
+        box-shadow: 4px 4px 12px rgba(0, 0, 0, 0.18), inset -2px -2px 4px rgba(0, 0, 0, 0.05);
+    }
+
+    .welcome-badge-trial {
+        background: #FFFFFF;
+        color: #141414;
+        border: 1.5px solid #141414;
+        padding: 8px 18px;
+        border-radius: 50px;
+        font-size: 0.88rem;
+        font-weight: 800;
+        box-shadow: 4px 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    /* Bento Grid Items */
+    .bento-welcome-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.5rem;
+    }
+
+    @media (max-width: 768px) {
+        .bento-welcome-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .bento-welcome-box {
+        background: #F8FAFC;
+        border-radius: 1.25rem;
+        padding: 1.35rem 1.5rem;
+        border: 1.5px solid #141414;
+        box-shadow: 6px 6px 14px rgba(180, 190, 205, 0.25), inset 2px 2px 4px rgba(255, 255, 255, 0.9);
+    }
+
+    .bento-welcome-full {
+        grid-column: 1 / -1;
+    }
+
+    .cred-item-label {
+        font-size: 0.76rem;
+        font-weight: 800;
+        color: #64748B;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 4px;
+    }
+
+    .cred-item-val {
+        font-size: 1rem;
+        font-weight: 700;
+        color: #0F172A;
+    }
+
+    /* Inputs Clay 3D */
+    .welcome-input-group {
+        display: flex;
+        align-items: center;
+        background: #FFFFFF;
+        border-radius: 0.85rem;
+        border: 1.5px solid #141414;
+        box-shadow: inset 2px 2px 4px rgba(0, 0, 0, 0.05);
+        overflow: hidden;
+        margin-top: 6px;
+    }
+
+    .welcome-input-icon {
+        padding: 0.75rem 0.9rem;
+        color: #FF6B35;
+        font-size: 1.1rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .welcome-input {
+        width: 100%;
+        border: none;
+        background: transparent;
+        padding: 0.75rem 0.75rem 0.75rem 0;
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: #0F172A;
+        outline: none !important;
+    }
+
+    /* Password Informative Banner */
+    .password-info-banner {
+        background: linear-gradient(135deg, #EEF2FF 0%, #E0E7FF 100%);
+        border: 2px solid #4F46E5;
+        border-radius: 1.25rem;
+        padding: 1.35rem 1.6rem;
+        display: flex;
+        align-items: flex-start;
+        gap: 16px;
+        box-shadow: 6px 6px 16px rgba(79, 70, 229, 0.12);
+    }
+
+    .password-banner-icon {
+        width: 46px;
+        height: 46px;
+        border-radius: 14px;
+        background: #4F46E5;
+        color: #FFFFFF;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.3rem;
+        flex-shrink: 0;
+        box-shadow: 0 4px 10px rgba(79, 70, 229, 0.3);
+    }
+
+    /* CTA Button */
+    .btn-welcome-submit {
+        background: #FF6B35;
+        color: #FFFFFF !important;
+        border: 2px solid #141414;
+        border-radius: 14px;
+        padding: 0.95rem 2.5rem;
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        font-size: 1.05rem;
+        font-weight: 800;
+        cursor: pointer;
+        box-shadow: 0 4px 0 #C44E1E, 0 8px 24px rgba(255, 107, 53, 0.35);
+        transition: all 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        width: 100%;
+        justify-content: center;
+    }
+
+    .btn-welcome-submit:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 7px 0 #C44E1E, 0 14px 28px rgba(255, 107, 53, 0.45);
+        color: #FFFFFF !important;
+    }
+
+    .btn-welcome-submit:active {
+        transform: translateY(2px);
+        box-shadow: 0 1px 0 #C44E1E, 0 4px 12px rgba(255, 107, 53, 0.2);
+    }
+</style>
+{% endblock %}
+
+{% block contenido %}
+<div class="welcome-page-wrapper">
+    <div class="welcome-bento-container">
+        
+        <div class="clay-welcome-card">
+            <!-- CABECERA DE BIENVENIDA -->
+            <div class="clay-welcome-header">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="clay-avatar-badge">
+                        <i class="bi bi-person-check-fill"></i>
+                    </div>
+                    <div>
+                        <h3 class="fw-bold mb-1 text-white">¡Bienvenido a COTIZAPro!</h3>
+                        <small class="text-white-50 fs-6">Ficha de Credenciales & Resumen de Cuenta Vinculada</small>
+                    </div>
+                </div>
+                <div class="welcome-badge-trial">
+                    <i class="bi bi-gift-fill me-1 text-orange-pro"></i> 5 Cotizaciones Gratis Activas
+                </div>
+            </div>
+
+            <div class="p-4 p-md-5">
+                
+                <form action="/auth/bienvenida-google" method="post">
+                    
+                    <div class="bento-welcome-grid mb-4">
+                        
+                        <!-- CARD 1: NOMBRE COMPLETO -->
+                        <div class="bento-welcome-box">
+                            <div class="cred-item-label">
+                                <i class="bi bi-person-fill text-orange-pro me-1"></i> Nombre Registrado
+                            </div>
+                            <div class="welcome-input-group">
+                                <span class="welcome-input-icon"><i class="bi bi-person-vcard"></i></span>
+                                <input type="text" name="nombre" class="welcome-input" value="{{ usuario.nombre }}" required>
+                            </div>
+                        </div>
+
+                        <!-- CARD 2: CORREO ELECTRÓNICO (GOOGLE) -->
+                        <div class="bento-welcome-box">
+                            <div class="cred-item-label">
+                                <i class="bi bi-envelope-fill text-orange-pro me-1"></i> Correo de Acceso Principal
+                            </div>
+                            <div class="cred-item-val pt-2">
+                                <span class="badge bg-light text-dark border border-dark px-3 py-2 fs-6 rounded-pill">
+                                    <i class="bi bi-google text-danger me-1"></i> {{ usuario.correo }}
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- CARD 3: EMPRESA / NEGOCIO -->
+                        <div class="bento-welcome-box">
+                            <div class="cred-item-label">
+                                <i class="bi bi-building-fill text-indigo me-1"></i> Nombre de tu Empresa / Negocio
+                            </div>
+                            <div class="welcome-input-group">
+                                <span class="welcome-input-icon"><i class="bi bi-building"></i></span>
+                                <input type="text" name="empresa_nombre" class="welcome-input" value="{{ usuario.empresa_nombre or '' }}" placeholder="Ej: Importadora Santa Cruz S.R.L.">
+                            </div>
+                        </div>
+
+                        <!-- CARD 4: TELÉFONO / WHATSAPP -->
+                        <div class="bento-welcome-box">
+                            <div class="cred-item-label">
+                                <i class="bi bi-telephone-fill text-emerald me-1"></i> Teléfono / WhatsApp Comercial
+                            </div>
+                            <div class="welcome-input-group">
+                                <span class="welcome-input-icon"><i class="bi bi-telephone"></i></span>
+                                <input type="tel" name="telefono" class="welcome-input" value="{{ usuario.telefono or '' }}" placeholder="Ej: 70000000">
+                            </div>
+                        </div>
+
+                        <!-- CARD 5: BANNER DE INFORMACIÓN SOBRE CONTRASEÑA / PERFIL -->
+                        <div class="bento-welcome-full">
+                            <div class="password-info-banner">
+                                <div class="password-banner-icon">
+                                    <i class="bi bi-key-fill"></i>
+                                </div>
+                                <div>
+                                    <h5 class="fw-bold text-dark mb-1">
+                                        <i class="bi bi-shield-lock me-1 text-primary"></i> Acceso Seguro con Google & Contraseña de Resguardo
+                                    </h5>
+                                    <p class="mb-0 text-secondary small" style="line-height: 1.55;">
+                                        Tu cuenta ha sido vinculada y protegida mediante <strong>Google OAuth 2.0</strong>. Para iniciar sesión rápidamente en cualquier momento solo debes presionar el botón <em>"Continuar con Google"</em>.
+                                    </p>
+                                    <div class="mt-2 p-2 bg-white rounded-3 border border-indigo d-inline-block">
+                                        <span class="small fw-bold text-dark">
+                                            <i class="bi bi-info-circle-fill me-1 text-indigo"></i>
+                                            ¿Deseas consultar o establecer una contraseña estándar? Puedes verla y gestionarla en cualquier momento ingresando a la sección 
+                                            <a href="{{ url_for('perfil') }}" class="fw-bold text-primary text-decoration-underline ms-1">
+                                                <i class="bi bi-person-gear"></i> Mi Perfil
+                                            </a> en el menú superior de tu panel.
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- BOTÓN DE ACCIÓN PRINCIPAL 3D CLAY -->
+                    <div class="pt-2">
+                        <button type="submit" class="btn-welcome-submit">
+                            <i class="bi bi-rocket-takeoff-fill fs-5"></i> Guardar Ficha e Ingresar a mi Panel
+                        </button>
+                    </div>
+
+                </form>
+
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

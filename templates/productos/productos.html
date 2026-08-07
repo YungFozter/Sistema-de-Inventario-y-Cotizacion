@@ -132,14 +132,17 @@
           </div>
         </div>
 
-        <!-- BENTO ITEM 3: Descripción -->
+        <!-- BENTO ITEM 3: Categoría -->
         <div class="editorial-bento-item">
           <label class="editorial-bento-label">
-            <i class="bi bi-text-paragraph text-orange-pro"></i> Descripción
+            <i class="bi bi-folder-fill text-orange-pro"></i> Categoría
           </label>
           <div class="clay-pill-input-group">
-            <span class="clay-pill-input-icon"><i class="bi bi-card-text"></i></span>
-            <input type="text" name="descripcion" class="clay-pill-input" value="{{ request.args.get('descripcion', '') }}" placeholder="Palabras clave">
+            <span class="clay-pill-input-icon"><i class="bi bi-diagram-3"></i></span>
+            <select name="categoria" id="categoriaBusqueda" class="clay-pill-input form-select">
+              <option value="">Todas las categorías</option>
+              <!-- Las opciones se cargarán dinámicamente -->
+            </select>
           </div>
         </div>
 
@@ -154,17 +157,14 @@
           </div>
         </div>
 
-        <!-- BENTO ITEM 5: Categoría -->
-        <div class="editorial-bento-item">
+        <!-- BENTO ITEM 5: Descripción -->
+        <div class="editorial-bento-item" style="flex: 1 1 100%;">
           <label class="editorial-bento-label">
-            <i class="bi bi-folder-fill text-orange-pro"></i> Categoría
+            <i class="bi bi-text-paragraph text-orange-pro"></i> Descripción
           </label>
           <div class="clay-pill-input-group">
-            <span class="clay-pill-input-icon"><i class="bi bi-diagram-3"></i></span>
-            <select name="categoria" id="categoriaBusqueda" class="clay-pill-input form-select">
-              <option value="">Todas las categorías</option>
-              <!-- Las opciones se cargarán dinámicamente -->
-            </select>
+            <span class="clay-pill-input-icon"><i class="bi bi-card-text"></i></span>
+            <input type="text" name="descripcion" class="clay-pill-input" value="{{ request.args.get('descripcion', '') }}" placeholder="Palabras clave o nombre del producto">
           </div>
         </div>
 

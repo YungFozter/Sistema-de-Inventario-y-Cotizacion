@@ -969,7 +969,8 @@ def register_routes(app):
             else:
                 return f"Error generando PDF: {str(e)}", 500
 
-    @app.route('/api/empresa/campos-config', methods=['GET', 'POST'])
+    @app.route('/api/empresa/campos-config', methods=['GET', 'POST'], strict_slashes=False)
+    @app.route('/api/empresa/campos-config/', methods=['GET', 'POST'], strict_slashes=False)
     @login_required
     def api_campos_config():
         user_id = session.get('user_id')

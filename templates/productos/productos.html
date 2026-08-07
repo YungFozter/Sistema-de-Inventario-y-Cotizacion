@@ -2308,6 +2308,15 @@
                   subtotalGeneral += ptotal;
                 }
 
+                let customBadgesHtml = '';
+                if (item.campos_personalizados && typeof item.campos_personalizados === 'object' && Object.keys(item.campos_personalizados).length > 0) {
+                  customBadgesHtml = '<div class="mt-1 d-flex flex-wrap gap-1">';
+                  for (const [k, v] of Object.entries(item.campos_personalizados)) {
+                    customBadgesHtml += `<span class="badge bg-light text-dark border me-1 shadow-sm" style="font-size: 0.73rem;"><i class="bi bi-tag-fill text-warning me-1"></i><strong>${escapeHtml(k)}:</strong> ${escapeHtml(v)}</span>`;
+                  }
+                  customBadgesHtml += '</div>';
+                }
+
                 const tr = document.createElement('tr');
                 tr.className = item.selected ? '' : 'opacity-50 bg-light';
                 tr.innerHTML = `
@@ -2319,6 +2328,7 @@
             </td>
             <td class="align-middle">
                 <textarea class="form-control form-control-sm fw-semibold text-dark border-secondary-subtle auto-expand-desc" rows="2" style="min-height: 46px; max-height: 180px; font-size: 0.88rem; line-height: 1.35; resize: vertical; border-radius: 6px; background-color: #fcfcfc;" onchange="actualizarItemCampo(${idx}, 'descripcion', this.value)" oninput="autoAjustarTextarea(this)">${escapeHtml(item.descripcion || '')}</textarea>
+                ${customBadgesHtml}
             </td>
             <td class="align-middle">
                 <input type="text" class="form-control form-control-sm fw-medium border-secondary-subtle" value="${escapeHtml(item.marca || '')}" onchange="actualizarItemCampo(${idx}, 'marca', this.value)" style="border-radius: 6px;">

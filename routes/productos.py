@@ -370,6 +370,17 @@ def register_routes(app):
                         update_cols.append('proveedor=?')
                         update_vals.append(proveedor)
 
+                    # Recolectar campos personalizados desde el formulario
+                    custom_fields_dict = {}
+                    for key, val in request.form.items():
+                        if key.startswith('campo_personalizado_'):
+                            c_name = key.replace('campo_personalizado_', '')
+                            custom_fields_dict[c_name] = val.strip()
+
+                    if 'campos_personalizados' in columnas_nombres and custom_fields_dict:
+                        update_cols.append('campos_personalizados=?')
+                        update_vals.append(json.dumps(custom_fields_dict, ensure_ascii=False))
+
                     update_vals.append(id)
                     update_str = ', '.join(update_cols)
 

@@ -49,7 +49,21 @@
             </td>
             <td data-label="Empresa">{{ p['empresa'] }}</td>
             <td data-label="Código"><strong>{{ p['codigo'] }}</strong></td>
-            <td data-label="Descripción">{{ p['descripcion'] }}</td>
+            <td data-label="Descripción">
+              <div>{{ p['descripcion'] }}</div>
+              {% if p['campos_personalizados'] %}
+                {% set campos_dict = p['campos_personalizados']|from_json %}
+                {% if campos_dict and campos_dict is mapping and campos_dict|length > 0 %}
+                  <div class="mt-1 d-flex flex-wrap gap-1">
+                    {% for k, v in campos_dict.items() %}
+                      <span class="badge bg-light text-dark border me-1 shadow-sm" style="font-size: 0.73rem; font-weight: 500;">
+                        <i class="bi bi-tag-fill text-warning me-1"></i><strong>{{ k }}:</strong> {{ v }}
+                      </span>
+                    {% endfor %}
+                  </div>
+                {% endif %}
+              {% endif %}
+            </td>
             <td data-label="Marca">{{ p['marca'] }}</td>
             <td data-label="Proveedor">
               {% if p['proveedor'] %}

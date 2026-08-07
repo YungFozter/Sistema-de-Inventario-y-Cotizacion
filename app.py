@@ -42,6 +42,19 @@ def inicializar_base_datos():
 
 inicializar_base_datos()
 
+import json
+
+@app.template_filter('from_json')
+def from_json_filter(value):
+    if not value:
+        return {}
+    if isinstance(value, dict):
+        return value
+    try:
+        return json.loads(value)
+    except Exception:
+        return {}
+
 # Context Processor
 @app.context_processor
 def inject_now():

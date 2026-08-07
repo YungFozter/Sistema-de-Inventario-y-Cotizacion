@@ -240,14 +240,14 @@
 
       <div class="editorial-bento-grid mb-2">
         
-        <!-- BENTO ITEM 1: Nombre del Producto -->
+        <!-- BENTO ITEM 1: Descripción / Nombre del Producto -->
         <div class="editorial-bento-item">
           <label class="editorial-bento-label">
-            <i class="bi bi-box-seam text-orange-pro"></i> Nombre del Producto
+            <i class="bi bi-box-seam text-orange-pro"></i> Descripción / Nombre del Producto <span class="text-danger">*</span>
           </label>
           <div class="clay-pill-input-group">
             <span class="clay-pill-input-icon"><i class="bi bi-pencil-square"></i></span>
-            <input type="text" name="empresa" id="empresa" class="clay-pill-input" placeholder="Ej: Cable Cobre 12AWG Multifilar" oninput="actualizarVistaPreviaProducto()">
+            <input type="text" name="descripcion" id="descripcion" class="clay-pill-input" placeholder="Ej: Cable Cobre 12AWG Multifilar Siemens" required oninput="actualizarVistaPreviaProducto()">
           </div>
         </div>
 
@@ -259,17 +259,6 @@
           <div class="clay-pill-input-group">
             <span class="clay-pill-input-icon"><i class="bi bi-hash"></i></span>
             <input type="text" name="codigo" id="codigo" class="clay-pill-input" placeholder="Ej: ERD-001" required oninput="actualizarVistaPreviaProducto()">
-          </div>
-        </div>
-
-        <!-- BENTO ITEM 3: Descripción -->
-        <div class="editorial-bento-item">
-          <label class="editorial-bento-label">
-            <i class="bi bi-text-paragraph text-orange-pro"></i> Descripción
-          </label>
-          <div class="clay-pill-input-group">
-            <span class="clay-pill-input-icon"><i class="bi bi-card-text"></i></span>
-            <input type="text" name="descripcion" id="descripcion" class="clay-pill-input" placeholder="Detalles técnicos" oninput="actualizarVistaPreviaProducto()">
           </div>
         </div>
 

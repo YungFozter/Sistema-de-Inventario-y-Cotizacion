@@ -257,6 +257,112 @@ class PDFProductExtractor:
         return duplicados
 
     @classmethod
+    def parse_structured_tables(cls, pdf_file, consolidar_duplicados=True):
+        """Extrae tablas estructuradas de PDF y captura columnas personalizadas en campos_personalizados"""
+        products = []
+        try:
+            with pdfplumber.open(pdf_file) as pdf:
+                for page in pdf.pages:
+                    tables = page.extract_tables()
+                    for table in tables:
+                        if not table or len(table) < 2:
+                            continue
+
+                        headers = [re.sub(r'\s+', ' ', str(h).replace('\n', ' ')).strip() if h else '' for h in table[0]]
+                        norm_headers = [h.lower() for h in headers]
+
+                        cod_idx = -1
+                        desc_idx = -1
+                        marca_idx = -1
+                        cant_idx = -1
+                        um_idx = -1
+                        precio_idx = -1
+                        custom_map = {}
+
+                        skip_keywords = ['n°', 'nº', 'no.', 'item', '#', 'total', 'subtotal', 'n °']
+
+                        for idx, h in enumerate(norm_headers):
+                            if any(k in h for k in ['codigo', 'cod', 'código']) and cod_idx == -1:
+                                cod_idx = idx
+                            elif any(k in h for k in ['descripcion', 'descripción', 'producto', 'detalle']) and desc_idx == -1:
+                                desc_idx = idx
+                            elif 'marca' in h and marca_idx == -1:
+                                marca_idx = idx
+                            elif any(k in h for k in ['cant', 'cantidad']) and cant_idx == -1:
+                                cant_idx = idx
+                            elif any(k in h for k in ['u/m', 'um', 'unidad']) and um_idx == -1:
+                                um_idx = idx
+                            elif any(k in h for k in ['precio', 'p. unit', 'p.unit', 'unitario']) and precio_idx == -1:
+                                precio_idx = idx
+                            elif h and not any(sk in h for sk in skip_keywords):
+                                header_title = re.sub(r'\s+', ' ', headers[idx]).title()
+                                custom_map[idx] = header_title
+
+                        if cod_idx == -1 and desc_idx == -1:
+                            continue
+
+                        for row in table[1:]:
+                            if not row or len(row) < 3:
+                                continue
+                            
+                            row_cells = [re.sub(r'\s+', ' ', str(c).replace('\n', ' ')).strip() if c else '' for c in row]
+                            
+                            cod = row_cells[cod_idx] if cod_idx != -1 and cod_idx < len(row_cells) else ''
+                            desc = row_cells[desc_idx] if desc_idx != -1 and desc_idx < len(row_cells) else ''
+                            marca = row_cells[marca_idx] if marca_idx != -1 and marca_idx < len(row_cells) else ''
+                            um = row_cells[um_idx] if um_idx != -1 and um_idx < len(row_cells) else 'PZA'
+
+                            try:
+                                cant_str = row_cells[cant_idx].replace(',', '.') if cant_idx != -1 and cant_idx < len(row_cells) else '1'
+                                cant = float(cant_str) if cant_str else 1.0
+                            except ValueError:
+                                cant = 1.0
+
+                            try:
+                                precio_str = re.sub(r'[^\d\.]', '', row_cells[precio_idx].replace(',', '.')) if precio_idx != -1 and precio_idx < len(row_cells) else '0'
+                                precio = float(precio_str) if precio_str else 0.0
+                            except ValueError:
+                                precio = 0.0
+
+                            campos_pers = {}
+                            for c_idx, c_name in custom_map.items():
+                                if c_idx < len(row_cells) and row_cells[c_idx]:
+                                    campos_pers[c_name] = row_cells[c_idx]
+
+                            if cod or desc:
+                                products.append({
+                                    'codigo': cod,
+                                    'descripcion': desc,
+                                    'marca': marca,
+                                    'um': um,
+                                    'cantidad': cant,
+                                    'precio_unitario': precio,
+                                    'precio_total': round(cant * precio, 2),
+                                    'campos_personalizados': campos_pers
+                                })
+        except Exception:
+            pass
+
+        if not products:
+            return []
+
+        if not consolidar_duplicados:
+            return products
+
+        consolidated = {}
+        for p in products:
+            cod = p['codigo'] or p['descripcion']
+            if cod in consolidated:
+                consolidated[cod]['cantidad'] = round(consolidated[cod]['cantidad'] + p['cantidad'], 2)
+                consolidated[cod]['precio_total'] = round(consolidated[cod]['cantidad'] * consolidated[cod]['precio_unitario'], 2)
+                if p.get('campos_personalizados'):
+                    consolidated[cod]['campos_personalizados'].update(p['campos_personalizados'])
+            else:
+                consolidated[cod] = dict(p)
+
+        return list(consolidated.values())
+
+    @classmethod
     def extract_products(cls, pdf_source, consolidar_duplicados=True):
         """Procesa el PDF obteniendo las líneas y aplicando la parseación de bloques"""
         try:
@@ -264,6 +370,15 @@ class PDFProductExtractor:
                 pdf_file = BytesIO(pdf_source)
             else:
                 pdf_file = pdf_source
+
+            # Intento 1: Parseo de tablas estructuradas capturando campos personalizados
+            struct_prods = cls.parse_structured_tables(pdf_file, consolidar_duplicados=consolidar_duplicados)
+            if struct_prods:
+                return struct_prods
+
+            # Intento 2: Parseo de texto por líneas
+            if isinstance(pdf_source, bytes):
+                pdf_file.seek(0)
 
             lines = []
             with pdfplumber.open(pdf_file) as pdf:
@@ -277,7 +392,10 @@ class PDFProductExtractor:
             if prods:
                 return prods
 
-            # Respado con extract_tables si extract_text no retorna ítems
+            # Intento 3: Respado con extract_tables y parse_raw_lines
+            if isinstance(pdf_source, bytes):
+                pdf_file.seek(0)
+
             table_lines = []
             with pdfplumber.open(pdf_file) as pdf:
                 for page in pdf.pages:

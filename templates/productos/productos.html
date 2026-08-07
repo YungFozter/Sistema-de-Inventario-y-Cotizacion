@@ -2834,6 +2834,10 @@
             }
 
             function mostrarModalConfiguracionCamposEmpresa() {
+                const modalEl = document.getElementById('modalConfiguracionCamposEmpresa');
+                if (modalEl && modalEl.parentNode !== document.body) {
+                    document.body.appendChild(modalEl);
+                }
                 fetch('/api/empresa/campos-config')
                     .then(res => res.json())
                     .then(data => {
@@ -2844,8 +2848,15 @@
                         document.getElementById('cfgCampo4').value = campos[3] || '';
                         document.getElementById('cfgCampo5').value = campos[4] || '';
                         
-                        const modal = bootstrap.Modal.getOrCreateInstance(document.getElementById('modalConfiguracionCamposEmpresa'));
+                        const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
                         modal.show();
+
+                        setTimeout(() => {
+                            const backdrops = document.querySelectorAll('.modal-backdrop');
+                            if (backdrops.length > 1) {
+                                backdrops[backdrops.length - 1].style.zIndex = '1080';
+                            }
+                        }, 50);
                     })
                     .catch(err => console.error('Error cargando campos personalizados:', err));
             }
@@ -2882,7 +2893,7 @@
           </script>
 
 <!-- Modal Elegante de Configuración de Campos Personalizados por Empresa -->
-<div class="modal fade" id="modalConfiguracionCamposEmpresa" tabindex="-1" aria-labelledby="modalConfiguracionCamposEmpresaLabel" aria-hidden="true" style="z-index: 1080;">
+<div class="modal fade" id="modalConfiguracionCamposEmpresa" tabindex="-1" aria-labelledby="modalConfiguracionCamposEmpresaLabel" aria-hidden="true" style="z-index: 1085 !important;">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content border-0 shadow-lg" style="border-radius: 1rem; overflow: hidden;">
       <div class="modal-header bg-dark text-white py-3">

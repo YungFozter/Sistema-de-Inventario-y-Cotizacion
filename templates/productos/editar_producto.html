@@ -22,30 +22,41 @@
                 <input type="hidden" name="categoria_filtro" value="{{ filtros.categoria }}">
                 
                 <!-- Primera columna -->
-
                 <div class="col-md-6">
                     <div class="mb-3">
                         <label for="empresa" class="form-label">Nombre de Empresa</label>
                         <input type="text" class="form-control" id="empresa" name="empresa"
-                               value="{{ producto[1] }}">
+                               value="{{ producto['empresa'] if producto['empresa'] is defined else producto[1] }}">
                     </div>
 
                     <div class="mb-3">
                         <label for="codigo" class="form-label">Código</label>
                         <input type="text" class="form-control" id="codigo" name="codigo"
-                               value="{{ producto[2] }}" required>
+                               value="{{ producto['codigo'] if producto['codigo'] is defined else producto[2] }}" required>
                     </div>
 
                     <div class="mb-3">
                         <label for="descripcion" class="form-label">Descripción</label>
                         <input type="text" class="form-control" id="descripcion" name="descripcion"
-                               value="{{ producto[3] }}">
+                               value="{{ producto['descripcion'] if producto['descripcion'] is defined else producto[3] }}">
                     </div>
 
                     <div class="mb-3">
                         <label for="marca" class="form-label">Marca</label>
                         <input type="text" class="form-control" id="marca" name="marca"
-                               value="{{ producto[4] }}">
+                               value="{{ producto['marca'] if producto['marca'] is defined else producto[4] }}">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="proveedor" class="form-label">Proveedor / Distribuidor</label>
+                        <input type="text" class="form-control" id="proveedor" name="proveedor"
+                               value="{{ producto['proveedor'] if producto['proveedor'] is defined and producto['proveedor'] is not none else '' }}"
+                               list="listaProveedoresData" placeholder="Ej: Siemens Bolivia / Conduspar">
+                        <datalist id="listaProveedoresData">
+                            {% for prov in lista_proveedores %}
+                                <option value="{{ prov }}">
+                            {% endfor %}
+                        </datalist>
                     </div>
                     
                     <div class="mb-3">
@@ -53,9 +64,11 @@
                         <select class="form-select" id="categoria_id" name="categoria_id">
                             <option value="">Sin categoría</option>
                             {% for categoria in categorias %}
-                                <option value="{{ categoria[0] }}" 
-                                    {% if producto['categoria_id'] == categoria[0] %}selected{% endif %}>
-                                    {{ categoria[1] }}
+                                {% set cat_id = categoria['id'] if categoria['id'] is defined else categoria[0] %}
+                                {% set cat_nom = categoria['nombre'] if categoria['nombre'] is defined else categoria[1] %}
+                                <option value="{{ cat_id }}" 
+                                    {% if (producto['categoria_id'] is defined and producto['categoria_id'] == cat_id) or (producto[10] is defined and producto[10] == cat_id) %}selected{% endif %}>
+                                    {{ cat_nom }}
                                 </option>
                             {% endfor %}
                         </select>
@@ -79,25 +92,25 @@
                     <div class="mb-3">
                         <label for="tm" class="form-label">Tipo de Moneda (TM)</label>
                         <input type="text" class="form-control" id="tm" name="tm"
-                               value="{{ producto[5] }}">
+                               value="{{ producto['tm'] if producto['tm'] is defined else producto[5] }}">
                     </div>
 
                     <div class="mb-3">
                         <label for="um" class="form-label">Unidad de Medida (UM)</label>
                         <input type="text" class="form-control" id="um" name="um"
-                               value="{{ producto[6] }}">
+                               value="{{ producto['um'] if producto['um'] is defined else producto[6] }}">
                     </div>
 
                     <div class="mb-3">
                         <label for="cantidad" class="form-label">Cantidad</label>
                         <input type="number" class="form-control" id="cantidad" name="cantidad"
-                               min="1" value="{{ producto[7] }}">
+                               min="1" value="{{ producto['cantidad'] if producto['cantidad'] is defined else producto[7] }}">
                     </div>
 
                     <div class="mb-3">
                         <label for="precio_unitario" class="form-label">Precio Unitario</label>
                         <input type="number" class="form-control" id="precio_unitario" name="precio_unitario"
-                               step="any" value="{{ producto[8] }}">
+                               step="any" value="{{ producto['precio_unitario'] if producto['precio_unitario'] is defined else producto[8] }}">
                     </div>
                 </div>
 

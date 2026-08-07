@@ -367,10 +367,12 @@ def register_routes(app):
 
         # GET - Mostrar formulario de edición
         with get_db_connection() as conexion:
+            conexion.row_factory = sqlite3.Row
             cursor = conexion.cursor()
         
             cursor.execute('SELECT * FROM productos WHERE id=?', (id,))
-            producto = cursor.fetchone()
+            row = cursor.fetchone()
+            producto = dict(row) if row else {}
         
             cursor.execute('''
                 SELECT DISTINCT c.id, c.nombre 
@@ -378,16 +380,20 @@ def register_routes(app):
                 INNER JOIN productos p ON c.id = p.categoria_id 
                 ORDER BY c.nombre
             ''')
-            categorias_en_uso = cursor.fetchall()
+            categorias_en_uso = [dict(r) if hasattr(r, 'keys') else r for r in cursor.fetchall()]
         
             user_id = session.get('user_id')
             cursor.execute('SELECT id, nombre FROM categorias WHERE activo = 1 AND (creador_id = ? OR creador_id IS NULL) ORDER BY nombre', (user_id,))
-            todas_categorias = cursor.fetchall()
+            todas_categorias = [dict(r) if hasattr(r, 'keys') else r for r in cursor.fetchall()]
         
             categorias = categorias_en_uso if categorias_en_uso else todas_categorias
+
+            cursor.execute("SELECT nombre FROM proveedores ORDER BY nombre ASC")
+            lista_proveedores = [r[0] for r in cursor.fetchall()]
     
         filtros = {
             'empresa': empresa_filtro,
+            'proveedor': proveedor_filtro,
             'codigo': codigo_filtro,
             'descripcion': descripcion_filtro,
             'marca': marca_filtro,
@@ -399,6 +405,7 @@ def register_routes(app):
             producto=producto,
             categorias=categorias,
             todas_categorias=todas_categorias,
+            lista_proveedores=lista_proveedores,
             tab=tab,
             page_reg=page_reg,
             page_imp=page_imp,

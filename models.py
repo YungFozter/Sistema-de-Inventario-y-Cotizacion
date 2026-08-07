@@ -745,6 +745,17 @@ def registrar_productos_seleccionados(items, empresa="General", categoria_id=Non
     cursor = conexion.cursor()
     registrados_count = 0
     
+    # Obtener el nombre de la categoría si se proporcionó un categoria_id
+    categoria_nombre = None
+    if categoria_id:
+        try:
+            cursor.execute("SELECT nombre FROM categorias WHERE id = ?", (categoria_id,))
+            cat_row = cursor.fetchone()
+            if cat_row:
+                categoria_nombre = cat_row[0]
+        except Exception:
+            pass
+
     try:
         for item in items:
             codigo = str(item.get('codigo', '')).strip()[:50]
@@ -790,9 +801,9 @@ def registrar_productos_seleccionados(items, empresa="General", categoria_id=Non
 
                 cursor.execute('''
                     UPDATE productos
-                    SET descripcion = ?, marca = ?, um = ?, cantidad = ?, precio_unitario = ?, precio_total = ?, categoria_id = ?, campos_personalizados = COALESCE(?, campos_personalizados), es_importado = 1, fecha_actualizacion = CURRENT_TIMESTAMP
+                    SET descripcion = ?, marca = ?, um = ?, cantidad = ?, precio_unitario = ?, precio_total = ?, categoria_id = ?, categoria = COALESCE(?, categoria), campos_personalizados = COALESCE(?, campos_personalizados), es_importado = 1, fecha_actualizacion = CURRENT_TIMESTAMP
                     WHERE id = ?
-                ''', (descripcion, marca, um, final_cantidad, precio_unitario, final_precio_total, categoria_id, campos_pers_json, existente[0]))
+                ''', (descripcion, marca, um, final_cantidad, precio_unitario, final_precio_total, categoria_id, categoria_nombre, campos_pers_json, existente[0]))
             else:
                 if tipo_documento == 'catalogo':
                     final_cantidad = 0.0
@@ -802,9 +813,9 @@ def registrar_productos_seleccionados(items, empresa="General", categoria_id=Non
                 final_precio_total = round(final_cantidad * precio_unitario, 2)
                 
                 cursor.execute('''
-                    INSERT INTO productos (empresa, codigo, descripcion, marca, tm, um, cantidad, precio_unitario, precio_total, categoria_id, campos_personalizados, es_importado)
-                    VALUES (?, ?, ?, ?, 'Bs', ?, ?, ?, ?, ?, ?, 1)
-                ''', (empresa_item, codigo, descripcion, marca, um, final_cantidad, precio_unitario, final_precio_total, categoria_id, campos_pers_json))
+                    INSERT INTO productos (empresa, codigo, descripcion, marca, tm, um, cantidad, precio_unitario, precio_total, categoria_id, categoria, campos_personalizados, es_importado)
+                    VALUES (?, ?, ?, ?, 'Bs', ?, ?, ?, ?, ?, ?, ?, 1)
+                ''', (empresa_item, codigo, descripcion, marca, um, final_cantidad, precio_unitario, final_precio_total, categoria_id, categoria_nombre, campos_pers_json))
 
             
             # Si el item venía de una importación guardada, marcarlo como registrado

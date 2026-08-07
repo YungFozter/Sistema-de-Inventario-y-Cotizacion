@@ -180,20 +180,33 @@ def register_routes(app):
             filter_sql += " AND p.marca LIKE ?" if use_alias else " AND marca LIKE ?"
             params.append(f"%{marca}%")
         if categoria:
+            cat_nombre = None
+            if str(categoria).isdigit():
+                try:
+                    with get_db_connection() as conexion_cat:
+                        cursor_cat = conexion_cat.cursor()
+                        cursor_cat.execute("SELECT nombre FROM categorias WHERE id = ?", (int(categoria),))
+                        res_cat = cursor_cat.fetchone()
+                        if res_cat:
+                            cat_nombre = res_cat[0]
+                except Exception:
+                    pass
+
             if str(categoria).isdigit():
                 cat_id_num = int(categoria)
+                cat_target_name = cat_nombre or str(categoria)
                 if use_alias:
-                    filter_sql += " AND (p.categoria_id = ? OR p.categoria = ? OR c.id = ?)"
-                    params.extend([cat_id_num, str(categoria), cat_id_num])
+                    filter_sql += " AND (p.categoria_id = ? OR c.id = ? OR LOWER(p.categoria) = LOWER(?) OR LOWER(p.categoria) = LOWER(?))"
+                    params.extend([cat_id_num, cat_id_num, str(categoria), cat_target_name])
                 else:
-                    filter_sql += " AND (categoria_id = ? OR categoria = ?)"
-                    params.extend([cat_id_num, str(categoria)])
+                    filter_sql += " AND (categoria_id = ? OR LOWER(categoria) = LOWER(?) OR LOWER(categoria) = LOWER(?))"
+                    params.extend([cat_id_num, str(categoria), cat_target_name])
             else:
                 if use_alias:
-                    filter_sql += " AND (c.nombre LIKE ? OR p.categoria LIKE ?)"
+                    filter_sql += " AND (LOWER(c.nombre) LIKE LOWER(?) OR LOWER(p.categoria) LIKE LOWER(?))"
                     params.extend([f"%{categoria}%", f"%{categoria}%"])
                 else:
-                    filter_sql += " AND categoria LIKE ?"
+                    filter_sql += " AND LOWER(categoria) LIKE LOWER(?)"
                     params.append(f"%{categoria}%")
 
         # 1. Consultar Productos Registrados (Manuales: es_importado = 0 o NULL)

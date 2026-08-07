@@ -916,27 +916,17 @@
           </div>
         </div>
 
-        <!-- Opción de Consolidación de Duplicados vs Mantener Todos los 81 Ítems -->
+        <!-- Opción de Consolidación de Duplicados -->
         <div class="card mb-3 border-primary bg-light">
           <div class="card-body py-2">
-            <div class="row align-items-center g-2">
-              <div class="col-md-8">
-                <div class="form-check form-switch mb-0">
-                  <input class="form-check-input" type="checkbox" id="chkConsolidarDuplicados" checked
-                    onchange="toggleModoConsolidacion(this.checked)">
-                  <label class="form-check-label fw-bold text-dark fs-6" for="chkConsolidarDuplicados">
-                    📊 Consolidar Productos Duplicados (Sumar Cantidades)
-                  </label>
-                  <div class="form-text text-muted small mt-1" id="descModoConsolidar">
-                    <strong>ACTIVADO:</strong> Suma cantidades de productos con el mismo código (ej: 1.5 + 4 + 12 = 17.5
-                    MTS) obteniendo <strong>64 ítems únicos</strong>.
-                  </div>
-                </div>
-              </div>
-              <div class="col-md-4 text-end">
-                <span id="badgeModoConsolidarInfo" class="badge bg-success fs-6 p-2 shadow-sm">
-                  Modo: 64 Ítems Únicos
-                </span>
+            <div class="form-check form-switch mb-0">
+              <input class="form-check-input" type="checkbox" id="chkConsolidarDuplicados" checked
+                onchange="toggleModoConsolidacion(this.checked)">
+              <label class="form-check-label fw-bold text-dark fs-6" for="chkConsolidarDuplicados">
+                📊 Consolidar Productos Duplicados (Sumar Cantidades)
+              </label>
+              <div class="form-text text-muted small mt-1" id="descModoConsolidar">
+                <strong>ACTIVADO:</strong> Fusiona productos duplicados sumando sus cantidades automáticamente.
               </div>
             </div>
           </div>
@@ -2101,20 +2091,10 @@
 
             function toggleModoConsolidacion(checked) {
               const desc = document.getElementById('descModoConsolidar');
-              const badge = document.getElementById('badgeModoConsolidarInfo');
-
               if (checked) {
-                if (desc) desc.innerHTML = '<strong>ACTIVADO:</strong> Suma cantidades de productos con el mismo código (ej: 1.5 + 4 + 12 = 17.5 MTS) obteniendo <strong>64 ítems únicos</strong>.';
-                if (badge) {
-                  badge.className = 'badge bg-success fs-6 p-2 shadow-sm';
-                  badge.textContent = 'Modo: 64 Ítems Únicos';
-                }
+                if (desc) desc.innerHTML = '<strong>ACTIVADO:</strong> Fusiona productos duplicados sumando sus cantidades automáticamente.';
               } else {
-                if (desc) desc.innerHTML = '<strong>DESACTIVADO:</strong> Mantiene todas las filas individuales con sus cantidades exactas sin fusionar (ej: 1.5 MTS, 4 MTS, 12 MTS por separado), obteniendo los <strong>81 ítems completos</strong>.';
-                if (badge) {
-                  badge.className = 'badge bg-primary fs-6 p-2 shadow-sm';
-                  badge.textContent = 'Modo: 81 Ítems Individuales';
-                }
+                if (desc) desc.innerHTML = '<strong>DESACTIVADO:</strong> Conserva todas las filas por separado sin fusionar cantidades.';
               }
 
               const txtInput = document.getElementById('textoPegadoInput');

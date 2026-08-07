@@ -2895,48 +2895,63 @@
 <!-- Modal Elegante de Configuración de Campos Personalizados por Empresa -->
 <div class="modal fade" id="modalConfiguracionCamposEmpresa" tabindex="-1" aria-labelledby="modalConfiguracionCamposEmpresaLabel" aria-hidden="true" style="z-index: 1085 !important;">
   <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content border-0 shadow-lg" style="border-radius: 1rem; overflow: hidden;">
-      <div class="modal-header bg-dark text-white py-3">
-        <h5 class="modal-title fw-bold" id="modalConfiguracionCamposEmpresaLabel">
-          <i class="bi bi-sliders text-warning me-2 fs-5"></i> Campos Personalizados de Empresa
-        </h5>
+    <div class="modal-content border-0 shadow-lg" style="border-radius: 24px; overflow: hidden; border: 2px solid #141414 !important; box-shadow: 0 20px 50px rgba(0,0,0,0.18) !important;">
+      
+      <!-- HEADER OSCURO CON NARRATIVA PREMIUM & ALTO CONTRASTE -->
+      <div class="modal-header py-3 px-4" style="background-color: #141414 !important; border-bottom: 2px solid #141414;">
+        <div class="d-flex align-items-center gap-2">
+          <span class="rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 36px; height: 36px; background: rgba(255, 107, 53, 0.18); border: 1px solid #FF6B35;">
+            <i class="bi bi-sliders text-orange-pro fs-5"></i>
+          </span>
+          <h5 class="modal-title fw-bold text-white mb-0" id="modalConfiguracionCamposEmpresaLabel" style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 1.15rem; letter-spacing: -0.01em; color: #FFFFFF !important;">
+            Campos Personalizados de Empresa
+          </h5>
+        </div>
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
-      <div class="modal-body p-4 bg-light">
-        <p class="small text-muted mb-3">
-          Define hasta 5 campos o atributos adicionales propios de tu rubro (ej: <code>Ubicación Almacén</code>, <code>Garantía</code>, <code>Nº Lote</code>, <code>Voltaje</code>). El sistema los habilitará automáticamente para tus registros e importaciones.
+
+      <!-- BODY CÁLIDO CON CARDS & BORDES NEGROS 2PX -->
+      <div class="modal-body p-4" style="background-color: #FAF8F5;">
+        <p class="small text-secondary mb-3" style="font-size: 0.86rem; line-height: 1.45;">
+          Define hasta 5 atributos o especificadores adicionales propios de tu rubro (ej: <code>Ubicación Almacén</code>, <code>Garantía</code>, <code>Nº Lote</code>, <code>Voltaje</code>). Se activarán para tus registros e importaciones.
         </p>
+
         <form id="formCamposEmpresa">
-          <div class="mb-2">
-            <label class="form-label small fw-bold text-dark mb-1">Campo Personalizado 1:</label>
-            <input type="text" id="cfgCampo1" class="form-control form-control-sm rounded-pill px-3" placeholder="Ej: Ubicación Almacén / Estante">
-          </div>
-          <div class="mb-2">
-            <label class="form-label small fw-bold text-dark mb-1">Campo Personalizado 2:</label>
-            <input type="text" id="cfgCampo2" class="form-control form-control-sm rounded-pill px-3" placeholder="Ej: Garantía (Meses)">
-          </div>
-          <div class="mb-2">
-            <label class="form-label small fw-bold text-dark mb-1">Campo Personalizado 3:</label>
-            <input type="text" id="cfgCampo3" class="form-control form-control-sm rounded-pill px-3" placeholder="Ej: Nº Lote / Vencimiento">
-          </div>
-          <div class="mb-2">
-            <label class="form-label small fw-bold text-dark mb-1">Campo Personalizado 4:</label>
-            <input type="text" id="cfgCampo4" class="form-control form-control-sm rounded-pill px-3" placeholder="Ej: Voltaje / Especificación">
-          </div>
-          <div class="mb-3">
-            <label class="form-label small fw-bold text-dark mb-1">Campo Personalizado 5:</label>
-            <input type="text" id="cfgCampo5" class="form-control form-control-sm rounded-pill px-3" placeholder="Ej: Nº de Parte OEM">
+          <div class="row g-2">
+            <div class="col-12">
+              <label class="form-label small fw-bold text-dark mb-1"><i class="bi bi-tag-fill text-orange-pro me-1"></i> Campo 1:</label>
+              <input type="text" id="cfgCampo1" class="clay-pill-input w-100" style="border: 2px solid #141414 !important; border-radius: 50px !important; padding: 7px 18px; font-size: 0.88rem;" placeholder="Ej: Ubicación Almacén / Estante">
+            </div>
+            <div class="col-12">
+              <label class="form-label small fw-bold text-dark mb-1"><i class="bi bi-tag-fill text-orange-pro me-1"></i> Campo 2:</label>
+              <input type="text" id="cfgCampo2" class="clay-pill-input w-100" style="border: 2px solid #141414 !important; border-radius: 50px !important; padding: 7px 18px; font-size: 0.88rem;" placeholder="Ej: Garantía (Meses)">
+            </div>
+            <div class="col-12">
+              <label class="form-label small fw-bold text-dark mb-1"><i class="bi bi-tag-fill text-orange-pro me-1"></i> Campo 3:</label>
+              <input type="text" id="cfgCampo3" class="clay-pill-input w-100" style="border: 2px solid #141414 !important; border-radius: 50px !important; padding: 7px 18px; font-size: 0.88rem;" placeholder="Ej: Nº Lote / Vencimiento">
+            </div>
+            <div class="col-12">
+              <label class="form-label small fw-bold text-dark mb-1"><i class="bi bi-tag-fill text-orange-pro me-1"></i> Campo 4:</label>
+              <input type="text" id="cfgCampo4" class="clay-pill-input w-100" style="border: 2px solid #141414 !important; border-radius: 50px !important; padding: 7px 18px; font-size: 0.88rem;" placeholder="Ej: Voltaje / Especificación">
+            </div>
+            <div class="col-12">
+              <label class="form-label small fw-bold text-dark mb-1"><i class="bi bi-tag-fill text-orange-pro me-1"></i> Campo 5:</label>
+              <input type="text" id="cfgCampo5" class="clay-pill-input w-100" style="border: 2px solid #141414 !important; border-radius: 50px !important; padding: 7px 18px; font-size: 0.88rem;" placeholder="Ej: Nº de Parte OEM">
+            </div>
           </div>
         </form>
       </div>
-      <div class="modal-footer bg-white px-4 py-3 justify-content-between">
-        <button type="button" class="btn btn-outline-secondary rounded-pill px-4 fw-semibold" data-bs-dismiss="modal">
+
+      <!-- FOOTER CON ACCIONES PILL 3D EN NARANJA PRO Y NEGRO -->
+      <div class="modal-footer px-4 py-3 justify-content-between" style="background-color: #FFFFFF; border-top: 2px solid #141414;">
+        <button type="button" class="btn btn-outline-dark fw-bold rounded-pill px-4" style="border: 2px solid #141414; border-radius: 50px;" data-bs-dismiss="modal">
           Cancelar
         </button>
-        <button type="button" class="btn btn-warning text-dark rounded-pill px-4 fw-bold shadow-sm" onclick="guardarConfiguracionCamposEmpresa()">
+        <button type="button" class="btn text-white fw-bold rounded-pill px-4 shadow-sm" style="background-color: #FF6B35; border: 2px solid #141414; border-radius: 50px;" onclick="guardarConfiguracionCamposEmpresa()">
           <i class="bi bi-check-lg me-1"></i> Guardar Campos
         </button>
       </div>
+
     </div>
   </div>
 </div>

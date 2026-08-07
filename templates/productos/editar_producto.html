@@ -10,7 +10,7 @@
         </div>
 
         <div class="card-body">
-            <form action="/productos/editar/{{ producto[0] }}" method="post" class="row g-3">
+            <form action="/productos/editar/{{ producto['id'] if (producto is mapping and 'id' in producto) else (producto[0] if producto else '') }}" method="post" class="row g-3">
                 <!-- Campos ocultos para mantener la pestaña, paginación y filtros -->
                 <input type="hidden" name="tab" value="{{ tab }}">
                 <input type="hidden" name="page_reg" value="{{ page_reg }}">

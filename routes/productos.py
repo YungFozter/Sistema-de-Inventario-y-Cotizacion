@@ -168,8 +168,8 @@ def register_routes(app):
             filter_sql += " AND p.codigo LIKE ?" if use_alias else " AND codigo LIKE ?"
             params.append(f"%{codigo}%")
         if descripcion:
-            filter_sql += " AND p.descripcion LIKE ?" if use_alias else " AND descripcion LIKE ?"
-            params.append(f"%{descripcion}%")
+            filter_sql += " AND (p.descripcion LIKE ? OR p.empresa LIKE ?)" if use_alias else " AND (descripcion LIKE ? OR empresa LIKE ?)"
+            params.extend([f"%{descripcion}%", f"%{descripcion}%"])
         if marca:
             filter_sql += " AND p.marca LIKE ?" if use_alias else " AND marca LIKE ?"
             params.append(f"%{marca}%")

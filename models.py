@@ -533,6 +533,8 @@ def inicializar_base_datos():
         migrar_clientes_existentes()
         migrar_columnas_nuevas_categorias()
         migrar_columna_auth_provider()
+        migrar_columnas_nuevas_clientes()
+        migrar_columnas_nuevas_productos()
 
         print("\n" + "=" * 50)
         print(" BASE DE DATOS PREPARADA CORRECTAMENTE")
@@ -746,24 +748,30 @@ def registrar_productos_seleccionados(items, empresa="General", categoria_id=Non
             cursor.execute('SELECT id, cantidad FROM productos WHERE empresa = ? AND codigo = ?', (empresa_item, codigo))
             existente = cursor.fetchone()
 
+            campos_pers = item.get('campos_personalizados')
+            campos_pers_json = None
+            if campos_pers:
+                if isinstance(campos_pers, dict):
+                    campos_pers_json = json.dumps(campos_pers, ensure_ascii=False)
+                elif isinstance(campos_pers, str):
+                    campos_pers_json = campos_pers
+
             if existente:
-                # Si ya existe, calculamos la nueva cantidad según el tipo de documento
                 stock_actual = float(existente[1]) if existente[1] is not None and existente[1] != 999 else 0.0
                 
                 if tipo_documento == 'factura' and respetar_cantidades:
                     final_cantidad = round(stock_actual + cantidad_extraida, 2)
                 else:
-                    final_cantidad = stock_actual # Mantiene el stock intacto para 'catalogo' o sin cantidad
+                    final_cantidad = stock_actual
                 
                 final_precio_total = round(final_cantidad * precio_unitario, 2)
 
                 cursor.execute('''
                     UPDATE productos
-                    SET descripcion = ?, marca = ?, um = ?, cantidad = ?, precio_unitario = ?, precio_total = ?, categoria_id = ?, es_importado = 1, fecha_actualizacion = CURRENT_TIMESTAMP
+                    SET descripcion = ?, marca = ?, um = ?, cantidad = ?, precio_unitario = ?, precio_total = ?, categoria_id = ?, campos_personalizados = COALESCE(?, campos_personalizados), es_importado = 1, fecha_actualizacion = CURRENT_TIMESTAMP
                     WHERE id = ?
-                ''', (descripcion, marca, um, final_cantidad, precio_unitario, final_precio_total, categoria_id, existente[0]))
+                ''', (descripcion, marca, um, final_cantidad, precio_unitario, final_precio_total, categoria_id, campos_pers_json, existente[0]))
             else:
-                # Si es nuevo
                 if tipo_documento == 'catalogo':
                     final_cantidad = 0.0
                 else:
@@ -772,9 +780,9 @@ def registrar_productos_seleccionados(items, empresa="General", categoria_id=Non
                 final_precio_total = round(final_cantidad * precio_unitario, 2)
                 
                 cursor.execute('''
-                    INSERT INTO productos (empresa, codigo, descripcion, marca, tm, um, cantidad, precio_unitario, precio_total, categoria_id, es_importado)
-                    VALUES (?, ?, ?, ?, 'Bs', ?, ?, ?, ?, ?, 1)
-                ''', (empresa_item, codigo, descripcion, marca, um, final_cantidad, precio_unitario, final_precio_total, categoria_id))
+                    INSERT INTO productos (empresa, codigo, descripcion, marca, tm, um, cantidad, precio_unitario, precio_total, categoria_id, campos_personalizados, es_importado)
+                    VALUES (?, ?, ?, ?, 'Bs', ?, ?, ?, ?, ?, ?, 1)
+                ''', (empresa_item, codigo, descripcion, marca, um, final_cantidad, precio_unitario, final_precio_total, categoria_id, campos_pers_json))
 
             
             # Si el item venía de una importación guardada, marcarlo como registrado
@@ -977,6 +985,11 @@ def migrar_columnas_nuevas_clientes():
                 print("[INFO] Agregando columna auth_provider en Postgres...")
                 cursor.execute("ALTER TABLE clientes ADD COLUMN auth_provider VARCHAR(50) DEFAULT 'local'")
                 conexion.commit()
+
+            if 'campos_config' not in columnas_existentes:
+                print("[INFO] Agregando columna campos_config en Postgres...")
+                cursor.execute("ALTER TABLE clientes ADD COLUMN campos_config TEXT")
+                conexion.commit()
         else:
             cursor.execute("PRAGMA table_info(clientes)")
             columnas = [col[1] for col in cursor.fetchall()]
@@ -1005,19 +1018,46 @@ def migrar_columnas_nuevas_clientes():
                 print("[INFO] Agregando columna auth_provider en SQLite...")
                 cursor.execute("ALTER TABLE clientes ADD COLUMN auth_provider VARCHAR(50) DEFAULT 'local'")
 
+            if 'campos_config' not in columnas:
+                print("[INFO] Agregando columna campos_config en SQLite...")
+                cursor.execute("ALTER TABLE clientes ADD COLUMN campos_config TEXT")
+
             conexion.commit()
     except Exception as e:
         print(f"[ERROR] Error al migrar columnas de clientes: {e}")
-        if conexion:
-            try:
-                conexion.rollback()
-            except Exception:
-                pass
+
+def migrar_columnas_nuevas_productos():
+    """Agrega la columna campos_personalizados a la tabla productos si no existe."""
+    conexion = None
+    try:
+        conexion = get_db_connection()
+        cursor = conexion.cursor()
+        is_postgres = bool(
+            not os.environ.get('TESTING_DB') and
+            os.environ.get('DATABASE_URL') and
+            os.environ.get('DATABASE_URL').startswith('postgres')
+        )
+        if is_postgres:
+            cursor.execute("SELECT column_name FROM information_schema.columns WHERE table_name='productos'")
+            rows = cursor.fetchall() or []
+            cols = [col[0] for col in rows if isinstance(col, (list, tuple))]
+            if 'campos_personalizados' not in cols:
+                cursor.execute("ALTER TABLE productos ADD COLUMN campos_personalizados TEXT")
+                conexion.commit()
+        else:
+            cursor.execute("PRAGMA table_info(productos)")
+            cols = [col[1] for col in cursor.fetchall()]
+            if 'campos_personalizados' not in cols:
+                cursor.execute("ALTER TABLE productos ADD COLUMN campos_personalizados TEXT")
+                conexion.commit()
+    except Exception as e:
+        print(f"[ERROR] Error al migrar columnas de productos: {e}")
     finally:
         if conexion:
             try:
                 conexion.close()
             except Exception:
+                pass
                 pass
 
 

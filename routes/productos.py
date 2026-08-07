@@ -43,7 +43,7 @@ def _obtener_columnas_productos(cursor):
         cursor.execute("PRAGMA table_info(productos)")
         return [col[1] for col in cursor.fetchall()]
     except Exception:
-        return ['id', 'empresa', 'codigo', 'descripcion', 'marca', 'tm', 'um', 'cantidad', 'precio_unitario', 'precio_total', 'categoria_id', 'categoria', 'es_importado']
+        return ['id', 'empresa', 'codigo', 'descripcion', 'marca', 'tm', 'um', 'cantidad', 'precio_unitario', 'precio_total', 'categoria_id', 'categoria', 'campos_personalizados', 'es_importado']
 
 def register_routes(app):
     @app.route('/productos', methods=['GET', 'POST'])
@@ -955,9 +955,7 @@ def register_routes(app):
 
                 response = make_response(pdf_con_fondos)
                 response.headers['Content-Type'] = 'application/pdf'
-                # "inline" en lugar de "attachment" para que se visualice en la pestaña del navegador
                 response.headers['Content-Disposition'] = 'inline; filename=cotizacion_directa.pdf'
-            
                 return response
             
             except OSError as e:
@@ -970,4 +968,40 @@ def register_routes(app):
                 return jsonify({'success': False, 'message': str(e)})
             else:
                 return f"Error generando PDF: {str(e)}", 500
+
+    @app.route('/api/empresa/campos-config', methods=['GET', 'POST'])
+    @login_required
+    def api_campos_config():
+        user_id = session.get('user_id')
+        user_rol = session.get('user_rol')
+        
+        with get_db_connection() as conexion:
+            cursor = conexion.cursor()
+            
+            admin_id = user_id
+            if user_rol != 'admin' and user_rol != 'superadmin':
+                cursor.execute("SELECT creador_id FROM clientes WHERE id = ?", (user_id,))
+                res = cursor.fetchone()
+                if res and res[0]:
+                    admin_id = res[0]
+
+            if request.method == 'POST':
+                data = request.get_json(silent=True) or {}
+                campos_list = data.get('campos', [])
+                campos_json = json.dumps(campos_list, ensure_ascii=False)
+                
+                cursor.execute("UPDATE clientes SET campos_config = ? WHERE id = ?", (campos_json, admin_id))
+                conexion.commit()
+                return jsonify({'success': True, 'message': 'Configuración de campos guardada con éxito', 'campos': campos_list})
+
+            cursor.execute("SELECT campos_config FROM clientes WHERE id = ?", (admin_id,))
+            res = cursor.fetchone()
+            campos_config = []
+            if res and res[0]:
+                try:
+                    campos_config = json.loads(res[0])
+                except Exception:
+                    campos_config = []
+            
+            return jsonify({'success': True, 'campos': campos_config})
 

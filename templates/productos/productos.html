@@ -1407,18 +1407,25 @@
             // Registrar el producto con la categoría seleccionada
             function registrarProducto(categoriaId) {
               const formData = new FormData();
-              const codigoVal = document.getElementById('codigo').value.trim();
+              const codigoVal = document.getElementById('codigo')?.value.trim() || '';
+              const descEl = document.getElementById('descripcion') || document.getElementById('empresa');
+              const descVal = descEl ? descEl.value : '';
+              const empresaEl = document.getElementById('empresa');
+              const empresaVal = empresaEl ? empresaEl.value : '';
+              const proveedorEl = document.getElementById('proveedor');
+              const proveedorVal = proveedorEl ? proveedorEl.value : '';
 
               // Obtener todos los datos del formulario
-              formData.append('empresa', document.getElementById('empresa').value);
+              formData.append('empresa', empresaVal);
               formData.append('codigo', codigoVal);
-              formData.append('descripcion', document.getElementById('descripcion').value);
-              formData.append('marca', document.getElementById('marca').value);
-              formData.append('tm', document.getElementById('tm').value);
-              formData.append('um', document.getElementById('um').value);
-              formData.append('cantidad', document.getElementById('cantidad').value);
-              formData.append('precio_unitario', document.getElementById('precio_unitario').value);
-              formData.append('categoria_id', categoriaId);
+              formData.append('descripcion', descVal);
+              formData.append('marca', document.getElementById('marca')?.value || '');
+              formData.append('proveedor', proveedorVal);
+              formData.append('tm', document.getElementById('tm')?.value || 'Bs');
+              formData.append('um', document.getElementById('um')?.value || 'Pza');
+              formData.append('cantidad', document.getElementById('cantidad')?.value || '1');
+              formData.append('precio_unitario', document.getElementById('precio_unitario')?.value || '0');
+              formData.append('categoria_id', categoriaId || '');
 
               // Enviar el formulario
               fetch('/productos', {

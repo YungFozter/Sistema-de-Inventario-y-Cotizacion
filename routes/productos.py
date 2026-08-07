@@ -63,13 +63,24 @@ def register_routes(app):
                         cursor.execute("SELECT nombre FROM clientes WHERE id = ?", (session.get('user_id'),))
                         u = cursor.fetchone()
                         empresa = u[0] if u and u[0] else 'General'
-                    codigo = request.form['codigo']
-                    descripcion = request.form['descripcion']
-                    marca = request.form['marca']
-                    tm = request.form['tm']
-                    um = request.form['um']
-                    cantidad = int(request.form['cantidad'])
-                    precio_unitario = float(request.form['precio_unitario'])
+                    codigo = request.form.get('codigo', '').strip()
+                    descripcion = request.form.get('descripcion', '').strip()
+                    marca = request.form.get('marca', '').strip()
+                    tm = request.form.get('tm', 'Bs').strip()
+                    um = request.form.get('um', 'Pza').strip()
+
+                    try:
+                        cant_str = str(request.form.get('cantidad', '1')).replace(',', '.').strip()
+                        cantidad = int(float(cant_str)) if cant_str else 1
+                    except (ValueError, TypeError):
+                        cantidad = 1
+
+                    try:
+                        precio_str = str(request.form.get('precio_unitario', '0')).replace(',', '.').strip()
+                        precio_unitario = float(precio_str) if precio_str else 0.0
+                    except (ValueError, TypeError):
+                        precio_unitario = 0.0
+
                     precio_total = cantidad * precio_unitario
                     categoria_id = request.form.get('categoria_id')
                     if not categoria_id:
@@ -308,15 +319,26 @@ def register_routes(app):
 
         if request.method == 'POST':
             try:
-                empresa = request.form['empresa']
+                empresa = request.form.get('empresa', '').strip()
                 proveedor = request.form.get('proveedor', '').strip()
-                codigo = request.form['codigo']
-                descripcion = request.form['descripcion']
-                marca = request.form['marca']
-                tm = request.form['tm']
-                um = request.form['um']
-                cantidad = int(request.form['cantidad'])
-                precio_unitario = float(request.form['precio_unitario'])
+                codigo = request.form.get('codigo', '').strip()
+                descripcion = request.form.get('descripcion', '').strip()
+                marca = request.form.get('marca', '').strip()
+                tm = request.form.get('tm', 'Bs').strip()
+                um = request.form.get('um', 'Pza').strip()
+
+                try:
+                    cant_str = str(request.form.get('cantidad', '1')).replace(',', '.').strip()
+                    cantidad = int(float(cant_str)) if cant_str else 1
+                except (ValueError, TypeError):
+                    cantidad = 1
+
+                try:
+                    precio_str = str(request.form.get('precio_unitario', '0')).replace(',', '.').strip()
+                    precio_unitario = float(precio_str) if precio_str else 0.0
+                except (ValueError, TypeError):
+                    precio_unitario = 0.0
+
                 precio_total = cantidad * precio_unitario
                 categoria_id = request.form.get('categoria_id')
                 if not categoria_id:

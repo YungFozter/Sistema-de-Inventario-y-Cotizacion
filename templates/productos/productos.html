@@ -82,14 +82,14 @@
 
 <!-- SECCIÓN DE BÚSQUEDA BENTO GRID + CLAYMORPHISM 3D EDITORIAL -->
 <div class="editorial-bento-hero">
-  
+
   <!-- PANEL OSCURO EDITORIAL (IZQUIERDA) -->
   <div class="editorial-dark-panel">
     <div class="editorial-tag-badge mb-4">
       <span class="editorial-dot-orange"></span>
       CATÁLOGO INTELIGENTE
     </div>
-    
+
     <div>
       <h3 class="serif-editorial-title">Explora y Filtra tus Productos</h3>
       <p class="editorial-subtitle mb-0">
@@ -109,7 +109,7 @@
   <div class="editorial-light-panel">
     <form method="get" action="/productos">
       <div class="editorial-bento-grid mb-4">
-        
+
         <!-- BENTO ITEM 1: Proveedor / Distribuidor -->
         <div class="editorial-bento-item">
           <label class="editorial-bento-label">
@@ -117,7 +117,8 @@
           </label>
           <div class="clay-pill-input-group">
             <span class="clay-pill-input-icon"><i class="bi bi-building"></i></span>
-            <input type="text" name="proveedor" class="clay-pill-input" value="{{ request.args.get('proveedor', '') }}" placeholder="Ej: Siemens / Conduspar">
+            <input type="text" name="proveedor" class="clay-pill-input" value="{{ request.args.get('proveedor', '') }}"
+              placeholder="Ej: Siemens / Conduspar">
           </div>
         </div>
 
@@ -128,7 +129,8 @@
           </label>
           <div class="clay-pill-input-group">
             <span class="clay-pill-input-icon"><i class="bi bi-hash"></i></span>
-            <input type="text" name="codigo" class="clay-pill-input" value="{{ request.args.get('codigo', '') }}" placeholder="Ej: ERD-001">
+            <input type="text" name="codigo" class="clay-pill-input" value="{{ request.args.get('codigo', '') }}"
+              placeholder="Ej: ERD-001">
           </div>
         </div>
 
@@ -153,18 +155,20 @@
           </label>
           <div class="clay-pill-input-group">
             <span class="clay-pill-input-icon"><i class="bi bi-building"></i></span>
-            <input type="text" name="marca" class="clay-pill-input" value="{{ request.args.get('marca', '') }}" placeholder="Ej: Siemens / Schneider">
+            <input type="text" name="marca" class="clay-pill-input" value="{{ request.args.get('marca', '') }}"
+              placeholder="Ej: Siemens / Schneider">
           </div>
         </div>
 
         <!-- BENTO ITEM 5: Descripción -->
         <div class="editorial-bento-item" style="flex: 1 1 100%;">
           <label class="editorial-bento-label">
-            <i class="bi bi-text-paragraph text-orange-pro"></i> Descripción
+            <i class="bi bi-text-paragraph text-orange-pro"></i> Nombre / Descripción del Producto
           </label>
           <div class="clay-pill-input-group">
             <span class="clay-pill-input-icon"><i class="bi bi-card-text"></i></span>
-            <input type="text" name="descripcion" class="clay-pill-input" value="{{ request.args.get('descripcion', '') }}" placeholder="Palabras clave o nombre del producto">
+            <input type="text" name="descripcion" class="clay-pill-input"
+              value="{{ request.args.get('descripcion', '') }}" placeholder="Palabras clave o nombre del producto">
           </div>
         </div>
 
@@ -186,10 +190,10 @@
 
 <!-- SECCIÓN DE REGISTRO DE PRODUCTOS - IDEA 3: BENTO SUPERIOR & PANEL INFERIOR DE SUMMARY -->
 <div class="editorial-register-container">
-  
+
   <!-- PARTE SUPERIOR: PANEL CLARO CON BENTO GRID DE CAMPOS Y BOTONERA DE PLANTILLAS -->
   <div class="editorial-register-top">
-    
+
     <div class="d-flex align-items-center justify-content-between flex-wrap gap-3 mb-4">
       <div>
         <div class="d-flex align-items-center gap-2 mb-2">
@@ -197,7 +201,8 @@
             <span class="editorial-dot-orange"></span>
             GESTIÓN DE CATÁLOGO
           </div>
-          <span class="badge bg-dark text-warning border border-warning rounded-pill px-3 py-1.5 fw-bold" style="font-size: 0.78rem;" title="Tasa Dólar Paralelo AirTm P2P Sincronizada en Tiempo Real">
+          <span class="badge bg-dark text-warning border border-warning rounded-pill px-3 py-1.5 fw-bold"
+            style="font-size: 0.78rem;" title="Tasa Dólar Paralelo AirTm P2P Sincronizada en Tiempo Real">
             <i class="bi bi-broadcast me-1 text-warning"></i> AirTm Live: {{ tipo_cambio_live.rate }} Bs/$USD
           </span>
         </div>
@@ -224,7 +229,8 @@
         <button type="button" class="preset-pill-dark" onclick="aplicarPlantillaProducto('servicios')">
           💻 Servicios
         </button>
-        <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-2.5" onclick="limpiarFormularioProducto()" title="Restablecer">
+        <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-2.5"
+          onclick="limpiarFormularioProducto()" title="Restablecer">
           <i class="bi bi-arrow-counterclockwise"></i>
         </button>
       </div>
@@ -239,15 +245,17 @@
       <input type="hidden" name="categoria_id" id="categoria_id">
 
       <div class="editorial-bento-grid mb-2">
-        
+
         <!-- BENTO ITEM 1: Descripción / Nombre del Producto -->
         <div class="editorial-bento-item">
           <label class="editorial-bento-label">
-            <i class="bi bi-box-seam text-orange-pro"></i> Descripción / Nombre del Producto <span class="text-danger">*</span>
+            <i class="bi bi-box-seam text-orange-pro"></i> Nombre del Producto / Descripción <span
+              class="text-danger">*</span>
           </label>
           <div class="clay-pill-input-group">
             <span class="clay-pill-input-icon"><i class="bi bi-pencil-square"></i></span>
-            <input type="text" name="descripcion" id="descripcion" class="clay-pill-input" placeholder="Ej: Cable Cobre 12AWG Multifilar Siemens" required oninput="actualizarVistaPreviaProducto()">
+            <input type="text" name="descripcion" id="descripcion" class="clay-pill-input"
+              placeholder="Ej: Cable Cobre 12AWG Multifilar Siemens" required oninput="actualizarVistaPreviaProducto()">
           </div>
         </div>
 
@@ -258,7 +266,8 @@
           </label>
           <div class="clay-pill-input-group">
             <span class="clay-pill-input-icon"><i class="bi bi-hash"></i></span>
-            <input type="text" name="codigo" id="codigo" class="clay-pill-input" placeholder="Ej: ERD-001" required oninput="actualizarVistaPreviaProducto()">
+            <input type="text" name="codigo" id="codigo" class="clay-pill-input" placeholder="Ej: ERD-001" required
+              oninput="actualizarVistaPreviaProducto()">
           </div>
         </div>
 
@@ -269,7 +278,8 @@
           </label>
           <div class="clay-pill-input-group">
             <span class="clay-pill-input-icon"><i class="bi bi-building"></i></span>
-            <input type="text" name="marca" id="marca" class="clay-pill-input" placeholder="Ej: Siemens / Conduspar" oninput="actualizarVistaPreviaProducto()">
+            <input type="text" name="marca" id="marca" class="clay-pill-input" placeholder="Ej: Siemens / Conduspar"
+              oninput="actualizarVistaPreviaProducto()">
           </div>
         </div>
 
@@ -280,11 +290,12 @@
           </label>
           <div class="clay-pill-input-group">
             <span class="clay-pill-input-icon"><i class="bi bi-truck"></i></span>
-            <input type="text" name="proveedor" id="proveedor" class="clay-pill-input" list="listaProveedoresData" placeholder="Ej: Siemens Bolivia / Conduspar">
+            <input type="text" name="proveedor" id="proveedor" class="clay-pill-input" list="listaProveedoresData"
+              placeholder="Ej: Siemens Bolivia / Conduspar">
             <datalist id="listaProveedoresData">
               {% for prov in lista_proveedores %}
               <option value="{{ prov }}">
-              {% endfor %}
+                {% endfor %}
             </datalist>
           </div>
         </div>
@@ -310,7 +321,8 @@
           </label>
           <div class="clay-pill-input-group">
             <span class="clay-pill-input-icon"><i class="bi bi-bounding-box-circles"></i></span>
-            <input type="text" name="um" id="um" class="clay-pill-input" placeholder="Ej: Metros / Pza / Caja" oninput="actualizarVistaPreviaProducto()">
+            <input type="text" name="um" id="um" class="clay-pill-input" placeholder="Ej: Metros / Pza / Caja"
+              oninput="actualizarVistaPreviaProducto()">
           </div>
         </div>
 
@@ -321,7 +333,8 @@
           </label>
           <div class="clay-pill-input-group">
             <span class="clay-pill-input-icon"><i class="bi bi-layers"></i></span>
-            <input type="number" name="cantidad" id="cantidad" class="clay-pill-input" min="1" value="1" oninput="actualizarVistaPreviaProducto()">
+            <input type="number" name="cantidad" id="cantidad" class="clay-pill-input" min="1" value="1"
+              oninput="actualizarVistaPreviaProducto()">
           </div>
         </div>
 
@@ -332,7 +345,8 @@
           </label>
           <div class="clay-pill-input-group">
             <span class="clay-pill-input-icon"><i class="bi bi-currency-exchange"></i></span>
-            <input type="number" name="precio_unitario" id="precio_unitario" class="clay-pill-input" step="any" placeholder="0.00" required oninput="actualizarVistaPreviaProducto()">
+            <input type="number" name="precio_unitario" id="precio_unitario" class="clay-pill-input" step="any"
+              placeholder="0.00" required oninput="actualizarVistaPreviaProducto()">
           </div>
         </div>
 
@@ -344,20 +358,24 @@
   <!-- PARTE INFERIOR: PANEL OSCURO DE VISTA PREVIA EN VIVO & ACCIONES PILL 3D -->
   <div class="editorial-register-bottom">
     <div class="row align-items-center g-4">
-      
+
       <!-- COLUMNA 1: VISTA PREVIA EN TIEMPO REAL DEL PRODUCTO -->
       <div class="col-xl-5 col-lg-6">
         <div class="preview-summary-card d-flex align-items-center justify-content-between flex-wrap gap-3">
           <div class="d-flex align-items-center gap-3">
-            <div class="rounded-circle bg-warning bg-opacity-20 border border-warning text-warning p-3 d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
+            <div
+              class="rounded-circle bg-warning bg-opacity-20 border border-warning text-warning p-3 d-flex align-items-center justify-content-center"
+              style="width: 48px; height: 48px;">
               <i class="bi bi-box-seam-fill fs-4"></i>
             </div>
             <div>
               <div class="d-flex align-items-center gap-2">
-                <span class="badge bg-warning text-dark fw-extrabold rounded-pill px-2.5 py-1" id="previewCodigo">COD-000</span>
+                <span class="badge bg-warning text-dark fw-extrabold rounded-pill px-2.5 py-1"
+                  id="previewCodigo">COD-000</span>
                 <span class="small text-white-50" id="previewMarcaUM">Sin Marca | Pza</span>
               </div>
-              <h5 class="fw-bold text-white mb-0 mt-1" style="word-break: break-word; line-height: 1.35;" id="previewNombre">
+              <h5 class="fw-bold text-white mb-0 mt-1" style="word-break: break-word; line-height: 1.35;"
+                id="previewNombre">
                 Nuevo Producto...
               </h5>
             </div>
@@ -373,20 +391,27 @@
       </div>
 
       <!-- COLUMNA 2: BOTONES DE ACCIÓN PILL 3D CON ESPACIADO HOLGADO Y SEPARACIÓN CLARA -->
-      <div class="col-xl-7 col-lg-6 text-lg-end d-flex align-items-center justify-content-lg-end justify-content-start flex-wrap gap-3" style="row-gap: 14px !important; column-gap: 12px !important;">
+      <div
+        class="col-xl-7 col-lg-6 text-lg-end d-flex align-items-center justify-content-lg-end justify-content-start flex-wrap gap-3"
+        style="row-gap: 14px !important; column-gap: 12px !important;">
         <button type="button" id="btnMostrarModal" class="clay-pill-btn-primary my-1">
           <i class="bi bi-plus-circle-fill"></i> Registrar Producto
         </button>
 
-        <button type="button" id="btnGestionarCategorias" class="clay-pill-btn-secondary my-1" style="background: rgba(255,255,255,0.15); color: #FFF !important; border: 1px solid rgba(255,255,255,0.25);">
+        <button type="button" id="btnGestionarCategorias" class="clay-pill-btn-secondary my-1"
+          style="background: rgba(255,255,255,0.15); color: #FFF !important; border: 1px solid rgba(255,255,255,0.25);">
           <i class="bi bi-tags-fill"></i> Categorías
         </button>
 
-        <button type="button" id="btnImportarPDF" class="clay-pill-btn-primary my-1" style="background: #059669; box-shadow: 0 4px 14px rgba(5, 150, 105, 0.4);" data-bs-toggle="modal" data-bs-target="#modalImportarPDF">
+        <button type="button" id="btnImportarPDF" class="clay-pill-btn-primary my-1"
+          style="background: #059669; box-shadow: 0 4px 14px rgba(5, 150, 105, 0.4);" data-bs-toggle="modal"
+          data-bs-target="#modalImportarPDF">
           <i class="bi bi-file-earmark-pdf-fill"></i> Importar PDF
         </button>
 
-        <button type="button" id="btnVerHistorialImportaciones" class="clay-pill-btn-secondary my-1" style="background: rgba(255,255,255,0.1); color: #FFF !important;" data-bs-toggle="modal" data-bs-target="#modalHistorialImportaciones" onclick="cargarHistorialImportaciones()">
+        <button type="button" id="btnVerHistorialImportaciones" class="clay-pill-btn-secondary my-1"
+          style="background: rgba(255,255,255,0.1); color: #FFF !important;" data-bs-toggle="modal"
+          data-bs-target="#modalHistorialImportaciones" onclick="cargarHistorialImportaciones()">
           <i class="bi bi-clock-history"></i> Historial
         </button>
       </div>
@@ -436,9 +461,11 @@
       <div class="d-flex align-items-center gap-2">
         <h3 class="mb-0 text-success me-2">
           <i class="bi bi-box-seam-fill"></i> Productos Importados
-          <span class="badge bg-success ms-1">Total: {{ pagination_imp.total_items }} | Página {{ pagination_imp.page }} de {{ pagination_imp.total_pages }}</span>
+          <span class="badge bg-success ms-1">Total: {{ pagination_imp.total_items }} | Página {{ pagination_imp.page }}
+            de {{ pagination_imp.total_pages }}</span>
         </h3>
-        <button id="btnEliminarSeleccionadosImp" class="btn btn-sm btn-danger shadow-sm fw-bold border-0 px-3 py-1" style="display: none;" onclick="eliminarSeleccionadosImportados()">
+        <button id="btnEliminarSeleccionadosImp" class="btn btn-sm btn-danger shadow-sm fw-bold border-0 px-3 py-1"
+          style="display: none;" onclick="eliminarSeleccionadosImportados()">
           <i class="bi bi-trash-fill me-1"></i> Eliminar Seleccionados (<span id="countImpSeleccionados">0</span>)
         </button>
       </div>
@@ -446,10 +473,11 @@
         <label for="selectPerPageImp" class="form-label mb-0 fw-bold text-dark small">
           <i class="bi bi-card-list me-1 text-success"></i>Mostrar por página:
         </label>
-        <select id="selectPerPageImp" class="form-select form-select-sm fw-bold border-success shadow-sm" style="width: 85px;" onchange="cambiarItemsPorPaginaImportados(this.value)">
-          <option value="5" {% if pagination_imp.per_page == 5 %}selected{% endif %}>5</option>
-          <option value="15" {% if pagination_imp.per_page == 15 %}selected{% endif %}>15</option>
-          <option value="30" {% if pagination_imp.per_page == 30 %}selected{% endif %}>30</option>
+        <select id="selectPerPageImp" class="form-select form-select-sm fw-bold border-success shadow-sm"
+          style="width: 85px;" onchange="cambiarItemsPorPaginaImportados(this.value)">
+          <option value="5" {% if pagination_imp.per_page==5 %}selected{% endif %}>5</option>
+          <option value="15" {% if pagination_imp.per_page==15 %}selected{% endif %}>15</option>
+          <option value="30" {% if pagination_imp.per_page==30 %}selected{% endif %}>30</option>
         </select>
       </div>
     </div>
@@ -460,7 +488,8 @@
         <thead class="table-dark bg-success">
           <tr>
             <th class="text-center" style="width: 40px;">
-              <input type="checkbox" id="checkSelectAllImp" class="form-check-input" onclick="toggleSelectAllImportados(this.checked)" title="Seleccionar todos en esta página">
+              <input type="checkbox" id="checkSelectAllImp" class="form-check-input"
+                onclick="toggleSelectAllImportados(this.checked)" title="Seleccionar todos en esta página">
             </th>
             <th>Empresa</th>
             <th>Código</th>
@@ -478,7 +507,8 @@
           {% for p in productos_importados %}
           <tr>
             <td class="text-center" data-label="Seleccionar">
-              <input type="checkbox" class="form-check-input chk-producto-imp" value="{{ p['id'] }}" onchange="actualizarBotonEliminarImportados()">
+              <input type="checkbox" class="form-check-input chk-producto-imp" value="{{ p['id'] }}"
+                onchange="actualizarBotonEliminarImportados()">
             </td>
             <td data-label="Empresa">{{ p['empresa'] }}</td>
             <td data-label="Código"><strong>{{ p['codigo'] }}</strong></td>
@@ -530,25 +560,26 @@
         <li class="page-item active">
           <span class="page-link bg-success border-success">{{ i }}</span>
         </li>
-        {% elif i >= pagination_imp.page - 2 and i <= pagination_imp.page + 2 or i==1 or i==pagination_imp.total_pages %}
-        <li class="page-item">
+        {% elif i >= pagination_imp.page - 2 and i <= pagination_imp.page + 2 or i==1 or i==pagination_imp.total_pages
+          %} <li class="page-item">
           <a class="page-link"
-            href="{{ url_for('productos', tab='importados', page_imp=i, per_page=pagination_imp.per_page, page_reg=pagination_reg.page, empresa=filtros.empresa, codigo=filtros.codigo, descripcion=filtros.descripcion, marca=filtros.marca, categoria=filtros.categoria) }}">{{ i }}</a>
-        </li>
-        {% elif i == pagination_imp.page - 3 or i == pagination_imp.page + 3 %}
-        <li class="page-item disabled">
-          <span class="page-link">...</span>
-        </li>
-        {% endif %}
-        {% endfor %}
+            href="{{ url_for('productos', tab='importados', page_imp=i, per_page=pagination_imp.per_page, page_reg=pagination_reg.page, empresa=filtros.empresa, codigo=filtros.codigo, descripcion=filtros.descripcion, marca=filtros.marca, categoria=filtros.categoria) }}">{{
+            i }}</a>
+          </li>
+          {% elif i == pagination_imp.page - 3 or i == pagination_imp.page + 3 %}
+          <li class="page-item disabled">
+            <span class="page-link">...</span>
+          </li>
+          {% endif %}
+          {% endfor %}
 
-        <li class="page-item {% if pagination_imp.page == pagination_imp.total_pages %}disabled{% endif %}">
-          <a class="page-link"
-            href="{{ url_for('productos', tab='importados', page_imp=pagination_imp.page+1, per_page=pagination_imp.per_page, page_reg=pagination_reg.page, empresa=filtros.empresa, codigo=filtros.codigo, descripcion=filtros.descripcion, marca=filtros.marca, categoria=filtros.categoria) }}"
-            aria-label="Siguiente">
-            <span aria-hidden="true">Siguiente &raquo;</span>
-          </a>
-        </li>
+          <li class="page-item {% if pagination_imp.page == pagination_imp.total_pages %}disabled{% endif %}">
+            <a class="page-link"
+              href="{{ url_for('productos', tab='importados', page_imp=pagination_imp.page+1, per_page=pagination_imp.per_page, page_reg=pagination_reg.page, empresa=filtros.empresa, codigo=filtros.codigo, descripcion=filtros.descripcion, marca=filtros.marca, categoria=filtros.categoria) }}"
+              aria-label="Siguiente">
+              <span aria-hidden="true">Siguiente &raquo;</span>
+            </a>
+          </li>
       </ul>
     </nav>
     {% else %}
@@ -613,7 +644,8 @@
 </style>
 
 <!-- Modal Elegante de Confirmación para Eliminación Masiva -->
-<div class="modal fade" id="modalConfirmarEliminacionMasiva" tabindex="-1" aria-labelledby="modalConfirmarEliminacionMasivaLabel" aria-hidden="true" style="z-index: 1060;">
+<div class="modal fade" id="modalConfirmarEliminacionMasiva" tabindex="-1"
+  aria-labelledby="modalConfirmarEliminacionMasivaLabel" aria-hidden="true" style="z-index: 1060;">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content border-0 shadow-lg" style="border-radius: 1rem; overflow: hidden;">
       <div class="modal-header bg-danger text-white py-3">
@@ -624,23 +656,28 @@
       </div>
       <div class="modal-body text-center p-4">
         <div class="mb-3">
-          <span class="d-inline-flex align-items-center justify-content-center bg-danger bg-opacity-10 text-danger rounded-circle" style="width: 70px; height: 70px;">
+          <span
+            class="d-inline-flex align-items-center justify-content-center bg-danger bg-opacity-10 text-danger rounded-circle"
+            style="width: 70px; height: 70px;">
             <i class="bi bi-trash3-fill fs-1"></i>
           </span>
         </div>
         <h4 class="fw-bold text-dark mb-2">¿Eliminar productos seleccionados?</h4>
         <p class="text-muted mb-3 fs-6">
-          Está a punto de eliminar <strong id="cantEliminarModalText" class="text-danger fs-5">0</strong> producto(s) de la lista de <span id="tipoEliminarModalText" class="fw-bold text-dark">Registrados</span>.
+          Está a punto de eliminar <strong id="cantEliminarModalText" class="text-danger fs-5">0</strong> producto(s) de
+          la lista de <span id="tipoEliminarModalText" class="fw-bold text-dark">Registrados</span>.
         </p>
         <div class="alert alert-warning border border-warning-subtle text-start py-2 px-3 small rounded-3 mb-0">
-          <i class="bi bi-info-circle-fill text-warning me-1"></i> <strong>Atención:</strong> Esta acción no se puede deshacer y los registros seleccionados serán eliminados permanentemente del sistema.
+          <i class="bi bi-info-circle-fill text-warning me-1"></i> <strong>Atención:</strong> Esta acción no se puede
+          deshacer y los registros seleccionados serán eliminados permanentemente del sistema.
         </div>
       </div>
       <div class="modal-footer bg-light px-4 py-3 justify-content-center gap-2">
         <button type="button" class="btn btn-outline-secondary rounded-pill px-4 fw-semibold" data-bs-dismiss="modal">
           <i class="bi bi-x-lg me-1"></i> Cancelar
         </button>
-        <button type="button" id="btnEjecutarEliminacionConfirmada" class="btn btn-danger rounded-pill px-4 fw-bold shadow-sm" onclick="ejecutarEliminacionMasivaConfirmada()">
+        <button type="button" id="btnEjecutarEliminacionConfirmada"
+          class="btn btn-danger rounded-pill px-4 fw-bold shadow-sm" onclick="ejecutarEliminacionMasivaConfirmada()">
           <i class="bi bi-trash-fill me-1"></i> Sí, Eliminar Definitivamente
         </button>
       </div>
@@ -649,7 +686,8 @@
 </div>
 
 <!-- Modal Elegante de Confirmación para Eliminación de Categoría -->
-<div class="modal fade" id="modalConfirmarEliminarCategoria" tabindex="-1" aria-labelledby="modalConfirmarEliminarCategoriaLabel" aria-hidden="true" style="z-index: 1070;">
+<div class="modal fade" id="modalConfirmarEliminarCategoria" tabindex="-1"
+  aria-labelledby="modalConfirmarEliminarCategoriaLabel" aria-hidden="true" style="z-index: 1070;">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content border-0 shadow-lg" style="border-radius: 1rem; overflow: hidden;">
       <div class="modal-header bg-danger text-white py-3">
@@ -660,23 +698,28 @@
       </div>
       <div class="modal-body text-center p-4">
         <div class="mb-3">
-          <span class="d-inline-flex align-items-center justify-content-center bg-danger bg-opacity-10 text-danger rounded-circle" style="width: 70px; height: 70px;">
+          <span
+            class="d-inline-flex align-items-center justify-content-center bg-danger bg-opacity-10 text-danger rounded-circle"
+            style="width: 70px; height: 70px;">
             <i class="bi bi-tag-fill fs-1"></i>
           </span>
         </div>
         <h4 class="fw-bold text-dark mb-2">¿Eliminar esta categoría?</h4>
         <p class="text-muted mb-3 fs-6">
-          Está a punto de eliminar la categoría <strong id="nombreCatEliminarModalText" class="text-danger fs-5 font-monospace">"Categoría"</strong>.
+          Está a punto de eliminar la categoría <strong id="nombreCatEliminarModalText"
+            class="text-danger fs-5 font-monospace">"Categoría"</strong>.
         </p>
         <div class="alert alert-warning border border-warning-subtle text-start py-2 px-3 small rounded-3 mb-0">
-          <i class="bi bi-info-circle-fill text-warning me-1"></i> <strong>Atención:</strong> Esta acción no se puede deshacer. Los productos asignados a esta categoría mantendrán sus datos pero figurarán como "Sin categoría".
+          <i class="bi bi-info-circle-fill text-warning me-1"></i> <strong>Atención:</strong> Esta acción no se puede
+          deshacer. Los productos asignados a esta categoría mantendrán sus datos pero figurarán como "Sin categoría".
         </div>
       </div>
       <div class="modal-footer bg-light px-4 py-3 justify-content-center gap-2">
         <button type="button" class="btn btn-outline-secondary rounded-pill px-4 fw-semibold" data-bs-dismiss="modal">
           <i class="bi bi-x-lg me-1"></i> Cancelar
         </button>
-        <button type="button" id="btnEjecutarEliminarCategoriaConfirmada" class="btn btn-danger rounded-pill px-4 fw-bold shadow-sm" onclick="ejecutarEliminacionCategoriaConfirmada()">
+        <button type="button" id="btnEjecutarEliminarCategoriaConfirmada"
+          class="btn btn-danger rounded-pill px-4 fw-bold shadow-sm" onclick="ejecutarEliminacionCategoriaConfirmada()">
           <i class="bi bi-trash-fill me-1"></i> Sí, Eliminar Categoría
         </button>
       </div>
@@ -887,10 +930,12 @@
                   <span class="badge bg-dark text-white rounded-pill px-2 py-1 small">📐 U/M</span>
                   <span class="badge bg-dark text-white rounded-pill px-2 py-1 small">📊 Cantidad</span>
                   <span class="badge bg-dark text-white rounded-pill px-2 py-1 small">💰 Precio</span>
-                  <span class="badge bg-primary text-white rounded-pill px-2 py-1 small" id="badgeCamposPersonalizadosGuia">⚙️ Campos Personalizados Empresa</span>
+                  <span class="badge bg-primary text-white rounded-pill px-2 py-1 small"
+                    id="badgeCamposPersonalizadosGuia">⚙️ Campos Personalizados Empresa</span>
                 </div>
               </div>
-              <button type="button" class="btn btn-sm btn-outline-dark fw-bold rounded-pill px-3" onclick="mostrarModalConfiguracionCamposEmpresa()">
+              <button type="button" class="btn btn-sm btn-outline-dark fw-bold rounded-pill px-3"
+                onclick="mostrarModalConfiguracionCamposEmpresa()">
                 <i class="bi bi-gear-fill me-1 text-warning"></i> Configurar Campos Personalizados
               </button>
             </div>
@@ -1495,34 +1540,34 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ ids: idsAEliminarMasivo })
               })
-              .then(res => res.json())
-              .then(data => {
-                const modalEl = document.getElementById('modalConfirmarEliminacionMasiva');
-                const modalInstance = bootstrap.Modal.getInstance(modalEl);
-                if (modalInstance) modalInstance.hide();
+                .then(res => res.json())
+                .then(data => {
+                  const modalEl = document.getElementById('modalConfirmarEliminacionMasiva');
+                  const modalInstance = bootstrap.Modal.getInstance(modalEl);
+                  if (modalInstance) modalInstance.hide();
 
-                if (data.success) {
-                  sessionStorage.setItem('toastNotificacion', JSON.stringify({
-                    mensaje: `✅ ${data.message}`,
-                    tipo: 'success'
-                  }));
-                  window.location.href = `/productos?tab=${tabOrigenEliminarMasivo}`;
-                } else {
+                  if (data.success) {
+                    sessionStorage.setItem('toastNotificacion', JSON.stringify({
+                      mensaje: `✅ ${data.message}`,
+                      tipo: 'success'
+                    }));
+                    window.location.href = `/productos?tab=${tabOrigenEliminarMasivo}`;
+                  } else {
+                    if (btnExec) {
+                      btnExec.disabled = false;
+                      btnExec.innerHTML = '<i class="bi bi-trash-fill me-1"></i> Sí, Eliminar Definitivamente';
+                    }
+                    mostrarAlertaGestion(data.message || 'Error al eliminar productos', 'danger');
+                  }
+                })
+                .catch(err => {
+                  console.error(err);
                   if (btnExec) {
                     btnExec.disabled = false;
                     btnExec.innerHTML = '<i class="bi bi-trash-fill me-1"></i> Sí, Eliminar Definitivamente';
                   }
-                  mostrarAlertaGestion(data.message || 'Error al eliminar productos', 'danger');
-                }
-              })
-              .catch(err => {
-                console.error(err);
-                if (btnExec) {
-                  btnExec.disabled = false;
-                  btnExec.innerHTML = '<i class="bi bi-trash-fill me-1"></i> Sí, Eliminar Definitivamente';
-                }
-                mostrarAlertaGestion('Error de conexión al eliminar los productos.', 'danger');
-              });
+                  mostrarAlertaGestion('Error de conexión al eliminar los productos.', 'danger');
+                });
             }
 
             // FUNCIONES PARA GESTIÓN DE CATEGORÍAS
@@ -1752,37 +1797,37 @@
                 method: 'DELETE',
                 headers: { 'Content-Type': 'application/json' }
               })
-              .then(res => res.json())
-              .then(data => {
-                const modalEl = document.getElementById('modalConfirmarEliminarCategoria');
-                const modalInstance = bootstrap.Modal.getInstance(modalEl);
-                if (modalInstance) modalInstance.hide();
+                .then(res => res.json())
+                .then(data => {
+                  const modalEl = document.getElementById('modalConfirmarEliminarCategoria');
+                  const modalInstance = bootstrap.Modal.getInstance(modalEl);
+                  if (modalInstance) modalInstance.hide();
 
-                if (btnExec) {
-                  btnExec.disabled = false;
-                  btnExec.innerHTML = '<i class="bi bi-trash-fill me-1"></i> Sí, Eliminar Categoría';
-                }
+                  if (btnExec) {
+                    btnExec.disabled = false;
+                    btnExec.innerHTML = '<i class="bi bi-trash-fill me-1"></i> Sí, Eliminar Categoría';
+                  }
 
-                if (data.success) {
-                  mostrarAlertaGestion(data.message, 'success');
-                  cargarListaCategorias();
-                  cargarCategorias();
-                } else {
-                  mostrarAlertaGestion(data.message || 'Error al eliminar la categoría', 'danger');
-                }
-              })
-              .catch(error => {
-                console.error('Error al eliminar categoría:', error);
-                const modalEl = document.getElementById('modalConfirmarEliminarCategoria');
-                const modalInstance = bootstrap.Modal.getInstance(modalEl);
-                if (modalInstance) modalInstance.hide();
+                  if (data.success) {
+                    mostrarAlertaGestion(data.message, 'success');
+                    cargarListaCategorias();
+                    cargarCategorias();
+                  } else {
+                    mostrarAlertaGestion(data.message || 'Error al eliminar la categoría', 'danger');
+                  }
+                })
+                .catch(error => {
+                  console.error('Error al eliminar categoría:', error);
+                  const modalEl = document.getElementById('modalConfirmarEliminarCategoria');
+                  const modalInstance = bootstrap.Modal.getInstance(modalEl);
+                  if (modalInstance) modalInstance.hide();
 
-                if (btnExec) {
-                  btnExec.disabled = false;
-                  btnExec.innerHTML = '<i class="bi bi-trash-fill me-1"></i> Sí, Eliminar Categoría';
-                }
-                mostrarAlertaGestion('Error al eliminar la categoría', 'danger');
-              });
+                  if (btnExec) {
+                    btnExec.disabled = false;
+                    btnExec.innerHTML = '<i class="bi bi-trash-fill me-1"></i> Sí, Eliminar Categoría';
+                  }
+                  mostrarAlertaGestion('Error al eliminar la categoría', 'danger');
+                });
             }
 
             // Agregar nueva categoría desde el modal de gestión
@@ -2768,196 +2813,224 @@
             window.tasaDolarAirTm = parseFloat('{{ tipo_cambio_live.rate }}') || 11.28;
 
             function actualizarVistaPreviaProducto() {
-                const nombre = document.getElementById('empresa')?.value || 'Nuevo Producto...';
-                const codigo = document.getElementById('codigo')?.value || 'COD-000';
-                const marca = document.getElementById('marca')?.value || 'Sin Marca';
-                const um = document.getElementById('um')?.value || 'Pza';
-                const tm = document.getElementById('tm')?.value || 'Bs';
-                const cantidad = document.getElementById('cantidad')?.value || '1';
-                const precioVal = parseFloat(document.getElementById('precio_unitario')?.value) || 0;
+              const descEl = document.getElementById('descripcion') || document.getElementById('empresa');
+              const nombre = (descEl && descEl.value && descEl.value.trim()) ? descEl.value.trim() : 'Nuevo Producto...';
+              const codigo = document.getElementById('codigo')?.value || 'COD-000';
+              const marca = document.getElementById('marca')?.value || 'Sin Marca';
+              const um = document.getElementById('um')?.value || 'Pza';
+              const tm = document.getElementById('tm')?.value || 'Bs';
+              const cantidad = document.getElementById('cantidad')?.value || '1';
+              const precioVal = parseFloat(document.getElementById('precio_unitario')?.value) || 0;
 
-                const pNombre = document.getElementById('previewNombre');
-                const pCodigo = document.getElementById('previewCodigo');
-                const pMarcaUM = document.getElementById('previewMarcaUM');
-                const pPrecioStock = document.getElementById('previewPrecioStock');
+              const pNombre = document.getElementById('previewNombre');
+              const pCodigo = document.getElementById('previewCodigo');
+              const pMarcaUM = document.getElementById('previewMarcaUM');
+              const pPrecioStock = document.getElementById('previewPrecioStock');
 
-                if (pNombre) pNombre.textContent = nombre;
-                if (pCodigo) pCodigo.textContent = codigo;
-                if (pMarcaUM) pMarcaUM.textContent = `${marca} | ${um}`;
+              if (pNombre) pNombre.textContent = nombre;
+              if (pCodigo) pCodigo.textContent = codigo;
+              if (pMarcaUM) pMarcaUM.textContent = `${marca} | ${um}`;
 
-                if (tm === '$USD' || tm === 'USD') {
-                    const equivalenteBs = (precioVal * window.tasaDolarAirTm).toFixed(2);
-                    if (pPrecioStock) {
-                        pPrecioStock.innerHTML = `
+              if (tm === '$USD' || tm === 'USD') {
+                const equivalenteBs = (precioVal * window.tasaDolarAirTm).toFixed(2);
+                if (pPrecioStock) {
+                  pPrecioStock.innerHTML = `
                             $USD ${precioVal.toFixed(2)}
                             <span class="fs-6 text-white-50 d-block fw-normal" style="font-size: 0.76rem !important;">
                               (equiv. ${equivalenteBs} Bs @ AirTm ${window.tasaDolarAirTm})
                             </span>
                         `;
-                    }
-                } else {
-                    if (pPrecioStock) {
-                        pPrecioStock.textContent = `${precioVal.toFixed(2)} Bs (Stock: ${cantidad})`;
-                    }
                 }
+              } else {
+                if (pPrecioStock) {
+                  pPrecioStock.textContent = `${precioVal.toFixed(2)} Bs (Stock: ${cantidad})`;
+                }
+              }
             }
 
             function aplicarPlantillaProducto(tipo) {
-                const tmInput = document.getElementById('tm');
-                const umInput = document.getElementById('um');
-                const marcaInput = document.getElementById('marca');
-                const descInput = document.getElementById('descripcion');
+              const tmInput = document.getElementById('tm');
+              const umInput = document.getElementById('um');
+              const marcaInput = document.getElementById('marca');
+              const descInput = document.getElementById('descripcion');
 
-                if (tipo === 'electricidad') {
-                    if (tmInput) tmInput.value = 'Bs';
-                    if (umInput) umInput.value = 'Metros (m)';
-                    if (marcaInput) marcaInput.value = 'Conduspar / Siemens';
-                    if (descInput) descInput.value = 'Cable eléctrico conductor multifilar de cobre aislado';
-                } else if (tipo === 'herramientas') {
-                    if (tmInput) tmInput.value = 'Bs';
-                    if (umInput) umInput.value = 'Pieza (Pza)';
-                    if (marcaInput) marcaInput.value = 'Bosch / Makita';
-                    if (descInput) descInput.value = 'Herramienta industrial / equipo de protección y corte';
-                } else if (tipo === 'insumos') {
-                    if (tmInput) tmInput.value = 'Bs';
-                    if (umInput) umInput.value = 'Caja (Caj)';
-                    if (marcaInput) marcaInput.value = 'Genérico / Importado';
-                    if (descInput) descInput.value = 'Caja de insumos y consumibles de oficina/taller';
-                } else if (tipo === 'servicios') {
-                    if (tmInput) tmInput.value = '$USD';
-                    if (umInput) umInput.value = 'Servicio (Glb)';
-                    if (marcaInput) marcaInput.value = 'COTIZAPro Services';
-                    if (descInput) descInput.value = 'Servicio técnico especializado / Licencia y configuración';
-                }
-                actualizarVistaPreviaProducto();
+              if (tipo === 'electricidad') {
+                if (tmInput) tmInput.value = 'Bs';
+                if (umInput) umInput.value = 'Metros (m)';
+                if (marcaInput) marcaInput.value = 'Conduspar / Siemens';
+                if (descInput) descInput.value = 'Cable eléctrico conductor multifilar de cobre aislado';
+              } else if (tipo === 'herramientas') {
+                if (tmInput) tmInput.value = 'Bs';
+                if (umInput) umInput.value = 'Pieza (Pza)';
+                if (marcaInput) marcaInput.value = 'Bosch / Makita';
+                if (descInput) descInput.value = 'Herramienta industrial / equipo de protección y corte';
+              } else if (tipo === 'insumos') {
+                if (tmInput) tmInput.value = 'Bs';
+                if (umInput) umInput.value = 'Caja (Caj)';
+                if (marcaInput) marcaInput.value = 'Genérico / Importado';
+                if (descInput) descInput.value = 'Caja de insumos y consumibles de oficina/taller';
+              } else if (tipo === 'servicios') {
+                if (tmInput) tmInput.value = '$USD';
+                if (umInput) umInput.value = 'Servicio (Glb)';
+                if (marcaInput) marcaInput.value = 'COTIZAPro Services';
+                if (descInput) descInput.value = 'Servicio técnico especializado / Licencia y configuración';
+              }
+              actualizarVistaPreviaProducto();
             }
 
             function limpiarFormularioProducto() {
-                const form = document.getElementById('formProducto');
-                if (form) form.reset();
-                actualizarVistaPreviaProducto();
+              const form = document.getElementById('formProducto');
+              if (form) form.reset();
+              actualizarVistaPreviaProducto();
             }
 
             function mostrarModalConfiguracionCamposEmpresa() {
-                const modalEl = document.getElementById('modalConfiguracionCamposEmpresa');
-                if (modalEl && modalEl.parentNode !== document.body) {
-                    document.body.appendChild(modalEl);
-                }
-                fetch('/api/empresa/campos-config')
-                    .then(res => res.json())
-                    .then(data => {
-                        const campos = data.campos || [];
-                        document.getElementById('cfgCampo1').value = campos[0] || '';
-                        document.getElementById('cfgCampo2').value = campos[1] || '';
-                        document.getElementById('cfgCampo3').value = campos[2] || '';
-                        document.getElementById('cfgCampo4').value = campos[3] || '';
-                        document.getElementById('cfgCampo5').value = campos[4] || '';
-                        
-                        const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
-                        modal.show();
+              const modalEl = document.getElementById('modalConfiguracionCamposEmpresa');
+              if (modalEl && modalEl.parentNode !== document.body) {
+                document.body.appendChild(modalEl);
+              }
+              fetch('/api/empresa/campos-config')
+                .then(res => res.json())
+                .then(data => {
+                  const campos = data.campos || [];
+                  document.getElementById('cfgCampo1').value = campos[0] || '';
+                  document.getElementById('cfgCampo2').value = campos[1] || '';
+                  document.getElementById('cfgCampo3').value = campos[2] || '';
+                  document.getElementById('cfgCampo4').value = campos[3] || '';
+                  document.getElementById('cfgCampo5').value = campos[4] || '';
 
-                        setTimeout(() => {
-                            const backdrops = document.querySelectorAll('.modal-backdrop');
-                            if (backdrops.length > 1) {
-                                backdrops[backdrops.length - 1].style.zIndex = '1080';
-                            }
-                        }, 50);
-                    })
-                    .catch(err => console.error('Error cargando campos personalizados:', err));
+                  const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+                  modal.show();
+
+                  setTimeout(() => {
+                    const backdrops = document.querySelectorAll('.modal-backdrop');
+                    if (backdrops.length > 1) {
+                      backdrops[backdrops.length - 1].style.zIndex = '1080';
+                    }
+                  }, 50);
+                })
+                .catch(err => console.error('Error cargando campos personalizados:', err));
             }
 
             function guardarConfiguracionCamposEmpresa() {
-                const campos = [
-                    document.getElementById('cfgCampo1').value.trim(),
-                    document.getElementById('cfgCampo2').value.trim(),
-                    document.getElementById('cfgCampo3').value.trim(),
-                    document.getElementById('cfgCampo4').value.trim(),
-                    document.getElementById('cfgCampo5').value.trim()
-                ].filter(c => c.length > 0);
+              const campos = [
+                document.getElementById('cfgCampo1').value.trim(),
+                document.getElementById('cfgCampo2').value.trim(),
+                document.getElementById('cfgCampo3').value.trim(),
+                document.getElementById('cfgCampo4').value.trim(),
+                document.getElementById('cfgCampo5').value.trim()
+              ].filter(c => c.length > 0);
 
-                fetch('/api/empresa/campos-config', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ campos: campos })
-                })
+              fetch('/api/empresa/campos-config', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ campos: campos })
+              })
                 .then(res => res.json())
                 .then(data => {
-                    if (data.success) {
-                        const modalEl = document.getElementById('modalConfiguracionCamposEmpresa');
-                        const modal = bootstrap.Modal.getInstance(modalEl);
-                        if (modal) modal.hide();
-                        mostrarAlertaGestion('Campos personalizados guardados con éxito', 'success');
-                        
-                        const badgeGuia = document.getElementById('badgeCamposPersonalizadosGuia');
-                        if (badgeGuia && campos.length > 0) {
-                            badgeGuia.textContent = `⚙️ Activos: ${campos.join(', ')}`;
-                        }
+                  if (data.success) {
+                    const modalEl = document.getElementById('modalConfiguracionCamposEmpresa');
+                    const modal = bootstrap.Modal.getInstance(modalEl);
+                    if (modal) modal.hide();
+                    mostrarAlertaGestion('Campos personalizados guardados con éxito', 'success');
+
+                    const badgeGuia = document.getElementById('badgeCamposPersonalizadosGuia');
+                    if (badgeGuia && campos.length > 0) {
+                      badgeGuia.textContent = `⚙️ Activos: ${campos.join(', ')}`;
                     }
+                  }
                 });
             }
           </script>
 
-<!-- Modal Elegante de Configuración de Campos Personalizados por Empresa -->
-<div class="modal fade" id="modalConfiguracionCamposEmpresa" tabindex="-1" aria-labelledby="modalConfiguracionCamposEmpresaLabel" aria-hidden="true" style="z-index: 1085 !important;">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content border-0 shadow-lg" style="border-radius: 24px; overflow: hidden; border: 2px solid #141414 !important; box-shadow: 0 20px 50px rgba(0,0,0,0.18) !important;">
-      
-      <!-- HEADER OSCURO CON NARRATIVA PREMIUM & ALTO CONTRASTE -->
-      <div class="modal-header py-3 px-4" style="background-color: #141414 !important; border-bottom: 2px solid #141414;">
-        <div class="d-flex align-items-center gap-2">
-          <span class="rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 36px; height: 36px; background: rgba(255, 107, 53, 0.18); border: 1px solid #FF6B35;">
-            <i class="bi bi-sliders text-orange-pro fs-5"></i>
-          </span>
-          <h5 class="modal-title fw-bold text-white mb-0" id="modalConfiguracionCamposEmpresaLabel" style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 1.15rem; letter-spacing: -0.01em; color: #FFFFFF !important;">
-            Campos Personalizados de Empresa
-          </h5>
-        </div>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
+          <!-- Modal Elegante de Configuración de Campos Personalizados por Empresa -->
+          <div class="modal fade" id="modalConfiguracionCamposEmpresa" tabindex="-1"
+            aria-labelledby="modalConfiguracionCamposEmpresaLabel" aria-hidden="true" style="z-index: 1085 !important;">
+            <div class="modal-dialog modal-dialog-centered">
+              <div class="modal-content border-0 shadow-lg"
+                style="border-radius: 24px; overflow: hidden; border: 2px solid #141414 !important; box-shadow: 0 20px 50px rgba(0,0,0,0.18) !important;">
 
-      <!-- BODY CÁLIDO CON CARDS & BORDES NEGROS 2PX -->
-      <div class="modal-body p-4" style="background-color: #FAF8F5;">
-        <p class="small text-secondary mb-3" style="font-size: 0.86rem; line-height: 1.45;">
-          Define hasta 5 atributos o especificadores adicionales propios de tu rubro (ej: <code>Ubicación Almacén</code>, <code>Garantía</code>, <code>Nº Lote</code>, <code>Voltaje</code>). Se activarán para tus registros e importaciones.
-        </p>
+                <!-- HEADER OSCURO CON NARRATIVA PREMIUM & ALTO CONTRASTE -->
+                <div class="modal-header py-3 px-4"
+                  style="background-color: #141414 !important; border-bottom: 2px solid #141414;">
+                  <div class="d-flex align-items-center gap-2">
+                    <span class="rounded-circle d-inline-flex align-items-center justify-content-center"
+                      style="width: 36px; height: 36px; background: rgba(255, 107, 53, 0.18); border: 1px solid #FF6B35;">
+                      <i class="bi bi-sliders text-orange-pro fs-5"></i>
+                    </span>
+                    <h5 class="modal-title fw-bold text-white mb-0" id="modalConfiguracionCamposEmpresaLabel"
+                      style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 1.15rem; letter-spacing: -0.01em; color: #FFFFFF !important;">
+                      Campos Personalizados de Empresa
+                    </h5>
+                  </div>
+                  <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                    aria-label="Close"></button>
+                </div>
 
-        <form id="formCamposEmpresa">
-          <div class="row g-2">
-            <div class="col-12">
-              <label class="form-label small fw-bold text-dark mb-1"><i class="bi bi-tag-fill text-orange-pro me-1"></i> Campo 1:</label>
-              <input type="text" id="cfgCampo1" class="clay-pill-input w-100" style="border: 2px solid #141414 !important; border-radius: 50px !important; padding: 7px 18px; font-size: 0.88rem;" placeholder="Ej: Ubicación Almacén / Estante">
-            </div>
-            <div class="col-12">
-              <label class="form-label small fw-bold text-dark mb-1"><i class="bi bi-tag-fill text-orange-pro me-1"></i> Campo 2:</label>
-              <input type="text" id="cfgCampo2" class="clay-pill-input w-100" style="border: 2px solid #141414 !important; border-radius: 50px !important; padding: 7px 18px; font-size: 0.88rem;" placeholder="Ej: Garantía (Meses)">
-            </div>
-            <div class="col-12">
-              <label class="form-label small fw-bold text-dark mb-1"><i class="bi bi-tag-fill text-orange-pro me-1"></i> Campo 3:</label>
-              <input type="text" id="cfgCampo3" class="clay-pill-input w-100" style="border: 2px solid #141414 !important; border-radius: 50px !important; padding: 7px 18px; font-size: 0.88rem;" placeholder="Ej: Nº Lote / Vencimiento">
-            </div>
-            <div class="col-12">
-              <label class="form-label small fw-bold text-dark mb-1"><i class="bi bi-tag-fill text-orange-pro me-1"></i> Campo 4:</label>
-              <input type="text" id="cfgCampo4" class="clay-pill-input w-100" style="border: 2px solid #141414 !important; border-radius: 50px !important; padding: 7px 18px; font-size: 0.88rem;" placeholder="Ej: Voltaje / Especificación">
-            </div>
-            <div class="col-12">
-              <label class="form-label small fw-bold text-dark mb-1"><i class="bi bi-tag-fill text-orange-pro me-1"></i> Campo 5:</label>
-              <input type="text" id="cfgCampo5" class="clay-pill-input w-100" style="border: 2px solid #141414 !important; border-radius: 50px !important; padding: 7px 18px; font-size: 0.88rem;" placeholder="Ej: Nº de Parte OEM">
+                <!-- BODY CÁLIDO CON CARDS & BORDES NEGROS 2PX -->
+                <div class="modal-body p-4" style="background-color: #FAF8F5;">
+                  <p class="small text-secondary mb-3" style="font-size: 0.86rem; line-height: 1.45;">
+                    Define hasta 5 atributos o especificadores adicionales propios de tu rubro (ej:
+                    <code>Ubicación Almacén</code>, <code>Garantía</code>, <code>Nº Lote</code>, <code>Voltaje</code>).
+                    Se activarán para tus registros e importaciones.
+                  </p>
+
+                  <form id="formCamposEmpresa">
+                    <div class="row g-2">
+                      <div class="col-12">
+                        <label class="form-label small fw-bold text-dark mb-1"><i
+                            class="bi bi-tag-fill text-orange-pro me-1"></i> Campo 1:</label>
+                        <input type="text" id="cfgCampo1" class="clay-pill-input w-100"
+                          style="border: 2px solid #141414 !important; border-radius: 50px !important; padding: 7px 18px; font-size: 0.88rem;"
+                          placeholder="Ej: Ubicación Almacén / Estante">
+                      </div>
+                      <div class="col-12">
+                        <label class="form-label small fw-bold text-dark mb-1"><i
+                            class="bi bi-tag-fill text-orange-pro me-1"></i> Campo 2:</label>
+                        <input type="text" id="cfgCampo2" class="clay-pill-input w-100"
+                          style="border: 2px solid #141414 !important; border-radius: 50px !important; padding: 7px 18px; font-size: 0.88rem;"
+                          placeholder="Ej: Garantía (Meses)">
+                      </div>
+                      <div class="col-12">
+                        <label class="form-label small fw-bold text-dark mb-1"><i
+                            class="bi bi-tag-fill text-orange-pro me-1"></i> Campo 3:</label>
+                        <input type="text" id="cfgCampo3" class="clay-pill-input w-100"
+                          style="border: 2px solid #141414 !important; border-radius: 50px !important; padding: 7px 18px; font-size: 0.88rem;"
+                          placeholder="Ej: Nº Lote / Vencimiento">
+                      </div>
+                      <div class="col-12">
+                        <label class="form-label small fw-bold text-dark mb-1"><i
+                            class="bi bi-tag-fill text-orange-pro me-1"></i> Campo 4:</label>
+                        <input type="text" id="cfgCampo4" class="clay-pill-input w-100"
+                          style="border: 2px solid #141414 !important; border-radius: 50px !important; padding: 7px 18px; font-size: 0.88rem;"
+                          placeholder="Ej: Voltaje / Especificación">
+                      </div>
+                      <div class="col-12">
+                        <label class="form-label small fw-bold text-dark mb-1"><i
+                            class="bi bi-tag-fill text-orange-pro me-1"></i> Campo 5:</label>
+                        <input type="text" id="cfgCampo5" class="clay-pill-input w-100"
+                          style="border: 2px solid #141414 !important; border-radius: 50px !important; padding: 7px 18px; font-size: 0.88rem;"
+                          placeholder="Ej: Nº de Parte OEM">
+                      </div>
+                    </div>
+                  </form>
+                </div>
+
+                <!-- FOOTER CON ACCIONES PILL 3D EN NARANJA PRO Y NEGRO -->
+                <div class="modal-footer px-4 py-3 justify-content-between"
+                  style="background-color: #FFFFFF; border-top: 2px solid #141414;">
+                  <button type="button" class="btn btn-outline-dark fw-bold rounded-pill px-4"
+                    style="border: 2px solid #141414; border-radius: 50px;" data-bs-dismiss="modal">
+                    Cancelar
+                  </button>
+                  <button type="button" class="btn text-white fw-bold rounded-pill px-4 shadow-sm"
+                    style="background-color: #FF6B35; border: 2px solid #141414; border-radius: 50px;"
+                    onclick="guardarConfiguracionCamposEmpresa()">
+                    <i class="bi bi-check-lg me-1"></i> Guardar Campos
+                  </button>
+                </div>
+
+              </div>
             </div>
           </div>
-        </form>
-      </div>
-
-      <!-- FOOTER CON ACCIONES PILL 3D EN NARANJA PRO Y NEGRO -->
-      <div class="modal-footer px-4 py-3 justify-content-between" style="background-color: #FFFFFF; border-top: 2px solid #141414;">
-        <button type="button" class="btn btn-outline-dark fw-bold rounded-pill px-4" style="border: 2px solid #141414; border-radius: 50px;" data-bs-dismiss="modal">
-          Cancelar
-        </button>
-        <button type="button" class="btn text-white fw-bold rounded-pill px-4 shadow-sm" style="background-color: #FF6B35; border: 2px solid #141414; border-radius: 50px;" onclick="guardarConfiguracionCamposEmpresa()">
-          <i class="bi bi-check-lg me-1"></i> Guardar Campos
-        </button>
-      </div>
-
-    </div>
-  </div>
-</div>
-{% endblock %}
+          {% endblock %}

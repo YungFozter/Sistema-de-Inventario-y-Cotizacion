@@ -46,7 +46,7 @@ def _obtener_columnas_productos(cursor):
         return ['id', 'empresa', 'codigo', 'descripcion', 'marca', 'tm', 'um', 'cantidad', 'precio_unitario', 'precio_total', 'categoria_id', 'categoria', 'proveedor', 'proveedor_id', 'campos_personalizados', 'es_importado']
 
 def register_routes(app):
-    @app.route('/productos', methods=['GET', 'POST'])
+    @app.route('/productos', methods=['GET', 'POST'], strict_slashes=False)
     @login_required
     @admin_required
     def productos():
@@ -291,7 +291,7 @@ def register_routes(app):
             tipo_cambio_live=obtener_tipo_cambio_paralelo()
         )
 
-    @app.route('/productos/editar/<int:id>', methods=['GET', 'POST'])
+    @app.route('/productos/editar/<int:id>', methods=['GET', 'POST'], strict_slashes=False)
     @login_required
     @admin_required
     def editar_producto(id):
@@ -334,28 +334,24 @@ def register_routes(app):
                 
                     columnas_nombres = _obtener_columnas_productos(cursor)
                 
-                    if 'proveedor' in columnas_nombres and 'categoria_id' in columnas_nombres:
-                        cursor.execute('''
-                            UPDATE productos SET
-                                empresa=?, codigo=?, descripcion=?, marca=?, tm=?, um=?, 
-                                cantidad=?, precio_unitario=?, precio_total=?, categoria_id=?, categoria=?, proveedor=?
-                            WHERE id=?
-                        ''', (empresa, codigo, descripcion, marca, tm, um, cantidad, precio_unitario, precio_total, categoria_id, categoria_nombre, proveedor, id))
-                    elif 'categoria_id' in columnas_nombres:
-                        cursor.execute('''
-                            UPDATE productos SET
-                                empresa=?, codigo=?, descripcion=?, marca=?, tm=?, um=?, 
-                                cantidad=?, precio_unitario=?, precio_total=?, categoria_id=?, categoria=?
-                            WHERE id=?
-                        ''', (empresa, codigo, descripcion, marca, tm, um, cantidad, precio_unitario, precio_total, categoria_id, categoria_nombre, id))
+                    update_cols = ['empresa=?', 'codigo=?', 'descripcion=?', 'marca=?', 'tm=?', 'um=?', 'cantidad=?', 'precio_unitario=?', 'precio_total=?']
+                    update_vals = [empresa, codigo, descripcion, marca, tm, um, cantidad, precio_unitario, precio_total]
+
+                    if 'categoria_id' in columnas_nombres:
+                        update_cols.extend(['categoria_id=?', 'categoria=?'])
+                        update_vals.extend([categoria_id, categoria_nombre])
                     else:
-                        cursor.execute('''
-                            UPDATE productos SET
-                                empresa=?, codigo=?, descripcion=?, marca=?, tm=?, um=?, 
-                                cantidad=?, precio_unitario=?, precio_total=?, categoria=?
-                            WHERE id=?
-                        ''', (empresa, codigo, descripcion, marca, tm, um, cantidad, precio_unitario, precio_total, categoria_nombre, id))
-                
+                        update_cols.append('categoria=?')
+                        update_vals.append(categoria_nombre)
+
+                    if 'proveedor' in columnas_nombres:
+                        update_cols.append('proveedor=?')
+                        update_vals.append(proveedor)
+
+                    update_vals.append(id)
+                    update_str = ', '.join(update_cols)
+
+                    cursor.execute(f'UPDATE productos SET {update_str} WHERE id=?', update_vals)
                     conexion.commit()
             
                 flash('Producto actualizado correctamente', 'success')

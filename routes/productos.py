@@ -403,6 +403,7 @@ def register_routes(app):
         return render_template(
             'productos/editar_producto.html',
             producto=producto,
+            producto_id=id,
             categorias=categorias,
             todas_categorias=todas_categorias,
             lista_proveedores=lista_proveedores,

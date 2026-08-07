@@ -3,7 +3,135 @@
 {% block titulo %}Proveedores — COTIZAPro{% endblock %}
 
 {% block contenido %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
 <link rel="stylesheet" href="/static/css/productos.css">
+
+<style>
+  /* Bento Hero & Cards Hover Animations */
+  .bento-hero-card {
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    background: #FAF8F5;
+    border-radius: 28px;
+    border: 2.5px solid #141414 !important;
+    position: relative;
+    overflow: hidden;
+  }
+  .bento-hero-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; height: 6px;
+    background: linear-gradient(90deg, #FF6B35 0%, #FF9F1C 50%, #141414 100%);
+  }
+
+  /* Bento Field Items Hover 3D Shift */
+  .bento-input-card {
+    background: #FFFFFF;
+    border: 2.5px solid #141414 !important;
+    border-radius: 22px !important;
+    padding: 16px 20px;
+    transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    position: relative;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+  }
+  .bento-input-card:hover {
+    transform: translateY(-6px) scale(1.015);
+    border-color: #FF6B35 !important;
+    box-shadow: 0 16px 36px -8px rgba(255, 107, 53, 0.24), 0 6px 12px rgba(0, 0, 0, 0.06) !important;
+  }
+  .bento-input-card:focus-within {
+    transform: translateY(-4px) scale(1.01);
+    border-color: #FF6B35 !important;
+    box-shadow: 0 0 0 4px rgba(255, 107, 53, 0.18), 0 12px 24px -6px rgba(255, 107, 53, 0.2) !important;
+    background: #FFFDFB;
+  }
+
+  /* Animated Icon Bounce on Hover/Focus */
+  .bento-input-card:hover .bento-field-icon,
+  .bento-input-card:focus-within .bento-field-icon {
+    transform: scale(1.22) rotate(-8deg);
+    color: #FF6B35 !important;
+  }
+  .bento-field-icon {
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    display: inline-block;
+  }
+
+  /* Input Styling Inside Bento Field */
+  .bento-field-label {
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: #141414;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .bento-input-control {
+    border: 1.5px solid rgba(20, 20, 20, 0.12);
+    background: #F6F3ED;
+    border-radius: 100px;
+    padding: 10px 18px 10px 42px;
+    width: 100%;
+    font-weight: 600;
+    color: #141414;
+    outline: none;
+    transition: all 0.25s ease;
+  }
+  .bento-input-control:focus {
+    background: #FFFFFF;
+    border-color: #FF6B35;
+    box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.15);
+  }
+  .bento-input-group {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+  .bento-input-group .bento-inner-icon {
+    position: absolute;
+    left: 16px;
+    color: #FF6B35;
+    font-size: 0.95rem;
+    pointer-events: none;
+    transition: all 0.25s ease;
+  }
+  .bento-input-card:focus-within .bento-inner-icon {
+    transform: scale(1.2);
+  }
+
+  /* Hover Action Buttons */
+  .btn-bento-action {
+    background: #FF6B35;
+    color: #FFFFFF;
+    border: 2.5px solid #141414;
+    border-radius: 100px !important;
+    font-weight: 800;
+    padding: 12px 32px;
+    transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    box-shadow: 0 8px 20px rgba(255, 107, 53, 0.28);
+  }
+  .btn-bento-action:hover {
+    transform: translateY(-3px) scale(1.04);
+    background: #FF7B4B;
+    color: #FFFFFF;
+    box-shadow: 0 16px 32px rgba(255, 107, 53, 0.4);
+  }
+  .btn-bento-action:active {
+    transform: translateY(1px) scale(0.98);
+  }
+
+  /* Table Row Hover */
+  .bento-table-row {
+    transition: all 0.25s ease;
+  }
+  .bento-table-row:hover {
+    background-color: rgba(255, 107, 53, 0.04) !important;
+    transform: scale(1.002);
+  }
+</style>
 
 <div class="container-fluid py-4 px-lg-5" style="background-color: #FAF8F5; min-height: 100vh;">
   
@@ -11,86 +139,112 @@
   {% with messages = get_flashed_messages(with_categories=true) %}
     {% if messages %}
       {% for category, message in messages %}
-        <div class="alert alert-{{ category }} alert-dismissible fade show rounded-pill px-4 py-3 shadow-sm border border-2 border-dark mb-4" role="alert">
-          <i class="bi bi-info-circle-fill me-2"></i> {{ message }}
+        <div class="alert alert-{{ category }} alert-dismissible fade show rounded-pill px-4 py-3 shadow-sm border border-2 border-dark mb-4 animate__animated animate__fadeInDown" role="alert">
+          <i class="fa-solid fa-circle-info me-2"></i> {{ message }}
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" onclick="this.parentElement.remove()"></button>
         </div>
       {% endfor %}
     {% endif %}
   {% endwith %}
 
-  <!-- FORMULARIO DE REGISTRO BENTO GRID (ANCHO COMPLETO) -->
-  <div class="card border-0 shadow-sm p-4 p-md-5 mb-4" style="background: #FAF8F5; border-radius: 28px; border: 2px solid #141414 !important;">
+  <!-- FORMULARIO DE REGISTRO BENTO GRID REINVENTADO -->
+  <div class="card bento-hero-card shadow-sm p-4 p-md-5 mb-4 animate__animated animate__fadeIn">
     <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
       <div>
-        <h3 class="fw-bold text-dark mb-1" style="font-size: 1.75rem;"><i class="bi bi-truck text-orange-pro me-2"></i> Registrar Nuevo Proveedor</h3>
-        <p class="text-secondary small mb-0">Agrega un nuevo fabricante o distribuidor a tu inventario de forma rápida.</p>
+        <h3 class="fw-bold text-dark mb-1" style="font-size: 1.8rem;"><i class="fa-solid fa-truck-field text-orange-pro me-2 bento-field-icon"></i> Registrar Nuevo Proveedor</h3>
+        <p class="text-secondary small mb-0">Agrega un nuevo fabricante o distribuidor a tu inventario con diseño Bento Interactivo.</p>
       </div>
-      <span class="badge bg-dark text-white rounded-pill px-3 py-1.5 fw-bold" style="font-size: 0.78rem;">FORMULARIO PRO</span>
+      <span class="badge bg-dark text-warning border border-warning rounded-pill px-3.5 py-2 fw-bold shadow-sm" style="font-size: 0.8rem;">
+        <i class="fa-solid fa-bolt me-1 text-warning"></i> FORMULARIO PRO
+      </span>
     </div>
 
     <form method="post" action="/proveedores" id="formProveedor">
-      <div class="editorial-bento-grid mb-4">
+      <div class="row g-3 mb-4">
         
         <!-- BENTO 1: Nombre / Razón Social (OBLIGATORIO) -->
-        <div class="editorial-bento-item" style="border: 2px solid #141414 !important; border-radius: 50px !important;">
-          <label class="editorial-bento-label"><i class="bi bi-building text-orange-pro"></i> Razón Social / Nombre *</label>
-          <div class="clay-pill-input-group">
-            <span class="clay-pill-input-icon"><i class="bi bi-briefcase"></i></span>
-            <input type="text" name="nombre" class="clay-pill-input" placeholder="Ej: Siemens Bolivia S.A." required style="border-radius: 50px !important;">
+        <div class="col-md-6">
+          <div class="bento-input-card">
+            <label class="bento-field-label">
+              <i class="fa-solid fa-building text-orange-pro bento-field-icon"></i> Razón Social / Nombre *
+            </label>
+            <div class="bento-input-group">
+              <i class="fa-solid fa-briefcase bento-inner-icon"></i>
+              <input type="text" name="nombre" class="bento-input-control" placeholder="Ej: Siemens Bolivia S.A." required>
+            </div>
           </div>
         </div>
 
         <!-- BENTO 2: Asesor / Contacto (OBLIGATORIO) -->
-        <div class="editorial-bento-item" style="border: 2px solid #141414 !important; border-radius: 50px !important;">
-          <label class="editorial-bento-label"><i class="bi bi-person-badge text-orange-pro"></i> Asesor / Contacto *</label>
-          <div class="clay-pill-input-group">
-            <span class="clay-pill-input-icon"><i class="bi bi-person"></i></span>
-            <input type="text" name="contacto_nombre" class="clay-pill-input" placeholder="Ej: Ing. Roberto Carlos" required style="border-radius: 50px !important;">
+        <div class="col-md-6">
+          <div class="bento-input-card">
+            <label class="bento-field-label">
+              <i class="fa-solid fa-id-card-clip text-orange-pro bento-field-icon"></i> Asesor / Contacto *
+            </label>
+            <div class="bento-input-group">
+              <i class="fa-solid fa-user bento-inner-icon"></i>
+              <input type="text" name="contacto_nombre" class="bento-input-control" placeholder="Ej: Ing. Roberto Carlos" required>
+            </div>
           </div>
         </div>
 
         <!-- BENTO 3: NIT / RUC (OPCIONAL) -->
-        <div class="editorial-bento-item" style="border: 2px solid #141414 !important; border-radius: 50px !important;">
-          <label class="editorial-bento-label"><i class="bi bi-card-heading text-orange-pro"></i> NIT / RUC</label>
-          <div class="clay-pill-input-group">
-            <span class="clay-pill-input-icon"><i class="bi bi-hash"></i></span>
-            <input type="text" name="nit_ruc" class="clay-pill-input" placeholder="Ej: 1029384019" style="border-radius: 50px !important;">
+        <div class="col-md-4">
+          <div class="bento-input-card">
+            <label class="bento-field-label">
+              <i class="fa-solid fa-passport text-orange-pro bento-field-icon"></i> NIT / RUC
+            </label>
+            <div class="bento-input-group">
+              <i class="fa-solid fa-hashtag bento-inner-icon"></i>
+              <input type="text" name="nit_ruc" class="bento-input-control" placeholder="Ej: 1029384019">
+            </div>
           </div>
         </div>
 
         <!-- BENTO 4: Teléfono (OPCIONAL) -->
-        <div class="editorial-bento-item" style="border: 2px solid #141414 !important; border-radius: 50px !important;">
-          <label class="editorial-bento-label"><i class="bi bi-telephone text-orange-pro"></i> Teléfono / Celular</label>
-          <div class="clay-pill-input-group">
-            <span class="clay-pill-input-icon"><i class="bi bi-phone"></i></span>
-            <input type="text" name="telefono" class="clay-pill-input" placeholder="Ej: +591 76543210" style="border-radius: 50px !important;">
+        <div class="col-md-4">
+          <div class="bento-input-card">
+            <label class="bento-field-label">
+              <i class="fa-solid fa-phone text-orange-pro bento-field-icon"></i> Teléfono / Celular
+            </label>
+            <div class="bento-input-group">
+              <i class="fa-solid fa-mobile-screen-button bento-inner-icon"></i>
+              <input type="text" name="telefono" class="bento-input-control" placeholder="Ej: +591 76543210">
+            </div>
           </div>
         </div>
 
         <!-- BENTO 5: Rubro / Especialidad (OPCIONAL) -->
-        <div class="editorial-bento-item" style="border: 2px solid #141414 !important; border-radius: 50px !important;">
-          <label class="editorial-bento-label"><i class="bi bi-tags text-orange-pro"></i> Rubro / Especialidad</label>
-          <div class="clay-pill-input-group">
-            <span class="clay-pill-input-icon"><i class="bi bi-tag"></i></span>
-            <input type="text" name="rubro" class="clay-pill-input" placeholder="Ej: Material Eléctrico / Herramientas" style="border-radius: 50px !important;">
+        <div class="col-md-4">
+          <div class="bento-input-card">
+            <label class="bento-field-label">
+              <i class="fa-solid fa-tags text-orange-pro bento-field-icon"></i> Rubro / Especialidad
+            </label>
+            <div class="bento-input-group">
+              <i class="fa-solid fa-boxes-stacked bento-inner-icon"></i>
+              <input type="text" name="rubro" class="bento-input-control" placeholder="Ej: Material Eléctrico / Herramientas">
+            </div>
           </div>
         </div>
 
         <!-- BENTO 6: Correo Electrónico (OPCIONAL) -->
-        <div class="editorial-bento-item" style="border: 2px solid #141414 !important; border-radius: 50px !important;">
-          <label class="editorial-bento-label"><i class="bi bi-envelope text-orange-pro"></i> Correo Electrónico</label>
-          <div class="clay-pill-input-group">
-            <span class="clay-pill-input-icon"><i class="bi bi-at"></i></span>
-            <input type="email" name="correo" class="clay-pill-input" placeholder="ventas@siemens.bo" style="border-radius: 50px !important;">
+        <div class="col-12">
+          <div class="bento-input-card">
+            <label class="bento-field-label">
+              <i class="fa-solid fa-envelope text-orange-pro bento-field-icon"></i> Correo Electrónico
+            </label>
+            <div class="bento-input-group">
+              <i class="fa-solid fa-at bento-inner-icon"></i>
+              <input type="email" name="correo" class="bento-input-control" placeholder="ventas@siemens.bo">
+            </div>
           </div>
         </div>
 
       </div>
 
       <div class="d-flex align-items-center justify-content-end gap-2">
-        <button type="submit" class="btn text-white fw-bold rounded-pill px-4 py-2.5 shadow-sm" style="background-color: #FF6B35; border: 2px solid #141414; border-radius: 50px !important;">
-          <i class="bi bi-plus-circle-fill me-1"></i> Guardar Proveedor
+        <button type="submit" class="btn btn-bento-action shadow">
+          <i class="fa-solid fa-circle-plus me-1"></i> Guardar Proveedor
         </button>
       </div>
     </form>
@@ -136,7 +290,7 @@
         </thead>
         <tbody>
           {% for p in proveedores %}
-          <tr style="border-bottom: 1px solid rgba(20, 20, 20, 0.08);">
+          <tr class="bento-table-row" style="border-bottom: 1px solid rgba(20, 20, 20, 0.08);">
             <td class="py-3 px-4">
               <div class="d-flex align-items-center gap-2">
                 <span class="rounded-circle d-inline-flex align-items-center justify-content-center fw-bold text-white" style="width: 38px; height: 38px; background-color: #FF6B35; border: 1.5px solid #141414;">

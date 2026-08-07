@@ -2915,18 +2915,18 @@
 
             function mostrarModalConfiguracionCamposEmpresa() {
               const modalEl = document.getElementById('modalConfiguracionCamposEmpresa');
-              if (modalEl && modalEl.parentNode !== document.body) {
+              if (!modalEl) return;
+              if (modalEl.parentNode !== document.body) {
                 document.body.appendChild(modalEl);
               }
               fetch('/api/empresa/campos-config')
                 .then(res => res.json())
                 .then(data => {
                   const campos = data.campos || [];
-                  document.getElementById('cfgCampo1').value = campos[0] || '';
-                  document.getElementById('cfgCampo2').value = campos[1] || '';
-                  document.getElementById('cfgCampo3').value = campos[2] || '';
-                  document.getElementById('cfgCampo4').value = campos[3] || '';
-                  document.getElementById('cfgCampo5').value = campos[4] || '';
+                  for (let i = 1; i <= 5; i++) {
+                    const el = document.getElementById(`cfgCampo${i}`);
+                    if (el) el.value = campos[i - 1] || '';
+                  }
 
                   const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
                   modal.show();
@@ -2942,13 +2942,13 @@
             }
 
             function guardarConfiguracionCamposEmpresa() {
-              const campos = [
-                document.getElementById('cfgCampo1').value.trim(),
-                document.getElementById('cfgCampo2').value.trim(),
-                document.getElementById('cfgCampo3').value.trim(),
-                document.getElementById('cfgCampo4').value.trim(),
-                document.getElementById('cfgCampo5').value.trim()
-              ].filter(c => c.length > 0);
+              const campos = [];
+              for (let i = 1; i <= 5; i++) {
+                const el = document.getElementById(`cfgCampo${i}`);
+                if (el && el.value.trim().length > 0) {
+                  campos.push(el.value.trim());
+                }
+              }
 
               fetch('/api/empresa/campos-config', {
                 method: 'POST',

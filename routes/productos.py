@@ -180,11 +180,21 @@ def register_routes(app):
             filter_sql += " AND p.marca LIKE ?" if use_alias else " AND marca LIKE ?"
             params.append(f"%{marca}%")
         if categoria:
-            if 'categoria_id' in columnas_nombres:
-                filter_sql += " AND p.categoria_id = ?"
+            if str(categoria).isdigit():
+                cat_id_num = int(categoria)
+                if use_alias:
+                    filter_sql += " AND (p.categoria_id = ? OR p.categoria = ? OR c.id = ?)"
+                    params.extend([cat_id_num, str(categoria), cat_id_num])
+                else:
+                    filter_sql += " AND (categoria_id = ? OR categoria = ?)"
+                    params.extend([cat_id_num, str(categoria)])
             else:
-                filter_sql += " AND categoria LIKE ?"
-            params.append(categoria)
+                if use_alias:
+                    filter_sql += " AND (c.nombre LIKE ? OR p.categoria LIKE ?)"
+                    params.extend([f"%{categoria}%", f"%{categoria}%"])
+                else:
+                    filter_sql += " AND categoria LIKE ?"
+                    params.append(f"%{categoria}%")
 
         # 1. Consultar Productos Registrados (Manuales: es_importado = 0 o NULL)
         cond_reg = " AND (p.es_importado IS NULL OR p.es_importado = 0)" if use_alias else " AND (es_importado IS NULL OR es_importado = 0)"

@@ -108,6 +108,7 @@
   <!-- PANEL CLARO FORMULARIO BENTO GRID (DERECHA) -->
   <div class="editorial-light-panel">
     <form method="get" action="/productos">
+      <input type="hidden" name="tab" id="activeTabInput" value="{{ tab_activa }}">
       <div class="editorial-bento-grid mb-4">
 
         <!-- BENTO ITEM 1: Proveedor / Distribuidor -->
@@ -428,14 +429,16 @@
 <ul class="nav nav-pills nav-fill mb-4 p-2 bg-light rounded shadow-sm border" id="pills-tab-productos" role="tablist">
   <li class="nav-item" role="presentation">
     <button class="nav-link {% if tab_activa != 'importados' %}active{% endif %} fw-bold fs-5"
-      id="pills-registrados-tab" data-bs-toggle="pill" data-bs-target="#pills-registrados" type="button" role="tab">
+      id="pills-registrados-tab" data-bs-toggle="pill" data-bs-target="#pills-registrados" type="button" role="tab"
+      onclick="const tabInp = document.getElementById('activeTabInput'); if(tabInp) tabInp.value='registrados';">
       <i class="bi bi-list-ul"></i> Productos Registrados (Manuales)
       <span class="badge bg-primary ms-2">Total: {{ pagination_reg.total_items }}</span>
     </button>
   </li>
   <li class="nav-item" role="presentation">
     <button class="nav-link {% if tab_activa == 'importados' %}active{% endif %} fw-bold fs-5 text-success"
-      id="pills-importados-tab" data-bs-toggle="pill" data-bs-target="#pills-importados" type="button" role="tab">
+      id="pills-importados-tab" data-bs-toggle="pill" data-bs-target="#pills-importados" type="button" role="tab"
+      onclick="const tabInp = document.getElementById('activeTabInput'); if(tabInp) tabInp.value='importados';">
       <i class="bi bi-box-seam-fill"></i> Productos Importados (PDF / Texto)
       <span class="badge bg-success ms-2">Total: {{ pagination_imp.total_items }}</span>
     </button>
@@ -512,7 +515,21 @@
             </td>
             <td data-label="Empresa">{{ p['empresa'] }}</td>
             <td data-label="Código"><strong>{{ p['codigo'] }}</strong></td>
-            <td data-label="Descripción">{{ p['descripcion'] }}</td>
+            <td data-label="Descripción">
+              <div>{{ p['descripcion'] }}</div>
+              {% if p['campos_personalizados'] %}
+                {% set campos_dict = p['campos_personalizados']|from_json %}
+                {% if campos_dict and campos_dict is mapping and campos_dict|length > 0 %}
+                  <div class="mt-1 d-flex flex-wrap gap-1">
+                    {% for k, v in campos_dict.items() %}
+                      <span class="badge bg-light text-dark border me-1 shadow-sm" style="font-size: 0.73rem; font-weight: 500;">
+                        <i class="bi bi-tag-fill text-warning me-1"></i><strong>{{ k }}:</strong> {{ v }}
+                      </span>
+                    {% endfor %}
+                  </div>
+                {% endif %}
+              {% endif %}
+            </td>
             <td data-label="Marca">{{ p['marca'] }}</td>
             <td data-label="Categoría">
               {% if p['categoria_nombre'] %}

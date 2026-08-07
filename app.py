@@ -9,7 +9,7 @@ load_dotenv(override=True)
 
 from db_wrapper import get_db_connection
 
-from models import crear_tablas, migrar_columnas_nuevas_clientes, migrar_esquema_productos, migrar_tablas_equipo, migrar_columnas_nuevas_categorias
+from models import crear_tablas, migrar_columnas_nuevas_clientes, migrar_esquema_productos, migrar_tablas_equipo, migrar_columnas_nuevas_categorias, migrar_columnas_nuevas_productos
 
 import logging
 for _log_name in ['pdfminer', 'pdfminer.pdfinterp', 'pdfminer.pdfpage', 'pdfminer.converter', 'pdfminer.layout', 'PyPDF2', 'pypdf', 'pdfplumber']:
@@ -33,6 +33,7 @@ def inicializar_base_datos():
         
         crear_tablas()
         migrar_columnas_nuevas_clientes()
+        migrar_columnas_nuevas_productos()
         migrar_esquema_productos()
         migrar_tablas_equipo()
         migrar_columnas_nuevas_categorias()

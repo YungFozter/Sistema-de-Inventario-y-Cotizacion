@@ -93,24 +93,19 @@ def register_routes(app):
                             if resultado:
                                 categoria_nombre = resultado[0]
 
-                        if 'proveedor' in columnas_nombres and 'es_importado' in columnas_nombres:
-                            cursor.execute('''
-                                INSERT INTO productos 
-                                (empresa, codigo, descripcion, marca, tm, um, cantidad, precio_unitario, precio_total, categoria_id, categoria, proveedor, es_importado)
-                                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0)
-                            ''', (empresa, codigo, descripcion, marca, tm, um, cantidad, precio_unitario, precio_total, categoria_id, categoria_nombre, proveedor))
-                        elif 'es_importado' in columnas_nombres:
-                            cursor.execute('''
-                                INSERT INTO productos 
-                                (empresa, codigo, descripcion, marca, tm, um, cantidad, precio_unitario, precio_total, categoria_id, categoria, es_importado)
-                                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0)
-                            ''', (empresa, codigo, descripcion, marca, tm, um, cantidad, precio_unitario, precio_total, categoria_id, categoria_nombre))
-                        else:
-                            cursor.execute('''
-                                INSERT INTO productos 
-                                (empresa, codigo, descripcion, marca, tm, um, cantidad, precio_unitario, precio_total, categoria_id, categoria)
-                                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                            ''', (empresa, codigo, descripcion, marca, tm, um, cantidad, precio_unitario, precio_total, categoria_id, categoria_nombre))
+                        cols = ['empresa', 'codigo', 'descripcion', 'marca', 'tm', 'um', 'cantidad', 'precio_unitario', 'precio_total', 'categoria_id', 'categoria']
+                        vals = [empresa, codigo, descripcion, marca, tm, um, cantidad, precio_unitario, precio_total, categoria_id, categoria_nombre]
+
+                        if 'proveedor' in columnas_nombres:
+                            cols.append('proveedor')
+                            vals.append(proveedor)
+                        if 'es_importado' in columnas_nombres:
+                            cols.append('es_importado')
+                            vals.append(0)
+
+                        placeholders = ', '.join(['?'] * len(vals))
+                        cols_str = ', '.join(cols)
+                        cursor.execute(f"INSERT INTO productos ({cols_str}) VALUES ({placeholders})", vals)
                     
                         conexion.commit()
 

@@ -647,38 +647,41 @@
 <div class="modal fade" id="modalConfirmarEliminacionMasiva" tabindex="-1"
   aria-labelledby="modalConfirmarEliminacionMasivaLabel" aria-hidden="true" style="z-index: 1060;">
   <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content border-0 shadow-lg" style="border-radius: 1rem; overflow: hidden;">
-      <div class="modal-header bg-danger text-white py-3">
-        <h5 class="modal-title fw-bold" id="modalConfirmarEliminacionMasivaLabel">
-          <i class="bi bi-exclamation-triangle-fill me-2 fs-5"></i> Confirmar Eliminación Masiva
-        </h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body text-center p-4">
-        <div class="mb-3">
-          <span
-            class="d-inline-flex align-items-center justify-content-center bg-danger bg-opacity-10 text-danger rounded-circle"
-            style="width: 70px; height: 70px;">
-            <i class="bi bi-trash3-fill fs-1"></i>
-          </span>
+    <div class="modal-content bento-modal clay-surface border-0">
+      
+      <!-- Bento Header Area -->
+      <div class="modal-body text-center p-5 pb-4 position-relative">
+        <button type="button" class="btn-close position-absolute top-0 end-0 m-4 shadow-none" data-bs-dismiss="modal" aria-label="Close"></button>
+        
+        <div class="d-inline-flex justify-content-center align-items-center mb-4 clay-icon-pill mx-auto">
+          <i class="bi bi-trash3-fill text-orange-pro fs-2"></i>
         </div>
-        <h4 class="fw-bold text-dark mb-2">¿Eliminar productos seleccionados?</h4>
-        <p class="text-muted mb-3 fs-6">
-          Está a punto de eliminar <strong id="cantEliminarModalText" class="text-danger fs-5">0</strong> producto(s) de
-          la lista de <span id="tipoEliminarModalText" class="fw-bold text-dark">Registrados</span>.
+        
+        <h3 class="serif-title mb-2">Eliminar Producto/s</h3>
+        
+        <p class="text-muted fs-6 mb-4 px-3" style="font-family: var(--bs-font-sans-serif);">
+          Está a punto de remover <strong id="cantEliminarModalText" class="text-dark fs-5">0</strong> registro(s) de la lista de <span id="tipoEliminarModalText" class="text-dark fw-bold">Registrados</span>.
         </p>
-        <div class="alert alert-warning border border-warning-subtle text-start py-2 px-3 small rounded-3 mb-0">
-          <i class="bi bi-info-circle-fill text-warning me-1"></i> <strong>Atención:</strong> Esta acción no se puede
-          deshacer y los registros seleccionados serán eliminados permanentemente del sistema.
+
+        <div class="bento-warning-box text-start d-flex gap-3 align-items-start">
+          <i class="bi bi-info-circle-fill text-orange-pro mt-1 fs-5"></i>
+          <div>
+            <strong class="text-dark" style="font-family: var(--bs-font-sans-serif);">Atención</strong>
+            <p class="mb-0 text-muted small mt-1" style="font-family: var(--bs-font-sans-serif);">
+              Esta acción no se puede deshacer. Los registros seleccionados serán borrados permanentemente del catálogo.
+            </p>
+          </div>
         </div>
       </div>
-      <div class="modal-footer bg-light px-4 py-3 justify-content-center gap-2">
-        <button type="button" class="btn btn-outline-secondary rounded-pill px-4 fw-semibold" data-bs-dismiss="modal">
-          <i class="bi bi-x-lg me-1"></i> Cancelar
+      
+      <!-- Actions Area -->
+      <div class="modal-footer border-0 pt-0 px-5 pb-5 d-flex gap-3 justify-content-center flex-nowrap">
+        <button type="button" class="btn clay-btn-secondary flex-grow-1" data-bs-dismiss="modal">
+          Mantener
         </button>
-        <button type="button" id="btnEjecutarEliminacionConfirmada"
-          class="btn btn-danger rounded-pill px-4 fw-bold shadow-sm" onclick="ejecutarEliminacionMasivaConfirmada()">
-          <i class="bi bi-trash-fill me-1"></i> Sí, Eliminar Definitivamente
+        <button type="button" class="btn clay-btn-primary flex-grow-1"
+          id="btnEjecutarEliminacionConfirmada" onclick="ejecutarEliminacionMasivaConfirmada()">
+          Confirmar Eliminación
         </button>
       </div>
     </div>

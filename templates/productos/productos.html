@@ -1487,6 +1487,10 @@
               modalInstance.show();
             }
 
+            function eliminarProductoIndividual(id, tabNombre, tabKey) {
+              abrirModalEliminacionMasiva([id], tabNombre, tabKey);
+            }
+
             // --- 1. PRODUCTOS REGISTRADOS (MANUALES) ---
             function toggleSelectAllRegistrados(checked) {
               document.querySelectorAll('.chk-producto-reg').forEach(chk => chk.checked = checked);

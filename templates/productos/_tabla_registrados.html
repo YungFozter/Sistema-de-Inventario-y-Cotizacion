@@ -32,6 +32,7 @@
           <th>Código</th>
           <th>Descripción</th>
           <th>Marca</th>
+          <th>Proveedor</th>
           <th>Categoría</th>
           <th>TM</th>
           <th>UM</th>
@@ -50,6 +51,13 @@
             <td data-label="Código"><strong>{{ p['codigo'] }}</strong></td>
             <td data-label="Descripción">{{ p['descripcion'] }}</td>
             <td data-label="Marca">{{ p['marca'] }}</td>
+            <td data-label="Proveedor">
+              {% if p['proveedor'] %}
+                <span class="badge bg-dark text-white rounded-pill px-2.5 py-1 fw-bold">{{ p['proveedor'] }}</span>
+              {% else %}
+                <span class="text-muted small">S/P</span>
+              {% endif %}
+            </td>
             <td data-label="Categoría">
               {% if p['categoria_nombre'] %}
                 <span class="badge bg-info">{{ p['categoria_nombre'] }}</span>

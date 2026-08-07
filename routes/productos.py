@@ -43,7 +43,7 @@ def _obtener_columnas_productos(cursor):
         cursor.execute("PRAGMA table_info(productos)")
         return [col[1] for col in cursor.fetchall()]
     except Exception:
-        return ['id', 'empresa', 'codigo', 'descripcion', 'marca', 'tm', 'um', 'cantidad', 'precio_unitario', 'precio_total', 'categoria_id', 'categoria', 'campos_personalizados', 'es_importado']
+        return ['id', 'empresa', 'codigo', 'descripcion', 'marca', 'tm', 'um', 'cantidad', 'precio_unitario', 'precio_total', 'categoria_id', 'categoria', 'proveedor', 'proveedor_id', 'campos_personalizados', 'es_importado']
 
 def register_routes(app):
     @app.route('/productos', methods=['GET', 'POST'])
@@ -75,6 +75,8 @@ def register_routes(app):
                     if not categoria_id:
                         categoria_id = None
 
+                    proveedor = request.form.get('proveedor', '').strip()
+
                     # Validar si ya existe combinación empresa + codigo
                     cursor.execute("SELECT COUNT(*) FROM productos WHERE empresa=? AND codigo=?", (empresa, codigo))
                     existe = cursor.fetchone()[0]
@@ -91,7 +93,13 @@ def register_routes(app):
                             if resultado:
                                 categoria_nombre = resultado[0]
 
-                        if 'es_importado' in columnas_nombres:
+                        if 'proveedor' in columnas_nombres and 'es_importado' in columnas_nombres:
+                            cursor.execute('''
+                                INSERT INTO productos 
+                                (empresa, codigo, descripcion, marca, tm, um, cantidad, precio_unitario, precio_total, categoria_id, categoria, proveedor, es_importado)
+                                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0)
+                            ''', (empresa, codigo, descripcion, marca, tm, um, cantidad, precio_unitario, precio_total, categoria_id, categoria_nombre, proveedor))
+                        elif 'es_importado' in columnas_nombres:
                             cursor.execute('''
                                 INSERT INTO productos 
                                 (empresa, codigo, descripcion, marca, tm, um, cantidad, precio_unitario, precio_total, categoria_id, categoria, es_importado)
@@ -111,6 +119,7 @@ def register_routes(app):
 
         # Lógica de búsqueda
         empresa = request.args.get('empresa', '')
+        proveedor = request.args.get('proveedor', '')
         codigo = request.args.get('codigo', '')
         descripcion = request.args.get('descripcion', '')
         marca = request.args.get('marca', '')
@@ -152,6 +161,9 @@ def register_routes(app):
         if empresa:
             filter_sql += " AND p.empresa LIKE ?" if use_alias else " AND empresa LIKE ?"
             params.append(f"%{empresa}%")
+        if proveedor:
+            filter_sql += " AND p.proveedor LIKE ?" if use_alias else " AND proveedor LIKE ?"
+            params.append(f"%{proveedor}%")
         if codigo:
             filter_sql += " AND p.codigo LIKE ?" if use_alias else " AND codigo LIKE ?"
             params.append(f"%{codigo}%")
@@ -186,6 +198,7 @@ def register_routes(app):
 
         try:
             with get_db_connection() as conexion:
+                conexion.row_factory = sqlite3.Row
                 cursor = conexion.cursor()
 
                 # Registrados
@@ -193,20 +206,21 @@ def register_routes(app):
                 total_registrados = cursor.fetchone()[0]
                 total_pages_reg = max(1, (total_registrados + per_page - 1) // per_page)
                 cursor.execute(base_query + filter_sql + cond_reg + " ORDER BY id DESC LIMIT ? OFFSET ?", params + [per_page, offset_reg])
-                productos_registrados = cursor.fetchall()
+                productos_registrados = [dict(row) for row in cursor.fetchall()]
 
                 # Importados
                 cursor.execute(count_query + filter_sql + cond_imp, params)
                 total_importados = cursor.fetchone()[0]
                 total_pages_imp = max(1, (total_importados + per_page - 1) // per_page)
                 cursor.execute(base_query + filter_sql + cond_imp + " ORDER BY id DESC LIMIT ? OFFSET ?", params + [per_page, offset_imp])
-                productos_importados = cursor.fetchall()
+                productos_importados = [dict(row) for row in cursor.fetchall()]
 
         except Exception as e:
             mensaje_error = f"Error al buscar productos: {str(e)}"
 
         filtros = {
             'empresa': empresa,
+            'proveedor': proveedor,
             'codigo': codigo,
             'descripcion': descripcion,
             'marca': marca,
@@ -244,6 +258,7 @@ def register_routes(app):
         # Obtener clientes para el modal de PDF Directo y empresas para Superadmin
         clientes = []
         lista_empresas = []
+        lista_proveedores = []
         try:
             with get_db_connection() as conexion:
                 cursor = conexion.cursor()
@@ -256,9 +271,13 @@ def register_routes(app):
 
                 cursor.execute("SELECT DISTINCT empresa FROM productos WHERE empresa IS NOT NULL AND empresa != '' ORDER BY empresa")
                 lista_empresas = [row[0] for row in cursor.fetchall()]
+
+                cursor.execute("SELECT nombre FROM proveedores ORDER BY nombre ASC")
+                lista_proveedores = [row[0] for row in cursor.fetchall()]
         except Exception:
             clientes = []
             lista_empresas = []
+            lista_proveedores = []
 
         return render_template(
             'productos/productos.html',
@@ -273,6 +292,7 @@ def register_routes(app):
             tab_activa=tab_activa,
             clientes=clientes,
             lista_empresas=lista_empresas,
+            lista_proveedores=lista_proveedores,
             tipo_cambio_live=obtener_tipo_cambio_paralelo()
         )
 
@@ -285,6 +305,7 @@ def register_routes(app):
         page_imp = request.form.get('page_imp', request.args.get('page_imp', 1))
     
         empresa_filtro = request.form.get('empresa_filtro', request.args.get('empresa', ''))
+        proveedor_filtro = request.form.get('proveedor_filtro', request.args.get('proveedor', ''))
         codigo_filtro = request.form.get('codigo_filtro', request.args.get('codigo', ''))
         descripcion_filtro = request.form.get('descripcion_filtro', request.args.get('descripcion', ''))
         marca_filtro = request.form.get('marca_filtro', request.args.get('marca', ''))
@@ -293,6 +314,7 @@ def register_routes(app):
         if request.method == 'POST':
             try:
                 empresa = request.form['empresa']
+                proveedor = request.form.get('proveedor', '').strip()
                 codigo = request.form['codigo']
                 descripcion = request.form['descripcion']
                 marca = request.form['marca']
@@ -317,7 +339,14 @@ def register_routes(app):
                 
                     columnas_nombres = _obtener_columnas_productos(cursor)
                 
-                    if 'categoria_id' in columnas_nombres:
+                    if 'proveedor' in columnas_nombres and 'categoria_id' in columnas_nombres:
+                        cursor.execute('''
+                            UPDATE productos SET
+                                empresa=?, codigo=?, descripcion=?, marca=?, tm=?, um=?, 
+                                cantidad=?, precio_unitario=?, precio_total=?, categoria_id=?, categoria=?, proveedor=?
+                            WHERE id=?
+                        ''', (empresa, codigo, descripcion, marca, tm, um, cantidad, precio_unitario, precio_total, categoria_id, categoria_nombre, proveedor, id))
+                    elif 'categoria_id' in columnas_nombres:
                         cursor.execute('''
                             UPDATE productos SET
                                 empresa=?, codigo=?, descripcion=?, marca=?, tm=?, um=?, 

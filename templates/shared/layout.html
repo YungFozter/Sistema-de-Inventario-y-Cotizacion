@@ -952,6 +952,9 @@
           <a href="/productos" class="clay-nav-link {% if request.path.startswith('/productos') %}active{% endif %}">
             <i class="bi bi-box-seam-fill" style="color:inherit;"></i> Productos
           </a>
+          <a href="/proveedores" class="clay-nav-link {% if request.path.startswith('/proveedores') %}active{% endif %}">
+            <i class="bi bi-truck" style="color:inherit;"></i> Proveedores
+          </a>
           <a href="{{ url_for('gestion_cotizaciones') }}" class="clay-nav-link {% if request.path.startswith('/cotizaciones') %}active{% endif %}">
             <i class="bi bi-file-earmark-text-fill" style="color:inherit;"></i> Cotizaciones
           </a>

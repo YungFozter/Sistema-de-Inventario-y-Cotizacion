@@ -110,14 +110,14 @@
     <form method="get" action="/productos">
       <div class="editorial-bento-grid mb-4">
         
-        <!-- BENTO ITEM 1: Nombre del Producto -->
+        <!-- BENTO ITEM 1: Proveedor / Distribuidor -->
         <div class="editorial-bento-item">
           <label class="editorial-bento-label">
-            <i class="bi bi-box-seam text-orange-pro"></i> Nombre del Producto
+            <i class="bi bi-truck text-orange-pro"></i> Proveedor / Distribuidor
           </label>
           <div class="clay-pill-input-group">
-            <span class="clay-pill-input-icon"><i class="bi bi-search"></i></span>
-            <input type="text" name="empresa" class="clay-pill-input" value="{{ request.args.get('empresa', '') }}" placeholder="Ej: ElectroRed / Cable 12AWG">
+            <span class="clay-pill-input-icon"><i class="bi bi-building"></i></span>
+            <input type="text" name="proveedor" class="clay-pill-input" value="{{ request.args.get('proveedor', '') }}" placeholder="Ej: Siemens / Conduspar">
           </div>
         </div>
 
@@ -281,6 +281,22 @@
           <div class="clay-pill-input-group">
             <span class="clay-pill-input-icon"><i class="bi bi-building"></i></span>
             <input type="text" name="marca" id="marca" class="clay-pill-input" placeholder="Ej: Siemens / Conduspar" oninput="actualizarVistaPreviaProducto()">
+          </div>
+        </div>
+
+        <!-- BENTO ITEM 4.5: Proveedor / Distribuidor -->
+        <div class="editorial-bento-item">
+          <label class="editorial-bento-label">
+            <i class="bi bi-truck text-orange-pro"></i> Proveedor / Distribuidor
+          </label>
+          <div class="clay-pill-input-group">
+            <span class="clay-pill-input-icon"><i class="bi bi-truck"></i></span>
+            <input type="text" name="proveedor" id="proveedor" class="clay-pill-input" list="listaProveedoresData" placeholder="Ej: Siemens Bolivia / Conduspar">
+            <datalist id="listaProveedoresData">
+              {% for prov in lista_proveedores %}
+              <option value="{{ prov }}">
+              {% endfor %}
+            </datalist>
           </div>
         </div>
 

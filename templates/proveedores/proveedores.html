@@ -1,0 +1,302 @@
+{% extends "shared/layout.html" %}
+
+{% block content %}
+<link rel="stylesheet" href="/static/css/productos.css">
+
+<div class="container-fluid py-4 px-lg-5" style="background-color: #FAF8F5; min-height: 100vh;">
+  
+  <!-- ALERTA DE MENSAJES DE FLASH -->
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for category, message in messages %}
+        <div class="alert alert-{{ category }} alert-dismissible fade show rounded-pill px-4 py-3 shadow-sm border border-2 border-dark mb-4" role="alert">
+          <i class="bi bi-info-circle-fill me-2"></i> {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" onclick="this.parentElement.remove()"></button>
+        </div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+
+  <!-- HERO EDITORIAL BENTO GRID - MÓDULO PROVEEDORES -->
+  <div class="editorial-bento-hero mb-4" style="border: 2px solid #141414; border-radius: 28px; overflow: hidden; background: #FAF8F5; box-shadow: 0 16px 40px rgba(0,0,0,0.06);">
+    
+    <!-- PANEL OSCURO EDITORIAL (IZQUIERDA) -->
+    <div class="editorial-dark-panel p-4 p-md-5" style="background: linear-gradient(135deg, rgba(20, 20, 20, 0.94) 0%, rgba(30, 41, 59, 0.96) 100%), url('/static/images/editorial_product_banner.jpg'); background-size: cover;">
+      <div>
+        <div class="d-flex align-items-center gap-2 mb-3">
+          <span class="editorial-dot-orange"></span>
+          <span class="badge bg-dark text-warning border border-warning rounded-pill px-3 py-1.5 fw-bold" style="font-size: 0.78rem;">
+            GESTIÓN DE CADENA DE SUMINISTRO
+          </span>
+        </div>
+        <h2 class="serif-editorial-title text-white mb-2" style="font-size: 2.3rem;">Directorio de Proveedores</h2>
+        <p class="editorial-subtitle mb-0" style="font-size: 0.92rem; color: rgba(255,255,255,0.78);">
+          Administra tus distribuidores oficiales, contactos clave, RUC/NIT y condiciones de compra en un solo lugar.
+        </p>
+      </div>
+
+      <div class="pt-4 mt-auto">
+        <div class="d-flex align-items-center gap-2 text-white-50 small">
+          <i class="bi bi-truck text-orange-pro fs-5"></i>
+          <span class="fw-semibold">Multi-Tenant & Aislamiento por Empresa</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- PANEL CLARO FORMULARIO REGISTRO RÁPIDO (DERECHA) -->
+    <div class="editorial-light-panel p-4 p-md-5" style="background: #FAF8F5;">
+      <div class="d-flex align-items-center justify-content-between mb-3">
+        <h4 class="register-title-executive mb-0" style="font-size: 1.5rem;">Registrar Nuevo Proveedor</h4>
+        <span class="badge bg-dark text-white rounded-pill px-3 py-1 fw-bold" style="font-size: 0.75rem;">FORMULARIO PRO</span>
+      </div>
+
+      <form method="post" action="/proveedores" id="formProveedor">
+        <div class="editorial-bento-grid mb-3">
+          
+          <!-- BENTO 1: Nombre Razón Social -->
+          <div class="editorial-bento-item" style="border: 2px solid #141414 !important; border-radius: 50px !important;">
+            <label class="editorial-bento-label"><i class="bi bi-building text-orange-pro"></i> Razón Social / Nombre *</label>
+            <div class="clay-pill-input-group">
+              <span class="clay-pill-input-icon"><i class="bi bi-briefcase"></i></span>
+              <input type="text" name="nombre" class="clay-pill-input" placeholder="Ej: Siemens Bolivia S.A." required style="border-radius: 50px !important;">
+            </div>
+          </div>
+
+          <!-- BENTO 2: NIT / RUC -->
+          <div class="editorial-bento-item" style="border: 2px solid #141414 !important; border-radius: 50px !important;">
+            <label class="editorial-bento-label"><i class="bi bi-card-heading text-orange-pro"></i> NIT / RUC</label>
+            <div class="clay-pill-input-group">
+              <span class="clay-pill-input-icon"><i class="bi bi-hash"></i></span>
+              <input type="text" name="nit_ruc" class="clay-pill-input" placeholder="Ej: 1029384019" style="border-radius: 50px !important;">
+            </div>
+          </div>
+
+          <!-- BENTO 3: Contacto Nombre -->
+          <div class="editorial-bento-item" style="border: 2px solid #141414 !important; border-radius: 50px !important;">
+            <label class="editorial-bento-label"><i class="bi bi-person-badge text-orange-pro"></i> Asesor / Contacto</label>
+            <div class="clay-pill-input-group">
+              <span class="clay-pill-input-icon"><i class="bi bi-person"></i></span>
+              <input type="text" name="contacto_nombre" class="clay-pill-input" placeholder="Ej: Ing. Roberto Carlos" style="border-radius: 50px !important;">
+            </div>
+          </div>
+
+          <!-- BENTO 4: Teléfono -->
+          <div class="editorial-bento-item" style="border: 2px solid #141414 !important; border-radius: 50px !important;">
+            <label class="editorial-bento-label"><i class="bi bi-telephone text-orange-pro"></i> Teléfono / Celular</label>
+            <div class="clay-pill-input-group">
+              <span class="clay-pill-input-icon"><i class="bi bi-phone"></i></span>
+              <input type="text" name="telefono" class="clay-pill-input" placeholder="Ej: +591 76543210" style="border-radius: 50px !important;">
+            </div>
+          </div>
+
+          <!-- BENTO 5: Rubro / Especialidad -->
+          <div class="editorial-bento-item" style="border: 2px solid #141414 !important; border-radius: 50px !important;">
+            <label class="editorial-bento-label"><i class="bi bi-tags text-orange-pro"></i> Rubro / Especialidad</label>
+            <div class="clay-pill-input-group">
+              <span class="clay-pill-input-icon"><i class="bi bi-tag"></i></span>
+              <input type="text" name="rubro" class="clay-pill-input" placeholder="Ej: Material Eléctrico / Herramientas" style="border-radius: 50px !important;">
+            </div>
+          </div>
+
+          <!-- BENTO 6: Correo Electrónico -->
+          <div class="editorial-bento-item" style="border: 2px solid #141414 !important; border-radius: 50px !important;">
+            <label class="editorial-bento-label"><i class="bi bi-envelope text-orange-pro"></i> Correo Electrónico</label>
+            <div class="clay-pill-input-group">
+              <span class="clay-pill-input-icon"><i class="bi bi-at"></i></span>
+              <input type="email" name="correo" class="clay-pill-input" placeholder="ventas@siemens.bo" style="border-radius: 50px !important;">
+            </div>
+          </div>
+
+        </div>
+
+        <div class="d-flex align-items-center justify-content-end gap-2 mt-3">
+          <button type="submit" class="btn text-white fw-bold rounded-pill px-4 py-2.5 shadow-sm" style="background-color: #FF6B35; border: 2px solid #141414; border-radius: 50px !important;">
+            <i class="bi bi-plus-circle-fill me-1"></i> Guardar Proveedor
+          </button>
+        </div>
+      </form>
+    </div>
+
+  </div>
+
+  <!-- SECCIÓN DE BÚSQUEDA Y LISTADO BENTO DE PROVEEDORES -->
+  <div class="card border-0 shadow-sm p-4 mb-4" style="background: #FFFFFF; border-radius: 24px; border: 2px solid #141414 !important;">
+    
+    <div class="d-flex align-items-center justify-content-between flex-wrap gap-3 mb-4">
+      <div>
+        <h4 class="register-title-executive mb-1" style="font-size: 1.6rem;">Proveedores Registrados</h4>
+        <p class="text-secondary small mb-0">Total: <strong>{{ pagination.total_items }}</strong> proveedores encontrados</p>
+      </div>
+
+      <!-- BARRA DE BÚSQUEDA BENTO PILL -->
+      <form method="get" action="/proveedores" class="d-flex align-items-center gap-2 flex-wrap" style="max-width: 480px;">
+        <div class="clay-pill-input-group" style="border: 2px solid #141414 !important; border-radius: 50px !important; overflow: hidden; background: #FAF8F5;">
+          <span class="clay-pill-input-icon"><i class="bi bi-search"></i></span>
+          <input type="text" name="q" class="clay-pill-input" value="{{ query_search }}" placeholder="Buscar por Nombre, NIT, Contacto..." style="border-radius: 50px !important;">
+        </div>
+        <button type="submit" class="btn text-white fw-bold rounded-pill px-4" style="background-color: #141414; border: 2px solid #141414;">
+          Filtrar
+        </button>
+        {% if query_search %}
+        <a href="/proveedores" class="btn btn-outline-dark rounded-pill px-3" style="border: 2px solid #141414;">Limpiar</a>
+        {% endif %}
+      </form>
+    </div>
+
+    <!-- TABLA EDITORIAL DE PROVEEDORES -->
+    {% if proveedores %}
+    <div class="table-responsive" style="border-radius: 18px; border: 2px solid #141414; overflow: hidden;">
+      <table class="table table-hover align-middle mb-0">
+        <thead style="background-color: #141414; color: #FFFFFF;">
+          <tr>
+            <th class="py-3 px-4 fw-bold">Proveedor / Razón Social</th>
+            <th class="py-3 px-3 fw-bold">NIT / RUC</th>
+            <th class="py-3 px-3 fw-bold">Contacto</th>
+            <th class="py-3 px-3 fw-bold">Teléfono</th>
+            <th class="py-3 px-3 fw-bold">Rubro</th>
+            <th class="py-3 px-4 text-end fw-bold">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for p in proveedores %}
+          <tr style="border-bottom: 1px solid rgba(20, 20, 20, 0.08);">
+            <td class="py-3 px-4">
+              <div class="d-flex align-items-center gap-2">
+                <span class="rounded-circle d-inline-flex align-items-center justify-content-center fw-bold text-white" style="width: 38px; height: 38px; background-color: #FF6B35; border: 1.5px solid #141414;">
+                  {{ p.nombre[0]|upper }}
+                </span>
+                <div>
+                  <strong class="text-dark d-block" style="font-size: 0.95rem;">{{ p.nombre }}</strong>
+                  <small class="text-muted"><i class="bi bi-geo-alt me-1"></i>{{ p.direccion or 'Sin dirección' }}</small>
+                </div>
+              </div>
+            </td>
+            <td class="py-3 px-3">
+              <span class="badge bg-dark text-white rounded-pill px-3 py-1 fw-bold font-monospace" style="border: 1px solid #141414;">
+                {{ p.nit_ruc or 'S/N' }}
+              </span>
+            </td>
+            <td class="py-3 px-3">
+              <span class="fw-semibold text-dark">{{ p.contacto_nombre or 'N/A' }}</span>
+            </td>
+            <td class="py-3 px-3">
+              {% if p.telefono %}
+              <a href="https://wa.me/{{ p.telefono|replace(' ', '') }}" target="_blank" class="badge bg-success bg-opacity-10 text-success border border-success rounded-pill px-3 py-1.5 fw-bold text-decoration-none">
+                <i class="bi bi-whatsapp me-1"></i> {{ p.telefono }}
+              </a>
+              {% else %}
+              <span class="text-muted small">Sin teléfono</span>
+              {% endif %}
+            </td>
+            <td class="py-3 px-3">
+              <span class="badge bg-warning bg-opacity-20 text-dark border border-warning rounded-pill px-3 py-1 fw-bold">
+                {{ p.rubro or 'General' }}
+              </span>
+            </td>
+            <td class="py-3 px-4 text-end">
+              <div class="d-inline-flex gap-1">
+                <button type="button" class="btn btn-sm btn-outline-dark rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 34px; height: 34px; border: 1.5px solid #141414;" onclick="abrirModalEditarProveedor({{ p|tojson }})" title="Editar Proveedor">
+                  <i class="bi bi-pencil-fill"></i>
+                </button>
+                <a href="/proveedores/eliminar/{{ p.id }}" class="btn btn-sm btn-outline-danger rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 34px; height: 34px; border: 1.5px solid #dc2626;" onclick="return confirm('¿Eliminar al proveedor {{ p.nombre }}?')" title="Eliminar Proveedor">
+                  <i class="bi bi-trash-fill"></i>
+                </a>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- PAGINACIÓN CÁLIDA -->
+    <nav class="mt-4">
+      <ul class="pagination justify-content-center gap-1">
+        <li class="page-item {% if pagination.page == 1 %}disabled{% endif %}">
+          <a class="page-link rounded-pill px-3 fw-bold border-2 border-dark" href="/proveedores?page={{ pagination.page - 1 }}&q={{ query_search }}">« Anterior</a>
+        </li>
+        {% for p_num in range(1, pagination.total_pages + 1) %}
+        <li class="page-item {% if p_num == pagination.page %}active{% endif %}">
+          <a class="page-link rounded-pill fw-bold border-2 border-dark {% if p_num == pagination.page %}bg-dark text-white{% endif %}" href="/proveedores?page={{ p_num }}&q={{ query_search }}">{{ p_num }}</a>
+        </li>
+        {% endfor %}
+        <li class="page-item {% if pagination.page == pagination.total_pages %}disabled{% endif %}">
+          <a class="page-link rounded-pill px-3 fw-bold border-2 border-dark" href="/proveedores?page={{ pagination.page + 1 }}&q={{ query_search }}">Siguiente »</a>
+        </li>
+      </ul>
+    </nav>
+
+    {% else %}
+    <div class="text-center py-5">
+      <div class="rounded-circle d-inline-flex align-items-center justify-content-center bg-warning bg-opacity-10 text-orange-pro p-4 mb-3" style="border: 2px solid #FF6B35;">
+        <i class="bi bi-truck fs-1"></i>
+      </div>
+      <h5 class="fw-bold text-dark mb-1">No se encontraron proveedores</h5>
+      <p class="text-muted small">Registra tu primer proveedor arriba para vincularlo a tu inventario.</p>
+    </div>
+    {% endif %}
+
+  </div>
+
+</div>
+
+<!-- MODAL ELEGANTE EDICIÓN DE PROVEEDOR -->
+<div class="modal fade" id="modalEditarProveedor" tabindex="-1" aria-hidden="true" style="z-index: 1085 !important;">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg" style="border-radius: 24px; overflow: hidden; border: 2px solid #141414 !important;">
+      <div class="modal-header py-3 px-4" style="background-color: #141414 !important;">
+        <h5 class="modal-title fw-bold text-white mb-0"><i class="bi bi-pencil-square text-orange-pro me-2"></i> Editar Proveedor</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form id="formEditProveedorModal" method="post" action="">
+        <div class="modal-body p-4" style="background-color: #FAF8F5;">
+          <div class="row g-2">
+            <div class="col-12">
+              <label class="form-label small fw-bold text-dark mb-1">Razón Social / Nombre *</label>
+              <input type="text" name="nombre" id="editNombre" class="clay-pill-input w-100" style="border: 2px solid #141414 !important; border-radius: 50px !important; padding: 7px 18px;" required>
+            </div>
+            <div class="col-6">
+              <label class="form-label small fw-bold text-dark mb-1">NIT / RUC</label>
+              <input type="text" name="nit_ruc" id="editNitRuc" class="clay-pill-input w-100" style="border: 2px solid #141414 !important; border-radius: 50px !important; padding: 7px 18px;">
+            </div>
+            <div class="col-6">
+              <label class="form-label small fw-bold text-dark mb-1">Teléfono</label>
+              <input type="text" name="telefono" id="editTelefono" class="clay-pill-input w-100" style="border: 2px solid #141414 !important; border-radius: 50px !important; padding: 7px 18px;">
+            </div>
+            <div class="col-12">
+              <label class="form-label small fw-bold text-dark mb-1">Contacto / Asesor</label>
+              <input type="text" name="contacto_nombre" id="editContacto" class="clay-pill-input w-100" style="border: 2px solid #141414 !important; border-radius: 50px !important; padding: 7px 18px;">
+            </div>
+            <div class="col-12">
+              <label class="form-label small fw-bold text-dark mb-1">Rubro</label>
+              <input type="text" name="rubro" id="editRubro" class="clay-pill-input w-100" style="border: 2px solid #141414 !important; border-radius: 50px !important; padding: 7px 18px;">
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer px-4 py-3 justify-content-between" style="background-color: #FFFFFF; border-top: 2px solid #141414;">
+          <button type="button" class="btn btn-outline-dark fw-bold rounded-pill px-4" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn text-white fw-bold rounded-pill px-4" style="background-color: #FF6B35; border: 2px solid #141414;">Guardar Cambios</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+function abrirModalEditarProveedor(prov) {
+    const modalEl = document.getElementById('modalEditarProveedor');
+    if (modalEl && modalEl.parentNode !== document.body) {
+        document.body.appendChild(modalEl);
+    }
+    document.getElementById('formEditProveedorModal').action = `/proveedores/editar/${prov.id}`;
+    document.getElementById('editNombre').value = prov.nombre || '';
+    document.getElementById('editNitRuc').value = prov.nit_ruc || '';
+    document.getElementById('editTelefono').value = prov.telefono || '';
+    document.getElementById('editContacto').value = prov.contacto_nombre || '';
+    document.getElementById('editRubro').value = prov.rubro || '';
+
+    const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+    modal.show();
+}
+</script>
+{% endblock %}

@@ -79,6 +79,24 @@ def crear_tablas():
             ){";" if is_postgres else ""}
         ''')
 
+        # Tabla de proveedores
+        cursor.execute(f'''
+            CREATE TABLE IF NOT EXISTS proveedores (
+                id {"SERIAL PRIMARY KEY" if is_postgres else "INTEGER PRIMARY KEY AUTOINCREMENT"},
+                empresa TEXT NOT NULL,
+                nombre TEXT NOT NULL,
+                nit_ruc TEXT,
+                contacto_nombre TEXT,
+                telefono TEXT,
+                correo TEXT,
+                direccion TEXT,
+                rubro TEXT,
+                creador_id INTEGER,
+                fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (creador_id) REFERENCES clientes(id)
+            ){";" if is_postgres else ""}
+        ''')
+
         # Tabla de productos
         cursor.execute(f'''
             CREATE TABLE IF NOT EXISTS productos (
@@ -94,11 +112,15 @@ def crear_tablas():
                 precio_total REAL,
                 categoria_id INTEGER,
                 categoria TEXT,
+                proveedor TEXT,
+                proveedor_id INTEGER,
                 stock_minimo INTEGER DEFAULT 5,
                 stock_reservado INTEGER DEFAULT 0,
                 fecha_actualizacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 es_importado INTEGER DEFAULT 0,
+                campos_personalizados TEXT,
                 FOREIGN KEY (categoria_id) REFERENCES categorias(id),
+                FOREIGN KEY (proveedor_id) REFERENCES proveedores(id),
                 UNIQUE(empresa, codigo)
             ){";" if is_postgres else ""}
         ''')
@@ -1027,7 +1049,7 @@ def migrar_columnas_nuevas_clientes():
         print(f"[ERROR] Error al migrar columnas de clientes: {e}")
 
 def migrar_columnas_nuevas_productos():
-    """Agrega la columna campos_personalizados a la tabla productos si no existe."""
+    """Agrega la columna campos_personalizados, proveedor y proveedor_id a la tabla productos si no existen."""
     conexion = None
     try:
         conexion = get_db_connection()
@@ -1043,13 +1065,21 @@ def migrar_columnas_nuevas_productos():
             cols = [col[0] for col in rows if isinstance(col, (list, tuple))]
             if 'campos_personalizados' not in cols:
                 cursor.execute("ALTER TABLE productos ADD COLUMN campos_personalizados TEXT")
-                conexion.commit()
+            if 'proveedor' not in cols:
+                cursor.execute("ALTER TABLE productos ADD COLUMN proveedor TEXT")
+            if 'proveedor_id' not in cols:
+                cursor.execute("ALTER TABLE productos ADD COLUMN proveedor_id INTEGER")
+            conexion.commit()
         else:
             cursor.execute("PRAGMA table_info(productos)")
             cols = [col[1] for col in cursor.fetchall()]
             if 'campos_personalizados' not in cols:
                 cursor.execute("ALTER TABLE productos ADD COLUMN campos_personalizados TEXT")
-                conexion.commit()
+            if 'proveedor' not in cols:
+                cursor.execute("ALTER TABLE productos ADD COLUMN proveedor TEXT")
+            if 'proveedor_id' not in cols:
+                cursor.execute("ALTER TABLE productos ADD COLUMN proveedor_id INTEGER")
+            conexion.commit()
     except Exception as e:
         print(f"[ERROR] Error al migrar columnas de productos: {e}")
     finally:

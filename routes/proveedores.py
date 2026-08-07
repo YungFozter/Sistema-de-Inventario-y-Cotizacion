@@ -31,8 +31,8 @@ def register_routes(app):
                 direccion = request.form.get('direccion', '').strip()
                 rubro = request.form.get('rubro', '').strip()
 
-                if not nombre:
-                    flash('El nombre del proveedor es obligatorio', 'warning')
+                if not nombre or not contacto_nombre:
+                    flash('La Razón Social/Nombre y el Asesor/Contacto son obligatorios.', 'warning')
                 else:
                     with get_db_connection() as conexion:
                         cursor = conexion.cursor()

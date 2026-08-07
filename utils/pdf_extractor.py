@@ -110,8 +110,8 @@ class PDFProductExtractor:
                     break
                 continue
 
-            # Si la línea empieza con un número de item o código (ej: "1 6232 ..." o "1. 6232 ...")
-            if re.match(r'^\d{1,3}[\.\s]+\d+', line_clean):
+            # Si la línea empieza con un número de item o código (ej: "1 6232 ...", "1 ELE-101 ...", "1. PROD-01 ...")
+            if re.match(r'^\d{1,3}[\.\s]+[A-Za-z0-9\-\.\_\/]{2,}', line_clean):
                 if curr_block:
                     blocks.append(curr_block)
                 curr_block = [line_clean]

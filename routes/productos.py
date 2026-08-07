@@ -110,6 +110,18 @@ def register_routes(app):
                         if 'proveedor' in columnas_nombres:
                             cols.append('proveedor')
                             vals.append(proveedor)
+                            if proveedor:
+                                try:
+                                    user_id = session.get('user_id')
+                                    cursor.execute("SELECT COUNT(*) FROM proveedores WHERE empresa = ? AND LOWER(nombre) = LOWER(?)", (empresa, proveedor))
+                                    if cursor.fetchone()[0] == 0:
+                                        cursor.execute('''
+                                            INSERT INTO proveedores (empresa, nombre, rubro, creador_id)
+                                            VALUES (?, ?, 'Suministros', ?)
+                                        ''', (empresa, proveedor, user_id))
+                                except Exception:
+                                    pass
+
                         if 'es_importado' in columnas_nombres:
                             cols.append('es_importado')
                             vals.append(0)
@@ -392,6 +404,17 @@ def register_routes(app):
                     if 'proveedor' in columnas_nombres:
                         update_cols.append('proveedor=?')
                         update_vals.append(proveedor)
+                        if proveedor:
+                            try:
+                                user_id = session.get('user_id')
+                                cursor.execute("SELECT COUNT(*) FROM proveedores WHERE empresa = ? AND LOWER(nombre) = LOWER(?)", (empresa, proveedor))
+                                if cursor.fetchone()[0] == 0:
+                                    cursor.execute('''
+                                        INSERT INTO proveedores (empresa, nombre, rubro, creador_id)
+                                        VALUES (?, ?, 'Suministros', ?)
+                                    ''', (empresa, proveedor, user_id))
+                            except Exception:
+                                pass
 
                     # Recolectar campos personalizados desde el formulario
                     custom_fields_dict = {}

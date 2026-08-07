@@ -865,8 +865,11 @@
           <i class="bi bi-file-earmark-pdf-fill me-2"></i> Importar Productos desde PDF
         </h5>
         <div class="d-flex align-items-center gap-2">
-          <a href="{{ url_for('static', filename='downloads/catalogo_prueba_importacion.pdf') }}" download class="btn btn-sm btn-light fw-bold text-success shadow-sm" title="Descargar documento PDF de prueba estructurado">
-            <i class="bi bi-download me-1"></i> Descargar PDF de Ejemplo
+          <a href="{{ url_for('static', filename='downloads/catalogo_prueba_importacion.pdf') }}" download class="btn btn-sm btn-light fw-bold text-success shadow-sm" title="Ejemplo 1: Proveniente + Delicado Si-No">
+            <i class="bi bi-download me-1"></i> PDF Ejemplo 1
+          </a>
+          <a href="{{ url_for('static', filename='downloads/catalogo_prueba_campos_personalizados.pdf') }}" download class="btn btn-sm btn-warning fw-bold text-dark shadow-sm" title="Ejemplo 2: Ubicación Almacén + Garantía Meses">
+            <i class="bi bi-download me-1"></i> PDF Ejemplo 2 (Nuevos Campos)
           </a>
           <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>

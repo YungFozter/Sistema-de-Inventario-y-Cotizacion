@@ -1060,16 +1060,18 @@ def migrar_columnas_nuevas_productos():
             os.environ.get('DATABASE_URL').startswith('postgres')
         )
         if is_postgres:
-            cursor.execute("SELECT column_name FROM information_schema.columns WHERE table_name='productos'")
-            rows = cursor.fetchall() or []
-            cols = [col[0] for col in rows if isinstance(col, (list, tuple))]
-            if 'campos_personalizados' not in cols:
-                cursor.execute("ALTER TABLE productos ADD COLUMN campos_personalizados TEXT")
-            if 'proveedor' not in cols:
-                cursor.execute("ALTER TABLE productos ADD COLUMN proveedor TEXT")
-            if 'proveedor_id' not in cols:
-                cursor.execute("ALTER TABLE productos ADD COLUMN proveedor_id INTEGER")
-            conexion.commit()
+            for sql_col in [
+                "ALTER TABLE productos ADD COLUMN IF NOT EXISTS campos_personalizados TEXT",
+                "ALTER TABLE productos ADD COLUMN IF NOT EXISTS proveedor TEXT",
+                "ALTER TABLE productos ADD COLUMN IF NOT EXISTS proveedor_id INTEGER"
+            ]:
+                try:
+                    cursor.execute(sql_col)
+                    conexion.commit()
+                except Exception as ex_col:
+                    print(f"[WARN] Error agregando columna postgres: {ex_col}")
+                    if conexion:
+                        conexion.rollback()
         else:
             cursor.execute("PRAGMA table_info(productos)")
             cols = [col[1] for col in cursor.fetchall()]

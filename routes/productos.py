@@ -161,7 +161,7 @@ def register_routes(app):
         if empresa:
             filter_sql += " AND p.empresa LIKE ?" if use_alias else " AND empresa LIKE ?"
             params.append(f"%{empresa}%")
-        if proveedor:
+        if proveedor and 'proveedor' in columnas_nombres:
             filter_sql += " AND p.proveedor LIKE ?" if use_alias else " AND proveedor LIKE ?"
             params.append(f"%{proveedor}%")
         if codigo:

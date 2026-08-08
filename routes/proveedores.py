@@ -70,7 +70,7 @@ def register_routes(app):
                 params = [user_id, empresa_usuario]
 
                 if query_search:
-                    base_sql += " AND (nombre LIKE ? OR nit_ruc LIKE ? OR contacto_nombre LIKE ? OR rubro LIKE ?)"
+                    base_sql += " AND (LOWER(nombre) LIKE LOWER(?) OR LOWER(nit_ruc) LIKE LOWER(?) OR LOWER(contacto_nombre) LIKE LOWER(?) OR LOWER(rubro) LIKE LOWER(?))"
                     p_search = f"%{query_search}%"
                     params.extend([p_search, p_search, p_search, p_search])
 
@@ -170,7 +170,7 @@ def register_routes(app):
             params = [user_id, empresa_usuario]
 
             if query_search:
-                base_sql += " AND (nombre LIKE ? OR nit_ruc LIKE ? OR contacto_nombre LIKE ? OR rubro LIKE ?)"
+                base_sql += " AND (LOWER(nombre) LIKE LOWER(?) OR LOWER(nit_ruc) LIKE LOWER(?) OR LOWER(contacto_nombre) LIKE LOWER(?) OR LOWER(rubro) LIKE LOWER(?))"
                 p_search = f"%{query_search}%"
                 params.extend([p_search, p_search, p_search, p_search])
 

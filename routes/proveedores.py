@@ -112,15 +112,47 @@ def register_routes(app):
             direccion = request.form.get('direccion', '').strip()
             rubro = request.form.get('rubro', '').strip()
 
+            if not nombre or not contacto_nombre:
+                flash('La Razón Social/Nombre y el Asesor/Contacto son obligatorios.', 'warning')
+                return redirect(url_for('proveedores'))
+
             with get_db_connection() as conexion:
                 cursor = conexion.cursor()
+
+                # 1. Obtener el nombre anterior del proveedor
+                cursor.execute("SELECT nombre, empresa FROM proveedores WHERE id = ?", (id,))
+                prov_anterior = cursor.fetchone()
+                nombre_anterior = prov_anterior[0] if prov_anterior else None
+
+                # 2. Actualizar proveedor
                 cursor.execute('''
                     UPDATE proveedores 
                     SET nombre=?, nit_ruc=?, contacto_nombre=?, telefono=?, correo=?, direccion=?, rubro=?
                     WHERE id=?
                 ''', (nombre, nit_ruc, contacto_nombre, telefono, correo, direccion, rubro, id))
+
+                # 3. Cascada: Actualizar el nombre en todos los productos que usaban el proveedor anterior
+                if nombre_anterior and nombre != nombre_anterior:
+                    try:
+                        cursor.execute("PRAGMA table_info(productos)")
+                        cols_prod = [c[1] for c in cursor.fetchall()]
+                        if 'proveedor_id' in cols_prod:
+                            cursor.execute('''
+                                UPDATE productos
+                                SET proveedor = ?
+                                WHERE proveedor_id = ? OR LOWER(proveedor) = LOWER(?)
+                            ''', (nombre, id, nombre_anterior))
+                        else:
+                            cursor.execute('''
+                                UPDATE productos
+                                SET proveedor = ?
+                                WHERE LOWER(proveedor) = LOWER(?)
+                            ''', (nombre, nombre_anterior))
+                    except Exception as e_casc:
+                        print(f"[WARN] Error actualizando productos asociados: {e_casc}")
+
                 conexion.commit()
-                flash(f'¡Proveedor "{nombre}" actualizado correctamente!', 'success')
+                flash(f'¡Proveedor "{nombre}" y sus productos asociados actualizados correctamente!', 'success')
         except Exception as e:
             flash(f'Error al actualizar proveedor: {str(e)}', 'danger')
 

@@ -1,0 +1,468 @@
+{% extends "shared/layout.html" %}
+
+{% block titulo %}ChatLife IA — Bot Propio de WhatsApp 24/7{% endblock %}
+
+{% block contenido %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+<style>
+  .chatlife-hero-card {
+    background: linear-gradient(135deg, #141414 0%, #1f2937 100%);
+    border-radius: 28px;
+    border: 2px solid #141414;
+    color: #FFFFFF;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .chatlife-hero-card::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 300px;
+    background: radial-gradient(circle at 80% 50%, rgba(37, 211, 102, 0.18), transparent 70%);
+    pointer-events: none;
+  }
+
+  .chatlife-tab-btn {
+    border: 2px solid #141414;
+    border-radius: 50px;
+    padding: 10px 22px;
+    font-weight: 800;
+    font-size: 0.9rem;
+    transition: all 0.25s ease;
+    background: #FFFFFF;
+    color: #141414;
+  }
+
+  .chatlife-tab-btn.active {
+    background: #FF6B35;
+    color: #FFFFFF;
+    border-color: #141414;
+    box-shadow: 0 4px 14px rgba(255, 107, 53, 0.3);
+  }
+
+  /* WhatsApp Live Simulator Box */
+  .whatsapp-sim-card {
+    background: #efeae2;
+    border-radius: 24px;
+    border: 2.5px solid #141414;
+    overflow: hidden;
+    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.08);
+  }
+
+  .whatsapp-sim-header {
+    background: #075e54;
+    color: #FFFFFF;
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .whatsapp-chat-body {
+    height: 380px;
+    overflow-y: auto;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .chat-bubble {
+    max-width: 80%;
+    padding: 12px 16px;
+    border-radius: 18px;
+    font-size: 0.92rem;
+    line-height: 1.45;
+    position: relative;
+    word-break: break-word;
+    animation: fadeInMsg 0.25s ease;
+  }
+
+  @keyframes fadeInMsg {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .chat-bubble-user {
+    background: #e7fce3;
+    color: #111b21;
+    align-self: flex-end;
+    border-bottom-right-radius: 4px;
+    border: 1px solid rgba(37, 211, 102, 0.3);
+  }
+
+  .chat-bubble-bot {
+    background: #FFFFFF;
+    color: #111b21;
+    align-self: flex-start;
+    border-bottom-left-radius: 4px;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+  }
+
+  .bento-input-card {
+    background: #FFFFFF;
+    border: 2.5px solid #141414 !important;
+    border-radius: 22px !important;
+    padding: 18px 22px;
+    transition: all 0.3s ease;
+  }
+
+  .bento-input-card:hover {
+    border-color: #25D366 !important;
+    box-shadow: 0 10px 28px rgba(37, 211, 102, 0.15);
+  }
+</style>
+
+<div class="container-fluid py-4 px-lg-5" style="background-color: #FAF8F5; min-height: 100vh;">
+
+  <!-- HERO BANNER CHATLIFE IA -->
+  <div class="card chatlife-hero-card p-4 p-md-5 mb-4 shadow-sm animate__animated animate__fadeIn">
+    <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+      <div>
+        <div class="d-flex align-items-center gap-2 mb-2">
+          <span class="badge bg-success text-white rounded-pill px-3 py-1.5 fw-bold" style="font-size: 0.85rem;">
+            <i class="fa-brands fa-whatsapp me-1"></i> BOT IA PROPIO WHATSAPP
+          </span>
+          {% if config and config.bot_activo %}
+          <span class="badge bg-success bg-opacity-20 text-success border border-success rounded-pill px-3 py-1 fw-bold">
+            ● BOT ACTIVO 24/7
+          </span>
+          {% else %}
+          <span class="badge bg-secondary rounded-pill px-3 py-1 fw-bold">
+            ○ BOT PAUSADO
+          </span>
+          {% endif %}
+        </div>
+        <h2 class="fw-bold mb-1" style="font-size: 2.1rem; color: #FFFFFF;">ChatLife IA</h2>
+        <p class="text-white-50 mb-0" style="font-size: 1.05rem;">
+          Atiende a tus clientes 24/7 por WhatsApp, consulta tu catálogo e inventario en tiempo real y cierra ventas automáticamente.
+        </p>
+      </div>
+
+      <div class="text-end">
+        <a href="#simulador" class="btn btn-success fw-bold rounded-pill px-4 py-2.5 shadow" style="border: 2px solid #141414;">
+          <i class="fa-solid fa-play me-1.5"></i> Probar Simulador
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- NAVEGACIÓN POR PESTAÑAS BENTO -->
+  <div class="d-flex align-items-center gap-2 mb-4 flex-wrap">
+    <button type="button" class="btn chatlife-tab-btn active" onclick="switchChatLifeTab('tabSimulador', this)">
+      <i class="fa-solid fa-comments text-success me-1.5"></i> 1. Simulador en Vivo
+    </button>
+    <button type="button" class="btn chatlife-tab-btn" onclick="switchChatLifeTab('tabMetaConfig', this)">
+      <i class="fa-brands fa-meta text-primary me-1.5"></i> 2. Meta WhatsApp API
+    </button>
+    <button type="button" class="btn chatlife-tab-btn" onclick="switchChatLifeTab('tabIAConfig', this)">
+      <i class="fa-solid fa-brain text-warning me-1.5"></i> 3. Ajustes de IA & Prompts
+    </button>
+    <button type="button" class="btn chatlife-tab-btn" onclick="switchChatLifeTab('tabHistorial', this)">
+      <i class="fa-solid fa-list-check text-info me-1.5"></i> 4. Log de Conversaciones
+    </button>
+  </div>
+
+  <!-- TAB 1: SIMULADOR DE CHAT EN VIVO -->
+  <div id="tabSimulador" class="chatlife-tab-content">
+    <div class="row g-4">
+      <!-- Chat Simulator Left -->
+      <div class="col-lg-7">
+        <div class="whatsapp-sim-card">
+          <div class="whatsapp-sim-header">
+            <div class="rounded-circle bg-white text-success d-flex align-items-center justify-content-center fw-bold" style="width: 42px; height: 42px; font-size: 1.2rem;">
+              <i class="fa-brands fa-whatsapp"></i>
+            </div>
+            <div>
+              <h6 class="fw-bold mb-0 text-white">ChatLife IA — ({{ config.empresa or 'Tu Empresa' }})</h6>
+              <small class="text-white-50" style="font-size: 0.78rem;">● En línea · Responde al instante consultando tu inventario</small>
+            </div>
+          </div>
+
+          <div id="whatsappChatBody" class="whatsapp-chat-body">
+            <div class="chat-bubble chat-bubble-bot">
+              ¡Hola! 👋 Soy **ChatLife IA**, el asistente de ventas de <strong>{{ config.empresa or 'Tu Empresa' }}</strong>.<br>
+              ¿En qué te puedo ayudar hoy? Puedes preguntarme precios, disponibilidad de stock o solicitar una cotización.
+            </div>
+          </div>
+
+          <!-- Input Bar -->
+          <div class="p-3 bg-white border-top border-2 border-dark d-flex align-items-center gap-2">
+            <input type="text" id="simMensajeInput" class="form-control rounded-pill px-4 py-2.5 fw-semibold border-2 border-dark" placeholder="Escribe un mensaje de prueba (ej: ¿Tienen laptop y precio?)..." onkeypress="if(event.key==='Enter') enviarMensajeSimulador()">
+            <button type="button" class="btn btn-success text-white fw-bold rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width: 44px; height: 44px; border: 2px solid #141414;" onclick="enviarMensajeSimulador()">
+              <i class="fa-solid fa-paper-plane"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Instructions & Context Right -->
+      <div class="col-lg-5">
+        <div class="card bento-input-card h-100">
+          <h5 class="fw-bold text-dark mb-3"><i class="fa-solid fa-lightbulb text-warning me-2"></i> Pruebas Recomendadas</h5>
+          <p class="text-secondary small">
+            El simulador consulta en vivo tu base de datos de <strong>Productos</strong> y <strong>Categorías</strong>. Prueba escribir preguntas como:
+          </p>
+
+          <div class="d-flex flex-column gap-2 mb-4">
+            <button type="button" class="btn btn-outline-dark text-start rounded-pill px-3 py-2 small fw-semibold" onclick="setSimInput('¿Cuáles son los productos más vendidos y sus precios?')">
+              💬 "¿Cuáles son los productos más vendidos y sus precios?"
+            </button>
+            <button type="button" class="btn btn-outline-dark text-start rounded-pill px-3 py-2 small fw-semibold" onclick="setSimInput('¿Tienen disponibilidad de stock y qué precio tiene?')">
+              📦 "¿Tienen disponibilidad de stock y qué precio tiene?"
+            </button>
+            <button type="button" class="btn btn-outline-dark text-start rounded-pill px-3 py-2 small fw-semibold" onclick="setSimInput('Necesito una cotización formal para mi empresa')">
+              📑 "Necesito una cotización formal para mi empresa"
+            </button>
+          </div>
+
+          <div class="p-3 bg-light rounded-4 border border-1 border-dark mt-auto">
+            <div class="small fw-bold text-dark mb-1"><i class="bi bi-shield-check text-success me-1"></i> Estado del Motor:</div>
+            <div class="small text-muted">
+              {% if config and config.openai_api_key %}
+              <span class="badge bg-primary text-white rounded-pill px-2.5 py-1">OpenAI GPT-4o-Mini Activo</span>
+              {% else %}
+              <span class="badge bg-warning bg-opacity-20 text-dark border border-warning rounded-pill px-2.5 py-1">Motor Inteligente Integrado (Sin API Key)</span>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 2: CONFIGURACIÓN META WHATSAPP CLOUD API -->
+  <div id="tabMetaConfig" class="chatlife-tab-content" style="display: none;">
+    <div class="card bento-input-card">
+      <h4 class="fw-bold text-dark mb-3"><i class="fa-brands fa-meta text-primary me-2"></i> Configuración Meta WhatsApp Cloud API</h4>
+      <p class="text-secondary small mb-4">
+        Conecta tu número oficial de WhatsApp Business registrando la Webhook URL y los Tokens provistos por Meta for Developers.
+      </p>
+
+      <form method="post" action="/api/chatlife/guardar-config">
+        <div class="row g-3">
+
+          <div class="col-md-6">
+            <label class="form-label small fw-bold text-dark mb-1">Webhook URL (Copiar en Meta for Developers)</label>
+            <div class="input-group">
+              <input type="text" class="form-control rounded-pill px-3 py-2 border-2 border-dark bg-light fw-bold font-monospace" value="{{ webhook_url }}" readonly>
+              <button class="btn btn-dark rounded-pill px-3 ms-2 fw-bold" type="button" onclick="navigator.clipboard.writeText('{{ webhook_url }}'); alert('¡URL copiada al portapapeles!');">Copiar</button>
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label small fw-bold text-dark mb-1">Token de Verificación (Verify Token)</label>
+            <input type="text" name="verify_token" class="form-control rounded-pill px-3 py-2 border-2 border-dark font-monospace" value="{{ config.verify_token if config else '' }}" placeholder="chatlife_token_123">
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label small fw-bold text-dark mb-1">Phone Number ID (ID del Número de Teléfono en Meta)</label>
+            <input type="text" name="phone_number_id" class="form-control rounded-pill px-3 py-2 border-2 border-dark font-monospace" value="{{ config.phone_number_id if config else '' }}" placeholder="Ej: 109283746591023">
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label small fw-bold text-dark mb-1">WhatsApp Business Account ID (WABA ID)</label>
+            <input type="text" name="waba_id" class="form-control rounded-pill px-3 py-2 border-2 border-dark font-monospace" value="{{ config.waba_id if config else '' }}" placeholder="Ej: 987654321012345">
+          </div>
+
+          <div class="col-12">
+            <label class="form-label small fw-bold text-dark mb-1">Token de Acceso Permanente (System User Permanent Token)</label>
+            <textarea name="access_token" rows="3" class="form-control rounded-4 p-3 border-2 border-dark font-monospace" placeholder="EAAG... (Token permanente generado en Meta Business Manager)">{{ config.access_token if config else '' }}</textarea>
+          </div>
+
+          <!-- Campos ocultos de la otra tab -->
+          <input type="hidden" name="openai_api_key" value="{{ config.openai_api_key if config else '' }}">
+          <input type="hidden" name="system_prompt" value="{{ config.system_prompt if config else '' }}">
+          <input type="hidden" name="bot_activo" value="{{ config.bot_activo if config else 1 }}">
+          <input type="hidden" name="auto_crear_clientes" value="{{ config.auto_crear_clientes if config else 1 }}">
+
+          <div class="col-12 text-end pt-3">
+            <button type="submit" class="btn btn-dark text-white rounded-pill px-5 py-2.5 fw-bold" style="border: 2px solid #141414;">
+              <i class="fa-solid fa-floppy-disk me-1.5"></i> Guardar Credenciales Meta
+            </button>
+          </div>
+
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- TAB 3: AJUSTES DE IA & PROMPTS -->
+  <div id="tabIAConfig" class="chatlife-tab-content" style="display: none;">
+    <div class="card bento-input-card">
+      <h4 class="fw-bold text-dark mb-3"><i class="fa-solid fa-brain text-warning me-2"></i> Parámetros de la Inteligencia Artificial</h4>
+      <p class="text-secondary small mb-4">
+        Personaliza el comportamiento del bot, añade tu API Key de OpenAI (opcional) y ajusta las reglas de interacción.
+      </p>
+
+      <form method="post" action="/api/chatlife/guardar-config">
+
+        <!-- Campos ocultos Meta -->
+        <input type="hidden" name="phone_number_id" value="{{ config.phone_number_id if config else '' }}">
+        <input type="hidden" name="waba_id" value="{{ config.waba_id if config else '' }}">
+        <input type="hidden" name="verify_token" value="{{ config.verify_token if config else '' }}">
+        <input type="hidden" name="access_token" value="{{ config.access_token if config else '' }}">
+
+        <div class="row g-3">
+
+          <div class="col-md-6">
+            <label class="form-label small fw-bold text-dark mb-1">OpenAI API Key (Opcional - GPT-4o-Mini)</label>
+            <input type="password" name="openai_api_key" class="form-control rounded-pill px-3 py-2 border-2 border-dark font-monospace" value="{{ config.openai_api_key if config else '' }}" placeholder="sk-proj-...">
+            <small class="text-muted">Si se deja vacío, el sistema utilizará el motor de IA integrado nativo.</small>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label small fw-bold text-dark mb-1">Estado del Bot</label>
+            <select name="bot_activo" class="form-select rounded-pill px-3 py-2 border-2 border-dark fw-bold">
+              <option value="1" {% if config and config.bot_activo %}selected{% endif %}>🟢 BOT ACTIVADO (Responde automáticamente)</option>
+              <option value="0" {% if config and not config.bot_activo %}selected{% endif %}>🔴 BOT PAUSADO (Manual)</option>
+            </select>
+          </div>
+
+          <div class="col-12">
+            <label class="form-label small fw-bold text-dark mb-1">Instrucciones Personalizadas (System Prompt)</label>
+            <textarea name="system_prompt" rows="4" class="form-control rounded-4 p-3 border-2 border-dark fw-semibold" placeholder="Ej: Responde siempre saludando cordialmente, utiliza emojis profesionales y si el cliente pide precios, proporciona los montos exactos en Bolivianos (Bs)...">{{ config.system_prompt if config else '' }}</textarea>
+          </div>
+
+          <div class="col-md-6">
+            <div class="form-check form-switch pt-2">
+              <input class="form-check-input" type="checkbox" name="auto_crear_clientes" value="1" id="autoCrearCheck" {% if config and config.auto_crear_clientes %}checked{% endif %}>
+              <label class="form-check-label fw-bold text-dark small" for="autoCrearCheck">
+                Auto-registrar nuevos clientes de WhatsApp en el módulo "Clientes"
+              </label>
+            </div>
+          </div>
+
+          <div class="col-12 text-end pt-3">
+            <button type="submit" class="btn btn-warning text-dark rounded-pill px-5 py-2.5 fw-bold" style="border: 2px solid #141414;">
+              <i class="fa-solid fa-floppy-disk me-1.5"></i> Guardar Ajustes de IA
+            </button>
+          </div>
+
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- TAB 4: LOG DE CONVERSACIONES -->
+  <div id="tabHistorial" class="chatlife-tab-content" style="display: none;">
+    <div class="card bento-input-card">
+      <h4 class="fw-bold text-dark mb-3"><i class="fa-solid fa-list-check text-info me-2"></i> Historial de Mensajes & Conversaciones</h4>
+      
+      {% if mensajes %}
+      <div class="table-responsive rounded-4 border border-2 border-dark overflow-hidden">
+        <table class="table table-hover align-middle mb-0">
+          <thead style="background: #141414; color: #fff;">
+            <tr>
+              <th class="py-3 px-4">Remitente</th>
+              <th class="py-3 px-3">Mensaje Cliente</th>
+              <th class="py-3 px-3">Respuesta IA</th>
+              <th class="py-3 px-3">Tipo</th>
+              <th class="py-3 px-4">Fecha</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for m in mensajes %}
+            <tr style="border-bottom: 1px solid rgba(0,0,0,0.08);">
+              <td class="py-3 px-4 fw-bold text-dark">
+                {{ m.nombre_remitente }}
+                <small class="d-block text-muted font-monospace">{{ m.telefono_remitente }}</small>
+              </td>
+              <td class="py-3 px-3 text-secondary small" style="max-width: 250px;">{{ m.mensaje_cliente }}</td>
+              <td class="py-3 px-3 text-dark small fw-semibold" style="max-width: 300px;">{{ m.respuesta_bot }}</td>
+              <td class="py-3 px-3">
+                {% if m.es_simulacion %}
+                <span class="badge bg-secondary rounded-pill px-3 py-1 fw-bold">Simulador</span>
+                {% else %}
+                <span class="badge bg-success text-white rounded-pill px-3 py-1 fw-bold"><i class="fa-brands fa-whatsapp me-1"></i> WhatsApp</span>
+                {% endif %}
+              </td>
+              <td class="py-3 px-4 small text-muted">{{ m.fecha_registro }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <div class="text-center py-5">
+        <i class="fa-solid fa-comments text-muted fs-1 mb-2"></i>
+        <h5 class="fw-bold text-dark">Aún no hay mensajes en el historial</h5>
+        <p class="text-muted small">Prueba el simulador de IA arriba para registrar tu primera interacción.</p>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+</div>
+
+<script>
+  function switchChatLifeTab(tabId, btn) {
+    document.querySelectorAll('.chatlife-tab-content').forEach(el => el.style.display = 'none');
+    document.querySelectorAll('.chatlife-tab-btn').forEach(el => el.classList.remove('active'));
+    
+    document.getElementById(tabId).style.display = 'block';
+    btn.classList.add('active');
+  }
+
+  function setSimInput(texto) {
+    document.getElementById('simMensajeInput').value = texto;
+    enviarMensajeSimulador();
+  }
+
+  function enviarMensajeSimulador() {
+    const input = document.getElementById('simMensajeInput');
+    const texto = input.value.trim();
+    if (!texto) return;
+
+    const chatBody = document.getElementById('whatsappChatBody');
+
+    // Render User Bubble
+    const userBubble = document.createElement('div');
+    userBubble.className = 'chat-bubble chat-bubble-user';
+    userBubble.textContent = texto;
+    chatBody.appendChild(userBubble);
+
+    input.value = '';
+    chatBody.scrollTop = chatBody.scrollHeight;
+
+    // Loading indicator
+    const botLoading = document.createElement('div');
+    botLoading.className = 'chat-bubble chat-bubble-bot text-muted fst-italic';
+    botLoading.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin me-1"></i> ChatLife IA está escribiendo...';
+    chatBody.appendChild(botLoading);
+    chatBody.scrollTop = chatBody.scrollHeight;
+
+    fetch('/api/chatlife/simular', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ mensaje: texto })
+    })
+    .then(res => res.json())
+    .then(data => {
+      botLoading.remove();
+      const botBubble = document.createElement('div');
+      botBubble.className = 'chat-bubble chat-bubble-bot';
+      if (data.success) {
+        botBubble.innerHTML = data.respuesta.replace(/\n/g, '<br>');
+      } else {
+        botBubble.innerHTML = `⚠️ Error: ${data.error}`;
+      }
+      chatBody.appendChild(botBubble);
+      chatBody.scrollTop = chatBody.scrollHeight;
+    })
+    .catch(err => {
+      botLoading.remove();
+      const botBubble = document.createElement('div');
+      botBubble.className = 'chat-bubble chat-bubble-bot text-danger';
+      botBubble.textContent = '⚠️ Ocurrió un error al procesar el mensaje.';
+      chatBody.appendChild(botBubble);
+    });
+  }
+</script>
+{% endblock %}

@@ -158,6 +158,42 @@ def crear_tablas():
             ){";" if is_postgres else ""}
         ''')
 
+        # Tabla de configuración ChatLife (Meta WhatsApp Cloud API + IA)
+        cursor.execute(f'''
+            CREATE TABLE IF NOT EXISTS chatlife_config (
+                id {"SERIAL PRIMARY KEY" if is_postgres else "INTEGER PRIMARY KEY AUTOINCREMENT"},
+                user_id INTEGER UNIQUE,
+                empresa TEXT,
+                phone_number_id TEXT,
+                waba_id TEXT,
+                verify_token TEXT DEFAULT 'chatlife_verify_token',
+                access_token TEXT,
+                openai_api_key TEXT,
+                model_name TEXT DEFAULT 'gpt-4o-mini',
+                system_prompt TEXT,
+                bot_activo {"BOOLEAN DEFAULT TRUE" if is_postgres else "INTEGER DEFAULT 1"},
+                auto_crear_clientes {"BOOLEAN DEFAULT TRUE" if is_postgres else "INTEGER DEFAULT 1"},
+                fecha_actualizacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (user_id) REFERENCES clientes(id)
+            ){";" if is_postgres else ""}
+        ''')
+
+        # Tabla de mensajes ChatLife (Historial de Conversaciones WhatsApp)
+        cursor.execute(f'''
+            CREATE TABLE IF NOT EXISTS chatlife_mensajes (
+                id {"SERIAL PRIMARY KEY" if is_postgres else "INTEGER PRIMARY KEY AUTOINCREMENT"},
+                user_id INTEGER,
+                telefono_remitente TEXT,
+                nombre_remitente TEXT,
+                mensaje_cliente TEXT,
+                respuesta_bot TEXT,
+                es_simulacion {"BOOLEAN DEFAULT FALSE" if is_postgres else "INTEGER DEFAULT 0"},
+                estado TEXT DEFAULT 'respondido',
+                fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (user_id) REFERENCES clientes(id)
+            ){";" if is_postgres else ""}
+        ''')
+
         # Tabla de importaciones desde PDF
         cursor.execute(f'''
             CREATE TABLE IF NOT EXISTS importaciones_pdf (

@@ -40,9 +40,9 @@ def generar_codigo_cliente_unico(cursor, creador_id=None):
     usados = set()
     try:
         if creador_id:
-            cursor.execute("SELECT codigo_cliente FROM clientes WHERE creador_id = ? AND rol = 'cliente' AND codigo_cliente LIKE 'CLI-%'", (creador_id,))
+            cursor.execute("SELECT codigo_cliente FROM clientes WHERE creador_id = ? AND codigo_cliente LIKE 'CLI-%'", (creador_id,))
         else:
-            cursor.execute("SELECT codigo_cliente FROM clientes WHERE rol = 'cliente' AND codigo_cliente LIKE 'CLI-%'")
+            cursor.execute("SELECT codigo_cliente FROM clientes WHERE codigo_cliente LIKE 'CLI-%'")
         rows = cursor.fetchall() or []
         for row in rows:
             if not row:

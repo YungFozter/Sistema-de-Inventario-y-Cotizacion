@@ -420,15 +420,56 @@ def migrar_clientes_existentes():
             conexion.commit()
             print(f"[OK] Admin por defecto creado con ID {admin_id}")
 
-        # Actualizar clientes existentes
+        # Actualizar clientes existentes sin creador_id
         cursor.execute('''
             UPDATE clientes 
             SET creador_id = ?
             WHERE creador_id IS NULL OR creador_id = 0
         ''', (admin_id,))
+        conexion.commit()
+
+        # Reparar y resecuenciar automáticamente códigos de cliente duplicados o vacíos
+        cursor.execute('''
+            SELECT id, creador_id, codigo_cliente 
+            FROM clientes 
+            WHERE rol = 'cliente' 
+            ORDER BY id ASC
+        ''')
+        rows_clientes = cursor.fetchall() or []
+        
+        grupos_creador = {}
+        for r in rows_clientes:
+            c_id = r[0]
+            c_creador = r[1] or admin_id
+            c_code = r[2]
+            grupos_creador.setdefault(c_creador, []).append((c_id, c_code))
+
+        corregidos = 0
+        for c_creador, c_list in grupos_creador.items():
+            usados_set = set()
+            next_seq = 1
+            for c_id, c_code in c_list:
+                es_valido = False
+                if c_code and str(c_code).startswith('CLI-'):
+                    parts = str(c_code).split('-')
+                    if len(parts) >= 2 and parts[1].isdigit():
+                        num_val = int(parts[1])
+                        if num_val not in usados_set:
+                            usados_set.add(num_val)
+                            es_valido = True
+                
+                if not es_valido:
+                    while next_seq in usados_set:
+                        next_seq += 1
+                    nuevo_codigo = f"CLI-{next_seq:04d}"
+                    cursor.execute("UPDATE clientes SET codigo_cliente = ? WHERE id = ?", (nuevo_codigo, c_id))
+                    usados_set.add(next_seq)
+                    next_seq += 1
+                    corregidos += 1
 
         conexion.commit()
-        print(f"[OK] Asignado creador_id={admin_id} a {cursor.rowcount} clientes existentes")
+        if corregidos > 0:
+            print(f"[OK] Se corrigieron {corregidos} código(s) de cliente duplicados asignando secuenciales únicos CLI-XXXX")
 
     except Exception as e:
         print(f"[ERROR] Error en migración de clientes: {str(e)}")

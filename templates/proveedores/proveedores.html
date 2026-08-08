@@ -3,8 +3,8 @@
 {% block titulo %}Proveedores — COTIZAPro{% endblock %}
 
 {% block contenido %}
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 <link rel="stylesheet" href="/static/css/productos.css">
 
 <style>
@@ -17,10 +17,14 @@
     position: relative;
     overflow: hidden;
   }
+
   .bento-hero-card::before {
     content: '';
     position: absolute;
-    top: 0; left: 0; right: 0; height: 6px;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 6px;
     background: linear-gradient(90deg, #FF6B35 0%, #FF9F1C 50%, #141414 100%);
   }
 
@@ -34,11 +38,13 @@
     position: relative;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
   }
+
   .bento-input-card:hover {
     transform: translateY(-6px) scale(1.015);
     border-color: #FF6B35 !important;
     box-shadow: 0 16px 36px -8px rgba(255, 107, 53, 0.24), 0 6px 12px rgba(0, 0, 0, 0.06) !important;
   }
+
   .bento-input-card:focus-within {
     transform: translateY(-4px) scale(1.01);
     border-color: #FF6B35 !important;
@@ -52,6 +58,7 @@
     transform: scale(1.22) rotate(-8deg);
     color: #FF6B35 !important;
   }
+
   .bento-field-icon {
     transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
     display: inline-block;
@@ -69,6 +76,7 @@
     align-items: center;
     gap: 8px;
   }
+
   .bento-input-control {
     border: 1.5px solid rgba(20, 20, 20, 0.12);
     background: #F6F3ED;
@@ -80,16 +88,19 @@
     outline: none;
     transition: all 0.25s ease;
   }
+
   .bento-input-control:focus {
     background: #FFFFFF;
     border-color: #FF6B35;
     box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.15);
   }
+
   .bento-input-group {
     position: relative;
     display: flex;
     align-items: center;
   }
+
   .bento-input-group .bento-inner-icon {
     position: absolute;
     left: 16px;
@@ -98,6 +109,7 @@
     pointer-events: none;
     transition: all 0.25s ease;
   }
+
   .bento-input-card:focus-within .bento-inner-icon {
     transform: scale(1.2);
   }
@@ -113,12 +125,14 @@
     transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
     box-shadow: 0 8px 20px rgba(255, 107, 53, 0.28);
   }
+
   .btn-bento-action:hover {
     transform: translateY(-3px) scale(1.04);
     background: #FF7B4B;
     color: #FFFFFF;
     box-shadow: 0 16px 32px rgba(255, 107, 53, 0.4);
   }
+
   .btn-bento-action:active {
     transform: translateY(1px) scale(0.98);
   }
@@ -127,6 +141,7 @@
   .bento-table-row {
     transition: all 0.25s ease;
   }
+
   .bento-table-row:hover {
     background-color: rgba(255, 107, 53, 0.04) !important;
     transform: scale(1.002);
@@ -134,34 +149,39 @@
 </style>
 
 <div class="container-fluid py-4 px-lg-5" style="background-color: #FAF8F5; min-height: 100vh;">
-  
+
   <!-- ALERTA DE MENSAJES DE FLASH -->
   {% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
-      {% for category, message in messages %}
-        <div class="alert alert-{{ category }} alert-dismissible fade show rounded-pill px-4 py-3 shadow-sm border border-2 border-dark mb-4 animate__animated animate__fadeInDown" role="alert">
-          <i class="fa-solid fa-circle-info me-2"></i> {{ message }}
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" onclick="this.parentElement.remove()"></button>
-        </div>
-      {% endfor %}
-    {% endif %}
+  {% if messages %}
+  {% for category, message in messages %}
+  <div
+    class="alert alert-{{ category }} alert-dismissible fade show rounded-pill px-4 py-3 shadow-sm border border-2 border-dark mb-4 animate__animated animate__fadeInDown"
+    role="alert">
+    <i class="fa-solid fa-circle-info me-2"></i> {{ message }}
+    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
+      onclick="this.parentElement.remove()"></button>
+  </div>
+  {% endfor %}
+  {% endif %}
   {% endwith %}
 
   <!-- FORMULARIO DE REGISTRO BENTO GRID REINVENTADO -->
   <div class="card bento-hero-card shadow-sm p-4 p-md-5 mb-4 animate__animated animate__fadeIn">
     <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
       <div>
-        <h3 class="fw-bold text-dark mb-1" style="font-size: 1.8rem;"><i class="fa-solid fa-truck-field text-orange-pro me-2 bento-field-icon"></i> Registrar Nuevo Proveedor</h3>
-        <p class="text-secondary small mb-0">Agrega un nuevo fabricante o distribuidor a tu inventario con diseño Bento Interactivo.</p>
+        <h3 class="fw-bold text-dark mb-1" style="font-size: 1.8rem;"><i
+            class="fa-solid fa-truck-field text-orange-pro me-2 bento-field-icon"></i> Registrar Nuevo Proveedor</h3>
+        <p class="text-secondary small mb-0">Agrega un nuevo fabricante o distribuidor.</p>
       </div>
-      <span class="badge bg-dark text-warning border border-warning rounded-pill px-3.5 py-2 fw-bold shadow-sm" style="font-size: 0.8rem;">
+      <span class="badge bg-dark text-warning border border-warning rounded-pill px-3.5 py-2 fw-bold shadow-sm"
+        style="font-size: 0.8rem;">
         <i class="fa-solid fa-bolt me-1 text-warning"></i> FORMULARIO PRO
       </span>
     </div>
 
     <form method="post" action="/proveedores" id="formProveedor">
       <div class="row g-3 mb-4">
-        
+
         <!-- BENTO 1: Nombre / Razón Social (OBLIGATORIO) -->
         <div class="col-md-6">
           <div class="bento-input-card">
@@ -170,7 +190,8 @@
             </label>
             <div class="bento-input-group">
               <i class="fa-solid fa-briefcase bento-inner-icon"></i>
-              <input type="text" name="nombre" class="bento-input-control" placeholder="Ej: Siemens Bolivia S.A." required>
+              <input type="text" name="nombre" class="bento-input-control" placeholder="Ej: Siemens Bolivia S.A."
+                required>
             </div>
           </div>
         </div>
@@ -183,7 +204,8 @@
             </label>
             <div class="bento-input-group">
               <i class="fa-solid fa-user bento-inner-icon"></i>
-              <input type="text" name="contacto_nombre" class="bento-input-control" placeholder="Ej: Ing. Roberto Carlos" required>
+              <input type="text" name="contacto_nombre" class="bento-input-control"
+                placeholder="Ej: Ing. Roberto Carlos" required>
             </div>
           </div>
         </div>
@@ -222,7 +244,8 @@
             </label>
             <div class="bento-input-group">
               <i class="fa-solid fa-boxes-stacked bento-inner-icon"></i>
-              <input type="text" name="rubro" class="bento-input-control" placeholder="Ej: Material Eléctrico / Herramientas">
+              <input type="text" name="rubro" class="bento-input-control"
+                placeholder="Ej: Material Eléctrico / Herramientas">
             </div>
           </div>
         </div>
@@ -242,7 +265,8 @@
 
         <!-- BOTÓN GUARDAR PROVEEDOR (AL LADO EN LA MISMA FILA) -->
         <div class="col-md-6 d-flex align-items-center justify-content-end pt-2 pt-md-0">
-          <button type="submit" class="btn btn-bento-action shadow py-3 px-4 w-100 w-md-auto" style="font-size: 1.05rem;">
+          <button type="submit" class="btn btn-bento-action shadow py-3 px-4 w-100 w-md-auto"
+            style="font-size: 1.05rem;">
             <i class="fa-solid fa-circle-plus me-2"></i> Guardar Proveedor
           </button>
         </div>
@@ -252,25 +276,32 @@
   </div>
 
   <!-- SECCIÓN DE BÚSQUEDA Y LISTADO BENTO DE PROVEEDORES -->
-  <div class="card border-0 shadow-sm p-4 mb-4" style="background: #FFFFFF; border-radius: 24px; border: 2px solid #141414 !important;">
-    
+  <div class="card border-0 shadow-sm p-4 mb-4"
+    style="background: #FFFFFF; border-radius: 24px; border: 2px solid #141414 !important;">
+
     <div class="d-flex align-items-center justify-content-between flex-wrap gap-3 mb-4">
       <div>
         <h4 class="register-title-executive mb-1" style="font-size: 1.6rem;">Proveedores Registrados</h4>
-        <p class="text-secondary small mb-0">Total: <strong>{{ pagination.total_items }}</strong> proveedores encontrados</p>
+        <p class="text-secondary small mb-0">Total: <strong>{{ pagination.total_items }}</strong> proveedores
+          encontrados</p>
       </div>
 
       <!-- BARRA DE BÚSQUEDA BENTO PILL -->
-      <form method="get" action="/proveedores" class="d-flex align-items-center gap-2 flex-wrap" style="max-width: 480px;">
-        <div class="clay-pill-input-group" style="border: 2px solid #141414 !important; border-radius: 50px !important; overflow: hidden; background: #FAF8F5;">
+      <form method="get" action="/proveedores" class="d-flex align-items-center gap-2 flex-wrap"
+        style="max-width: 480px;">
+        <div class="clay-pill-input-group"
+          style="border: 2px solid #141414 !important; border-radius: 50px !important; overflow: hidden; background: #FAF8F5;">
           <span class="clay-pill-input-icon"><i class="bi bi-search"></i></span>
-          <input type="text" name="q" class="clay-pill-input" value="{{ query_search }}" placeholder="Buscar por Nombre, NIT, Contacto..." style="border-radius: 50px !important;">
+          <input type="text" name="q" class="clay-pill-input" value="{{ query_search }}"
+            placeholder="Buscar por Nombre, NIT, Contacto..." style="border-radius: 50px !important;">
         </div>
-        <button type="submit" class="btn text-white fw-bold rounded-pill px-4" style="background-color: #141414; border: 2px solid #141414;">
+        <button type="submit" class="btn text-white fw-bold rounded-pill px-4"
+          style="background-color: #141414; border: 2px solid #141414;">
           Filtrar
         </button>
         {% if query_search %}
-        <a href="/proveedores" class="btn btn-outline-dark rounded-pill px-3" style="border: 2px solid #141414;">Limpiar</a>
+        <a href="/proveedores" class="btn btn-outline-dark rounded-pill px-3"
+          style="border: 2px solid #141414;">Limpiar</a>
         {% endif %}
       </form>
     </div>
@@ -294,19 +325,22 @@
           <tr class="bento-table-row" style="border-bottom: 1px solid rgba(20, 20, 20, 0.08);">
             <td class="py-3 px-4">
               <div class="d-flex align-items-center gap-2">
-                <span class="rounded-circle d-inline-flex align-items-center justify-content-center fw-bold text-white" style="width: 38px; height: 38px; background-color: #FF6B35; border: 1.5px solid #141414;">
+                <span class="rounded-circle d-inline-flex align-items-center justify-content-center fw-bold text-white"
+                  style="width: 38px; height: 38px; background-color: #FF6B35; border: 1.5px solid #141414;">
                   {{ p.nombre[0]|upper }}
                 </span>
                 <div>
                   <strong class="text-dark d-block" style="font-size: 0.95rem;">{{ p.nombre }}</strong>
                   {% if p.direccion %}
-                  <small class="text-muted d-block" style="font-size: 0.8rem;"><i class="bi bi-geo-alt me-1"></i>{{ p.direccion }}</small>
+                  <small class="text-muted d-block" style="font-size: 0.8rem;"><i class="bi bi-geo-alt me-1"></i>{{
+                    p.direccion }}</small>
                   {% endif %}
                 </div>
               </div>
             </td>
             <td class="py-3 px-3">
-              <span class="badge bg-dark text-white rounded-pill px-3 py-1 fw-bold font-monospace" style="border: 1px solid #141414;">
+              <span class="badge bg-dark text-white rounded-pill px-3 py-1 fw-bold font-monospace"
+                style="border: 1px solid #141414;">
                 {{ p.nit_ruc or 'S/N' }}
               </span>
             </td>
@@ -315,7 +349,8 @@
             </td>
             <td class="py-3 px-3">
               {% if p.telefono %}
-              <a href="https://wa.me/{{ p.telefono|replace(' ', '') }}" target="_blank" class="badge bg-success bg-opacity-10 text-success border border-success rounded-pill px-3 py-1.5 fw-bold text-decoration-none">
+              <a href="https://wa.me/{{ p.telefono|replace(' ', '') }}" target="_blank"
+                class="badge bg-success bg-opacity-10 text-success border border-success rounded-pill px-3 py-1.5 fw-bold text-decoration-none">
                 <i class="bi bi-whatsapp me-1"></i> {{ p.telefono }}
               </a>
               {% else %}
@@ -323,16 +358,29 @@
               {% endif %}
             </td>
             <td class="py-3 px-3">
-              <span class="badge bg-warning bg-opacity-20 text-dark border border-warning rounded-pill px-3 py-1 fw-bold">
+              <span
+                class="badge bg-warning bg-opacity-20 text-dark border border-warning rounded-pill px-3 py-1 fw-bold">
                 {{ p.rubro or 'General' }}
               </span>
             </td>
             <td class="py-3 px-4 text-end">
               <div class="d-inline-flex gap-1">
-                <button type="button" class="btn btn-sm btn-outline-dark rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 34px; height: 34px; border: 1.5px solid #141414;" onclick="abrirModalEditarProveedor({{ p|tojson }})" title="Editar Proveedor">
+                <button type="button"
+                  class="btn btn-sm btn-outline-dark rounded-circle d-inline-flex align-items-center justify-content-center"
+                  style="width: 34px; height: 34px; border: 1.5px solid #141414;"
+                  data-id="{{ p.id }}"
+                  data-nombre="{{ p.nombre or '' }}"
+                  data-nit="{{ p.nit_ruc or '' }}"
+                  data-telefono="{{ p.telefono or '' }}"
+                  data-contacto="{{ p.contacto_nombre or '' }}"
+                  data-rubro="{{ p.rubro or '' }}"
+                  onclick="abrirModalEditarProveedorBtn(this)" title="Editar Proveedor">
                   <i class="bi bi-pencil-fill"></i>
                 </button>
-                <a href="/proveedores/eliminar/{{ p.id }}" class="btn btn-sm btn-outline-danger rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 34px; height: 34px; border: 1.5px solid #dc2626;" onclick="return confirm('¿Eliminar al proveedor {{ p.nombre }}?')" title="Eliminar Proveedor">
+                <a href="/proveedores/eliminar/{{ p.id }}"
+                  class="btn btn-sm btn-outline-danger rounded-circle d-inline-flex align-items-center justify-content-center"
+                  style="width: 34px; height: 34px; border: 1.5px solid #dc2626;"
+                  onclick="return confirm('¿Eliminar al proveedor {{ p.nombre }}?')" title="Eliminar Proveedor">
                   <i class="bi bi-trash-fill"></i>
                 </a>
               </div>
@@ -347,22 +395,27 @@
     <nav class="mt-4">
       <ul class="pagination justify-content-center gap-1">
         <li class="page-item {% if pagination.page == 1 %}disabled{% endif %}">
-          <a class="page-link rounded-pill px-3 fw-bold border-2 border-dark" href="/proveedores?page={{ pagination.page - 1 }}&q={{ query_search }}">« Anterior</a>
+          <a class="page-link rounded-pill px-3 fw-bold border-2 border-dark"
+            href="/proveedores?page={{ pagination.page - 1 }}&q={{ query_search }}">« Anterior</a>
         </li>
         {% for p_num in range(1, pagination.total_pages + 1) %}
         <li class="page-item {% if p_num == pagination.page %}active{% endif %}">
-          <a class="page-link rounded-pill fw-bold border-2 border-dark {% if p_num == pagination.page %}bg-dark text-white{% endif %}" href="/proveedores?page={{ p_num }}&q={{ query_search }}">{{ p_num }}</a>
+          <a class="page-link rounded-pill fw-bold border-2 border-dark {% if p_num == pagination.page %}bg-dark text-white{% endif %}"
+            href="/proveedores?page={{ p_num }}&q={{ query_search }}">{{ p_num }}</a>
         </li>
         {% endfor %}
         <li class="page-item {% if pagination.page == pagination.total_pages %}disabled{% endif %}">
-          <a class="page-link rounded-pill px-3 fw-bold border-2 border-dark" href="/proveedores?page={{ pagination.page + 1 }}&q={{ query_search }}">Siguiente »</a>
+          <a class="page-link rounded-pill px-3 fw-bold border-2 border-dark"
+            href="/proveedores?page={{ pagination.page + 1 }}&q={{ query_search }}">Siguiente »</a>
         </li>
       </ul>
     </nav>
 
     {% else %}
     <div class="text-center py-5">
-      <div class="rounded-circle d-inline-flex align-items-center justify-content-center bg-warning bg-opacity-10 text-orange-pro p-4 mb-3" style="border: 2px solid #FF6B35;">
+      <div
+        class="rounded-circle d-inline-flex align-items-center justify-content-center bg-warning bg-opacity-10 text-orange-pro p-4 mb-3"
+        style="border: 2px solid #FF6B35;">
         <i class="bi bi-truck fs-1"></i>
       </div>
       <h5 class="fw-bold text-dark mb-1">No se encontraron proveedores</h5>
@@ -377,9 +430,11 @@
 <!-- MODAL ELEGANTE EDICIÓN DE PROVEEDOR -->
 <div class="modal fade" id="modalEditarProveedor" tabindex="-1" aria-hidden="true" style="z-index: 1085 !important;">
   <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content border-0 shadow-lg" style="border-radius: 24px; overflow: hidden; border: 2px solid #141414 !important;">
+    <div class="modal-content border-0 shadow-lg"
+      style="border-radius: 24px; overflow: hidden; border: 2px solid #141414 !important;">
       <div class="modal-header py-3 px-4" style="background-color: #141414 !important;">
-        <h5 class="modal-title fw-bold text-white mb-0"><i class="bi bi-pencil-square text-orange-pro me-2"></i> Editar Proveedor</h5>
+        <h5 class="modal-title fw-bold text-white mb-0"><i class="bi bi-pencil-square text-orange-pro me-2"></i> Editar
+          Proveedor</h5>
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <form id="formEditProveedorModal" method="post" action="">
@@ -387,29 +442,38 @@
           <div class="row g-2">
             <div class="col-12">
               <label class="form-label small fw-bold text-dark mb-1">Razón Social / Nombre *</label>
-              <input type="text" name="nombre" id="editNombre" class="clay-pill-input w-100" style="border: 2px solid #141414 !important; border-radius: 50px !important; padding: 7px 18px;" required>
+              <input type="text" name="nombre" id="editNombre" class="clay-pill-input w-100"
+                style="border: 2px solid #141414 !important; border-radius: 50px !important; padding: 7px 18px;"
+                required>
             </div>
             <div class="col-6">
               <label class="form-label small fw-bold text-dark mb-1">NIT / RUC</label>
-              <input type="text" name="nit_ruc" id="editNitRuc" class="clay-pill-input w-100" style="border: 2px solid #141414 !important; border-radius: 50px !important; padding: 7px 18px;">
+              <input type="text" name="nit_ruc" id="editNitRuc" class="clay-pill-input w-100"
+                style="border: 2px solid #141414 !important; border-radius: 50px !important; padding: 7px 18px;">
             </div>
             <div class="col-6">
               <label class="form-label small fw-bold text-dark mb-1">Teléfono</label>
-              <input type="text" name="telefono" id="editTelefono" class="clay-pill-input w-100" style="border: 2px solid #141414 !important; border-radius: 50px !important; padding: 7px 18px;">
+              <input type="text" name="telefono" id="editTelefono" class="clay-pill-input w-100"
+                style="border: 2px solid #141414 !important; border-radius: 50px !important; padding: 7px 18px;">
             </div>
             <div class="col-12">
               <label class="form-label small fw-bold text-dark mb-1">Contacto / Asesor</label>
-              <input type="text" name="contacto_nombre" id="editContacto" class="clay-pill-input w-100" style="border: 2px solid #141414 !important; border-radius: 50px !important; padding: 7px 18px;">
+              <input type="text" name="contacto_nombre" id="editContacto" class="clay-pill-input w-100"
+                style="border: 2px solid #141414 !important; border-radius: 50px !important; padding: 7px 18px;">
             </div>
             <div class="col-12">
               <label class="form-label small fw-bold text-dark mb-1">Rubro</label>
-              <input type="text" name="rubro" id="editRubro" class="clay-pill-input w-100" style="border: 2px solid #141414 !important; border-radius: 50px !important; padding: 7px 18px;">
+              <input type="text" name="rubro" id="editRubro" class="clay-pill-input w-100"
+                style="border: 2px solid #141414 !important; border-radius: 50px !important; padding: 7px 18px;">
             </div>
           </div>
         </div>
-        <div class="modal-footer px-4 py-3 justify-content-between" style="background-color: #FFFFFF; border-top: 2px solid #141414;">
-          <button type="button" class="btn btn-outline-dark fw-bold rounded-pill px-4" data-bs-dismiss="modal">Cancelar</button>
-          <button type="submit" class="btn text-white fw-bold rounded-pill px-4" style="background-color: #FF6B35; border: 2px solid #141414;">Guardar Cambios</button>
+        <div class="modal-footer px-4 py-3 justify-content-between"
+          style="background-color: #FFFFFF; border-top: 2px solid #141414;">
+          <button type="button" class="btn btn-outline-dark fw-bold rounded-pill px-4"
+            data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn text-white fw-bold rounded-pill px-4"
+            style="background-color: #FF6B35; border: 2px solid #141414;">Guardar Cambios</button>
         </div>
       </form>
     </div>
@@ -417,20 +481,27 @@
 </div>
 
 <script>
-function abrirModalEditarProveedor(prov) {
+  function abrirModalEditarProveedorBtn(btn) {
+    const provId = btn.getAttribute('data-id');
+    const provNombre = btn.getAttribute('data-nombre');
+    const provNit = btn.getAttribute('data-nit');
+    const provTelefono = btn.getAttribute('data-telefono');
+    const provContacto = btn.getAttribute('data-contacto');
+    const provRubro = btn.getAttribute('data-rubro');
+
     const modalEl = document.getElementById('modalEditarProveedor');
     if (modalEl && modalEl.parentNode !== document.body) {
-        document.body.appendChild(modalEl);
+      document.body.appendChild(modalEl);
     }
-    document.getElementById('formEditProveedorModal').action = `/proveedores/editar/${prov.id}`;
-    document.getElementById('editNombre').value = prov.nombre || '';
-    document.getElementById('editNitRuc').value = prov.nit_ruc || '';
-    document.getElementById('editTelefono').value = prov.telefono || '';
-    document.getElementById('editContacto').value = prov.contacto_nombre || '';
-    document.getElementById('editRubro').value = prov.rubro || '';
+    document.getElementById('formEditProveedorModal').action = `/proveedores/editar/${provId}`;
+    document.getElementById('editNombre').value = provNombre || '';
+    document.getElementById('editNitRuc').value = provNit || '';
+    document.getElementById('editTelefono').value = provTelefono || '';
+    document.getElementById('editContacto').value = provContacto || '';
+    document.getElementById('editRubro').value = provRubro || '';
 
     const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
     modal.show();
-}
+  }
 </script>
 {% endblock %}

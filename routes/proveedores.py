@@ -31,9 +31,11 @@ def register_routes(app):
                 direccion = request.form.get('direccion', '').strip()
                 rubro = request.form.get('rubro', '').strip()
 
-                if not nombre or not contacto_nombre:
-                    flash('La Razón Social/Nombre y el Asesor/Contacto son obligatorios.', 'warning')
+                if not nombre:
+                    flash('La Razón Social / Nombre es obligatoria.', 'warning')
                 else:
+                    if not contacto_nombre:
+                        contacto_nombre = 'N/A'
                     with get_db_connection() as conexion:
                         cursor = conexion.cursor()
                         # Validar si ya existe
@@ -112,9 +114,12 @@ def register_routes(app):
             direccion = request.form.get('direccion', '').strip()
             rubro = request.form.get('rubro', '').strip()
 
-            if not nombre or not contacto_nombre:
-                flash('La Razón Social/Nombre y el Asesor/Contacto son obligatorios.', 'warning')
+            if not nombre:
+                flash('La Razón Social / Nombre es obligatoria.', 'warning')
                 return redirect(url_for('proveedores'))
+
+            if not contacto_nombre:
+                contacto_nombre = 'N/A'
 
             with get_db_connection() as conexion:
                 cursor = conexion.cursor()

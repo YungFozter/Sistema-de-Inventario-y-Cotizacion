@@ -116,8 +116,8 @@ def register_routes(app):
                                     cursor.execute("SELECT COUNT(*) FROM proveedores WHERE empresa = ? AND LOWER(nombre) = LOWER(?)", (empresa, proveedor))
                                     if cursor.fetchone()[0] == 0:
                                         cursor.execute('''
-                                            INSERT INTO proveedores (empresa, nombre, rubro, creador_id)
-                                            VALUES (?, ?, 'Suministros', ?)
+                                            INSERT INTO proveedores (empresa, nombre, contacto_nombre, rubro, creador_id)
+                                            VALUES (?, ?, 'N/A', 'Suministros', ?)
                                         ''', (empresa, proveedor, user_id))
                                 except Exception:
                                     pass
@@ -410,8 +410,8 @@ def register_routes(app):
                                 cursor.execute("SELECT COUNT(*) FROM proveedores WHERE empresa = ? AND LOWER(nombre) = LOWER(?)", (empresa, proveedor))
                                 if cursor.fetchone()[0] == 0:
                                     cursor.execute('''
-                                        INSERT INTO proveedores (empresa, nombre, rubro, creador_id)
-                                        VALUES (?, ?, 'Suministros', ?)
+                                        INSERT INTO proveedores (empresa, nombre, contacto_nombre, rubro, creador_id)
+                                        VALUES (?, ?, 'N/A', 'Suministros', ?)
                                     ''', (empresa, proveedor, user_id))
                             except Exception:
                                 pass

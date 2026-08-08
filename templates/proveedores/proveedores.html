@@ -281,34 +281,40 @@
 
     <div class="d-flex align-items-center justify-content-between flex-wrap gap-3 mb-4">
       <div>
-        <h4 class="register-title-executive mb-1" style="font-size: 1.6rem;">Proveedores Registrados</h4>
-        <p class="text-secondary small mb-0">Total: <strong>{{ pagination.total_items }}</strong> proveedores
-          encontrados</p>
+        <h4 class="register-title-executive mb-1" style="font-size: 1.6rem;"><i class="fa-solid fa-address-book text-orange-pro me-2"></i> Proveedores Registrados</h4>
+        <p class="text-secondary small mb-0">Total: <strong id="totalProveedoresCount">{{ pagination.total_items }}</strong> proveedores encontrados</p>
       </div>
 
-      <!-- BARRA DE BÚSQUEDA BENTO PILL -->
-      <form method="get" action="/proveedores" class="d-flex align-items-center gap-2 flex-wrap"
-        style="max-width: 480px;">
-        <div class="clay-pill-input-group"
-          style="border: 2px solid #141414 !important; border-radius: 50px !important; overflow: hidden; background: #FAF8F5;">
-          <span class="clay-pill-input-icon"><i class="bi bi-search"></i></span>
-          <input type="text" name="q" class="clay-pill-input" value="{{ query_search }}"
-            placeholder="Buscar por Nombre, NIT, Contacto..." style="border-radius: 50px !important;">
+      <div class="d-flex align-items-center gap-3 flex-wrap">
+        <!-- SELECTOR DE PER_PAGE 5-15-30 -->
+        <div class="d-flex align-items-center gap-2">
+          <label for="perPageSelect" class="small fw-bold text-secondary mb-0"><i class="fa-solid fa-list-ol text-orange-pro me-1"></i> Mostrar por página:</label>
+          <select id="perPageSelect" class="form-select form-select-sm shadow-sm rounded-pill fw-bold border-2 border-dark" style="width: 130px; border-radius: 50px !important;" onchange="cargarProveedoresAJAX(1)">
+            <option value="5" {% if pagination.per_page == 5 %}selected{% endif %}>5</option>
+            <option value="15" {% if pagination.per_page == 15 %}selected{% endif %}>15</option>
+            <option value="30" {% if pagination.per_page == 30 %}selected{% endif %}>30</option>
+          </select>
         </div>
-        <button type="submit" class="btn text-white fw-bold rounded-pill px-4"
-          style="background-color: #141414; border: 2px solid #141414;">
-          Filtrar
-        </button>
-        {% if query_search %}
-        <a href="/proveedores" class="btn btn-outline-dark rounded-pill px-3"
-          style="border: 2px solid #141414;">Limpiar</a>
-        {% endif %}
-      </form>
+
+        <!-- BARRA DE BÚSQUEDA BENTO PILL -->
+        <form onsubmit="event.preventDefault(); cargarProveedoresAJAX(1);" class="d-flex align-items-center gap-2 flex-wrap" style="max-width: 480px;">
+          <div class="clay-pill-input-group"
+            style="border: 2px solid #141414 !important; border-radius: 50px !important; overflow: hidden; background: #FAF8F5;">
+            <span class="clay-pill-input-icon"><i class="bi bi-search"></i></span>
+            <input type="text" id="buscarProveedorInput" name="q" class="clay-pill-input" value="{{ query_search }}"
+              placeholder="Buscar por Nombre, NIT, Contacto..." style="border-radius: 50px !important;" oninput="debouncedBuscarProveedores()">
+          </div>
+          <button type="submit" class="btn text-white fw-bold rounded-pill px-4"
+            style="background-color: #141414; border: 2px solid #141414;">
+            Filtrar
+          </button>
+          <button type="button" class="btn btn-outline-dark rounded-pill px-3" style="border: 2px solid #141414;" onclick="limpiarFiltroProveedores()">Limpiar</button>
+        </form>
+      </div>
     </div>
 
-    <!-- TABLA EDITORIAL DE PROVEEDORES -->
-    {% if proveedores %}
-    <div class="table-responsive" style="border-radius: 18px; border: 2px solid #141414; overflow: hidden;">
+    <!-- CONTENEDOR TABLA PROVEEDORES -->
+    <div id="tablaContainer" class="table-responsive" style="border-radius: 18px; border: 2px solid #141414; overflow: hidden; {% if not proveedores %}display: none;{% endif %}">
       <table class="table table-hover align-middle mb-0">
         <thead style="background-color: #141414; color: #FFFFFF;">
           <tr>
@@ -320,7 +326,7 @@
             <th class="py-3 px-4 text-end fw-bold">Acciones</th>
           </tr>
         </thead>
-        <tbody>
+        <tbody id="tablaProveedoresBody">
           {% for p in proveedores %}
           <tr class="bento-table-row" style="border-bottom: 1px solid rgba(20, 20, 20, 0.08);">
             <td class="py-3 px-4">
@@ -332,8 +338,7 @@
                 <div>
                   <strong class="text-dark d-block" style="font-size: 0.95rem;">{{ p.nombre }}</strong>
                   {% if p.direccion %}
-                  <small class="text-muted d-block" style="font-size: 0.8rem;"><i class="bi bi-geo-alt me-1"></i>{{
-                    p.direccion }}</small>
+                  <small class="text-muted d-block" style="font-size: 0.8rem;"><i class="bi bi-geo-alt me-1"></i>{{ p.direccion }}</small>
                   {% endif %}
                 </div>
               </div>
@@ -391,28 +396,8 @@
       </table>
     </div>
 
-    <!-- PAGINACIÓN CÁLIDA -->
-    <nav class="mt-4">
-      <ul class="pagination justify-content-center gap-1">
-        <li class="page-item {% if pagination.page == 1 %}disabled{% endif %}">
-          <a class="page-link rounded-pill px-3 fw-bold border-2 border-dark"
-            href="/proveedores?page={{ pagination.page - 1 }}&q={{ query_search }}">« Anterior</a>
-        </li>
-        {% for p_num in range(1, pagination.total_pages + 1) %}
-        <li class="page-item {% if p_num == pagination.page %}active{% endif %}">
-          <a class="page-link rounded-pill fw-bold border-2 border-dark {% if p_num == pagination.page %}bg-dark text-white{% endif %}"
-            href="/proveedores?page={{ p_num }}&q={{ query_search }}">{{ p_num }}</a>
-        </li>
-        {% endfor %}
-        <li class="page-item {% if pagination.page == pagination.total_pages %}disabled{% endif %}">
-          <a class="page-link rounded-pill px-3 fw-bold border-2 border-dark"
-            href="/proveedores?page={{ pagination.page + 1 }}&q={{ query_search }}">Siguiente »</a>
-        </li>
-      </ul>
-    </nav>
-
-    {% else %}
-    <div class="text-center py-5">
+    <!-- CONTENEDOR ESTADO VACÍO -->
+    <div id="emptyStateContainer" class="text-center py-5" style="{% if proveedores %}display: none;{% endif %}">
       <div
         class="rounded-circle d-inline-flex align-items-center justify-content-center bg-warning bg-opacity-10 text-orange-pro p-4 mb-3"
         style="border: 2px solid #FF6B35;">
@@ -421,7 +406,23 @@
       <h5 class="fw-bold text-dark mb-1">No se encontraron proveedores</h5>
       <p class="text-muted small">Registra tu primer proveedor arriba para vincularlo a tu inventario.</p>
     </div>
-    {% endif %}
+
+    <!-- PAGINACIÓN DINÁMICA AJAX -->
+    <nav id="paginationNavContainer" class="mt-4">
+      <ul class="pagination justify-content-center gap-1" id="paginationList">
+        <li class="page-item {% if pagination.page == 1 %}disabled{% endif %}">
+          <a class="page-link rounded-pill px-3 fw-bold border-2 border-dark" href="javascript:void(0)" onclick="cargarProveedoresAJAX({{ pagination.page - 1 }})">« Anterior</a>
+        </li>
+        {% for p_num in range(1, pagination.total_pages + 1) %}
+        <li class="page-item {% if p_num == pagination.page %}active{% endif %}">
+          <a class="page-link rounded-pill fw-bold border-2 border-dark {% if p_num == pagination.page %}bg-dark text-white{% endif %}" href="javascript:void(0)" onclick="cargarProveedoresAJAX({{ p_num }})">{{ p_num }}</a>
+        </li>
+        {% endfor %}
+        <li class="page-item {% if pagination.page == pagination.total_pages %}disabled{% endif %}">
+          <a class="page-link rounded-pill px-3 fw-bold border-2 border-dark" href="javascript:void(0)" onclick="cargarProveedoresAJAX({{ pagination.page + 1 }})">Siguiente »</a>
+        </li>
+      </ul>
+    </nav>
 
   </div>
 
@@ -481,6 +482,152 @@
 </div>
 
 <script>
+  let searchTimer = null;
+  function debouncedBuscarProveedores() {
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(() => {
+      cargarProveedoresAJAX(1);
+    }, 300);
+  }
+
+  function limpiarFiltroProveedores() {
+    const input = document.getElementById('buscarProveedorInput');
+    if (input) input.value = '';
+    cargarProveedoresAJAX(1);
+  }
+
+  function cargarProveedoresAJAX(page) {
+    page = page || 1;
+    const qInput = document.getElementById('buscarProveedorInput');
+    const q = qInput ? qInput.value.trim() : '';
+    const perPageSelect = document.getElementById('perPageSelect');
+    const perPage = perPageSelect ? perPageSelect.value : 5;
+
+    fetch(`/api/proveedores/buscar?q=${encodeURIComponent(q)}&page=${page}&per_page=${perPage}`)
+      .then(res => res.json())
+      .then(data => {
+        if (!data.success) return;
+
+        const proveedores = data.proveedores || [];
+        const pagination = data.pagination || { page: 1, per_page: 5, total_pages: 1, total_items: 0 };
+
+        // Actualizar contador total
+        const countEl = document.getElementById('totalProveedoresCount');
+        if (countEl) countEl.textContent = pagination.total_items;
+
+        const tbody = document.getElementById('tablaProveedoresBody');
+        const tablaContainer = document.getElementById('tablaContainer');
+        const emptyState = document.getElementById('emptyStateContainer');
+
+        if (proveedores.length === 0) {
+          if (tablaContainer) tablaContainer.style.display = 'none';
+          if (emptyState) emptyState.style.display = 'block';
+        } else {
+          if (tablaContainer) tablaContainer.style.display = 'block';
+          if (emptyState) emptyState.style.display = 'none';
+
+          if (tbody) {
+            let html = '';
+            proveedores.forEach(p => {
+              const inicial = (p.nombre && p.nombre.length > 0) ? p.nombre[0].toUpperCase() : 'P';
+              const nitStr = p.nit_ruc || 'S/N';
+              const contactoStr = p.contacto_nombre || 'N/A';
+              const rubroStr = p.rubro || 'General';
+
+              let telefonoHtml = '<span class="text-muted small">Sin teléfono</span>';
+              if (p.telefono && p.telefono.trim().length > 0) {
+                const telClean = p.telefono.replace(/\s+/g, '');
+                telefonoHtml = `<a href="https://wa.me/${telClean}" target="_blank" class="badge bg-success bg-opacity-10 text-success border border-success rounded-pill px-3 py-1.5 fw-bold text-decoration-none"><i class="bi bi-whatsapp me-1"></i> ${p.telefono}</a>`;
+              }
+
+              let direccionHtml = '';
+              if (p.direccion && p.direccion.trim().length > 0) {
+                direccionHtml = `<small class="text-muted d-block" style="font-size: 0.8rem;"><i class="bi bi-geo-alt me-1"></i>${p.direccion}</small>`;
+              }
+
+              html += `
+                <tr class="bento-table-row" style="border-bottom: 1px solid rgba(20, 20, 20, 0.08);">
+                  <td class="py-3 px-4">
+                    <div class="d-flex align-items-center gap-2">
+                      <span class="rounded-circle d-inline-flex align-items-center justify-content-center fw-bold text-white"
+                        style="width: 38px; height: 38px; background-color: #FF6B35; border: 1.5px solid #141414;">
+                        ${inicial}
+                      </span>
+                      <div>
+                        <strong class="text-dark d-block" style="font-size: 0.95rem;">${p.nombre}</strong>
+                        ${direccionHtml}
+                      </div>
+                    </div>
+                  </td>
+                  <td class="py-3 px-3">
+                    <span class="badge bg-dark text-white rounded-pill px-3 py-1 fw-bold font-monospace" style="border: 1px solid #141414;">
+                      ${nitStr}
+                    </span>
+                  </td>
+                  <td class="py-3 px-3">
+                    <span class="fw-semibold text-dark">${contactoStr}</span>
+                  </td>
+                  <td class="py-3 px-3">
+                    ${telefonoHtml}
+                  </td>
+                  <td class="py-3 px-3">
+                    <span class="badge bg-warning bg-opacity-20 text-dark border border-warning rounded-pill px-3 py-1 fw-bold">
+                      ${rubroStr}
+                    </span>
+                  </td>
+                  <td class="py-3 px-4 text-end">
+                    <div class="d-inline-flex gap-1">
+                      <button type="button"
+                        class="btn btn-sm btn-outline-dark rounded-circle d-inline-flex align-items-center justify-content-center"
+                        style="width: 34px; height: 34px; border: 1.5px solid #141414;"
+                        data-id="${p.id}"
+                        data-nombre="${p.nombre || ''}"
+                        data-nit="${p.nit_ruc || ''}"
+                        data-telefono="${p.telefono || ''}"
+                        data-contacto="${p.contacto_nombre || ''}"
+                        data-rubro="${p.rubro || ''}"
+                        onclick="abrirModalEditarProveedorBtn(this)" title="Editar Proveedor">
+                        <i class="bi bi-pencil-fill"></i>
+                      </button>
+                      <a href="/proveedores/eliminar/${p.id}"
+                        class="btn btn-sm btn-outline-danger rounded-circle d-inline-flex align-items-center justify-content-center"
+                        style="width: 34px; height: 34px; border: 1.5px solid #dc2626;"
+                        onclick="return confirm('¿Eliminar al proveedor ${p.nombre}?')" title="Eliminar Proveedor">
+                        <i class="bi bi-trash-fill"></i>
+                      </a>
+                    </div>
+                  </td>
+                </tr>
+              `;
+            });
+            tbody.innerHTML = html;
+          }
+        }
+
+        // Actualizar paginación
+        const pagList = document.getElementById('paginationList');
+        if (pagList) {
+          let pagHtml = '';
+          const prevDisabled = pagination.page <= 1 ? 'disabled' : '';
+          const prevPage = Math.max(1, pagination.page - 1);
+          pagHtml += `<li class="page-item ${prevDisabled}"><a class="page-link rounded-pill px-3 fw-bold border-2 border-dark" href="javascript:void(0)" onclick="cargarProveedoresAJAX(${prevPage})">« Anterior</a></li>`;
+
+          for (let i = 1; i <= pagination.total_pages; i++) {
+            const activeClass = i === pagination.page ? 'active' : '';
+            const bgClass = i === pagination.page ? 'bg-dark text-white' : '';
+            pagHtml += `<li class="page-item ${activeClass}"><a class="page-link rounded-pill fw-bold border-2 border-dark ${bgClass}" href="javascript:void(0)" onclick="cargarProveedoresAJAX(${i})">${i}</a></li>`;
+          }
+
+          const nextDisabled = pagination.page >= pagination.total_pages ? 'disabled' : '';
+          const nextPage = Math.min(pagination.total_pages, pagination.page + 1);
+          pagHtml += `<li class="page-item ${nextDisabled}"><a class="page-link rounded-pill px-3 fw-bold border-2 border-dark" href="javascript:void(0)" onclick="cargarProveedoresAJAX(${nextPage})">Siguiente »</a></li>`;
+
+          pagList.innerHTML = pagHtml;
+        }
+      })
+      .catch(err => console.error('Error cargando proveedores:', err));
+  }
+
   function abrirModalEditarProveedorBtn(btn) {
     const provId = btn.getAttribute('data-id');
     const provNombre = btn.getAttribute('data-nombre');

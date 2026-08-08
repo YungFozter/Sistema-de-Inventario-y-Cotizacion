@@ -141,6 +141,60 @@ def register_routes(app):
 
         return redirect(url_for('proveedores'))
 
+    @app.route('/api/proveedores/buscar', methods=['GET'])
+    @login_required
+    def api_buscar_proveedores():
+        user_id = session.get('user_id')
+        query_search = request.args.get('q', '').strip()
+        try:
+            page = max(1, int(request.args.get('page', 1)))
+        except (ValueError, TypeError):
+            page = 1
+        try:
+            per_page = int(request.args.get('per_page', 5))
+        except (ValueError, TypeError):
+            per_page = 5
+        if per_page not in [5, 15, 30]:
+            per_page = 5
+
+        with get_db_connection() as conexion:
+            cursor = conexion.cursor()
+            cursor.execute("SELECT empresa_nombre, nombre FROM clientes WHERE id = ?", (user_id,))
+            u = cursor.fetchone()
+            empresa_usuario = u[0] if u and u[0] else (u[1] if u and u[1] else 'General')
+
+            conexion.row_factory = sqlite3.Row
+            cursor = conexion.cursor()
+
+            base_sql = "FROM proveedores WHERE (creador_id = ? OR empresa = ?)"
+            params = [user_id, empresa_usuario]
+
+            if query_search:
+                base_sql += " AND (nombre LIKE ? OR nit_ruc LIKE ? OR contacto_nombre LIKE ? OR rubro LIKE ?)"
+                p_search = f"%{query_search}%"
+                params.extend([p_search, p_search, p_search, p_search])
+
+            cursor.execute(f"SELECT COUNT(*) {base_sql}", params)
+            total_items = cursor.fetchone()[0]
+            total_pages = max(1, (total_items + per_page - 1) // per_page)
+            if page > total_pages:
+                page = total_pages
+            offset = max(0, (page - 1) * per_page)
+
+            cursor.execute(f"SELECT * {base_sql} ORDER BY id DESC LIMIT ? OFFSET ?", params + [per_page, offset])
+            rows = [dict(row) for row in cursor.fetchall()]
+
+            return jsonify({
+                'success': True,
+                'proveedores': rows,
+                'pagination': {
+                    'page': page,
+                    'per_page': per_page,
+                    'total_pages': total_pages,
+                    'total_items': total_items
+                }
+            })
+
     @app.route('/api/proveedores', methods=['GET'])
     @login_required
     def api_proveedores():

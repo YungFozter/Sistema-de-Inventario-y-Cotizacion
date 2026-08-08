@@ -28,7 +28,7 @@ def procesar_respuesta_ia(user_id, empresa, mensaje_cliente, system_prompt=None,
     Procesa la pregunta del cliente consultando el inventario de productos en tiempo real.
     Si se provee openai_api_key, utiliza OpenAI GPT API. De lo contrario, utiliza un motor inteligente interno.
     """
-    catalog_context = []
+    productos_lista = []
     try:
         with get_db_connection() as conexion:
             conexion.row_factory = sqlite3.Row
@@ -40,18 +40,21 @@ def procesar_respuesta_ia(user_id, empresa, mensaje_cliente, system_prompt=None,
                 WHERE p.empresa = ? OR p.creador_id = ?
                 LIMIT 50
             ''', (empresa, user_id))
-            rows = cursor.fetchall()
-            for r in rows:
-                cat = r['categoria_nombre'] or r['categoria'] or 'General'
-                catalog_context.append(
-                    f"- Código: {r['codigo']} | {r['descripcion']} ({r['marca'] or 'Genérico'}) | Categoría: {cat} | Precio: {r['precio_unitario']} Bs | Stock Disponible: {r['cantidad']} {r['um'] or 'UN'}"
-                )
+            productos_lista = [dict(r) for r in cursor.fetchall()]
     except Exception as e:
-        print(f"[WARN ChatLife] Error cargando catálogo: {e}")
+        print(f"[WARN ChatLive] Error cargando catálogo: {e}")
 
-    cat_text = "\n".join(catalog_context) if catalog_context else "No hay productos en inventario actualmente."
+    # Si hay OpenAI API Key configurada, llamamos a la API de OpenAI
+    if openai_api_key and openai_api_key.strip():
+        catalog_context = []
+        for r in productos_lista:
+            cat = r.get('categoria_nombre') or r.get('categoria') or 'General'
+            catalog_context.append(
+                f"- Código: {r['codigo']} | {r['descripcion']} ({r['marca'] or 'Genérico'}) | Categoría: {cat} | Precio: {r['precio_unitario']} Bs | Stock: {r['cantidad']} {r['um'] or 'UN'}"
+            )
+        cat_text = "\n".join(catalog_context) if catalog_context else "No hay productos en inventario actualmente."
 
-    prompt_base = f"""Eres 'ChatLive IA', el asistente virtual experto en ventas y atención al cliente de la empresa '{empresa}'.
+        prompt_base = f"""Eres 'ChatLive IA', el asistente virtual experto en ventas y atención al cliente de la empresa '{empresa}'.
 Tu objetivo es responder de forma amable, ejecutiva y persuasiva, brindar precios y stock del inventario y cerrar ventas o agendar cotizaciones.
 
 CATÁLOGO DE PRODUCTOS EN TIEMPO REAL:
@@ -63,8 +66,6 @@ INSTRUCCIONES ADICIONALES:
 MENSAJE DEL CLIENTE:
 "{mensaje_cliente}"
 """
-
-    if openai_api_key and openai_api_key.strip():
         try:
             res = requests.post(
                 "https://api.openai.com/v1/chat/completions",
@@ -87,36 +88,48 @@ MENSAJE DEL CLIENTE:
                 data = res.json()
                 return data['choices'][0]['message']['content'].strip()
         except Exception as e_ai:
-            print(f"[WARN ChatLife] Error llamando a OpenAI API: {e_ai}")
+            print(f"[WARN ChatLive] Error llamando a OpenAI API: {e_ai}")
 
-    # Fallback: Motor de Respuestas Inteligente Integrado
-    msg_lower = mensaje_cliente.lower()
-    coincidencias = []
+    # Fallback: Motor Inteligente Basado en Inventario Real (Sin API Key)
+    msg_lower = mensaje_cliente.lower().strip()
     
-    try:
-        with get_db_connection() as conexion:
-            conexion.row_factory = sqlite3.Row
-            cursor = conexion.cursor()
-            cursor.execute('''
-                SELECT descripcion, precio_unitario, cantidad, um, marca 
-                FROM productos 
-                WHERE (empresa = ? OR creador_id = ?) 
-                AND (LOWER(descripcion) LIKE ? OR LOWER(codigo) LIKE ? OR LOWER(marca) LIKE ?)
-                LIMIT 5
-            ''', (empresa, user_id, f'%{msg_lower}%', f'%{msg_lower}%', f'%{msg_lower}%'))
-            coincidencias = cursor.fetchall()
-    except Exception:
-        pass
+    stop_words = {'que', 'el', 'la', 'los', 'las', 'un', 'una', 'unos', 'unas', 'de', 'del', 'a', 'ante', 'con', 'para', 'por', 'sin', 'sobre', 'y', 'o', 'tienen', 'tiene', 'precio', 'precios', 'cuanto', 'cuantes', 'cuanto', 'cuantos', 'cual', 'cuales', 'son', 'misma', 'mi', 'su', 'sus', 'es', 'son', 'esta', 'estan', 'disponible', 'disponibilidad', 'stock', 'cotizacion', 'cotizar', 'necesito', 'quiero', 'favor', 'hola', 'buenas', 'buenos', 'dias', 'tardes', 'noches', 'vendidos', 'mas', 'menos'}
 
+    words = [w.strip('?,.!;:') for w in msg_lower.split() if w.strip('?,.!;:') not in stop_words and len(w.strip('?,.!;:')) > 2]
+
+    coincidencias = []
+    if words:
+        for p in productos_lista:
+            p_desc = (p['descripcion'] or '').lower()
+            p_cod = (p['codigo'] or '').lower()
+            p_marca = (p['marca'] or '').lower()
+            p_cat = ((p.get('categoria_nombre') or p.get('categoria')) or '').lower()
+            if any(w in p_desc or w in p_cod or w in p_marca or w in p_cat for w in words):
+                coincidencias.append(p)
+
+    # Caso A: Se encontraron coincidencias específicas de productos
     if coincidencias:
         res_items = []
-        for item in coincidencias:
-            res_items.append(f"• *{item['descripcion']}* ({item['marca'] or 'Marca Estándar'}): *{item['precio_unitario']} Bs* (Stock: {item['cantidad']} {item['um'] or 'UN'})")
-        return f"¡Hola! 👋 Gracias por comunicarte con *{empresa}*.\n\nEncontramos los siguientes ítems disponibles en nuestro catálogo:\n\n" + "\n".join(res_items) + "\n\n¿Te gustaría que te preparemos una cotización formal o deseas más información?"
-    elif "precio" in msg_lower or "cotiz" in msg_lower or "hola" in msg_lower or "stock" in msg_lower:
-        return f"¡Hola! 👋 Bienvenido a *{empresa}*. Contamos con un catálogo completo de insumos y equipos. ¿Qué producto estás buscando hoy para verificarte precio y disponibilidad en tiempo real?"
-    else:
-        return f"¡Gracias por escribir a *{empresa}*! 🤖 En breve un asesor comercial revisará tu solicitud. Mientras tanto, dime el producto o código de tu interés para enviarte precios y stock."
+        for p in coincidencias[:6]:
+            res_items.append(f"• *{p['descripcion']}* ({p['marca'] or 'Marca Estándar'})\n  👉 Precio: *{p['precio_unitario']} Bs* | Stock: *{p['cantidad']} {p['um'] or 'UN'}* (Código: `{p['codigo']}`)")
+        
+        return f"¡Hola! 👋 Gracias por consultar con *{empresa}*.\n\nEncontramos estos productos en nuestro catálogo:\n\n" + "\n\n".join(res_items) + "\n\n¿Deseas incluir alguno de estos ítems en una cotización formal?"
+
+    # Caso B: Consultas generales sobre catálogo, precios, stock o cotizaciones
+    if productos_lista:
+        res_items = []
+        for p in productos_lista[:6]:
+            res_items.append(f"• *{p['descripcion']}* — *{p['precio_unitario']} Bs* (Stock: {p['cantidad']} {p['um'] or 'UN'})")
+        
+        if "cotiz" in msg_lower:
+            return f"¡Hola! 👋 Con gusto te preparamos una cotización formal en *{empresa}*.\n\nNuestros productos disponibles son:\n\n" + "\n".join(res_items) + "\n\n¿Dime qué productos y qué cantidad necesitas para generarte la cotización al instante?"
+        elif "vendido" in msg_lower or "mas" in msg_lower:
+            return f"¡Hola! 👋 En *{empresa}*, los productos más destacados de nuestro catálogo son:\n\n" + "\n".join(res_items) + "\n\n¿Te gustaría cotizar alguno de ellos?"
+        else:
+            return f"¡Hola! 👋 Bienvenido a *{empresa}*.\n\nActualmente contamos con los siguientes productos en inventario:\n\n" + "\n".join(res_items) + "\n\n¿Qué producto o cantidad te gustaría consultar?"
+
+    # Caso C: No hay productos registrados aún
+    return f"¡Hola! 👋 Bienvenido a *{empresa}*. Actualmente estamos actualizando nuestro inventario. Por favor déjanos el detalle de lo que necesitas y un asesor te responderá a la brevedad."
 
 def register_routes(app):
 

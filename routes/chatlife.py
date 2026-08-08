@@ -180,8 +180,8 @@ def register_routes(app):
             access_token = request.form.get('access_token', '').strip()
             openai_api_key = request.form.get('openai_api_key', '').strip()
             system_prompt = request.form.get('system_prompt', '').strip()
-            bot_activo = 1 if request.form.get('bot_activo') == '1' else 0
-            auto_crear_clientes = 1 if request.form.get('auto_crear_clientes') == '1' else 0
+            bot_activo = True if request.form.get('bot_activo') == '1' else False
+            auto_crear_clientes = True if request.form.get('auto_crear_clientes') == '1' else False
 
             with get_db_connection() as conexion:
                 cursor = conexion.cursor()
@@ -228,8 +228,8 @@ def register_routes(app):
                 # Registrar mensaje simulado en el historial
                 cursor.execute('''
                     INSERT INTO chatlife_mensajes (user_id, telefono_remitente, nombre_remitente, mensaje_cliente, respuesta_bot, es_simulacion)
-                    VALUES (?, '+591 (Simulador)', 'Cliente Prueba', ?, ?, 1)
-                ''', (user_id, mensaje_cliente, respuesta_ia))
+                    VALUES (?, ?, ?, ?, ?, ?)
+                ''', (user_id, '+591 (Simulador)', 'Cliente Prueba', mensaje_cliente, respuesta_ia, True))
                 conexion.commit()
 
                 return jsonify({
@@ -331,8 +331,8 @@ def register_routes(app):
                                         # Registrar en el historial de mensajes
                                         cursor.execute('''
                                             INSERT INTO chatlife_mensajes (user_id, telefono_remitente, nombre_remitente, mensaje_cliente, respuesta_bot, es_simulacion)
-                                            VALUES (?, ?, ?, ?, ?, 0)
-                                        ''', (user_id, from_phone, nombre_cliente, text_body, respuesta_bot))
+                                            VALUES (?, ?, ?, ?, ?, ?)
+                                        ''', (user_id, from_phone, nombre_cliente, text_body, respuesta_bot, False))
                                         conexion.commit()
 
             except Exception as e_main:

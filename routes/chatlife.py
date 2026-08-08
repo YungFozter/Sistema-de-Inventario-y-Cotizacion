@@ -51,7 +51,7 @@ def procesar_respuesta_ia(user_id, empresa, mensaje_cliente, system_prompt=None,
 
     cat_text = "\n".join(catalog_context) if catalog_context else "No hay productos en inventario actualmente."
 
-    prompt_base = f"""Eres 'ChatLife IA', el asistente virtual experto en ventas y atención al cliente de la empresa '{empresa}'.
+    prompt_base = f"""Eres 'ChatLive IA', el asistente virtual experto en ventas y atención al cliente de la empresa '{empresa}'.
 Tu objetivo es responder de forma amable, ejecutiva y persuasiva, brindar precios y stock del inventario y cerrar ventas o agendar cotizaciones.
 
 CATÁLOGO DE PRODUCTOS EN TIEMPO REAL:

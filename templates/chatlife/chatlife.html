@@ -1,6 +1,6 @@
 {% extends "shared/layout.html" %}
 
-{% block titulo %}ChatLife IA — Bot Propio de WhatsApp 24/7{% endblock %}
+{% block titulo %}ChatLive IA — Bot Propio de WhatsApp 24/7{% endblock %}
 
 {% block contenido %}
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
@@ -121,7 +121,7 @@
 
 <div class="container-fluid py-4 px-lg-5" style="background-color: #FAF8F5; min-height: 100vh;">
 
-  <!-- HERO BANNER CHATLIFE IA -->
+  <!-- HERO BANNER CHATLIVE IA -->
   <div class="card chatlife-hero-card p-4 p-md-5 mb-4 shadow-sm animate__animated animate__fadeIn">
     <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
       <div>
@@ -139,7 +139,7 @@
           </span>
           {% endif %}
         </div>
-        <h2 class="fw-bold mb-1" style="font-size: 2.1rem; color: #FFFFFF;">ChatLife IA</h2>
+        <h2 class="fw-bold mb-1" style="font-size: 2.1rem; color: #FFFFFF;">ChatLive IA</h2>
         <p class="text-white-50 mb-0" style="font-size: 1.05rem;">
           Atiende a tus clientes 24/7 por WhatsApp, consulta tu catálogo e inventario en tiempo real y cierra ventas automáticamente.
         </p>
@@ -180,14 +180,14 @@
               <i class="fa-brands fa-whatsapp"></i>
             </div>
             <div>
-              <h6 class="fw-bold mb-0 text-white">ChatLife IA — ({{ config.empresa or 'Tu Empresa' }})</h6>
+              <h6 class="fw-bold mb-0 text-white">ChatLive IA — ({{ config.empresa or 'Tu Empresa' }})</h6>
               <small class="text-white-50" style="font-size: 0.78rem;">● En línea · Responde al instante consultando tu inventario</small>
             </div>
           </div>
 
           <div id="whatsappChatBody" class="whatsapp-chat-body">
             <div class="chat-bubble chat-bubble-bot">
-              ¡Hola! 👋 Soy **ChatLife IA**, el asistente de ventas de <strong>{{ config.empresa or 'Tu Empresa' }}</strong>.<br>
+              ¡Hola! 👋 Soy **ChatLive IA**, el asistente de ventas de <strong>{{ config.empresa or 'Tu Empresa' }}</strong>.<br>
               ¿En qué te puedo ayudar hoy? Puedes preguntarme precios, disponibilidad de stock o solicitar una cotización.
             </div>
           </div>
@@ -434,7 +434,7 @@
     // Loading indicator
     const botLoading = document.createElement('div');
     botLoading.className = 'chat-bubble chat-bubble-bot text-muted fst-italic';
-    botLoading.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin me-1"></i> ChatLife IA está escribiendo...';
+    botLoading.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin me-1"></i> ChatLive IA está escribiendo...';
     chatBody.appendChild(botLoading);
     chatBody.scrollTop = chatBody.scrollHeight;
 

@@ -108,19 +108,29 @@ def register_routes(app):
                         vals = [empresa, codigo, descripcion, marca, tm, um, cantidad, precio_unitario, precio_total, categoria_id, categoria_nombre]
 
                         if 'proveedor' in columnas_nombres:
-                            cols.append('proveedor')
-                            vals.append(proveedor)
+                            prov_id = None
                             if proveedor:
                                 try:
                                     user_id = session.get('user_id')
-                                    cursor.execute("SELECT COUNT(*) FROM proveedores WHERE empresa = ? AND LOWER(nombre) = LOWER(?)", (empresa, proveedor))
-                                    if cursor.fetchone()[0] == 0:
+                                    cursor.execute("SELECT id, nombre FROM proveedores WHERE (creador_id = ? OR empresa = ?) AND LOWER(nombre) = LOWER(?)", (user_id, empresa, proveedor))
+                                    p_row = cursor.fetchone()
+                                    if not p_row:
                                         cursor.execute('''
                                             INSERT INTO proveedores (empresa, nombre, contacto_nombre, rubro, creador_id)
                                             VALUES (?, ?, 'N/A', 'Suministros', ?)
                                         ''', (empresa, proveedor, user_id))
-                                except Exception:
-                                    pass
+                                        prov_id = cursor.lastrowid
+                                    else:
+                                        prov_id = p_row[0]
+                                        proveedor = p_row[1]
+                                except Exception as e_p:
+                                    print(f"[WARN] Error resolviendo proveedor en creación: {e_p}")
+
+                            cols.append('proveedor')
+                            vals.append(proveedor)
+                            if 'proveedor_id' in columnas_nombres:
+                                cols.append('proveedor_id')
+                                vals.append(prov_id)
 
                         if 'es_importado' in columnas_nombres:
                             cols.append('es_importado')
@@ -402,19 +412,29 @@ def register_routes(app):
                         update_vals.append(categoria_nombre)
 
                     if 'proveedor' in columnas_nombres:
-                        update_cols.append('proveedor=?')
-                        update_vals.append(proveedor)
+                        prov_id = None
                         if proveedor:
                             try:
                                 user_id = session.get('user_id')
-                                cursor.execute("SELECT COUNT(*) FROM proveedores WHERE empresa = ? AND LOWER(nombre) = LOWER(?)", (empresa, proveedor))
-                                if cursor.fetchone()[0] == 0:
+                                cursor.execute("SELECT id, nombre FROM proveedores WHERE (creador_id = ? OR empresa = ?) AND LOWER(nombre) = LOWER(?)", (user_id, empresa, proveedor))
+                                p_row = cursor.fetchone()
+                                if not p_row:
                                     cursor.execute('''
                                         INSERT INTO proveedores (empresa, nombre, contacto_nombre, rubro, creador_id)
                                         VALUES (?, ?, 'N/A', 'Suministros', ?)
                                     ''', (empresa, proveedor, user_id))
-                            except Exception:
-                                pass
+                                    prov_id = cursor.lastrowid
+                                else:
+                                    prov_id = p_row[0]
+                                    proveedor = p_row[1]
+                            except Exception as e_p:
+                                print(f"[WARN] Error resolviendo proveedor en edición: {e_p}")
+
+                        update_cols.append('proveedor=?')
+                        update_vals.append(proveedor)
+                        if 'proveedor_id' in columnas_nombres:
+                            update_cols.append('proveedor_id=?')
+                            update_vals.append(prov_id)
 
                     # Recolectar campos personalizados desde el formulario
                     custom_fields_dict = {}

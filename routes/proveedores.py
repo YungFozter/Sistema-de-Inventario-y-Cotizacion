@@ -144,9 +144,9 @@ def register_routes(app):
                         if 'proveedor_id' in cols_prod:
                             cursor.execute('''
                                 UPDATE productos
-                                SET proveedor = ?
+                                SET proveedor = ?, proveedor_id = ?
                                 WHERE proveedor_id = ? OR LOWER(proveedor) = LOWER(?)
-                            ''', (nombre, id, nombre_anterior))
+                            ''', (nombre, id, id, nombre_anterior))
                         else:
                             cursor.execute('''
                                 UPDATE productos

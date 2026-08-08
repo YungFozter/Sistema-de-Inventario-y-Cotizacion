@@ -44,17 +44,29 @@
             <!-- Lista de resultados -->
             <div id="lista-clientes-ajax" class="list-group list-group-flush" style="max-height:280px; overflow-y:auto;"></div>
 
-            <!-- Controles de paginación -->
-            <div class="d-flex align-items-center justify-content-between mt-2">
-              <button type="button" class="btn btn-sm btn-light rounded-circle" id="prevClienteAjax" disabled
-                      style="width:30px;height:30px;" title="Anterior">
-                <i class="bi bi-chevron-left"></i>
-              </button>
-              <span class="text-muted small" id="clientes-page-info">Página 1 de 1</span>
-              <button type="button" class="btn btn-sm btn-light rounded-circle" id="nextClienteAjax" disabled
-                      style="width:30px;height:30px;" title="Siguiente">
-                <i class="bi bi-chevron-right"></i>
-              </button>
+            <!-- Controles de paginación y selector por página -->
+            <div class="d-flex align-items-center justify-content-between mt-2 pt-2 border-top flex-wrap gap-2">
+              <div class="d-flex align-items-center gap-1.5 text-muted small">
+                <span>Mostrar</span>
+                <select id="perPageClienteSelect" class="form-select form-select-sm py-0 px-2 fw-bold rounded-pill border-secondary" style="width: auto; height: 28px; font-size: 0.78rem;">
+                  <option value="3">3</option>
+                  <option value="5" selected>5</option>
+                  <option value="10">10</option>
+                </select>
+                <span>por página</span>
+              </div>
+
+              <div class="d-flex align-items-center gap-2">
+                <button type="button" class="btn btn-sm btn-light rounded-circle border shadow-sm" id="prevClienteAjax" disabled
+                        style="width:30px;height:30px; display:inline-flex; align-items:center; justify-content:center;" title="Anterior">
+                  <i class="bi bi-chevron-left"></i>
+                </button>
+                <span class="text-muted small" id="clientes-page-info">Página <strong>1</strong> de <strong>1</strong></span>
+                <button type="button" class="btn btn-sm btn-light rounded-circle border shadow-sm" id="nextClienteAjax" disabled
+                        style="width:30px;height:30px; display:inline-flex; align-items:center; justify-content:center;" title="Siguiente">
+                  <i class="bi bi-chevron-right"></i>
+                </button>
+              </div>
             </div>
 
           </div>
@@ -72,13 +84,15 @@
       function buscarClientes(page) {
         _pageCliente = page || 1;
         const q = document.getElementById('buscar-cliente-input').value;
+        const perPageSelect = document.getElementById('perPageClienteSelect');
+        const perPage = perPageSelect ? perPageSelect.value : 5;
         const lista = document.getElementById('lista-clientes-ajax');
         const info  = document.getElementById('clientes-total-info');
         const pageInfo = document.getElementById('clientes-page-info');
 
         lista.innerHTML = `<div class="list-group-item text-center text-muted py-3"><div class="spinner-border spinner-border-sm text-primary me-2"></div>Buscando…</div>`;
 
-        fetch(`/api/buscar_clientes_cotizacion?q=${encodeURIComponent(q)}&page=${_pageCliente}`)
+        fetch(`/api/buscar_clientes_cotizacion?q=${encodeURIComponent(q)}&page=${_pageCliente}&per_page=${perPage}`)
           .then(r => {
             if (r.status === 401) {
               // Sesión expirada: redirigir al login
@@ -164,6 +178,14 @@
           clearTimeout(_timeoutCliente);
           _timeoutCliente = setTimeout(() => buscarClientes(1), 300);
         });
+
+        // Selector de elementos por página (3, 5, 10)
+        const perPageSel = document.getElementById('perPageClienteSelect');
+        if (perPageSel) {
+          perPageSel.addEventListener('change', function() {
+            buscarClientes(1);
+          });
+        }
 
         // Paginación
         document.getElementById('prevClienteAjax').addEventListener('click', function() {

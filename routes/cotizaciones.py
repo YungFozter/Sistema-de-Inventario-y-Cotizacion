@@ -1211,7 +1211,12 @@ def register_routes(app):
         try:
             q         = request.args.get('q', '').strip()
             page      = int(request.args.get('page', 1))
-            per_page  = 8   # clientes por página en el modal AJAX
+            try:
+                per_page = int(request.args.get('per_page', 5))
+            except (ValueError, TypeError):
+                per_page = 5
+            if per_page not in [3, 5, 10]:
+                per_page = 5
 
             conn   = get_db_connection()
             cursor = conn.cursor()

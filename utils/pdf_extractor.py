@@ -268,9 +268,8 @@ class PDFProductExtractor:
                         if not table or len(table) < 2:
                             continue
 
-                        headers = [re.sub(r'\s+', ' ', str(h).replace('\n', ' ')).strip() if h else '' for h in table[0]]
-                        norm_headers = [h.lower() for h in headers]
-
+                        # Buscar las cabeceras en las primeras 4 filas de la tabla
+                        header_row_idx = 0
                         cod_idx = -1
                         desc_idx = -1
                         marca_idx = -1
@@ -278,30 +277,44 @@ class PDFProductExtractor:
                         um_idx = -1
                         precio_idx = -1
                         custom_map = {}
-
+                        
                         skip_keywords = ['n°', 'nº', 'no.', 'item', '#', 'total', 'subtotal', 'n °']
 
-                        for idx, h in enumerate(norm_headers):
-                            if any(k in h for k in ['codigo', 'cod', 'código']) and cod_idx == -1:
-                                cod_idx = idx
-                            elif any(k in h for k in ['descripcion', 'descripción', 'producto', 'detalle']) and desc_idx == -1:
-                                desc_idx = idx
-                            elif 'marca' in h and marca_idx == -1:
-                                marca_idx = idx
-                            elif any(k in h for k in ['cant', 'cantidad']) and cant_idx == -1:
-                                cant_idx = idx
-                            elif any(k in h for k in ['u/m', 'um', 'unidad']) and um_idx == -1:
-                                um_idx = idx
-                            elif any(k in h for k in ['precio', 'p. unit', 'p.unit', 'unitario']) and precio_idx == -1:
-                                precio_idx = idx
-                            elif h and not any(sk in h for sk in skip_keywords):
-                                header_title = re.sub(r'\s+', ' ', headers[idx]).title()
-                                custom_map[idx] = header_title
-
+                        for r_idx, row in enumerate(table[:4]):
+                            if not row: continue
+                            headers = [re.sub(r'\s+', ' ', str(h).replace('\n', ' ')).strip() if h else '' for h in row]
+                            norm_headers = [h.lower() for h in headers]
+                            
+                            c_idx = -1; d_idx = -1; m_idx = -1; ca_idx = -1; u_idx = -1; p_idx = -1
+                            
+                            for idx, h in enumerate(norm_headers):
+                                if any(k in h for k in ['codigo', 'cod', 'código']) and c_idx == -1: c_idx = idx
+                                elif any(k in h for k in ['descripcion', 'descripción', 'producto', 'detalle', 'articulo', 'artículo', 'nombre', 'material', 'item']) and d_idx == -1: d_idx = idx
+                                elif any(k in h for k in ['marca', 'fabricante', 'brand']) and m_idx == -1: m_idx = idx
+                                elif any(k in h for k in ['cant', 'cantidad', 'qty']) and ca_idx == -1: ca_idx = idx
+                                elif any(k in h for k in ['u/m', 'um', 'unidad', 'medida', 'u.m']) and u_idx == -1: u_idx = idx
+                                elif any(k in h for k in ['precio', 'p. unit', 'p.unit', 'unitario', 'p/unit', 'p.u', 'p/u', 'p. u.']) and p_idx == -1: p_idx = idx
+                            
+                            # Si encuentra al menos Código o Descripción, asumimos que es la fila de cabeceras
+                            if c_idx != -1 or d_idx != -1:
+                                header_row_idx = r_idx
+                                cod_idx = c_idx
+                                desc_idx = d_idx
+                                marca_idx = m_idx
+                                cant_idx = ca_idx
+                                um_idx = u_idx
+                                precio_idx = p_idx
+                                
+                                for idx, h in enumerate(norm_headers):
+                                    if h and idx not in (cod_idx, desc_idx, marca_idx, cant_idx, um_idx, precio_idx) and not any(sk in h for sk in skip_keywords):
+                                        header_title = re.sub(r'\s+', ' ', headers[idx]).title()
+                                        custom_map[idx] = header_title
+                                break
+                                
                         if cod_idx == -1 and desc_idx == -1:
                             continue
 
-                        for row in table[1:]:
+                        for row in table[header_row_idx + 1:]:
                             if not row or len(row) < 3:
                                 continue
                             

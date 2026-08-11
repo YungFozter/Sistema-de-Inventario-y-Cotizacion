@@ -152,12 +152,19 @@ class PDFProductExtractor:
                 clean_p_tokens = [t for t in price_tokens if t.upper() not in ['BS', 'BS.', 'BS:', '$', 'USD']]
 
                 precio_val = 0.0
+                text_after_price = []
                 if clean_p_tokens:
-                    precio_val = cls._clean_price(clean_p_tokens[0])
+                    # El primer token que parezca un número se considera precio
+                    first_tok = clean_p_tokens[0]
+                    if re.match(r'^[0-9.,\-]+$', first_tok):
+                        precio_val = cls._clean_price(first_tok)
+                        text_after_price = clean_p_tokens[1:]
+                    else:
+                        text_after_price = clean_p_tokens
 
                 before_um = tokens[:um_idx]
 
-                # Extraer la cantidad si hay un número entero o decimal justo antes de la U/M (ej: 1 PZA, 1.5 MTS, 26 MTS, 30 BOL)
+                # Extraer la cantidad si hay un número entero o decimal justo antes de la U/M
                 cantidad_val = 1.0
                 if before_um and re.match(r'^\d+(?:[\.,]\d+)?$', before_um[-1]):
                     raw_qty = before_um.pop().replace(',', '.')
@@ -165,6 +172,10 @@ class PDFProductExtractor:
                         cantidad_val = float(raw_qty)
                     except ValueError:
                         cantidad_val = 1.0
+                        
+                # Si había texto después del precio, lo añadimos para evaluarlo como descripción/marca
+                if text_after_price:
+                    before_um.extend(text_after_price)
 
                 if before_um and before_um[-1].upper() in cls.KNOWN_COUNTRIES:
                     before_um.pop()
@@ -288,12 +299,12 @@ class PDFProductExtractor:
                             c_idx = -1; d_idx = -1; m_idx = -1; ca_idx = -1; u_idx = -1; p_idx = -1
                             
                             for idx, h in enumerate(norm_headers):
-                                if any(k in h for k in ['codigo', 'cod', 'código']) and c_idx == -1: c_idx = idx
-                                elif any(k in h for k in ['descripcion', 'descripción', 'producto', 'detalle', 'articulo', 'artículo', 'nombre', 'material', 'item']) and d_idx == -1: d_idx = idx
+                                if any(k in h for k in ['codigo', 'cod', 'código', 'id']) and c_idx == -1: c_idx = idx
+                                elif any(k in h for k in ['descripcion', 'descripción', 'producto', 'detalle', 'articulo', 'artículo', 'nombre', 'material', 'item', 'concepto', 'designacion', 'designación', 'desc', 'art', 'prod']) and d_idx == -1: d_idx = idx
                                 elif any(k in h for k in ['marca', 'fabricante', 'brand']) and m_idx == -1: m_idx = idx
                                 elif any(k in h for k in ['cant', 'cantidad', 'qty']) and ca_idx == -1: ca_idx = idx
                                 elif any(k in h for k in ['u/m', 'um', 'unidad', 'medida', 'u.m']) and u_idx == -1: u_idx = idx
-                                elif any(k in h for k in ['precio', 'p. unit', 'p.unit', 'unitario', 'p/unit', 'p.u', 'p/u', 'p. u.']) and p_idx == -1: p_idx = idx
+                                elif any(k in h for k in ['precio', 'p. unit', 'p.unit', 'unitario', 'p/unit', 'p.u', 'p/u', 'p. u.', 'p/u (bs)']) and p_idx == -1: p_idx = idx
                             
                             # Si encuentra al menos Código o Descripción, asumimos que es la fila de cabeceras
                             if c_idx != -1 or d_idx != -1:

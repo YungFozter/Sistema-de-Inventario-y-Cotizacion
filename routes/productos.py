@@ -31,6 +31,8 @@ from reportlab.lib.pagesizes import letter
 from PIL import Image
 import logging
 from utils.decorators import login_required, superadmin_required, admin_required, standard_required
+from utils.helpers import format_date, aplicar_fondos_por_pagina, generar_pdf_margenes_dinamicos
+
 def _obtener_columnas_productos(cursor):
     """Devuelve los nombres de las columnas de la tabla productos de forma compatible con SQLite y PostgreSQL"""
     try:

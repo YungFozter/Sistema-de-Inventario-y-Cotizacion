@@ -322,6 +322,69 @@ class PDFProductExtractor:
                                         custom_map[idx] = header_title
                                 break
                                 
+                        # Si no se encontraron por cabecera, usar inferencia de tipos de datos en las primeras filas de datos
+                        if cod_idx == -1 or desc_idx == -1:
+                            scores = {'cod': {}, 'desc': {}, 'marca': {}, 'um': {}, 'cant': {}, 'precio': {}}
+                            num_cols = max((len(r) for r in table[header_row_idx + 1:header_row_idx + 6] if r), default=0)
+                            
+                            if num_cols >= 3:
+                                for col in range(num_cols):
+                                    for key in scores: scores[key][col] = 0
+                                    
+                                for row in table[header_row_idx + 1:header_row_idx + 6]:
+                                    if not row or len(row) < num_cols: continue
+                                    for col, cell in enumerate(row[:num_cols]):
+                                        val = str(cell).strip()
+                                        if not val: continue
+                                        val_upper = val.upper()
+                                        
+                                        if val_upper in cls.KNOWN_UMS:
+                                            scores['um'][col] += 10
+                                            
+                                        is_num = bool(re.match(r'^[\d\.,\-]+$', val))
+                                        has_currency = bool(re.search(r'(?i)(bs|usd|\$|€|bs\.)', val))
+                                        
+                                        if is_num or has_currency:
+                                            try:
+                                                num_val = float(re.sub(r'[^\d\.]', '', val.replace(',', '.')))
+                                                if has_currency: scores['precio'][col] += 5
+                                                if num_val > 0:
+                                                    if num_val < 1000 and float(num_val).is_integer() and col > 0:
+                                                        scores['cant'][col] += 2
+                                                    if has_currency or (not float(num_val).is_integer() and col > 0):
+                                                        scores['precio'][col] += 2
+                                            except: pass
+                                            
+                                        if len(val) >= 2 and len(val) <= 25 and ' ' not in val:
+                                            if col == 0 and re.match(r'^\d+$', val) and int(val) < 100:
+                                                pass
+                                            else:
+                                                scores['cod'][col] += 3
+                                                
+                                        if len(val) > 15 and ' ' in val:
+                                            scores['desc'][col] += 5
+                                            
+                                used_cols = set()
+                                for p in ['desc', 'um', 'precio', 'cant', 'cod']:
+                                    best_c = -1
+                                    best_s = 0
+                                    for c, s in scores[p].items():
+                                        if c not in used_cols and s > best_s:
+                                            best_s = s
+                                            best_c = c
+                                    if best_c != -1:
+                                        if p == 'desc' and desc_idx == -1: desc_idx = best_c
+                                        elif p == 'um' and um_idx == -1: um_idx = best_c
+                                        elif p == 'precio' and precio_idx == -1: precio_idx = best_c
+                                        elif p == 'cant' and cant_idx == -1: cant_idx = best_c
+                                        elif p == 'cod': cod_idx = best_c  # Siempre sobrescribir cod si la inferencia encuentra uno mejor (evita atrapar la columna #)
+                                        used_cols.add(best_c)
+                                        
+                                # Limpiar de custom_map los inferidos
+                                for inferred_idx in (cod_idx, desc_idx, marca_idx, cant_idx, um_idx, precio_idx):
+                                    if inferred_idx in custom_map:
+                                        del custom_map[inferred_idx]
+
                         if cod_idx == -1 and desc_idx == -1:
                             continue
 

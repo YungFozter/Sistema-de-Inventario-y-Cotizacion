@@ -291,7 +291,7 @@ class PDFProductExtractor:
                         
                         skip_keywords = ['n°', 'nº', 'no.', 'item', '#', 'total', 'subtotal', 'n °']
 
-                        for r_idx, row in enumerate(table[:4]):
+                        for r_idx, row in enumerate(table[:15]):
                             if not row: continue
                             headers = [re.sub(r'\s+', ' ', str(h).replace('\n', ' ')).strip() if h else '' for h in row]
                             norm_headers = [h.lower() for h in headers]

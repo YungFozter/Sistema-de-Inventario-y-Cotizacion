@@ -508,7 +508,7 @@
         /* Eliminado @media print para que el logo conserve el tamaño definido en .logo img al generar PDF */
     </style>
 </head>
-<body{% if fondo_base64 %} class="body-with-background" {% endif %}>
+<body{% if fondo_base64 or es_pdf %} class="body-with-background" {% endif %}>
     {% if fondo_base64 %}
     <img src="{{ fondo_base64 }}" class="background-image" alt="Fondo">
     {% endif %}

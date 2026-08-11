@@ -1033,7 +1033,8 @@ def register_routes(app):
                 'usuario_sesion': session.get('user_nombre', 'Usuario del sistema'),
                 'usuario': usuario,
                 'logo_base64': "",
-                'fondo_base64': None  # El fondo se aplicará por página después con PyPDF2
+                'fondo_base64': None,  # El fondo se aplicará por página después con PyPDF2
+                'es_pdf': True
             }
 
             # Generar el HTML

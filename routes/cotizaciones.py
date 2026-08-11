@@ -844,7 +844,8 @@ def register_routes(app):
             'usuario_sesion': session.get('user_nombre', 'Usuario del sistema'),
             'usuario': usuario,
             'logo_base64': None,  # Logo anulado por solicitud del usuario
-            'fondo_base64': None  # Fondo se aplicará por página después
+            'fondo_base64': None,  # Fondo se aplicará por página después
+            'es_pdf': True
         }
     
         # Los fondos ahora se aplican por página después de generar el PDF

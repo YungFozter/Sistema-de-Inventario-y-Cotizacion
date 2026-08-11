@@ -883,6 +883,7 @@ def register_routes(app):
             'margin-right': '10mm',
             'margin-bottom': '10mm',
             'margin-left': '10mm',
+            'no-background': ''
         }
 
         try:

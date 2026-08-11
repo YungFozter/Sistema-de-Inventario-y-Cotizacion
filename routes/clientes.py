@@ -32,41 +32,50 @@ import logging
 from utils.decorators import login_required, superadmin_required, admin_required, standard_required
 from utils.helpers import format_date, aplicar_fondos_por_pagina, generar_pdf_margenes_dinamicos
 
+import re
+
 def generar_codigo_cliente_unico(cursor, creador_id=None):
     """
-    Genera un código secuencial sin saltos (rellenando huecos de clientes eliminados)
-    y garantizando cero duplicados por empresa/admin. Formato: CLI-0001, CLI-0002, etc.
+    Genera un código secuencial rellenando huecos de clientes eliminados.
+    Lógica reescrita para garantizar que detecte correctamente números pasados
+    incluso si tienen espacios o formatos extraños (ej: 'CLI - 001').
     """
     usados = set()
     try:
+        # Traer todos los códigos del admin (no solo los que empiezan por CLI para evitar problemas de LIKE)
         if creador_id:
-            cursor.execute("SELECT codigo_cliente FROM clientes WHERE creador_id = ? AND rol = 'cliente' AND codigo_cliente LIKE 'CLI-%'", (creador_id,))
+            cursor.execute("SELECT codigo_cliente FROM clientes WHERE creador_id = ? AND rol = 'cliente' AND codigo_cliente IS NOT NULL", (creador_id,))
         else:
-            cursor.execute("SELECT codigo_cliente FROM clientes WHERE rol = 'cliente' AND codigo_cliente LIKE 'CLI-%'")
-        rows = cursor.fetchall() or []
-        for row in rows:
-            if not row:
-                continue
-            try:
-                cod = None
-                if isinstance(row, (tuple, list)):
-                    cod = row[0] if len(row) > 0 else None
-                elif isinstance(row, dict):
-                    cod = row.get('codigo_cliente')
-                elif hasattr(row, 'keys'):
-                    keys = row.keys()
-                    cod = row['codigo_cliente'] if 'codigo_cliente' in keys else (row[0] if len(row) > 0 else None)
-                else:
-                    cod = row[0] if len(row) > 0 else None
+            cursor.execute("SELECT codigo_cliente FROM clientes WHERE rol = 'cliente' AND codigo_cliente IS NOT NULL")
+            
+        rows = cursor.fetchall()
+        if rows:
+            for row in rows:
+                try:
+                    cod = None
+                    if isinstance(row, dict) and 'codigo_cliente' in row:
+                        cod = row['codigo_cliente']
+                    elif hasattr(row, 'keys') and 'codigo_cliente' in dir(row): # fallback
+                        try:
+                            cod = row['codigo_cliente']
+                        except:
+                            cod = row[0] if len(row) > 0 else None
+                    elif isinstance(row, (list, tuple)) and len(row) > 0:
+                        cod = row[0]
+                    else:
+                        # Intento ciego
+                        cod = str(row[0]) if row else None
 
-                if cod and isinstance(cod, str):
-                    parts = cod.split('-')
-                    if len(parts) >= 2 and parts[1].isdigit():
-                        usados.add(int(parts[1]))
-            except (ValueError, IndexError, KeyError, TypeError):
-                pass
+                    if cod and isinstance(cod, str):
+                        cod = cod.strip().upper()
+                        # Buscar cualquier número asociado a CLI
+                        match = re.search(r'CLI\D*(\d+)', cod)
+                        if match:
+                            usados.add(int(match.group(1)))
+                except Exception as parse_err:
+                    continue
     except Exception as e:
-        print(f"[WARN] Error generando codigo cliente unico: {e}")
+        print(f"[ERROR] Error al generar codigo cliente unico: {e}")
 
     num = 1
     while num in usados:

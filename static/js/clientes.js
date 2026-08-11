@@ -7,6 +7,12 @@ document.addEventListener('DOMContentLoaded', function() {
             if (!form.checkValidity()) {
                 e.preventDefault();
                 e.stopPropagation();
+            } else {
+                const submitBtn = form.querySelector('button[type="submit"]');
+                if (submitBtn) {
+                    submitBtn.disabled = true;
+                    submitBtn.innerHTML = '<i class="bi bi-hourglass-split me-2 fs-6"></i> Guardando...';
+                }
             }
             form.classList.add('was-validated');
         }, false);

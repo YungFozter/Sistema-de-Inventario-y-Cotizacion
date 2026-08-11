@@ -220,15 +220,15 @@ def aplicar_fondos_por_pagina(pdf_bytes):
                 except Exception as e:
                     app.logger.warning(f"No se pudo aplicar margen extra en página {page_num + 1}: {e}")
             
-            # Combinar fondo con contenido (el contenido 'page' va sobre 'background_page')
+            # Combinar fondo con contenido (el 'background_page' va sobre 'page' para que no lo tape el lienzo blanco)
             try:
-                background_page.merge_page(page)
-                pdf_writer.add_page(background_page)
+                page.merge_page(background_page)
+                pdf_writer.add_page(page)
                 app.logger.info(f"✓ Página {page_num + 1} procesada y agregada exitosamente")
             except Exception as e:
                 try:
-                    page.merge_page(background_page)
-                    pdf_writer.add_page(page)
+                    background_page.merge_page(page)
+                    pdf_writer.add_page(background_page)
                 except Exception as e2:
                     app.logger.error(f"ERROR al combinar página {page_num + 1}: {e2}")
                     pdf_writer.add_page(page)

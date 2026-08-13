@@ -640,10 +640,8 @@
             </table>
         </div>
 
-        <!-- Contenedor general para evitar cortes de página entre totales, condiciones y firmas -->
-        <div style="page-break-inside: avoid; width: 100%;">
-            <!-- Sección de totales y monto literal (siempre al final) -->
-            <div class="totales-section last-page-content">
+        <!-- Sección de totales y monto literal (siempre al final) -->
+        <div class="totales-section last-page-content">
             <div class="dashed-line"></div>
             <div class="monto-letras">
                 <strong>SON:</strong> {{ total_letras }}
@@ -671,6 +669,9 @@
             </table>
         </div>
 
+        <!-- Contenedor para evitar cortes de página entre responsable, condiciones y firmas -->
+        <div style="page-break-inside: avoid; width: 100%;">
+        
         <!-- SECCIÓN RESPONSABLE -->
         <div class="section-title">RESPONSABLE</div>
         <div style="margin-bottom: 20px;">

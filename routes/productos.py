@@ -1068,23 +1068,17 @@ def register_routes(app):
                 'margin-right': '10mm',
                 'margin-bottom': '10mm',
                 'margin-left': '10mm',
-                'no-background': ''
             }
 
             try:
-                # Generar PDF base
+                # Generar PDF base (como el usuario quiere hoja blanca, no aplicamos fondos)
                 pdf_sin_fondo = pdfkit.from_string(html_renderizado, False, configuration=config, options=options)
-            
-                # Verificar páginas y aplicar fondo dinámico
-                temp_reader = PdfReader(io.BytesIO(pdf_sin_fondo))
-                num_pages = len(temp_reader.pages)
-            
-                if num_pages > 1:
-                    pdf_con_fondos = generar_pdf_margenes_dinamicos(html_renderizado, config, "directo")
-                else:
-                    pdf_con_fondos = aplicar_fondos_por_pagina(pdf_sin_fondo)
+                
+                # El usuario solicitó específicamente una hoja blanca para el PDF Directo,
+                # así que omitimos la lógica de PyPDF2 y devolvemos directamente el pdf de wkhtmltopdf
+                pdf_final = pdf_sin_fondo
 
-                response = make_response(pdf_con_fondos)
+                response = make_response(pdf_final)
                 response.headers['Content-Type'] = 'application/pdf'
                 response.headers['Content-Disposition'] = 'inline; filename=cotizacion_directa.pdf'
                 return response

@@ -220,6 +220,43 @@
             letter-spacing: 0.5px;
         }
 
+        .custom-client-box {
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 12px 16px;
+            margin-bottom: 15px;
+            color: #334155;
+            font-size: 10pt;
+        }
+        
+        .client-box-grid {
+            display: table;
+            width: 100%;
+        }
+        
+        .client-box-left {
+            display: table-cell;
+            width: 60%;
+            vertical-align: top;
+        }
+        
+        .client-box-right {
+            display: table-cell;
+            width: 40%;
+            text-align: right;
+            vertical-align: top;
+        }
+        
+        .client-row {
+            margin-bottom: 4px;
+        }
+        
+        .client-row strong {
+            color: #0f172a;
+            font-weight: 600;
+        }
+
         .client-data-container {
             background-color: transparent;
             border-radius: 4px;
@@ -580,28 +617,17 @@
             </div>
         </div>
         <!-- SECCIÓN DATOS CLIENTES -->
-        <div class="section-title">DATOS CLIENTES</div>
-        <div class="client-data-container">
-            <div class="client-data-grid">
-                <div class="data-row">
-                    <span class="data-label">CLIENTE/EMPRESA:</span>
-                    <span class="data-value highlight-value">{{ cliente.nombre if cliente.nombre else "S/N" }}</span>
+        <div class="custom-client-box">
+            <div class="client-box-grid">
+                <div class="client-box-left">
+                    <div class="client-row"><strong>Cliente:</strong> {{ cliente.nombre if cliente.nombre else "S/N" }}</div>
+                    <div class="client-row"><strong>NIT / CI:</strong> {% if cliente.nit and cliente.nit.strip() and cliente.nit.strip() not in ['S/N', 'S/A'] %}{{ cliente.nit }}{% else %}S/A{% endif %}</div>
+                    <div class="client-row"><strong>Teléfono:</strong> {{ cliente.telefono if cliente.telefono else "S/N" }}</div>
                 </div>
-                <div class="data-row">
-                    <span class="data-label">E-MAIL:</span>
-                    <span class="data-value">{{ cliente.email if cliente.email else "S/N" }}</span>
-                </div>
-                <div class="data-row">
-                    <span class="data-label">SOLICITUD N°:</span>
-                    <span class="data-value highlight-value">{{ cotizacion.solicitud_numero }}</span>
-                </div>
-                <div class="data-row">
-                    <span class="data-label">TELÉFONO:</span>
-                    <span class="data-value">{{ cliente.telefono if cliente.telefono else "S/N" }}</span>
-                </div>
-                <div class="data-row">
-                    <span class="data-label">NIT:</span>
-                    <span class="data-value highlight-value">{% if cliente.nit and cliente.nit.strip() and cliente.nit.strip() not in ['S/N', 'S/A'] %}{{ cliente.nit }}{% else %}S/A{% endif %}</span>
+                <div class="client-box-right">
+                    <div class="client-row"><strong>Fecha:</strong> {{ cotizacion.fecha }}</div>
+                    <div class="client-row"><strong>Validez:</strong> 1 Día</div>
+                    <div class="client-row"><strong>Moneda:</strong> Bolivianos (Bs)</div>
                 </div>
             </div>
         </div>

@@ -640,8 +640,10 @@
             </table>
         </div>
 
-        <!-- Sección de totales y monto literal (siempre al final) -->
-        <div class="totales-section last-page-content">
+        <!-- Contenedor general para evitar cortes de página entre totales, condiciones y firmas -->
+        <div style="page-break-inside: avoid; width: 100%;">
+            <!-- Sección de totales y monto literal (siempre al final) -->
+            <div class="totales-section last-page-content">
             <div class="dashed-line"></div>
             <div class="monto-letras">
                 <strong>SON:</strong> {{ total_letras }}
@@ -711,6 +713,7 @@
                 <div>{{ cotizacion.fecha }}</div>
             </div>
         </div>
+        </div> <!-- Cierre del contenedor avoid-page-break -->
     </div> <!-- Cierre del div container -->
     </body>
 

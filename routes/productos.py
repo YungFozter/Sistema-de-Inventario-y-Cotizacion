@@ -1065,6 +1065,7 @@ def register_routes(app):
             # Generar PDF real usando la lógica de wkhtmltopdf y PyPDF2 (idéntica a pdf_cotizacion)
             config = pdfkit.configuration(wkhtmltopdf=wkhtmltopdf_path)
             options = {
+                'page-size': 'Letter',
                 'enable-local-file-access': None,
                 'encoding': 'UTF-8',
                 'quiet': '',

@@ -880,6 +880,7 @@ def register_routes(app):
         # Configuración de pdfkit con la ruta detectada
         config = pdfkit.configuration(wkhtmltopdf=wkhtmltopdf_path)
         options = {
+            'page-size': 'Letter',
             'enable-local-file-access': None,
             'encoding': 'UTF-8',
             'quiet': '',

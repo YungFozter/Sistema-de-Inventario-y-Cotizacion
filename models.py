@@ -50,6 +50,8 @@ def crear_tablas():
                 creador_id INTEGER,
                 cotizaciones_trial_usadas INTEGER DEFAULT 0,
                 auth_provider TEXT DEFAULT 'local',
+                campos_config TEXT,
+                pdf_config TEXT,
                 FOREIGN KEY (creador_id) REFERENCES clientes(id)
             ){";" if is_postgres else ""}
         ''')
@@ -1059,6 +1061,11 @@ def migrar_columnas_nuevas_clientes():
                 print("[INFO] Agregando columna campos_config en Postgres...")
                 cursor.execute("ALTER TABLE clientes ADD COLUMN campos_config TEXT")
                 conexion.commit()
+
+            if 'pdf_config' not in columnas_existentes:
+                print("[INFO] Agregando columna pdf_config en Postgres...")
+                cursor.execute("ALTER TABLE clientes ADD COLUMN pdf_config TEXT")
+                conexion.commit()
         else:
             cursor.execute("PRAGMA table_info(clientes)")
             columnas = [col[1] for col in cursor.fetchall()]
@@ -1090,6 +1097,10 @@ def migrar_columnas_nuevas_clientes():
             if 'campos_config' not in columnas:
                 print("[INFO] Agregando columna campos_config en SQLite...")
                 cursor.execute("ALTER TABLE clientes ADD COLUMN campos_config TEXT")
+
+            if 'pdf_config' not in columnas:
+                print("[INFO] Agregando columna pdf_config en SQLite...")
+                cursor.execute("ALTER TABLE clientes ADD COLUMN pdf_config TEXT")
 
             conexion.commit()
     except Exception as e:

@@ -1,0 +1,472 @@
+    /* ============================================================
+       LOGIN - BENTO GRID + CLAYMORPHISM 3D
+       ============================================================ */
+    .auth-page-wrapper {
+        background-color: #F4F3EE;
+        background-image:
+            radial-gradient(circle at 15% 15%, rgba(255, 107, 53, 0.08) 0%, transparent 50%),
+            radial-gradient(circle at 85% 85%, rgba(79, 70, 229, 0.08) 0%, transparent 50%);
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        min-height: calc(100vh - 120px);
+        margin-top: -1.5rem;
+        margin-bottom: -3rem;
+        margin-left: -12px;
+        margin-right: -12px;
+        padding: 3.5rem 1.5rem 5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .auth-bento-container {
+        max-width: 1100px;
+        width: 100%;
+        display: grid;
+        grid-template-columns: 1fr 1.2fr;
+        gap: 2rem;
+        align-items: stretch;
+    }
+
+    /* ── Hero Card Oscura (Visual Izquierda) ─────────────────── */
+    .bento-card-dark {
+        background: linear-gradient(145deg, #1C1917 0%, #09090B 100%);
+        border: 1.5px solid rgba(255, 255, 255, 0.12);
+        border-radius: 26px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.18);
+        padding: 2.5rem 2rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .bento-card-dark::before {
+        content: '';
+        position: absolute;
+        top: -80px;
+        right: -80px;
+        width: 250px;
+        height: 250px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(255,107,53,0.18) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    /* ── Mini Features Bento ───────────────────────────────── */
+    .bento-card-feature {
+        background: #FFFFFF;
+        border: 1.5px solid rgba(0, 0, 0, 0.08);
+        border-radius: 20px;
+        box-shadow: 0 10px 28px rgba(0, 0, 0, 0.04);
+        padding: 1.15rem 1.35rem;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        transition: transform 0.25s ease, box-shadow 0.25s ease;
+    }
+
+    .bento-card-feature:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 14px 32px rgba(0, 0, 0, 0.08);
+    }
+
+    /* ── Badge ─────────────────────────────────────────────── */
+    .trial-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: linear-gradient(135deg, rgba(255,107,53,0.15), rgba(255,107,53,0.08));
+        border: 1.5px solid rgba(255,107,53,0.35);
+        border-radius: 50px;
+        padding: 7px 16px;
+        font-size: 0.82rem;
+        font-weight: 800;
+        color: #c94e1e;
+    }
+
+    /* ── Form Card ─────────────────────────────────────────── */
+    .form-card {
+        background: #FFFFFF;
+        border: 1.5px solid rgba(0, 0, 0, 0.08);
+        border-radius: 28px;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.08);
+        padding: 2.5rem;
+    }
+
+    /* ── Selector de Rol / Tipo Claymorphism ───────────────── */
+    .clay-role-selector {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.75rem;
+        background: #F4F4F6;
+        padding: 6px;
+        border-radius: 16px;
+        margin-bottom: 1.5rem;
+        border: 1.5px solid rgba(0,0,0,0.06);
+    }
+
+    .clay-role-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 10px 16px;
+        border-radius: 12px;
+        font-size: 0.88rem;
+        font-weight: 800;
+        color: #666;
+        text-decoration: none;
+        transition: all 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
+        border: 1.5px solid transparent;
+    }
+
+    .clay-role-btn:hover {
+        color: #141414;
+        background: rgba(255,255,255,0.6);
+    }
+
+    .clay-role-btn.active {
+        background: #FFFFFF;
+        color: #FF6B35;
+        border-color: rgba(255,107,53,0.3);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+    }
+
+    /* ── Inputs ────────────────────────────────────────────── */
+    .clay-input-group {
+        position: relative;
+        margin-bottom: 1.25rem;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: stretch !important;
+        width: 100% !important;
+        background: transparent !important;
+        box-shadow: none !important;
+        border: none !important;
+        padding: 0 !important;
+        overflow: visible !important;
+    }
+
+    .clay-input-label {
+        font-size: 0.78rem;
+        font-weight: 800;
+        color: #444;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        display: block !important;
+        margin-bottom: 6px;
+        width: 100% !important;
+    }
+
+    .clay-input-wrapper {
+        position: relative;
+        display: flex !important;
+        align-items: center;
+        width: 100% !important;
+    }
+
+    .clay-input-icon {
+        position: absolute;
+        left: 16px;
+        color: #666;
+        font-size: 1.1rem;
+        z-index: 5;
+        pointer-events: none;
+        top: 50%;
+        transform: translateY(-50%);
+        line-height: 1;
+    }
+
+    .clay-input {
+        width: 100% !important;
+        padding-top: 12px !important;
+        padding-bottom: 12px !important;
+        padding-right: 16px !important;
+        padding-left: 56px !important;
+        border: 1.5px solid rgba(0, 0, 0, 0.12) !important;
+        border-radius: 14px !important;
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: #141414;
+        background: #F8F9FA;
+        outline: none;
+        transition: all 0.2s ease;
+        box-shadow: none;
+    }
+
+    .clay-input:focus {
+        background: #FFFFFF;
+        border-color: #FF6B35;
+        box-shadow: 0 0 0 4px rgba(255, 107, 53, 0.14);
+    }
+
+    .clay-input-btn-eye {
+        position: absolute;
+        right: 12px;
+        background: none;
+        border: none;
+        color: #888;
+        cursor: pointer;
+        padding: 4px 8px;
+        font-size: 1.1rem;
+        transition: color 0.2s ease;
+    }
+
+    .clay-input-btn-eye:hover { color: #141414; }
+
+    /* ── Submit Button ─────────────────────────────────────── */
+    .btn-submit-clay {
+        width: 100%;
+        padding: 14px;
+        background: #FF6B35;
+        color: #FFFFFF;
+        border: none;
+        border-radius: 16px;
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        font-size: 1.05rem;
+        font-weight: 800;
+        cursor: pointer;
+        letter-spacing: -0.01em;
+        box-shadow: 0 4px 0 #c94e1e, 0 8px 24px rgba(255, 107, 53, 0.35);
+        transition: all 0.15s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+    }
+
+    .btn-submit-clay:hover {
+        background: #e85d24;
+        transform: translateY(-1px);
+        box-shadow: 0 6px 0 #c94e1e, 0 12px 28px rgba(255, 107, 53, 0.4);
+    }
+
+    .btn-submit-clay:active {
+        transform: translateY(3px);
+        box-shadow: 0 1px 0 #c94e1e, 0 4px 12px rgba(255, 107, 53, 0.2);
+    }
+
+    /* ── Animations ────────────────────────────────────────── */
+    @keyframes floatIcon {
+        0%   { transform: translateY(0px) rotate(0deg); }
+        50%  { transform: translateY(-8px) rotate(2deg); }
+        100% { transform: translateY(0px) rotate(0deg); }
+    }
+
+    .floating-3d-icon { animation: floatIcon 4s ease-in-out infinite; }
+
+    /* ── Floating 3D Icon Deck ────────────────────────────── */
+    .clay-floating-deck {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin: 1.25rem 0 0.5rem;
+        position: relative;
+        z-index: 2;
+    }
+
+    .floating-clay-chip {
+        background: #FFFFFF;
+        border: 1.5px solid rgba(0, 0, 0, 0.08);
+        border-radius: 14px;
+        padding: 8px 14px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.82rem;
+        font-weight: 800;
+        color: #2D3748;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.04), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+        transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        cursor: pointer;
+        user-select: none;
+    }
+
+    .floating-clay-chip:hover {
+        transform: translateY(-6px) scale(1.08) rotate(0deg) !important;
+        border-color: rgba(255, 107, 53, 0.35) !important;
+        box-shadow: 0 12px 28px rgba(255, 107, 53, 0.18), inset 0 1px 0 #FFFFFF !important;
+    }
+
+    .floating-clay-chip i { font-size: 1.1rem; }
+    .floating-clay-chip .text-orange  { color: #FF6B35; }
+    .floating-clay-chip .text-amber   { color: #F59E0B; }
+    .floating-clay-chip .text-emerald { color: #10B981; }
+    .floating-clay-chip .text-indigo  { color: #6366F1; }
+
+    /* Tilts & Floating Animations */
+    .tilt-left     { transform: rotate(-5deg); animation: float1 3.8s ease-in-out infinite; }
+    .tilt-right    { transform: rotate(6deg);  animation: float2 4.2s ease-in-out infinite; }
+    .tilt-left-sm  { transform: rotate(-3deg); animation: float3 3.5s ease-in-out infinite; }
+    .tilt-right-sm { transform: rotate(4deg);  animation: float4 4.0s ease-in-out infinite; }
+
+    @keyframes float1 {
+        0%, 100% { transform: translateY(0px) rotate(-5deg); }
+        50%      { transform: translateY(-7px) rotate(-3deg); }
+    }
+    @keyframes float2 {
+        0%, 100% { transform: translateY(0px) rotate(6deg); }
+        50%      { transform: translateY(-9px) rotate(8deg); }
+    }
+    @keyframes float3 {
+        0%, 100% { transform: translateY(0px) rotate(-3deg); }
+        50%      { transform: translateY(-6px) rotate(-1deg); }
+    }
+    @keyframes float4 {
+        0%, 100% { transform: translateY(0px) rotate(4deg); }
+        50%      { transform: translateY(-8px) rotate(6deg); }
+    }
+
+    .clay-bento-tile:hover {
+        transform: translateY(-2px);
+        background: #FFFFFF !important;
+        border-color: rgba(255, 107, 53, 0.25) !important;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06) !important;
+    }
+
+    /* ── Claymorphism Carousel Deck ───────────────────────── */
+    .clay-carousel-card {
+        background: #FFFFFF;
+        border: 1.5px solid rgba(0, 0, 0, 0.08);
+        border-radius: 28px;
+        box-shadow: 0 20px 48px rgba(0, 0, 0, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+        padding: 2.5rem 2.25rem 1.75rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        height: 100%;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .clay-slide-content {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        min-height: 360px;
+    }
+
+    .clay-slide-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        border-radius: 50px;
+        padding: 6px 16px;
+        font-size: 0.82rem;
+        font-weight: 800;
+        margin-bottom: 1.25rem;
+    }
+    .clay-slide-badge.orange { background: rgba(255,107,53,0.09); border: 1.5px solid rgba(255,107,53,0.3); color: #FF6B35; }
+    .clay-slide-badge.green  { background: rgba(16,185,129,0.09); border: 1.5px solid rgba(16,185,129,0.3); color: #10B981; }
+    .clay-slide-badge.sky    { background: rgba(2,132,199,0.09);  border: 1.5px solid rgba(2,132,199,0.3);  color: #0284C7; }
+    .clay-slide-badge.indigo { background: rgba(79,70,229,0.09);  border: 1.5px solid rgba(79,70,229,0.3);  color: #4F46E5; }
+
+    .clay-slide-title {
+        font-size: 1.85rem;
+        font-weight: 900;
+        color: #141414;
+        line-height: 1.2;
+        letter-spacing: -0.03em;
+        margin-bottom: 0.6rem;
+    }
+
+    .clay-slide-desc {
+        font-size: 0.9rem;
+        color: #666;
+        line-height: 1.55;
+        margin-bottom: 1.5rem;
+    }
+
+    .clay-slide-tile {
+        background: #F8F9FA;
+        border: 1.5px solid rgba(0, 0, 0, 0.06);
+        border-radius: 20px;
+        padding: 1.1rem 1.3rem;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+        transition: all 0.22s ease;
+    }
+
+    .clay-tile-icon {
+        width: 46px;
+        height: 46px;
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.35rem;
+        flex-shrink: 0;
+    }
+    .clay-tile-icon.orange { background: linear-gradient(135deg, #FFF3ED, #FFE5D9); color: #FF6B35; border: 1px solid rgba(255,107,53,0.2); }
+    .clay-tile-icon.green  { background: linear-gradient(135deg, #ECFDF5, #D1FAE5); color: #10B981; border: 1px solid rgba(16,185,129,0.2); }
+    .clay-tile-icon.sky    { background: linear-gradient(135deg, #F0F9FF, #E0F2FE); color: #0284C7; border: 1px solid rgba(2,132,199,0.2); }
+    .clay-tile-icon.indigo { background: linear-gradient(135deg, #EEF2FF, #E0E7FF); color: #4F46E5; border: 1px solid rgba(79,70,229,0.2); }
+
+    .clay-tile-title { font-weight: 800; font-size: 0.92rem; color: #141414; }
+    .clay-tile-sub { font-size: 0.78rem; color: #777; margin-top: 2px; }
+
+    /* Carousel Indicators 3D Clay */
+    .clay-carousel-indicators {
+        position: relative !important;
+        margin: 1.5rem 0 0.5rem 0 !important;
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+        gap: 8px !important;
+        z-index: 5 !important;
+    }
+    .clay-carousel-indicators button {
+        width: 12px !important;
+        height: 12px !important;
+        border-radius: 50% !important;
+        background-color: #CBD5E1 !important;
+        border: none !important;
+        opacity: 0.85 !important;
+        transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+        cursor: pointer !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+    .clay-carousel-indicators button.active {
+        width: 34px !important;
+        border-radius: 50px !important;
+        background-color: #FF6B35 !important;
+        opacity: 1 !important;
+        box-shadow: 0 3px 12px rgba(255, 107, 53, 0.45) !important;
+    }
+
+    .clay-carousel-footer {
+        background: #FAFAFA;
+        border: 1.5px solid rgba(0, 0, 0, 0.06);
+        border-radius: 16px;
+        padding: 12px 18px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-top: 1rem;
+    }
+
+    .status-dot-pulse {
+        width: 9px;
+        height: 9px;
+        border-radius: 50%;
+        background: #10B981;
+        box-shadow: 0 0 8px #10B981;
+        flex-shrink: 0;
+    }
+
+    /* ── Responsive ────────────────────────────────────────── */
+    @media (max-width: 991px) {
+        .auth-bento-container { grid-template-columns: 1fr; }
+        .auth-bento-visual { display: none; }
+    }
+
+    @media (max-width: 576px) {
+        .form-card { padding: 1.5rem 1.25rem !important; }
+    }

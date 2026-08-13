@@ -1017,6 +1017,9 @@ def register_routes(app):
                     'subtotal': qty * price
                 })
 
+            from models import obtener_configuracion_pdf
+            config_pdf = obtener_configuracion_pdf(session.get('user_id'))
+
             datos = {
                 'cliente': cliente_data,
                 'cotizacion': {
@@ -1034,7 +1037,8 @@ def register_routes(app):
                 'usuario': usuario,
                 'logo_base64': "",
                 'fondo_base64': None,  # El fondo se aplicará por página después con PyPDF2
-                'es_pdf': True
+                'es_pdf': True,
+                'config_pdf': config_pdf
             }
 
             # Generar el HTML

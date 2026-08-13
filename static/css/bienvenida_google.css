@@ -1,0 +1,199 @@
+    /* ============================================================
+       BIENVENIDA GOOGLE - BENTO GRID + CLAYMORPHISM 3D
+       ============================================================ */
+    .welcome-page-wrapper {
+        background-color: #F4F3EE;
+        background-image:
+            radial-gradient(circle at 15% 15%, rgba(255, 107, 53, 0.09) 0%, transparent 50%),
+            radial-gradient(circle at 85% 85%, rgba(79, 70, 229, 0.08) 0%, transparent 50%);
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        min-height: calc(100vh - 120px);
+        margin-top: -1.5rem;
+        margin-bottom: -3rem;
+        margin-left: -12px;
+        margin-right: -12px;
+        padding: 3rem 1.5rem 5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .welcome-bento-container {
+        max-width: 960px;
+        width: 100%;
+    }
+
+    /* ── Main Bento Card ───────────────────────────────────────── */
+    .clay-welcome-card {
+        background: #FFFFFF;
+        border: 2px solid #141414;
+        border-radius: 28px;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.08), 12px 12px 28px rgba(166, 180, 200, 0.35);
+        overflow: hidden;
+    }
+
+    .clay-welcome-header {
+        background: linear-gradient(135deg, #FF6B35 0%, #E8501A 100%);
+        padding: 2rem 2.5rem;
+        color: #ffffff;
+        border-bottom: 2.5px solid #141414;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 1.25rem;
+    }
+
+    .clay-avatar-badge {
+        width: 60px;
+        height: 60px;
+        border-radius: 18px;
+        background: #FFFFFF;
+        color: #FF6B35;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.8rem;
+        border: 2px solid #141414;
+        box-shadow: 4px 4px 12px rgba(0, 0, 0, 0.18), inset -2px -2px 4px rgba(0, 0, 0, 0.05);
+    }
+
+    .welcome-badge-trial {
+        background: #FFFFFF;
+        color: #141414;
+        border: 1.5px solid #141414;
+        padding: 8px 18px;
+        border-radius: 50px;
+        font-size: 0.88rem;
+        font-weight: 800;
+        box-shadow: 4px 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    /* Bento Grid Items */
+    .bento-welcome-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.5rem;
+    }
+
+    @media (max-width: 768px) {
+        .bento-welcome-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .bento-welcome-box {
+        background: #F8FAFC;
+        border-radius: 1.25rem;
+        padding: 1.35rem 1.5rem;
+        border: 1.5px solid #141414;
+        box-shadow: 6px 6px 14px rgba(180, 190, 205, 0.25), inset 2px 2px 4px rgba(255, 255, 255, 0.9);
+    }
+
+    .bento-welcome-full {
+        grid-column: 1 / -1;
+    }
+
+    .cred-item-label {
+        font-size: 0.76rem;
+        font-weight: 800;
+        color: #64748B;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 4px;
+    }
+
+    .cred-item-val {
+        font-size: 1rem;
+        font-weight: 700;
+        color: #0F172A;
+    }
+
+    /* Inputs Clay 3D */
+    .welcome-input-group {
+        display: flex;
+        align-items: center;
+        background: #FFFFFF;
+        border-radius: 0.85rem;
+        border: 1.5px solid #141414;
+        box-shadow: inset 2px 2px 4px rgba(0, 0, 0, 0.05);
+        overflow: hidden;
+        margin-top: 6px;
+    }
+
+    .welcome-input-icon {
+        padding: 0.75rem 0.9rem;
+        color: #FF6B35;
+        font-size: 1.1rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .welcome-input {
+        width: 100%;
+        border: none;
+        background: transparent;
+        padding: 0.75rem 0.75rem 0.75rem 0;
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: #0F172A;
+        outline: none !important;
+    }
+
+    /* Password Informative Banner */
+    .password-info-banner {
+        background: linear-gradient(135deg, #EEF2FF 0%, #E0E7FF 100%);
+        border: 2px solid #4F46E5;
+        border-radius: 1.25rem;
+        padding: 1.35rem 1.6rem;
+        display: flex;
+        align-items: flex-start;
+        gap: 16px;
+        box-shadow: 6px 6px 16px rgba(79, 70, 229, 0.12);
+    }
+
+    .password-banner-icon {
+        width: 46px;
+        height: 46px;
+        border-radius: 14px;
+        background: #4F46E5;
+        color: #FFFFFF;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.3rem;
+        flex-shrink: 0;
+        box-shadow: 0 4px 10px rgba(79, 70, 229, 0.3);
+    }
+
+    /* CTA Button */
+    .btn-welcome-submit {
+        background: #FF6B35;
+        color: #FFFFFF !important;
+        border: 2px solid #141414;
+        border-radius: 14px;
+        padding: 0.95rem 2.5rem;
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        font-size: 1.05rem;
+        font-weight: 800;
+        cursor: pointer;
+        box-shadow: 0 4px 0 #C44E1E, 0 8px 24px rgba(255, 107, 53, 0.35);
+        transition: all 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        width: 100%;
+        justify-content: center;
+    }
+
+    .btn-welcome-submit:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 7px 0 #C44E1E, 0 14px 28px rgba(255, 107, 53, 0.45);
+        color: #FFFFFF !important;
+    }
+
+    .btn-welcome-submit:active {
+        transform: translateY(2px);
+        box-shadow: 0 1px 0 #C44E1E, 0 4px 12px rgba(255, 107, 53, 0.2);
+    }

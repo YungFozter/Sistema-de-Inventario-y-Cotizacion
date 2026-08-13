@@ -850,6 +850,10 @@ def register_routes(app):
     
         # Los fondos ahora se aplican por página después de generar el PDF
 
+        # Añadir configuración de PDF a los datos
+        from models import obtener_configuracion_pdf
+        datos['config_pdf'] = obtener_configuracion_pdf(session.get('user_id'))
+
         # Renderizar plantilla HTML
         html = render_template('cotizaciones/cotizacion_pdf.html', **datos)
 
@@ -1099,6 +1103,10 @@ def register_routes(app):
             print(f"VISTA PREVIA - Longitud fondo_base64: {len(fondo_base64)}")
             print(f"VISTA PREVIA - Prefijo fondo_base64: {fondo_base64[:50]}...")
 
+        # Añadir configuración de PDF a los datos
+        from models import obtener_configuracion_pdf
+        datos['config_pdf'] = obtener_configuracion_pdf(session.get('user_id'))
+
         return render_template('cotizaciones/cotizacion_pdf.html', **datos)
 
     @app.route('/api/buscar_productos_cotizacion', methods=['GET'])
@@ -1274,3 +1282,44 @@ def register_routes(app):
 
         except Exception as e:
             return jsonify({'success': False, 'error': str(e)}), 500
+
+    @app.route('/api/pdf-config', methods=['GET', 'POST'])
+    @login_required
+    @admin_required
+    def api_pdf_config():
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        admin_id = session.get('user_id')
+
+        if request.method == 'GET':
+            try:
+                cursor.execute("SELECT pdf_config FROM clientes WHERE id = ?", (admin_id,))
+                res = cursor.fetchone()
+                config = {}
+                if res and res[0]:
+                    import json
+                    try:
+                        config = json.loads(res[0])
+                    except:
+                        pass
+                return jsonify({'success': True, 'config': config})
+            except Exception as e:
+                return jsonify({'success': False, 'message': str(e)}), 500
+            finally:
+                conn.close()
+
+        elif request.method == 'POST':
+            try:
+                data = request.json
+                if not data:
+                    return jsonify({'success': False, 'message': 'No data provided'}), 400
+
+                import json
+                config_json = json.dumps(data)
+                cursor.execute("UPDATE clientes SET pdf_config = ? WHERE id = ?", (config_json, admin_id))
+                conn.commit()
+                return jsonify({'success': True, 'message': 'Configuración guardada exitosamente'})
+            except Exception as e:
+                return jsonify({'success': False, 'message': str(e)}), 500
+            finally:
+                conn.close()

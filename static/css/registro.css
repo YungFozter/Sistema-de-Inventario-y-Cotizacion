@@ -1,0 +1,599 @@
+    /* ============================================================
+       REGISTRO - BENTO GRID + CLAYMORPHISM 3D (Freemium Model)
+       ============================================================ */
+    .auth-page-wrapper {
+        background-color: #F4F3EE;
+        background-image:
+            radial-gradient(circle at 15% 15%, rgba(255, 107, 53, 0.08) 0%, transparent 50%),
+            radial-gradient(circle at 85% 85%, rgba(79, 70, 229, 0.08) 0%, transparent 50%);
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        min-height: calc(100vh - 120px);
+        margin-top: -1.5rem;
+        margin-bottom: -3rem;
+        margin-left: -12px;
+        margin-right: -12px;
+        padding: 3.5rem 1.5rem 5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .auth-bento-container {
+        max-width: 1160px;
+        width: 100%;
+        display: grid;
+        grid-template-columns: 1fr 1.3fr;
+        gap: 2rem;
+        align-items: stretch;
+    }
+
+    /* ── Hero Card Oscura ──────────────────────────── */
+    .bento-card-dark {
+        background: linear-gradient(145deg, #1C1917 0%, #09090B 100%);
+        border: 1.5px solid rgba(255, 255, 255, 0.12);
+        border-radius: 26px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.18);
+        padding: 2.5rem 2rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        position: relative;
+        overflow: hidden;
+    }
+
+    /* ── Mini Features ─────────────────────────────── */
+    .bento-card-feature {
+        background: #FFFFFF;
+        border: 1.5px solid rgba(0, 0, 0, 0.08);
+        border-radius: 20px;
+        box-shadow: 0 10px 28px rgba(0, 0, 0, 0.04);
+        padding: 1.25rem 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        transition: transform 0.25s ease, box-shadow 0.25s ease;
+    }
+
+    .bento-card-feature:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 14px 32px rgba(0, 0, 0, 0.08);
+    }
+
+    /* ── Badge Trial ───────────────────────────────── */
+    .trial-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: linear-gradient(135deg, rgba(255, 107, 53, 0.15), rgba(255, 107, 53, 0.08));
+        border: 1.5px solid rgba(255, 107, 53, 0.35);
+        border-radius: 50px;
+        padding: 7px 16px;
+        font-size: 0.82rem;
+        font-weight: 800;
+        color: #c94e1e;
+        letter-spacing: 0.01em;
+    }
+
+    /* ── Form Card ─────────────────────────────────── */
+    .form-card {
+        background: #FFFFFF;
+        border: 1.5px solid rgba(0, 0, 0, 0.08);
+        border-radius: 28px;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.08);
+        padding: 2.5rem;
+    }
+
+    /* ── Clay Role Selector ────────────────────────── */
+    .clay-role-selector {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+        margin-bottom: 1.25rem;
+    }
+
+    .clay-role-option {
+        background: #F8F9FA;
+        border: 2px solid rgba(0, 0, 0, 0.08);
+        border-radius: 16px;
+        padding: 14px 16px;
+        cursor: pointer;
+        transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        user-select: none;
+    }
+
+    .clay-role-option:hover {
+        transform: translateY(-2px);
+        border-color: rgba(255, 107, 53, 0.4);
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.05);
+    }
+
+    .clay-role-option.active {
+        background: #FFFFFF;
+        border-color: #FF6B35;
+        box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.15), 0 8px 20px rgba(255, 107, 53, 0.12);
+        transform: scale(1.02);
+    }
+
+    /* ── Inputs ────────────────────────────────────── */
+    .clay-input-group {
+        position: relative;
+        margin-bottom: 1.15rem;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: stretch !important;
+        width: 100% !important;
+        background: transparent !important;
+        box-shadow: none !important;
+        border: none !important;
+        padding: 0 !important;
+        overflow: visible !important;
+    }
+
+    .clay-input-label {
+        font-size: 0.78rem;
+        font-weight: 800;
+        color: #444;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        display: block !important;
+        margin-bottom: 6px;
+        width: 100% !important;
+    }
+
+    .clay-input-wrapper {
+        position: relative;
+        display: flex !important;
+        align-items: center;
+        width: 100% !important;
+    }
+
+    .clay-input-icon {
+        position: absolute;
+        left: 5px;
+        color: #666;
+        font-size: 1.1rem;
+        z-index: 5;
+        pointer-events: none;
+        top: 50%;
+        transform: translateY(-50%);
+        line-height: 1;
+    }
+
+    .clay-input {
+        width: 100% !important;
+        padding-top: 12px !important;
+        padding-bottom: 12px !important;
+        padding-right: 16px !important;
+        padding-left: 42px !important;
+        border: 1.5px solid rgba(0, 0, 0, 0.12) !important;
+        border-radius: 14px !important;
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: #141414;
+        background: #F8F9FA;
+        outline: none;
+        transition: all 0.2s ease;
+        box-shadow: none;
+    }
+
+    #reg_telefono {
+        padding-left: 80px !important;
+    }
+
+    .clay-input:focus {
+        background: #FFFFFF;
+        border-color: #FF6B35;
+        box-shadow: 0 0 0 4px rgba(255, 107, 53, 0.14);
+    }
+
+    .clay-input-btn-eye {
+        position: absolute;
+        right: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        color: #888;
+        cursor: pointer;
+        padding: 4px 8px;
+        font-size: 1.1rem;
+        transition: color 0.2s ease;
+        z-index: 5;
+    }
+
+    .clay-input-btn-eye:hover {
+        color: #141414;
+    }
+
+    /* ── Float Animation ───────────────────────────── */
+    @keyframes floatIcon {
+        0% {
+            transform: translateY(0px) rotate(0deg);
+        }
+
+        50% {
+            transform: translateY(-8px) rotate(2deg);
+        }
+
+        100% {
+            transform: translateY(0px) rotate(0deg);
+        }
+    }
+
+    .floating-3d-icon {
+        animation: floatIcon 4s ease-in-out infinite;
+    }
+
+    /* ── Submit Button ─────────────────────────────── */
+    .btn-submit-clay {
+        width: 100%;
+        padding: 14px;
+        background: #FF6B35;
+        color: #FFFFFF;
+        border: none;
+        border-radius: 16px;
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        font-size: 1.05rem;
+        font-weight: 800;
+        cursor: pointer;
+        letter-spacing: -0.01em;
+        box-shadow: 0 4px 0 #c94e1e, 0 8px 24px rgba(255, 107, 53, 0.35);
+        transition: all 0.15s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+    }
+
+    .btn-submit-clay:hover {
+        background: #e85d24;
+        transform: translateY(-1px);
+        box-shadow: 0 6px 0 #c94e1e, 0 12px 28px rgba(255, 107, 53, 0.4);
+    }
+
+    .btn-submit-clay:active {
+        transform: translateY(3px);
+        box-shadow: 0 1px 0 #c94e1e, 0 4px 12px rgba(255, 107, 53, 0.2);
+    }
+
+    .reg-form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    /* ── Responsive ────────────────────────────────── */
+    @media (max-width: 991px) {
+        .auth-bento-container {
+            grid-template-columns: 1fr;
+        }
+
+        .auth-bento-visual {
+            display: none;
+        }
+    }
+
+    @media (max-width: 640px) {
+        .reg-form-row {
+            grid-template-columns: 1fr !important;
+            gap: 0.85rem !important;
+        }
+
+        .form-card {
+            padding: 1.5rem 1.25rem !important;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block contenido %}
+<div class="auth-page-wrapper">
+    <div class="auth-bento-container">
+
+        <!-- ═══════════════════════════════════════════════════════
+             IZQUIERDA: VISUAL BENTO DARK (CLAYMORPHISM)
+             ═══════════════════════════════════════════════════════ -->
+        <div class="auth-bento-visual" style="display:flex; flex-direction:column; gap:1.25rem;" data-aos="fade-right">
+
+            <!-- Hero Dark Card -->
+            <div class="bento-card-dark" style="flex:1;">
+                <div style="position:relative; z-index:2;">
+
+                    <!-- Badge Trial -->
+                    <div class="trial-badge mb-3">
+                        <i class="bi bi-gift-fill" style="color:#FF6B35;"></i>
+                        5 Cotizaciones Gratuitas incluidas
+                    </div>
+
+                    <!-- Ícono Flotante -->
+                    <div class="floating-3d-icon mb-4" style="width:60px; height:60px; border-radius:18px; background:#FF6B35; color:#FFF;
+                                display:flex; align-items:center; justify-content:center; font-size:1.8rem;
+                                box-shadow:0 10px 24px rgba(255,107,53,0.4);">
+                        <i class="bi bi-rocket-takeoff-fill"></i>
+                    </div>
+
+                    <h2 style="font-size:2rem; font-weight:900; letter-spacing:-0.03em; line-height:1.15;
+                               margin-bottom:1rem; color:#FFFFFF;">
+                        Cotiza en minutos,<br>
+                        <span style="color:#FF6B35;">sin complicaciones.</span>
+                    </h2>
+
+                    <p style="font-size:0.95rem; color:rgba(255,255,255,0.75); line-height:1.6;
+                              max-width:360px; margin:0 0 1.5rem;">
+                        Empieza <strong style="color:#FFF;">gratis</strong> con 5 cotizaciones de prueba.
+                        Cuando veas el poder del sistema, activa tu suscripción y cotiza sin límites.
+                    </p>
+
+                    <!-- Pasos rápidos -->
+                    <div style="display:flex; flex-direction:column; gap:8px;">
+                        {% for step in [('1', '#FF6B35', 'Crea tu cuenta (10 segundos)'),
+                        ('2', '#4F46E5', 'Carga tus productos o PDFs'),
+                        ('3', '#10B981', '¡Genera cotizaciones al instante!')] %}
+                        <div style="display:flex; align-items:center; gap:10px;">
+                            <span style="width:24px; height:24px; border-radius:50%; background:{{ step[1] }};
+                                         color:#FFF; font-size:0.7rem; font-weight:900;
+                                         display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                                {{ step[0] }}
+                            </span>
+                            <span style="font-size:0.85rem; color:rgba(255,255,255,0.85); font-weight:600;">{{ step[2]
+                                }}</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Decoración circular -->
+                <div style="position:absolute; right:-40px; bottom:-40px; width:220px; height:220px;
+                            border-radius:50%; background:rgba(255,107,53,0.1); pointer-events:none;"></div>
+
+                <!-- Status bar -->
+                <div style="position:relative; z-index:2; margin-top:2rem; display:flex; align-items:center;
+                            gap:8px; font-size:0.82rem; font-weight:700; color:rgba(255,255,255,0.9);">
+                    <span style="width:9px; height:9px; border-radius:50%; background:#4ade80; display:inline-block;
+                                 box-shadow:0 0 10px #4ade80;"></span>
+                    Sistema activo en Bolivia (UTC-4)
+                </div>
+            </div>
+
+            <!-- Mini Card: Seguridad -->
+            <div class="bento-card-feature">
+                <div style="width:44px; height:44px; border-radius:14px; background:#e0e7ff; color:#4F46E5;
+                            display:flex; align-items:center; justify-content:center; font-size:1.2rem;
+                            flex-shrink:0; box-shadow:0 4px 12px rgba(79,70,229,0.15);">
+                    <i class="bi bi-shield-lock-fill"></i>
+                </div>
+                <div>
+                    <div style="font-size:0.92rem; font-weight:800; color:#141414;">Datos 100% seguros</div>
+                    <div style="font-size:0.78rem; color:#666; margin-top:2px;">Tus cotizaciones y precios son privados
+                        y solo tuyos.</div>
+                </div>
+            </div>
+
+            <!-- Mini Card: Sin tarjeta -->
+            <div class="bento-card-feature">
+                <div style="width:44px; height:44px; border-radius:14px; background:#dcfce7; color:#16a34a;
+                            display:flex; align-items:center; justify-content:center; font-size:1.2rem;
+                            flex-shrink:0; box-shadow:0 4px 12px rgba(22,163,74,0.15);">
+                    <i class="bi bi-lightning-charge-fill"></i>
+                </div>
+                <div>
+                    <div style="font-size:0.92rem; font-weight:800; color:#141414;">Sin tarjeta de crédito</div>
+                    <div style="font-size:0.78rem; color:#666;">Acceso inmediato. Paga solo si decides quedarte.</div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- ═══════════════════════════════════════════════════════
+             DERECHA: FORMULARIO CLAYMORPHIC 3D
+             ═══════════════════════════════════════════════════════ -->
+        <div class="form-card" data-aos="fade-left">
+
+            <!-- Encabezado -->
+            <div style="margin-bottom:2rem;">
+                <div class="bento-headline-tag" style="margin-bottom:0.6rem;">
+                    <span style="background:#FF6B35;"></span> Empieza gratis ahora
+                </div>
+                <h2 style="font-size:1.85rem; font-weight:900; letter-spacing:-0.03em; color:#141414; margin:0;">
+                    Crea tu cuenta de empresa
+                </h2>
+                <p style="font-size:0.88rem; color:#666; margin-top:0.3rem;">
+                    Registra tu negocio y cotiza profesionalmente desde el primer día.
+                </p>
+            </div>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+            {% for category, message in messages %}
+            <div class="alert alert-{{ 'danger' if category == 'danger' else 'success' }} d-flex align-items-center gap-2 mb-3"
+                style="border-radius:14px; font-size:0.88rem; font-weight:600;">
+                <i class="bi bi-{{ 'exclamation-triangle-fill' if category == 'danger' else 'check-circle-fill' }}"></i>
+                {{ message }}
+            </div>
+            {% endfor %}
+            {% endif %}
+            {% endwith %}
+
+
+            <!-- Google OAuth -->
+            <div class="d-grid mt-4 mb-4 fade-up-enter delay-400">
+                <a href="{{ url_for('auth_google') }}" class="btn btn-outline-dark btn-lg"
+                    style="border-radius: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 10px; background: #fff; border: 1.5px solid #e0e0e0; color: #333;">
+                    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google"
+                        style="width: 20px;">
+                    Continuar con Google
+                </a>
+            </div>
+
+            <div class="d-flex align-items-center my-4 fade-up-enter delay-400">
+                <hr class="flex-grow-1">
+                <span class="mx-3 text-muted" style="font-size: 0.85rem; font-weight: 700;">O REGÍSTRATE CON TU
+                    CORREO</span>
+                <hr class="flex-grow-1">
+            </div>
+            <form action="/registro" method="post" id="registroForm" novalidate>
+
+                <!-- Nombre Completo + Empresa (2 columnas) -->
+                <div class="reg-form-row">
+                    <div class="clay-input-group">
+                        <label class="clay-input-label" for="reg_nombre">Nombre completo</label>
+                        <div class="clay-input-wrapper">
+                            <i class="bi bi-person-fill clay-input-icon"></i>
+                            <input type="text" id="reg_nombre" name="nombre" class="clay-input" required
+                                placeholder="Ej: Juan Pérez">
+                        </div>
+                    </div>
+
+                    <div class="clay-input-group">
+                        <label class="clay-input-label" for="reg_empresa">Empresa / Negocio</label>
+                        <div class="clay-input-wrapper">
+                            <i class="bi bi-building-fill clay-input-icon"></i>
+                            <input type="text" id="reg_empresa" name="empresa_nombre" class="clay-input"
+                                placeholder="Ej: Importadora Norte S.R.L.">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Correo y Teléfono -->
+                <div class="reg-form-row">
+                    <div class="clay-input-group">
+                        <label class="clay-input-label" for="reg_correo">Correo electrónico</label>
+                        <div class="clay-input-wrapper">
+                            <i class="bi bi-envelope-fill clay-input-icon"></i>
+                            <input type="email" id="reg_correo" name="correo" class="clay-input" required
+                                placeholder="correo@empresa.bo">
+                        </div>
+                    </div>
+
+                    <div class="clay-input-group" id="grupo_telefono">
+                        <label class="clay-input-label" for="reg_telefono">
+                            Teléfono Bolivia
+                            <span id="tel_status_icon" style="margin-left:6px; font-size:0.85rem;"></span>
+                        </label>
+                        <div class="clay-input-wrapper">
+                            <!-- Prefijo +591 fijo -->
+                            <span id="tel_prefix" style="position:absolute; left:42px; color:#666; font-size:0.9rem; font-weight:700;
+                                         pointer-events:none; z-index:3; line-height:1;
+                                         top:50%; transform:translateY(-50%); letter-spacing:0.01em;">
+                                +591
+                            </span>
+                            <i class="bi bi-telephone-fill clay-input-icon"></i>
+                            <input type="tel" id="reg_telefono" name="telefono" class="clay-input"
+                                placeholder="70000000" maxlength="8" inputmode="numeric" style="padding-left:80px;"
+                                autocomplete="tel">
+                        </div>
+                        <!-- Hint dinámico -->
+                        <div id="tel_hint"
+                            style="font-size:0.72rem; margin-top:5px; color:#888; display:flex; align-items:center; gap:5px;">
+                            <i class="bi bi-info-circle" style="font-size:0.7rem;"></i>
+                            Celular: 6x xxxxxxx · 7x xxxxxxx &nbsp;|  Fijo: 2/3/4 + 6 dígitos
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Contraseñas -->
+                <div class="reg-form-row">
+                    <div class="clay-input-group">
+                        <label class="clay-input-label" for="password_input">Contraseña</label>
+                        <div class="clay-input-wrapper">
+                            <i class="bi bi-lock-fill clay-input-icon"></i>
+                            <input type="password" id="password_input" name="contrasena" class="clay-input" required
+                                placeholder="Mínimo 6 caracteres">
+                            <button type="button" class="clay-input-btn-eye"
+                                onclick="togglePassword('password_input','eye_icon_pw')" tabindex="-1">
+                                <i id="eye_icon_pw" class="bi bi-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="clay-input-group">
+                        <label class="clay-input-label" for="confirm_input">Confirmar contraseña</label>
+                        <div class="clay-input-wrapper">
+                            <i class="bi bi-shield-lock-fill clay-input-icon"></i>
+                            <input type="password" id="confirm_input" name="confirmar_contrasena" class="clay-input"
+                                required placeholder="Repite tu contraseña">
+                            <button type="button" class="clay-input-btn-eye"
+                                onclick="togglePassword('confirm_input','eye_icon_conf')" tabindex="-1">
+                                <i id="eye_icon_conf" class="bi bi-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Info Freemium -->
+                <div style="background:#fff9f6; border:1.5px solid rgba(255,107,53,0.2); border-radius:14px;
+                            padding:12px 16px; margin-bottom:1.5rem; display:flex; align-items:flex-start; gap:10px;">
+                    <i class="bi bi-info-circle-fill"
+                        style="color:#FF6B35; font-size:1rem; margin-top:2px; flex-shrink:0;"></i>
+                    <div style="font-size:0.82rem; color:#664; line-height:1.5;">
+                        <strong style="color:#c94e1e;">Tu cuenta incluye 5 cotizaciones gratis</strong> para explorar
+                        todas las
+                        funcionalidades. Cuando estés listo, activa tu suscripción con un PIN para cotizar sin límites.
+                    </div>
+                </div>
+
+                <!-- Botón Crear Cuenta -->
+                <button type="submit" class="btn-submit-clay" id="btn_crear_cuenta">
+                    <i class="bi bi-rocket-takeoff-fill"></i> Crear mi cuenta gratis
+                </button>
+
+                <div style="text-align:center; margin-top:1.25rem;">
+                    <span style="font-size:0.88rem; color:#666;">¿Ya tienes una cuenta?</span>
+                    <a href="/login" style="font-size:0.88rem; font-weight:800; color:#FF6B35;
+                                           text-decoration:none; margin-left:4px;">Inicia sesión</a>
+                </div>
+
+            </form>
+        </div>
+    </div>
+</div>
+
+
+
+<style>
+    @keyframes shakeOTP {
+
+        0%,
+        100% {
+            transform: translateX(0);
+        }
+
+        15% {
+            transform: translateX(-8px);
+        }
+
+        45% {
+            transform: translateX(8px);
+        }
+
+        75% {
+            transform: translateX(-5px);
+        }
+    }
+
+    .otp-digit:focus {
+        border-color: #FF6B35 !important;
+        background: #FFFFFF !important;
+        box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.18) !important;
+        transform: scale(1.06);
+    }
+
+    .otp-digit.ok {
+        border-color: #10B981 !important;
+        background: #f0fdf4 !important;
+    }
+
+    .otp-digit.err {
+        border-color: #ef4444 !important;
+        background: #fef2f2 !important;
+    }
+
+    #otpInputsWrap.shake {
+        animation: shakeOTP 0.45s ease;
+    }

@@ -622,12 +622,30 @@
     <div class="container">
         <div class="custom-header-grid">
             <div class="header-left">
-                {% if config_pdf and config_pdf.logo_base64 %}
-                    <img src="{{ config_pdf.logo_base64 }}" class="header-logo" alt="Logo">
+                {% if config_pdf and config_pdf.header_layout == 'right' %}
+                    <table style="width: 100%; border: none; margin-bottom: 0;">
+                        <tr>
+                            <td style="width: 50%; text-align: left; vertical-align: middle; border: none; padding: 0;">
+                                {% if config_pdf and config_pdf.logo_base64 %}
+                                    <img src="{{ config_pdf.logo_base64 }}" style="max-width: 160px; max-height: 120px;" alt="Logo">
+                                {% endif %}
+                            </td>
+                            <td style="width: 50%; text-align: left; vertical-align: middle; border: none; padding: 0; padding-left: 15px;">
+                                <div class="header-company">{{ config_pdf.empresa_nombre if config_pdf and config_pdf.empresa_nombre else 'ELECTRORED BOLIVIA S.R.L.' }}</div>
+                                <div class="header-muted">NIT: {{ config_pdf.nit_emisor if config_pdf and config_pdf.nit_emisor else '1029384021' }}</div>
+                            </td>
+                        </tr>
+                    </table>
+                {% else %}
+                    {% if config_pdf and config_pdf.logo_base64 %}
+                        <img src="{{ config_pdf.logo_base64 }}" class="header-logo" alt="Logo">
+                    {% endif %}
+                    
+                    {% if not config_pdf or config_pdf.header_layout != 'hidden' %}
+                    <div class="header-company">{{ config_pdf.empresa_nombre if config_pdf and config_pdf.empresa_nombre else 'ELECTRORED BOLIVIA S.R.L.' }}</div>
+                    <div class="header-muted">NIT: {{ config_pdf.nit_emisor if config_pdf and config_pdf.nit_emisor else '1029384021' }}</div>
+                    {% endif %}
                 {% endif %}
-                <div class="header-company">{{ config_pdf.empresa_nombre if config_pdf and config_pdf.empresa_nombre else 'ELECTRORED BOLIVIA S.R.L.' }}</div>
-                <div class="header-muted">NIT: {{ config_pdf.nit_emisor if config_pdf and config_pdf.nit_emisor else '1029384021' }}</div>
-                <div class="header-muted">{{ config_pdf.direccion if config_pdf and config_pdf.direccion else 'Av. Banzer Km 5.5 - Santa Cruz' }}</div>
             </div>
             <div class="header-right">
                 <div class="header-title">{{ config_pdf.titulo_documento if config_pdf and config_pdf.titulo_documento else 'COTIZACIÓN DE VENTAS' }}</div>
@@ -770,7 +788,7 @@
 
         <!-- Pie de Página -->
         <div class="footer-section">
-            Email: {{ config_pdf.correo if config_pdf and config_pdf.correo else 'ventas@electrored.bo' }} - Santa Cruz - Bolivia
+            {{ config_pdf.direccion if config_pdf and config_pdf.direccion else 'Av. Banzer Km 5.5 - Santa Cruz' }} | Email: {{ config_pdf.correo if config_pdf and config_pdf.correo else 'ventas@electrored.bo' }}
         </div>
         
         </div> <!-- Cierre del contenedor avoid-page-break -->

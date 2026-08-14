@@ -1171,6 +1171,7 @@ def asegurar_tabla_configuracion_pdf(cursor):
                 telefono TEXT DEFAULT '',
                 correo TEXT DEFAULT '',
                 direccion TEXT DEFAULT '',
+                header_layout TEXT DEFAULT 'default',
                 terminos_condiciones TEXT DEFAULT '1. Validez de la oferta: 15 días.\n2. Precios incluyen impuestos de ley.\n3. Tiempo de entrega a convenir.',
                 nota_pie TEXT DEFAULT '¡Gracias por su preferencia!',
                 responsable_nombre TEXT DEFAULT '',
@@ -1184,6 +1185,12 @@ def asegurar_tabla_configuracion_pdf(cursor):
                 FOREIGN KEY (usuario_id) REFERENCES clientes(id)
             ){";" if is_postgres else ""}
         ''')
+        
+        # Add column if table exists from before
+        try:
+            cursor.execute("ALTER TABLE configuracion_pdf ADD COLUMN header_layout TEXT DEFAULT 'default'")
+        except:
+            pass
     except Exception as e:
         print(f"Error asegurando tabla configuracion_pdf: {e}")
 
@@ -1252,6 +1259,7 @@ def guardar_configuracion_pdf(usuario_id, datos):
                         telefono = ?,
                         correo = ?,
                         direccion = ?,
+                        header_layout = ?,
                         terminos_condiciones = ?,
                         nota_pie = ?,
                         responsable_nombre = ?,
@@ -1270,6 +1278,7 @@ def guardar_configuracion_pdf(usuario_id, datos):
                     datos.get('telefono', ''),
                     datos.get('correo', ''),
                     datos.get('direccion', ''),
+                    datos.get('header_layout', 'default'),
                     datos.get('terminos_condiciones', ''),
                     datos.get('nota_pie', ''),
                     datos.get('responsable_nombre', ''),
@@ -1283,10 +1292,10 @@ def guardar_configuracion_pdf(usuario_id, datos):
                 cursor.execute('''
                     INSERT INTO configuracion_pdf (
                         usuario_id, tipo_hoja, color_tema, titulo_documento,
-                        empresa_nombre, nit_emisor, telefono, correo, direccion,
+                        empresa_nombre, nit_emisor, telefono, correo, direccion, header_layout,
                         terminos_condiciones, nota_pie, responsable_nombre,
                         responsable_telefono, responsable_email, plazo_entrega, logo_base64
-                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 ''', (
                     usuario_id,
                     datos.get('tipo_hoja', 'A4'),
@@ -1297,6 +1306,7 @@ def guardar_configuracion_pdf(usuario_id, datos):
                     datos.get('telefono', ''),
                     datos.get('correo', ''),
                     datos.get('direccion', ''),
+                    datos.get('header_layout', 'default'),
                     datos.get('terminos_condiciones', ''),
                     datos.get('nota_pie', ''),
                     datos.get('responsable_nombre', ''),

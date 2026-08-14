@@ -699,6 +699,15 @@
                             <input type="text" id="editEmpresaNombre" class="form-control" value="{{ config_pdf.empresa_nombre or 'ELECTRORED BOLIVIA S.R.L.' }}">
                         </div>
 
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Disposición del Encabezado:</label>
+                            <select id="editHeaderLayout" class="form-select">
+                                <option value="default" {% if config_pdf.header_layout == 'default' or not config_pdf.header_layout %}selected{% endif %}>Mostrar nombre y NIT abajo del Logo</option>
+                                <option value="right" {% if config_pdf.header_layout == 'right' %}selected{% endif %}>Mostrar nombre y NIT a la derecha del Logo</option>
+                                <option value="hidden" {% if config_pdf.header_layout == 'hidden' %}selected{% endif %}>Ocultar nombre y NIT (Solo Logo)</option>
+                            </select>
+                        </div>
+
                         <div class="row g-3 mb-3">
                             <div class="col-md-6">
                                 <label class="form-label fw-bold">NIT / CI del Emisor:</label>
@@ -713,11 +722,6 @@
                         <div class="mb-3">
                             <label class="form-label fw-bold">Correo de la Empresa (para uso general):</label>
                             <input type="email" id="editCorreo" class="form-control" value="{{ config_pdf.correo or 'ventas@electrored.bo' }}">
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Dirección Física & Ciudad:</label>
-                            <input type="text" id="editDireccion" class="form-control" value="{{ config_pdf.direccion or 'Av. Banzer Km 5.5 - Santa Cruz' }}">
                         </div>
                     </div>
 
@@ -764,6 +768,10 @@
                             <label class="form-label fw-bold">Correo a mostrar en el Pie:</label>
                             <input type="email" id="editFooterCorreo" class="form-control" value="{{ config_pdf.correo or 'ventas@electrored.bo' }}">
                             <small class="text-muted">Este correo reemplazará al general en el pie de página al guardar.</small>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Dirección Física & Ciudad (Pie de Página):</label>
+                            <input type="text" id="editDireccion" class="form-control" value="{{ config_pdf.direccion or 'Av. Banzer Km 5.5 - Santa Cruz' }}">
                         </div>
                     </div>
 
@@ -988,6 +996,7 @@
             telefono: document.getElementById('editTelefono').value,
             correo: document.getElementById('secFieldsFooter').style.display === 'block' ? document.getElementById('editFooterCorreo').value : document.getElementById('editCorreo').value,
             direccion: document.getElementById('editDireccion').value,
+            header_layout: document.getElementById('editHeaderLayout').value,
             responsable_nombre: document.getElementById('editRespNombre').value,
             responsable_telefono: document.getElementById('editRespTelefono').value,
             responsable_email: document.getElementById('editRespEmail').value,

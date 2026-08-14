@@ -71,6 +71,7 @@
     .card-pos-3 { top: 400px; left: 25px; }
     .card-pos-4 { top: 620px; right: 25px; }
     .card-pos-5 { top: 820px; left: 25px; }
+    .card-pos-6 { top: 960px; right: 25px; }
 
     /* Conectores SVG */
     .connector-svg {
@@ -481,6 +482,19 @@
                 </div>
             </div>
 
+            <!-- Tarjeta 6: Pie de Página -->
+            <div id="card6" class="floating-card card-pos-6 d-none d-lg-block" 
+                 onclick="abrirModalEditor('footer')"
+                 onmouseenter="highlightSync('6', true)" onmouseleave="highlightSync('6', false)">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="bi bi-c-circle fs-3 text-primary"></i>
+                    <div>
+                        <h6 class="fw-bold mb-0 text-dark">6. Pie de Página</h6>
+                        <small class="text-muted">Email y Ciudad</small>
+                    </div>
+                </div>
+            </div>
+
             <!-- Hoja de Papel Boceto Canvas -->
             <div class="paper-sheet sheet-a4" id="paperSheet" style="--theme-color: {{ config_pdf.color_tema or '#dc2626' }};">
                 
@@ -643,8 +657,12 @@
                     </div>
 
                     <!-- Pie de Página -->
-                    <div class="text-center text-muted small mt-4 pt-2 border-top">
-                        Email: <span id="demoFooterEmail">{{ config_pdf.correo or 'ventas@electrored.bo' }}</span> - <span id="demoFooterCiudad">Santa Cruz - Bolivia</span>
+                    <div id="sec6" class="sheet-section"
+                         onclick="abrirModalEditor('footer')"
+                         onmouseenter="highlightSync('6', true)" onmouseleave="highlightSync('6', false)">
+                        <div class="text-center text-muted small mt-4 pt-2 border-top">
+                            Email: <span id="demoFooterEmail">{{ config_pdf.correo or 'ventas@electrored.bo' }}</span> - <span id="demoFooterCiudad">Santa Cruz - Bolivia</span>
+                        </div>
                     </div>
                 </div>
 
@@ -693,7 +711,7 @@
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label fw-bold">Correo de la Empresa:</label>
+                            <label class="form-label fw-bold">Correo de la Empresa (para uso general):</label>
                             <input type="email" id="editCorreo" class="form-control" value="{{ config_pdf.correo or 'ventas@electrored.bo' }}">
                         </div>
 
@@ -736,6 +754,16 @@
                         <div class="mb-3">
                             <label class="form-label fw-bold">Términos y Condiciones Generales:</label>
                             <textarea id="editTerminos" class="form-control" rows="4">{{ config_pdf.terminos_condiciones or '1. Validez de la oferta: 15 días.\n2. Precios incluyen impuestos de ley.\n3. Tiempo de entrega a convenir.' }}</textarea>
+                        </div>
+                    </div>
+
+                    <!-- Sección 6: Pie de Página -->
+                    <div id="secFieldsFooter" class="editor-sec">
+                        <h6 class="fw-bold text-primary mb-3"><i class="bi bi-c-circle me-1"></i>6. Pie de Página</h6>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Correo a mostrar en el Pie:</label>
+                            <input type="email" id="editFooterCorreo" class="form-control" value="{{ config_pdf.correo or 'ventas@electrored.bo' }}">
+                            <small class="text-muted">Este correo reemplazará al general en el pie de página al guardar.</small>
                         </div>
                     </div>
 
@@ -892,6 +920,9 @@
         } else if (seccion === 'condiciones_firmas') {
             document.getElementById('modalEditorTitulo').innerText = '5. Editar Condiciones & Plazos';
             document.getElementById('secFieldsCondicionesFirmas').style.display = 'block';
+        } else if (seccion === 'footer') {
+            document.getElementById('modalEditorTitulo').innerText = '6. Editar Pie de Página';
+            document.getElementById('secFieldsFooter').style.display = 'block';
         } else {
             document.getElementById('modalEditorTitulo').innerText = 'Editar Datos del PDF';
             document.querySelectorAll('.editor-sec').forEach(el => el.style.display = 'block');
@@ -904,7 +935,11 @@
         const emp = document.getElementById('editEmpresaNombre').value;
         const nit = document.getElementById('editNitEmisor').value;
         const dir = document.getElementById('editDireccion').value;
-        const correo = document.getElementById('editCorreo').value;
+        
+        let correo = document.getElementById('editFooterCorreo').value;
+        if(document.getElementById('secFieldsFooter').style.display === 'none') {
+            correo = document.getElementById('editCorreo').value;
+        }
         
         const respNom = document.getElementById('editRespNombre').value;
         const respTel = document.getElementById('editRespTelefono').value;
@@ -951,7 +986,7 @@
             empresa_nombre: document.getElementById('editEmpresaNombre').value,
             nit_emisor: document.getElementById('editNitEmisor').value,
             telefono: document.getElementById('editTelefono').value,
-            correo: document.getElementById('editCorreo').value,
+            correo: document.getElementById('secFieldsFooter').style.display === 'block' ? document.getElementById('editFooterCorreo').value : document.getElementById('editCorreo').value,
             direccion: document.getElementById('editDireccion').value,
             responsable_nombre: document.getElementById('editRespNombre').value,
             responsable_telefono: document.getElementById('editRespTelefono').value,

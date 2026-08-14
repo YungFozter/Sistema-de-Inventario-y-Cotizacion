@@ -383,29 +383,47 @@
         }
 
         .firma-section {
-            margin-top: 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            /* centrar verticalmente firma y fecha */
+            margin-top: 30px;
+            display: table;
+            width: 100%;
+        }
+
+        .firma-col {
+            display: table-cell;
+            text-align: center;
+            vertical-align: bottom;
+            width: 33%;
+        }
+        
+        .firma-col-right {
+            display: table-cell;
+            text-align: right;
+            vertical-align: bottom;
+            width: 33%;
         }
 
         .firma-container {
+            display: inline-block;
             text-align: center;
-            width: 200px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            /* asegurar centrado vertical del bloque de firma */
+            width: 80%;
         }
 
         .firma-line {
             border-top: 1px solid #2c3e50;
-            width: 80%;
             margin: 0 auto;
             padding-top: 6px;
-            /* reducir espacio vertical para alinear con la fecha */
             box-sizing: border-box;
+            font-size: 9pt;
+            font-weight: bold;
+        }
+
+        .footer-section {
+            margin-top: 25px;
+            padding-top: 10px;
+            border-top: 1px solid #e0e0e0;
+            text-align: center;
+            font-size: 8pt;
+            color: #6c757d;
         }
 
         .firma-text {
@@ -730,16 +748,31 @@
 
         <!-- SECCIÓN FIRMA -->
         <div class="firma-section">
-            <div class="firma-container">
-                <div class="firma-line"></div>
-                <div class="firma-text">FIRMA RESPONSABLE</div>
+            <div class="firma-col">
+                <div class="firma-container">
+                    <div class="firma-line">FIRMA RESPONSABLE</div>
+                </div>
+            </div>
+            
+            <div class="firma-col">
+                <div class="firma-container">
+                    <div class="firma-line">FIRMA CLIENTE</div>
+                </div>
             </div>
 
-            <div class="fecha-cotizacion">
-                <div><strong>FECHA DE COTIZACIÓN:</strong></div>
-                <div>{{ cotizacion.fecha }}</div>
+            <div class="firma-col-right">
+                <div class="fecha-cotizacion" style="display: inline-block; text-align: right; max-width: 150px;">
+                    <div style="font-size: 8pt;"><strong>FECHA DE COTIZACIÓN:</strong></div>
+                    <div style="font-size: 10pt;">{{ cotizacion.fecha }}</div>
+                </div>
             </div>
         </div>
+
+        <!-- Pie de Página -->
+        <div class="footer-section">
+            Email: {{ config_pdf.correo if config_pdf and config_pdf.correo else 'ventas@electrored.bo' }} - Santa Cruz - Bolivia
+        </div>
+        
         </div> <!-- Cierre del contenedor avoid-page-break -->
     </div> <!-- Cierre del div container -->
     </body>

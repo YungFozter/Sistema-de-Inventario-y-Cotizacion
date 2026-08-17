@@ -27,6 +27,7 @@ def register_mi_pdf_routes(app):
             'telefono': data.get('telefono', ''),
             'correo': data.get('correo', ''),
             'direccion': data.get('direccion', ''),
+            'header_layout': data.get('header_layout', 'default'),
             'terminos_condiciones': data.get('terminos_condiciones', ''),
             'nota_pie': data.get('nota_pie', ''),
             'responsable_nombre': data.get('responsable_nombre', ''),

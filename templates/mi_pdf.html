@@ -3,6 +3,10 @@
 {% block title %}MI PDF - Personalización de Cotizaciones{% endblock %}
 
 {% block contenido %}
+<!-- Cropper.js CDN para Ajuste, Zoom y Recorte de Logo -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
+
 <style>
     /* Estilos del Lienzo "MI PDF" UI Pro */
     .mipdf-container {
@@ -11,6 +15,39 @@
         padding: 2.5rem 2rem;
         box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
         position: relative;
+    }
+
+    /* Estilos para el Recortador / Cropper de Logo */
+    .cropper-checker-bg {
+        background-image: linear-gradient(45deg, #e2e8f0 25%, transparent 25%),
+                          linear-gradient(-45deg, #e2e8f0 25%, transparent 25%),
+                          linear-gradient(45deg, transparent 75%, #e2e8f0 75%),
+                          linear-gradient(-45deg, transparent 75%, #e2e8f0 75%);
+        background-size: 16px 16px;
+        background-position: 0 0, 0 8px, 8px -8px, -8px 0px;
+        background-color: #ffffff;
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        max-height: 420px;
+        overflow: hidden;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    .logo-thumbnail-preview {
+        max-height: 60px;
+        max-width: 140px;
+        object-fit: contain;
+        border-radius: 6px;
+        background-image: linear-gradient(45deg, #e2e8f0 25%, transparent 25%),
+                          linear-gradient(-45deg, #e2e8f0 25%, transparent 25%),
+                          linear-gradient(45deg, transparent 75%, #e2e8f0 75%),
+                          linear-gradient(-45deg, transparent 75%, #e2e8f0 75%);
+        background-size: 12px 12px;
+        background-position: 0 0, 0 6px, 6px -6px, -6px 0px;
+        background-color: #f8fafc;
+        border: 1px solid #cbd5e1;
+        padding: 4px;
     }
 
     .paper-canvas-wrapper {
@@ -708,9 +745,21 @@
                         <h6 class="fw-bold text-danger mb-3"><i class="bi bi-image me-1"></i>1. Logo & Datos de la Empresa Emisora</h6>
                         
                         <div class="mb-3 p-3 bg-light rounded border">
-                            <label class="form-label fw-bold">Subir Logo de la Empresa (PNG/JPG):</label>
-                            <input type="file" id="inputLogoFile" class="form-control" accept="image/*" onchange="procesarArchivoLogo(this)">
-                            <small class="text-muted">Recomendado: Imagen con fondo transparente o blanco (Max 2MB).</small>
+                            <label class="form-label fw-bold"><i class="bi bi-image me-1"></i>Logo de la Empresa (PNG/JPG):</label>
+                            <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
+                                <input type="file" id="inputLogoFile" class="form-control" style="max-width: 290px;" accept="image/*" onchange="seleccionarArchivoParaCropper(this)">
+                                <button type="button" class="btn btn-outline-danger fw-bold d-inline-flex align-items-center gap-1" id="btnAjustarLogo" onclick="abrirCropperConLogoActual()" {% if not config_pdf.logo_base64 %}style="display:none;"{% endif %}>
+                                    <i class="bi bi-crop"></i> Ajustar / Recortar Logo
+                                </button>
+                                <button type="button" class="btn btn-outline-secondary btn-sm" id="btnQuitarLogo" onclick="quitarLogoEmpresa()" {% if not config_pdf.logo_base64 %}style="display:none;"{% endif %}>
+                                    <i class="bi bi-trash text-danger"></i> Quitar Logo
+                                </button>
+                            </div>
+                            <div id="previewLogoThumbnailContainer" class="d-flex align-items-center gap-3 mt-2" {% if not config_pdf.logo_base64 %}style="display:none;"{% endif %}>
+                                <img id="imgLogoThumbnail" src="{{ config_pdf.logo_base64 or '' }}" class="logo-thumbnail-preview" alt="Miniatura Logo">
+                                <small class="text-muted">Logo activo. Haz clic en <strong>"Ajustar / Recortar Logo"</strong> para hacer zoom, cambiar posición o recortar márgenes.</small>
+                            </div>
+                            <small class="text-muted d-block mt-1">Recomendado: Imagen con fondo transparente o blanco (Max 2MB).</small>
                         </div>
 
                         <div class="mb-3">
@@ -910,36 +959,350 @@
         }
     }
 
-    function procesarArchivoLogo(input) {
+<!-- Modal de Ajuste, Zoom y Recorte de Logo -->
+<div class="modal fade" id="modalCropperLogo" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 shadow-lg rounded-4">
+            <div class="modal-header bg-dark text-white rounded-top-4">
+                <h5 class="modal-title fw-bold">
+                    <i class="bi bi-crop me-2 text-danger"></i>Ajustar, Zoom y Recortar Logo
+                </h5>
+                <button type="button" class="btn-close btn-close-white" onclick="cerrarCropperModal()"></button>
+            </div>
+            <div class="modal-body p-4">
+                <p class="text-muted small mb-3">
+                    <i class="bi bi-info-circle text-danger me-1"></i>
+                    Arrastra la imagen o los bordes del recuadro para definir el área visible. Usa los botones de <strong>Zoom</strong> para agrandar logos pequeños o recortar espacios vacíos superiores/inferiores.
+                </p>
+                
+                <!-- Lienzo del Cropper -->
+                <div class="cropper-checker-bg mb-3 text-center" style="min-height: 330px; max-height: 420px;">
+                    <img id="imgParaCropper" src="" style="max-width: 100%; display: block;" alt="Recortar Logo">
+                </div>
+
+                <!-- Barra de Herramientas de Ajuste -->
+                <div class="card bg-light border-0 rounded-3 p-3">
+                    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+                        
+                        <!-- Zoom -->
+                        <div class="btn-group" role="group">
+                            <button type="button" class="btn btn-outline-secondary" title="Aumentar Zoom (+)" onclick="cropperZoom(0.1)">
+                                <i class="bi bi-zoom-in"></i>
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary" title="Reducir Zoom (-)" onclick="cropperZoom(-0.1)">
+                                <i class="bi bi-zoom-out"></i>
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary" title="Restablecer" onclick="cropperReset()">
+                                <i class="bi bi-arrow-counterclockwise"></i> Reset
+                            </button>
+                        </div>
+
+                        <!-- Rotación y Volteo -->
+                        <div class="btn-group" role="group">
+                            <button type="button" class="btn btn-outline-secondary" title="Girar -90°" onclick="cropperRotate(-90)">
+                                <i class="bi bi-arrow-left-circle"></i> -90°
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary" title="Girar +90°" onclick="cropperRotate(90)">
+                                <i class="bi bi-arrow-right-circle"></i> +90°
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary" title="Voltear Horizontal" onclick="cropperFlipX()">
+                                <i class="bi bi-symmetry-vertical"></i>
+                            </button>
+                        </div>
+
+                        <!-- Selector de Proporción -->
+                        <div class="d-flex align-items-center gap-1">
+                            <label class="small fw-bold text-secondary me-1"><i class="bi bi-aspect-ratio"></i> Formato:</label>
+                            <select class="form-select form-select-sm fw-bold border-secondary" style="width: auto;" onchange="cropperSetAspectRatio(this.value)">
+                                <option value="NaN" selected>Libre (Personalizado)</option>
+                                <option value="3">3:1 (Banner Extendido)</option>
+                                <option value="2">2:1 (Rectangular)</option>
+                                <option value="1.7777777777777777">16:9 (Panorámico)</option>
+                                <option value="1.3333333333333333">4:3 (Estándar)</option>
+                                <option value="1">1:1 (Cuadrado)</option>
+                            </select>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer bg-light rounded-bottom-4">
+                <button type="button" class="btn btn-secondary fw-bold" onclick="cerrarCropperModal()">Cancelar</button>
+                <button type="button" class="btn btn-danger fw-bold px-4" onclick="guardarRecorteLogo()">
+                    <i class="bi bi-check2-circle me-1"></i> Aplicar Recorte y Usar Logo
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let currentThemeColor = "{{ config_pdf.color_tema or '#dc2626' }}";
+    let logoBase64Data = "{{ config_pdf.logo_base64 or '' }}";
+    let modalInstance = null;
+    let modalCropperInstance = null;
+    let cropperInstance = null;
+    let cropperScaleX = 1;
+
+    document.addEventListener('DOMContentLoaded', () => {
+        modalInstance = new bootstrap.Modal(document.getElementById('modalEditorPDF'));
+        cambiarTipoHoja("{{ config_pdf.tipo_hoja or 'A4' }}");
+        
+        // Trazar conectores SVG
+        setTimeout(trazarConectoresSVG, 300);
+        window.addEventListener('resize', trazarConectoresSVG);
+    });
+
+    function cambiarTipoHoja(tipo) {
+        const sheet = document.getElementById('paperSheet');
+        const badge = document.getElementById('badgeTamanoActual');
+        
+        sheet.classList.remove('sheet-a4', 'sheet-carta', 'sheet-oficio');
+
+        if (tipo === 'Carta') {
+            sheet.classList.add('sheet-carta');
+            badge.innerText = 'Hoja: Carta (216×279 mm)';
+        } else if (tipo === 'Oficio') {
+            sheet.classList.add('sheet-oficio');
+            badge.innerText = 'Hoja: Oficio (216×330 mm)';
+        } else {
+            sheet.classList.add('sheet-a4');
+            badge.innerText = 'Hoja: A4 (210×297 mm)';
+        }
+
+        setTimeout(trazarConectoresSVG, 200);
+    }
+
+    function cambiarColorTema(hexColor) {
+        currentThemeColor = hexColor;
+        document.getElementById('inputColorTema').value = hexColor;
+        document.getElementById('paperSheet').style.setProperty('--theme-color', hexColor);
+        document.querySelectorAll('.connector-path').forEach(p => p.style.stroke = hexColor);
+    }
+
+    function actualizarTituloHoja(val) {
+        document.getElementById('demoTituloDocumento').innerText = val || 'COTIZACIÓN DE VENTAS';
+    }
+
+    function highlightSync(id, active) {
+        const card = document.getElementById('card' + id);
+        const sec = document.getElementById('sec' + id);
+        const path = document.getElementById('path' + id);
+
+        if (active) {
+            if (card) card.classList.add('card-highlight-active');
+            if (sec) sec.classList.add('section-highlight-active');
+            if (path) path.classList.add('path-active');
+        } else {
+            if (card) card.classList.remove('card-highlight-active');
+            if (sec) sec.classList.remove('section-highlight-active');
+            if (path) path.classList.remove('path-active');
+        }
+    }
+
+    function trazarConectoresSVG() {
+        const svg = document.getElementById('svgConnectors');
+        const wrapper = document.getElementById('canvasWrapper');
+        if (!svg || !wrapper || window.innerWidth < 1200) return;
+
+        svg.innerHTML = '';
+        const wrapperRect = wrapper.getBoundingClientRect();
+
+        for (let i = 1; i <= 5; i++) {
+            const card = document.getElementById('card' + i);
+            const sec = document.getElementById('sec' + i);
+
+            if (!card || !sec) continue;
+
+            const cardRect = card.getBoundingClientRect();
+            const secRect = sec.getBoundingClientRect();
+
+            // Puntos de origen y destino
+            const isLeft = (i % 2 !== 0); // 1, 3, 5 están a la izquierda
+            
+            const startX = isLeft ? (cardRect.right - wrapperRect.left) : (cardRect.left - wrapperRect.left);
+            const startY = (cardRect.top + cardRect.height / 2) - wrapperRect.top;
+
+            const endX = isLeft ? (secRect.left - wrapperRect.left) : (secRect.right - wrapperRect.left);
+            const endY = (secRect.top + secRect.height / 2) - wrapperRect.top;
+
+            // Ruta Bezier suave
+            const controlOffset = Math.abs(endX - startX) * 0.5;
+            const cp1X = isLeft ? (startX + controlOffset) : (startX - controlOffset);
+            const cp2X = isLeft ? (endX - controlOffset) : (endX + controlOffset);
+
+            const pathD = `M ${startX} ${startY} C ${cp1X} ${startY}, ${cp2X} ${endY}, ${endX} ${endY}`;
+
+            const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            path.setAttribute('id', 'path' + i);
+            path.setAttribute('d', pathD);
+            path.setAttribute('class', 'connector-path');
+            path.style.stroke = currentThemeColor;
+
+            svg.appendChild(path);
+        }
+    }
+
+    /* =============================================
+       FUNCIONES DE CROPPER / AJUSTE / RECORTE DE LOGO
+       ============================================= */
+    function abrirCropperModal(imageUrl) {
+        if (modalInstance) modalInstance.hide();
+        if (!modalCropperInstance) {
+            modalCropperInstance = new bootstrap.Modal(document.getElementById('modalCropperLogo'));
+        }
+        const img = document.getElementById('imgParaCropper');
+        img.src = imageUrl;
+
+        modalCropperInstance.show();
+
+        const modalEl = document.getElementById('modalCropperLogo');
+        function initCropperOnShow() {
+            modalEl.removeEventListener('shown.bs.modal', initCropperOnShow);
+            if (cropperInstance) {
+                cropperInstance.destroy();
+            }
+            cropperScaleX = 1;
+            cropperInstance = new Cropper(img, {
+                aspectRatio: NaN,
+                viewMode: 1,
+                dragMode: 'move',
+                autoCropArea: 0.95,
+                restore: false,
+                guides: true,
+                center: true,
+                highlight: true,
+                cropBoxMovable: true,
+                cropBoxResizable: true,
+                toggleDragModeOnDblclick: true,
+                background: false
+            });
+        }
+        modalEl.addEventListener('shown.bs.modal', initCropperOnShow);
+    }
+
+    function seleccionarArchivoParaCropper(input) {
         if (input.files && input.files[0]) {
             const file = input.files[0];
             const reader = new FileReader();
-
             reader.onload = function(e) {
-                logoBase64Data = e.target.result;
-                
-                // Actualizar previsualización en la hoja
-                let img = document.getElementById('imgLogoSheet');
-                const placeholder = document.getElementById('imgLogoSheetPlaceholder');
-                const isHidden = (document.getElementById('editHeaderLayout') && document.getElementById('editHeaderLayout').value === 'hidden');
-
-                if (!img) {
-                    img = document.createElement('img');
-                    img.id = 'imgLogoSheet';
-                    img.className = 'logo-container' + (isHidden ? ' logo-solo' : '');
-                    img.alt = 'Logo Empresa';
-                    if (placeholder) placeholder.replaceWith(img);
-                } else {
-                    if (isHidden) {
-                        img.classList.add('logo-solo');
-                    } else {
-                        img.classList.remove('logo-solo');
-                    }
-                }
-                img.src = logoBase64Data;
+                abrirCropperModal(e.target.result);
             };
-
             reader.readAsDataURL(file);
+        }
+    }
+
+    function abrirCropperConLogoActual() {
+        if (logoBase64Data) {
+            abrirCropperModal(logoBase64Data);
+        }
+    }
+
+    function cropperZoom(val) {
+        if (cropperInstance) cropperInstance.zoom(val);
+    }
+
+    function cropperRotate(deg) {
+        if (cropperInstance) cropperInstance.rotate(deg);
+    }
+
+    function cropperFlipX() {
+        if (cropperInstance) {
+            cropperScaleX = -cropperScaleX;
+            cropperInstance.scaleX(cropperScaleX);
+        }
+    }
+
+    function cropperReset() {
+        if (cropperInstance) {
+            cropperScaleX = 1;
+            cropperInstance.reset();
+        }
+    }
+
+    function cropperSetAspectRatio(val) {
+        if (cropperInstance) {
+            const ratio = parseFloat(val);
+            cropperInstance.setAspectRatio(isNaN(ratio) ? NaN : ratio);
+        }
+    }
+
+    function cerrarCropperModal() {
+        if (modalCropperInstance) modalCropperInstance.hide();
+        if (cropperInstance) {
+            cropperInstance.destroy();
+            cropperInstance = null;
+        }
+        if (modalInstance) modalInstance.show();
+    }
+
+    function guardarRecorteLogo() {
+        if (!cropperInstance) return;
+        const canvas = cropperInstance.getCroppedCanvas({
+            maxWidth: 800,
+            maxHeight: 600,
+            imageSmoothingEnabled: true,
+            imageSmoothingQuality: 'high'
+        });
+
+        if (canvas) {
+            logoBase64Data = canvas.toDataURL('image/png');
+            
+            // Actualizar miniatura y botones en el modal
+            const thumb = document.getElementById('imgLogoThumbnail');
+            const thumbCont = document.getElementById('previewLogoThumbnailContainer');
+            const btnAjustar = document.getElementById('btnAjustarLogo');
+            const btnQuitar = document.getElementById('btnQuitarLogo');
+            if (thumb) thumb.src = logoBase64Data;
+            if (thumbCont) thumbCont.style.display = 'flex';
+            if (btnAjustar) btnAjustar.style.display = 'inline-flex';
+            if (btnQuitar) btnQuitar.style.display = 'inline-flex';
+
+            // Actualizar en la maqueta de la hoja
+            let imgSheet = document.getElementById('imgLogoSheet');
+            const placeholder = document.getElementById('imgLogoSheetPlaceholder');
+            const isHidden = (document.getElementById('editHeaderLayout') && document.getElementById('editHeaderLayout').value === 'hidden');
+
+            if (!imgSheet) {
+                imgSheet = document.createElement('img');
+                imgSheet.id = 'imgLogoSheet';
+                imgSheet.className = 'logo-container' + (isHidden ? ' logo-solo' : '');
+                imgSheet.alt = 'Logo Empresa';
+                if (placeholder) placeholder.replaceWith(imgSheet);
+            } else {
+                if (isHidden) {
+                    imgSheet.classList.add('logo-solo');
+                } else {
+                    imgSheet.classList.remove('logo-solo');
+                }
+            }
+            imgSheet.src = logoBase64Data;
+        }
+
+        cerrarCropperModal();
+    }
+
+    function quitarLogoEmpresa() {
+        if (confirm('¿Deseas remover el logotipo de la cotización?')) {
+            logoBase64Data = '';
+            const thumbCont = document.getElementById('previewLogoThumbnailContainer');
+            const btnAjustar = document.getElementById('btnAjustarLogo');
+            const btnQuitar = document.getElementById('btnQuitarLogo');
+            const inputFile = document.getElementById('inputLogoFile');
+            if (inputFile) inputFile.value = '';
+            if (thumbCont) thumbCont.style.display = 'none';
+            if (btnAjustar) btnAjustar.style.display = 'none';
+            if (btnQuitar) btnQuitar.style.display = 'none';
+
+            const imgSheet = document.getElementById('imgLogoSheet');
+            if (imgSheet) {
+                const placeholder = document.createElement('div');
+                placeholder.id = 'imgLogoSheetPlaceholder';
+                const isHidden = (document.getElementById('editHeaderLayout') && document.getElementById('editHeaderLayout').value === 'hidden');
+                placeholder.className = 'logo-placeholder' + (isHidden ? ' logo-solo-placeholder' : '');
+                placeholder.innerHTML = '<i class="bi bi-cloud-upload me-1"></i> Subir Logo';
+                imgSheet.replaceWith(placeholder);
+            }
         }
     }
 

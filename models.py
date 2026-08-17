@@ -1187,10 +1187,13 @@ def asegurar_tabla_configuracion_pdf(cursor):
         ''')
         
         # Add column if table exists from before
-        try:
-            cursor.execute("ALTER TABLE configuracion_pdf ADD COLUMN header_layout TEXT DEFAULT 'default'")
-        except:
-            pass
+        if is_postgres:
+            cursor.execute("ALTER TABLE configuracion_pdf ADD COLUMN IF NOT EXISTS header_layout TEXT DEFAULT 'default'")
+        else:
+            try:
+                cursor.execute("ALTER TABLE configuracion_pdf ADD COLUMN header_layout TEXT DEFAULT 'default'")
+            except:
+                pass
     except Exception as e:
         print(f"Error asegurando tabla configuracion_pdf: {e}")
 
@@ -1207,6 +1210,8 @@ def obtener_configuracion_pdf(usuario_id):
             if row:
                 col_names = [col[0] for col in cursor.description]
                 res = dict(zip(col_names, row))
+                if not res.get('header_layout'):
+                    res['header_layout'] = 'default'
                 if not res.get('responsable_nombre'):
                     cursor.execute("SELECT nombre, telefono, correo FROM clientes WHERE id = ?", (usuario_id,))
                     u = cursor.fetchone()
@@ -1227,6 +1232,7 @@ def obtener_configuracion_pdf(usuario_id):
         'telefono': '+591 76543210',
         'correo': 'ventas@electrored.bo',
         'direccion': 'Av. Banzer Km 5.5 - Santa Cruz',
+        'header_layout': 'default',
         'terminos_condiciones': '1. Validez de la oferta: 15 días.\n2. Precios incluyen impuestos de ley.\n3. Tiempo de entrega a convenir.',
         'nota_pie': '¡Gracias por su preferencia!',
         'responsable_nombre': 'Administrador',

@@ -1048,6 +1048,24 @@
         modalInstance = new bootstrap.Modal(document.getElementById('modalEditorPDF'));
         cambiarTipoHoja("{{ config_pdf.tipo_hoja or 'A4' }}");
         
+        // Evitar advertencia de aria-hidden en elementos con foco al cerrar modal
+        const modalEditorEl = document.getElementById('modalEditorPDF');
+        if (modalEditorEl) {
+            modalEditorEl.addEventListener('hide.bs.modal', () => {
+                if (document.activeElement && modalEditorEl.contains(document.activeElement)) {
+                    document.activeElement.blur();
+                }
+            });
+        }
+        const modalCropperEl = document.getElementById('modalCropperLogo');
+        if (modalCropperEl) {
+            modalCropperEl.addEventListener('hide.bs.modal', () => {
+                if (document.activeElement && modalCropperEl.contains(document.activeElement)) {
+                    document.activeElement.blur();
+                }
+            });
+        }
+
         // Trazar conectores SVG
         setTimeout(trazarConectoresSVG, 300);
         window.addEventListener('resize', trazarConectoresSVG);
@@ -1228,6 +1246,9 @@
     }
 
     function cerrarCropperModal() {
+        if (document.activeElement) {
+            document.activeElement.blur();
+        }
         if (modalCropperInstance) modalCropperInstance.hide();
         if (cropperInstance) {
             cropperInstance.destroy();
@@ -1385,6 +1406,9 @@
             }
         }
 
+        if (document.activeElement) {
+            document.activeElement.blur();
+        }
         modalInstance.hide();
         setTimeout(trazarConectoresSVG, 100);
     }

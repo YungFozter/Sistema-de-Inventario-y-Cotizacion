@@ -130,6 +130,13 @@
         max-height: 60px;
         object-fit: contain;
         margin-bottom: 6px;
+        transition: all 0.2s ease;
+    }
+
+    .logo-container.logo-solo {
+        max-width: 260px !important;
+        max-height: 85px !important;
+        margin-bottom: 0 !important;
     }
 
     .logo-placeholder {
@@ -144,6 +151,13 @@
         color: #64748b;
         background: #f8fafc;
         margin-bottom: 6px;
+        transition: all 0.2s ease;
+    }
+
+    .logo-placeholder.logo-solo-placeholder {
+        width: 220px !important;
+        height: 75px !important;
+        margin-bottom: 0 !important;
     }
 
     .sheet-client-box {
@@ -508,9 +522,9 @@
                             <div id="demoHeaderWrapper" class="{% if config_pdf.header_layout == 'right' %}d-flex align-items-center gap-3{% endif %}">
                                 <div id="demoLogoWrapper">
                                     {% if config_pdf.logo_base64 %}
-                                        <img id="imgLogoSheet" src="{{ config_pdf.logo_base64 }}" class="logo-container" alt="Logo Empresa">
+                                        <img id="imgLogoSheet" src="{{ config_pdf.logo_base64 }}" class="logo-container {% if config_pdf.header_layout == 'hidden' %}logo-solo{% endif %}" alt="Logo Empresa">
                                     {% else %}
-                                        <div id="imgLogoSheetPlaceholder" class="logo-placeholder">
+                                        <div id="imgLogoSheetPlaceholder" class="logo-placeholder {% if config_pdf.header_layout == 'hidden' %}logo-solo-placeholder{% endif %}">
                                             <i class="bi bi-cloud-upload me-1"></i> Subir Logo
                                         </div>
                                     {% endif %}
@@ -907,12 +921,20 @@
                 // Actualizar previsualización en la hoja
                 let img = document.getElementById('imgLogoSheet');
                 const placeholder = document.getElementById('imgLogoSheetPlaceholder');
+                const isHidden = (document.getElementById('editHeaderLayout') && document.getElementById('editHeaderLayout').value === 'hidden');
 
                 if (!img) {
                     img = document.createElement('img');
                     img.id = 'imgLogoSheet';
-                    img.className = 'logo-container';
+                    img.className = 'logo-container' + (isHidden ? ' logo-solo' : '');
+                    img.alt = 'Logo Empresa';
                     if (placeholder) placeholder.replaceWith(img);
+                } else {
+                    if (isHidden) {
+                        img.classList.add('logo-solo');
+                    } else {
+                        img.classList.remove('logo-solo');
+                    }
                 }
                 img.src = logoBase64Data;
             };
@@ -977,17 +999,26 @@
         // Actualizar disposición del encabezado en la maqueta en vivo
         const wrapper = document.getElementById('demoHeaderWrapper');
         const info = document.getElementById('demoHeaderInfo');
+        const imgLogo = document.getElementById('imgLogoSheet');
+        const placeholderLogo = document.getElementById('imgLogoSheetPlaceholder');
+
         if (wrapper && info) {
             if (layout === 'right') {
                 wrapper.className = 'd-flex align-items-center gap-3';
                 info.classList.remove('d-none');
+                if (imgLogo) imgLogo.classList.remove('logo-solo');
+                if (placeholderLogo) placeholderLogo.classList.remove('logo-solo-placeholder');
             } else if (layout === 'hidden') {
-                wrapper.className = '';
+                wrapper.className = 'd-flex align-items-center';
                 info.classList.add('d-none');
+                if (imgLogo) imgLogo.classList.add('logo-solo');
+                if (placeholderLogo) placeholderLogo.classList.add('logo-solo-placeholder');
             } else {
                 // default
                 wrapper.className = '';
                 info.classList.remove('d-none');
+                if (imgLogo) imgLogo.classList.remove('logo-solo');
+                if (placeholderLogo) placeholderLogo.classList.remove('logo-solo-placeholder');
             }
         }
 

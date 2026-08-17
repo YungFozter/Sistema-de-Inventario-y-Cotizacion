@@ -504,19 +504,24 @@
                      onmouseenter="highlightSync('1', true)" onmouseleave="highlightSync('1', false)">
                     <div class="sheet-header-grid">
                         <!-- Superior Izquierda: Logo y Datos Emisor -->
-                        <div>
-                            {% if config_pdf.logo_base64 %}
-                                <img id="imgLogoSheet" src="{{ config_pdf.logo_base64 }}" class="logo-container" alt="Logo Empresa">
-                            {% else %}
-                                <div id="imgLogoSheetPlaceholder" class="logo-placeholder">
-                                    <i class="bi bi-cloud-upload me-1"></i> Subir Logo
+                        <div id="demoHeaderLeft">
+                            <div id="demoHeaderWrapper" class="{% if config_pdf.header_layout == 'right' %}d-flex align-items-center gap-3{% endif %}">
+                                <div id="demoLogoWrapper">
+                                    {% if config_pdf.logo_base64 %}
+                                        <img id="imgLogoSheet" src="{{ config_pdf.logo_base64 }}" class="logo-container" alt="Logo Empresa">
+                                    {% else %}
+                                        <div id="imgLogoSheetPlaceholder" class="logo-placeholder">
+                                            <i class="bi bi-cloud-upload me-1"></i> Subir Logo
+                                        </div>
+                                    {% endif %}
                                 </div>
-                            {% endif %}
-                            <div class="fw-bold text-dark fs-5" id="demoNombreEmpresa">
-                                {{ config_pdf.empresa_nombre or 'ELECTRORED BOLIVIA S.R.L.' }}
+                                <div id="demoHeaderInfo" class="{% if config_pdf.header_layout == 'hidden' %}d-none{% endif %}">
+                                    <div class="fw-bold text-dark fs-5" id="demoNombreEmpresa">
+                                        {{ config_pdf.empresa_nombre or 'ELECTRORED BOLIVIA S.R.L.' }}
+                                    </div>
+                                    <div class="text-muted small" id="demoNitEmisor">NIT: {{ config_pdf.nit_emisor or '1029384021' }}</div>
+                                </div>
                             </div>
-                            <div class="text-muted small" id="demoNitEmisor">NIT: {{ config_pdf.nit_emisor or '1029384021' }}</div>
-                            <div class="text-muted small" id="demoDireccionEmisor">{{ config_pdf.direccion or 'Av. Banzer Km 5.5 - Santa Cruz' }}</div>
                         </div>
 
                         <!-- Superior Derecha: Título y Código -->
@@ -661,7 +666,7 @@
                          onclick="abrirModalEditor('footer')"
                          onmouseenter="highlightSync('6', true)" onmouseleave="highlightSync('6', false)">
                         <div class="text-center text-muted small mt-4 pt-2 border-top">
-                            Email: <span id="demoFooterEmail">{{ config_pdf.correo or 'ventas@electrored.bo' }}</span> - <span id="demoFooterCiudad">Santa Cruz - Bolivia</span>
+                            <span id="demoFooterDireccion">{{ config_pdf.direccion or 'Av. Banzer Km 5.5 - Santa Cruz' }}</span> | Email: <span id="demoFooterEmail">{{ config_pdf.correo or 'ventas@electrored.bo' }}</span>
                         </div>
                     </div>
                 </div>
@@ -943,6 +948,7 @@
         const emp = document.getElementById('editEmpresaNombre').value;
         const nit = document.getElementById('editNitEmisor').value;
         const dir = document.getElementById('editDireccion').value;
+        const layout = document.getElementById('editHeaderLayout').value;
         
         let correo = document.getElementById('editFooterCorreo').value;
         if(document.getElementById('secFieldsFooter').style.display === 'none') {
@@ -954,9 +960,13 @@
         const respMail = document.getElementById('editRespEmail').value;
         const plazo = document.getElementById('editPlazoEntrega').value;
 
+        // Actualizar textos
         if (emp) document.getElementById('demoNombreEmpresa').innerText = emp;
         if (nit) document.getElementById('demoNitEmisor').innerText = 'NIT: ' + nit;
-        if (dir) document.getElementById('demoDireccionEmisor').innerText = dir;
+        if (dir) {
+            const elDir = document.getElementById('demoFooterDireccion');
+            if (elDir) elDir.innerText = dir;
+        }
         if (correo) document.getElementById('demoFooterEmail').innerText = correo;
 
         if (respNom) document.getElementById('demoRespNombre').innerText = respNom;
@@ -964,7 +974,25 @@
         if (respMail) document.getElementById('demoRespEmail').innerText = respMail;
         if (plazo) document.getElementById('demoPlazoEntrega').innerText = plazo;
 
+        // Actualizar disposición del encabezado en la maqueta en vivo
+        const wrapper = document.getElementById('demoHeaderWrapper');
+        const info = document.getElementById('demoHeaderInfo');
+        if (wrapper && info) {
+            if (layout === 'right') {
+                wrapper.className = 'd-flex align-items-center gap-3';
+                info.classList.remove('d-none');
+            } else if (layout === 'hidden') {
+                wrapper.className = '';
+                info.classList.add('d-none');
+            } else {
+                // default
+                wrapper.className = '';
+                info.classList.remove('d-none');
+            }
+        }
+
         modalInstance.hide();
+        setTimeout(trazarConectoresSVG, 100);
     }
 
     function guardarConfiguracionPDF() {

@@ -592,14 +592,14 @@
                     <div class="sheet-client-box">
                         <div class="row">
                             <div class="col-7">
-                                <div><strong>Cliente:</strong> SANTIAGO MENDOZA SORIA</div>
-                                <div><strong>NIT / CI:</strong> 8392019 SCZ</div>
-                                <div><strong>Teléfono:</strong> +591 76543210</div>
+                                <div><strong>Cliente:</strong> <span id="demoClienteNombre">SANTIAGO MENDOZA SORIA</span></div>
+                                <div><strong>NIT / CI:</strong> <span id="demoClienteNit">8392019 SCZ</span></div>
+                                <div><strong>Teléfono:</strong> <span id="demoClienteTelefono">+591 76543210</span></div>
                             </div>
                             <div class="col-5 text-end">
                                 <div><strong>Fecha:</strong> 30/07/2026</div>
                                 <div><strong>Validez:</strong> 15 Días</div>
-                                <div><strong>Moneda:</strong> Bolivianos (Bs)</div>
+                                <div><strong>Moneda:</strong> <span id="demoMonedaCot">Bolivianos (Bs)</span></div>
                             </div>
                         </div>
                     </div>
@@ -790,6 +790,85 @@
                         <div class="mb-3">
                             <label class="form-label fw-bold">Correo de la Empresa (para uso general):</label>
                             <input type="email" id="editCorreo" class="form-control" value="{{ config_pdf.correo or 'ventas@electrored.bo' }}">
+                        </div>
+                    </div>
+
+                    <!-- Sección 2: Datos del Cliente -->
+                    <div id="secFieldsClient" class="editor-sec">
+                        <h6 class="fw-bold text-success mb-3"><i class="bi bi-person-lines-fill me-1"></i>2. Formato de Datos del Cliente</h6>
+                        
+                        <div class="alert alert-success bg-success bg-opacity-10 border-success text-dark small mb-3">
+                            <i class="bi bi-info-circle-fill text-success me-1"></i>
+                            <strong>Mapeo Automático:</strong> En los PDFs de cotización reales, estos datos se rellenan automáticamente a partir del cliente seleccionado (registrado desde el módulo de <em>Clientes</em>).
+                        </div>
+
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Nombre / Razón Social del Cliente:</label>
+                                <input type="text" id="editDemoClienteNombre" class="form-control" value="SANTIAGO MENDOZA SORIA">
+                                <small class="text-muted">Nombre del destinatario en la cotización de muestra.</small>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">NIT / CI del Cliente:</label>
+                                <input type="text" id="editDemoClienteNit" class="form-control" value="8392019 SCZ">
+                                <small class="text-muted">Documento fiscal o de identidad del cliente.</small>
+                            </div>
+                        </div>
+
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Teléfono / Contacto:</label>
+                                <input type="text" id="editDemoClienteTelefono" class="form-control" value="+591 76543210">
+                                <small class="text-muted">Teléfono o celular del cliente.</small>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Moneda Predeterminada:</label>
+                                <select id="editDemoClienteMoneda" class="form-select">
+                                    <option value="Bolivianos (Bs)" selected>Bolivianos (Bs)</option>
+                                    <option value="Dólares (USD)">Dólares (USD)</option>
+                                </select>
+                                <small class="text-muted">Moneda de emisión en la cotización.</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sección 3: Tabla de Ítems -->
+                    <div id="secFieldsTable" class="editor-sec">
+                        <h6 class="fw-bold text-warning mb-3"><i class="bi bi-table me-1"></i>3. Estructura de la Tabla de Productos / Ítems</h6>
+                        
+                        <div class="alert alert-warning bg-warning bg-opacity-10 border-warning text-dark small mb-3">
+                            <i class="bi bi-palette-fill text-warning me-1"></i>
+                            <strong>Estilo Dinámico:</strong> La cabecera de la tabla de productos adapta automáticamente el color corporativo que elijas en el selector de <em>Tema de Color</em> superior.
+                        </div>
+
+                        <div class="p-3 bg-light rounded border mb-3">
+                            <h6 class="fw-bold text-dark mb-2">Columnas incluidas en el PDF:</h6>
+                            <ul class="list-group list-group-flush small">
+                                <li class="list-group-item bg-transparent d-flex justify-content-between align-items-center py-2">
+                                    <span><strong>#</strong> (Número correlativo del producto)</span>
+                                    <span class="badge bg-success">Visible</span>
+                                </li>
+                                <li class="list-group-item bg-transparent d-flex justify-content-between align-items-center py-2">
+                                    <span><strong>Código</strong> (Código interno del ítem)</span>
+                                    <span class="badge bg-success">Visible</span>
+                                </li>
+                                <li class="list-group-item bg-transparent d-flex justify-content-between align-items-center py-2">
+                                    <span><strong>Descripción</strong> (Nombre y detalle del producto)</span>
+                                    <span class="badge bg-success">Visible</span>
+                                </li>
+                                <li class="list-group-item bg-transparent d-flex justify-content-between align-items-center py-2">
+                                    <span><strong>Cant</strong> (Cantidad cotizada)</span>
+                                    <span class="badge bg-success">Visible</span>
+                                </li>
+                                <li class="list-group-item bg-transparent d-flex justify-content-between align-items-center py-2">
+                                    <span><strong>P.Unit (Bs)</strong> (Precio unitario)</span>
+                                    <span class="badge bg-success">Visible</span>
+                                </li>
+                                <li class="list-group-item bg-transparent d-flex justify-content-between align-items-center py-2">
+                                    <span><strong>P.Total (Bs)</strong> (Subtotal calculado)</span>
+                                    <span class="badge bg-success">Visible</span>
+                                </li>
+                            </ul>
                         </div>
                     </div>
 
@@ -1229,6 +1308,12 @@
         if (seccion === 'header') {
             document.getElementById('modalEditorTitulo').innerText = '1. Editar Logo y Datos de la Empresa';
             document.getElementById('secFieldsHeader').style.display = 'block';
+        } else if (seccion === 'client') {
+            document.getElementById('modalEditorTitulo').innerText = '2. Formato de Datos del Cliente';
+            document.getElementById('secFieldsClient').style.display = 'block';
+        } else if (seccion === 'table') {
+            document.getElementById('modalEditorTitulo').innerText = '3. Estructura de la Tabla de Ítems';
+            document.getElementById('secFieldsTable').style.display = 'block';
         } else if (seccion === 'totales_responsable') {
             document.getElementById('modalEditorTitulo').innerText = '4. Editar Datos del Responsable';
             document.getElementById('secFieldsTotalesResponsable').style.display = 'block';
@@ -1262,6 +1347,12 @@
         const respMail = document.getElementById('editRespEmail').value;
         const plazo = document.getElementById('editPlazoEntrega').value;
 
+        // Datos de muestra del Cliente
+        const demoCliNom = document.getElementById('editDemoClienteNombre');
+        const demoCliNit = document.getElementById('editDemoClienteNit');
+        const demoCliTel = document.getElementById('editDemoClienteTelefono');
+        const demoCliMon = document.getElementById('editDemoClienteMoneda');
+
         // Actualizar textos
         if (emp) document.getElementById('demoNombreEmpresa').innerText = emp;
         if (nit) document.getElementById('demoNitEmisor').innerText = 'NIT: ' + nit;
@@ -1275,6 +1366,19 @@
         if (respTel) document.getElementById('demoRespTelefono').innerText = respTel;
         if (respMail) document.getElementById('demoRespEmail').innerText = respMail;
         if (plazo) document.getElementById('demoPlazoEntrega').innerText = plazo;
+
+        if (demoCliNom && document.getElementById('demoClienteNombre')) {
+            document.getElementById('demoClienteNombre').innerText = demoCliNom.value;
+        }
+        if (demoCliNit && document.getElementById('demoClienteNit')) {
+            document.getElementById('demoClienteNit').innerText = demoCliNit.value;
+        }
+        if (demoCliTel && document.getElementById('demoClienteTelefono')) {
+            document.getElementById('demoClienteTelefono').innerText = demoCliTel.value;
+        }
+        if (demoCliMon && document.getElementById('demoMonedaCot')) {
+            document.getElementById('demoMonedaCot').innerText = demoCliMon.value;
+        }
 
         // Actualizar disposición del encabezado en la maqueta en vivo
         const wrapper = document.getElementById('demoHeaderWrapper');

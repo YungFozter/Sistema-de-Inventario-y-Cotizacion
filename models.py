@@ -1198,12 +1198,43 @@ def asegurar_tabla_configuracion_pdf(cursor):
         print(f"Error asegurando tabla configuracion_pdf: {e}")
 
 def obtener_configuracion_pdf(usuario_id):
-    """Obtiene la configuración de PDF para un usuario o retorna valores por defecto"""
+    """Obtiene la configuración de PDF para un usuario o retorna valores por defecto con datos reales del usuario/admin"""
     try:
         with get_db_connection() as conexion:
             cursor = conexion.cursor()
             asegurar_tabla_configuracion_pdf(cursor)
             conexion.commit()
+
+            # Obtener datos reales del usuario actual / admin desde clientes
+            u_nombre = ''
+            u_telefono = ''
+            u_correo = ''
+            u_empresa = ''
+            u_nit = ''
+            
+            if usuario_id:
+                cursor.execute("SELECT id, nombre, telefono, correo, empresa_nombre, nit, rol, creador_id FROM clientes WHERE id = ?", (usuario_id,))
+                u_row = cursor.fetchone()
+                if u_row:
+                    col_u = [col[0] for col in cursor.description]
+                    u_dict = dict(zip(col_u, u_row))
+                    u_nombre = u_dict.get('nombre') or ''
+                    u_telefono = u_dict.get('telefono') or ''
+                    u_correo = u_dict.get('correo') or ''
+                    u_empresa = u_dict.get('empresa_nombre') or ''
+                    u_nit = u_dict.get('nit') or ''
+
+                    # Si es un vendedor (standard) y no tiene empresa o nit, obtener del admin creador
+                    if u_dict.get('rol') == 'standard' and u_dict.get('creador_id'):
+                        cursor.execute("SELECT empresa_nombre, nit, telefono, correo FROM clientes WHERE id = ?", (u_dict['creador_id'],))
+                        admin_row = cursor.fetchone()
+                        if admin_row:
+                            col_a = [col[0] for col in cursor.description]
+                            a_dict = dict(zip(col_a, admin_row))
+                            if not u_empresa:
+                                u_empresa = a_dict.get('empresa_nombre') or ''
+                            if not u_nit:
+                                u_nit = a_dict.get('nit') or ''
 
             cursor.execute("SELECT * FROM configuracion_pdf WHERE usuario_id = ?", (usuario_id,))
             row = cursor.fetchone()
@@ -1212,14 +1243,53 @@ def obtener_configuracion_pdf(usuario_id):
                 res = dict(zip(col_names, row))
                 if not res.get('header_layout'):
                     res['header_layout'] = 'default'
-                if not res.get('responsable_nombre'):
-                    cursor.execute("SELECT nombre, telefono, correo FROM clientes WHERE id = ?", (usuario_id,))
-                    u = cursor.fetchone()
-                    if u:
-                        res['responsable_nombre'] = u[0] or 'Administrador'
-                        res['responsable_telefono'] = res.get('responsable_telefono') or u[1] or ''
-                        res['responsable_email'] = res.get('responsable_email') or u[2] or ''
+                
+                # Rellenar con información real del usuario/admin si no hay o si contiene placeholders de prueba
+                if not res.get('responsable_nombre') or res.get('responsable_nombre') == 'Administrador':
+                    res['responsable_nombre'] = u_nombre or 'Administrador'
+                
+                if not res.get('responsable_telefono') or res.get('responsable_telefono') == '+591 76543210':
+                    if u_telefono:
+                        res['responsable_telefono'] = u_telefono
+                
+                if not res.get('responsable_email') or res.get('responsable_email') == 'admin@sistema.com':
+                    if u_correo:
+                        res['responsable_email'] = u_correo
+
+                if (not res.get('empresa_nombre') or res.get('empresa_nombre') == 'ELECTRORED BOLIVIA S.R.L.') and u_empresa:
+                    res['empresa_nombre'] = u_empresa
+
+                if (not res.get('nit_emisor') or res.get('nit_emisor') == '1029384021') and u_nit:
+                    res['nit_emisor'] = u_nit
+
+                if (not res.get('correo') or res.get('correo') == 'ventas@electrored.bo') and u_correo:
+                    res['correo'] = u_correo
+
+                if (not res.get('telefono') or res.get('telefono') == '+591 76543210') and u_telefono:
+                    res['telefono'] = u_telefono
+
                 return res
+            else:
+                return {
+                    'tipo_hoja': 'A4',
+                    'color_tema': '#dc2626',
+                    'titulo_documento': 'COTIZACIÓN DE VENTAS',
+                    'empresa_nombre': u_empresa or 'ELECTRORED BOLIVIA S.R.L.',
+                    'nit_emisor': u_nit or '1029384021',
+                    'telefono': u_telefono or '+591 76543210',
+                    'correo': u_correo or 'ventas@electrored.bo',
+                    'direccion': 'Av. Banzer Km 5.5 - Santa Cruz',
+                    'header_layout': 'default',
+                    'terminos_condiciones': '1. Validez de la oferta: 15 días.\n2. Precios incluyen impuestos de ley.\n3. Tiempo de entrega a convenir.',
+                    'nota_pie': '¡Gracias por su preferencia!',
+                    'responsable_nombre': u_nombre or 'Administrador',
+                    'responsable_telefono': u_telefono or '+591 76543210',
+                    'responsable_email': u_correo or 'admin@sistema.com',
+                    'plazo_entrega': 'De acuerdo a la existencia / 48 horas',
+                    'logo_base64': '',
+                    'logo_path': '',
+                    'firma_path': ''
+                }
     except Exception as e:
         print(f"Error obteniendo configuracion_pdf: {e}")
     

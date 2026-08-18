@@ -681,9 +681,9 @@
                     <div class="responsable-section">
                         <div class="fw-bold text-dark mb-1 small text-uppercase" style="letter-spacing: 0.5px;">RESPONSABLE</div>
                         <div class="row g-2">
-                            <div class="col-md-4"><strong>NOMBRE:</strong> <span id="demoRespNombre">{{ config_pdf.responsable_nombre or 'Administrador' }}</span></div>
-                            <div class="col-md-4"><strong>TELÉFONO:</strong> <span id="demoRespTelefono">{{ config_pdf.responsable_telefono or '+591 76543210' }}</span></div>
-                            <div class="col-md-4"><strong>E-MAIL:</strong> <span id="demoRespEmail">{{ config_pdf.responsable_email or 'admin@sistema.com' }}</span></div>
+                            <div class="col-md-4"><strong>NOMBRE:</strong> <span id="demoRespNombre">{{ config_pdf.responsable_nombre or 'Usuario Administrador' }}</span></div>
+                            <div class="col-md-4"><strong>TELÉFONO:</strong> <span id="demoRespTelefono">{{ config_pdf.responsable_telefono or 'S/N' }}</span></div>
+                            <div class="col-md-4"><strong>E-MAIL:</strong> <span id="demoRespEmail">{{ config_pdf.responsable_email or 'S/N' }}</span></div>
                         </div>
                     </div>
                 </div>
@@ -878,17 +878,17 @@
                         
                         <div class="mb-3">
                             <label class="form-label fw-bold">Nombre del Responsable:</label>
-                            <input type="text" id="editRespNombre" class="form-control" value="{{ config_pdf.responsable_nombre or 'Administrador' }}">
+                            <input type="text" id="editRespNombre" class="form-control" value="{{ config_pdf.responsable_nombre or '' }}" placeholder="Ej: Juan Pérez">
                         </div>
                         
                         <div class="row g-3 mb-3">
                             <div class="col-md-6">
                                 <label class="form-label fw-bold">Teléfono Directo Responsable:</label>
-                                <input type="text" id="editRespTelefono" class="form-control" value="{{ config_pdf.responsable_telefono or '+591 76543210' }}">
+                                <input type="text" id="editRespTelefono" class="form-control" value="{{ config_pdf.responsable_telefono or '' }}" placeholder="Ej: +591 7XXXXXXX">
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label fw-bold">Email Responsable:</label>
-                                <input type="email" id="editRespEmail" class="form-control" value="{{ config_pdf.responsable_email or 'admin@sistema.com' }}">
+                                <input type="email" id="editRespEmail" class="form-control" value="{{ config_pdf.responsable_email or '' }}" placeholder="Ej: responsable@empresa.com">
                             </div>
                         </div>
                     </div>

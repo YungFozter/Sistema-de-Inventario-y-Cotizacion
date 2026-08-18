@@ -1245,27 +1245,29 @@ def obtener_configuracion_pdf(usuario_id):
                     res['header_layout'] = 'default'
                 
                 # Rellenar con información real del usuario/admin si no hay o si contiene placeholders de prueba
-                if not res.get('responsable_nombre') or res.get('responsable_nombre') == 'Administrador':
+                placeholder_telefonos = ['+591 76543210', '+59176543210', '76543210']
+                
+                if not res.get('responsable_nombre') or str(res.get('responsable_nombre')).strip() in ['Administrador', '']:
                     res['responsable_nombre'] = u_nombre or 'Administrador'
                 
-                if not res.get('responsable_telefono') or res.get('responsable_telefono') == '+591 76543210':
+                if not res.get('responsable_telefono') or str(res.get('responsable_telefono')).strip() in placeholder_telefonos:
                     if u_telefono:
                         res['responsable_telefono'] = u_telefono
                 
-                if not res.get('responsable_email') or res.get('responsable_email') == 'admin@sistema.com':
+                if not res.get('responsable_email') or str(res.get('responsable_email')).strip() in ['admin@sistema.com', '']:
                     if u_correo:
                         res['responsable_email'] = u_correo
 
-                if (not res.get('empresa_nombre') or res.get('empresa_nombre') == 'ELECTRORED BOLIVIA S.R.L.') and u_empresa:
+                if (not res.get('empresa_nombre') or str(res.get('empresa_nombre')).strip() == 'ELECTRORED BOLIVIA S.R.L.') and u_empresa:
                     res['empresa_nombre'] = u_empresa
 
-                if (not res.get('nit_emisor') or res.get('nit_emisor') == '1029384021') and u_nit:
+                if (not res.get('nit_emisor') or str(res.get('nit_emisor')).strip() == '1029384021') and u_nit:
                     res['nit_emisor'] = u_nit
 
-                if (not res.get('correo') or res.get('correo') == 'ventas@electrored.bo') and u_correo:
+                if (not res.get('correo') or str(res.get('correo')).strip() == 'ventas@electrored.bo') and u_correo:
                     res['correo'] = u_correo
 
-                if (not res.get('telefono') or res.get('telefono') == '+591 76543210') and u_telefono:
+                if (not res.get('telefono') or str(res.get('telefono')).strip() in placeholder_telefonos) and u_telefono:
                     res['telefono'] = u_telefono
 
                 return res
@@ -1274,16 +1276,16 @@ def obtener_configuracion_pdf(usuario_id):
                     'tipo_hoja': 'A4',
                     'color_tema': '#dc2626',
                     'titulo_documento': 'COTIZACIÓN DE VENTAS',
-                    'empresa_nombre': u_empresa or 'ELECTRORED BOLIVIA S.R.L.',
-                    'nit_emisor': u_nit or '1029384021',
-                    'telefono': u_telefono or '+591 76543210',
-                    'correo': u_correo or 'ventas@electrored.bo',
+                    'empresa_nombre': u_empresa or '',
+                    'nit_emisor': u_nit or '',
+                    'telefono': u_telefono or '',
+                    'correo': u_correo or '',
                     'direccion': 'Av. Banzer Km 5.5 - Santa Cruz',
                     'header_layout': 'default',
                     'terminos_condiciones': '1. Validez de la oferta: 15 días.\n2. Precios incluyen impuestos de ley.\n3. Tiempo de entrega a convenir.',
                     'nota_pie': '¡Gracias por su preferencia!',
                     'responsable_nombre': u_nombre or 'Administrador',
-                    'responsable_telefono': u_telefono or '+591 76543210',
+                    'responsable_telefono': u_telefono or '',
                     'responsable_email': u_correo or 'admin@sistema.com',
                     'plazo_entrega': 'De acuerdo a la existencia / 48 horas',
                     'logo_base64': '',

@@ -335,6 +335,7 @@ def register_routes(app):
                 # Actualizar la sesión
                 session['user_nombre'] = nombre
                 session['user_email'] = correo
+                session['user_telefono'] = telefono
                 flash('Perfil actualizado correctamente', 'success')
                 return redirect(url_for('perfil'))
 

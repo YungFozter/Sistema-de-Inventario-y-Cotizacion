@@ -764,7 +764,7 @@
 
                         <div class="mb-3">
                             <label class="form-label fw-bold">Nombre Comercial / Razón Social:</label>
-                            <input type="text" id="editEmpresaNombre" class="form-control" value="{{ config_pdf.empresa_nombre or 'ELECTRORED BOLIVIA S.R.L.' }}">
+                            <input type="text" id="editEmpresaNombre" class="form-control" value="{{ config_pdf.empresa_nombre or '' }}" placeholder="Ej: ELECTRORED BOLIVIA S.R.L.">
                         </div>
 
                         <div class="mb-3">
@@ -779,17 +779,17 @@
                         <div class="row g-3 mb-3">
                             <div class="col-md-6">
                                 <label class="form-label fw-bold">NIT / CI del Emisor:</label>
-                                <input type="text" id="editNitEmisor" class="form-control" value="{{ config_pdf.nit_emisor or '1029384021' }}">
+                                <input type="text" id="editNitEmisor" class="form-control" value="{{ config_pdf.nit_emisor or '' }}" placeholder="Ej: 1029384021">
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label fw-bold">Teléfono de la Empresa:</label>
-                                <input type="text" id="editTelefono" class="form-control" value="{{ config_pdf.telefono or '+591 76543210' }}">
+                                <input type="text" id="editTelefono" class="form-control" value="{{ config_pdf.telefono or '' }}" placeholder="Ej: +591 7XXXXXXX">
                             </div>
                         </div>
 
                         <div class="mb-3">
                             <label class="form-label fw-bold">Correo de la Empresa (para uso general):</label>
-                            <input type="email" id="editCorreo" class="form-control" value="{{ config_pdf.correo or 'ventas@electrored.bo' }}">
+                            <input type="email" id="editCorreo" class="form-control" value="{{ config_pdf.correo or '' }}" placeholder="Ej: ventas@empresa.bo">
                         </div>
                     </div>
 

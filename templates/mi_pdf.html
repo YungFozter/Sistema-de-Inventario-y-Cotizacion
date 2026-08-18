@@ -649,24 +649,35 @@
                     </table>
                 </div>
 
-                <!-- SECCIÓN 4: Totales, Monto Literal & Responsable -->
+                <!-- SECCIÓN 4: Totales, Monto Literal & Responsable (Side by Side) -->
                 <div id="sec4" class="sheet-section" 
                      onclick="abrirModalEditor('totales_responsable')"
                      onmouseenter="highlightSync('4', true)" onmouseleave="highlightSync('4', false)">
                     
                     <!-- Monto Literal -->
-                    <div class="monto-literal-strip">
+                    <div class="monto-literal-strip mb-2">
                         <strong>SON:</strong> CIENTO OCHO BOLIVIANOS CON SESENTA Y SIETE CENTAVOS
                     </div>
 
-                    <!-- Cuadro de Totales -->
-                    <div class="d-flex justify-content-end totals-box">
-                        <div style="width: 250px;" class="text-end">
-                            <div class="d-flex justify-content-between">
-                                <span>Subtotal Bruto:</span>
-                                <strong>Bs 1,417.51</strong>
+                    <!-- Layout 2 Columnas: Responsable (Izquierda) + Totales (Derecha) -->
+                    <div class="row align-items-start g-3">
+                        <!-- Izquierda: Responsable -->
+                        <div class="col-7 text-start">
+                            <div class="fw-bold text-dark mb-1 small text-decoration-underline" style="letter-spacing: 0.5px;">RESPONSABLE Y CONSULTA</div>
+                            <div class="small text-secondary lh-sm">
+                                <div class="mb-1"><strong class="text-dark">NOMBRE:</strong> <span id="demoRespNombre">{{ config_pdf.responsable_nombre or 'Usuario Administrador' }}</span></div>
+                                <div class="mb-1"><strong class="text-dark">TELÉFONO:</strong> <span id="demoRespTelefono">{{ config_pdf.responsable_telefono or 'S/N' }}</span></div>
+                                <div><strong class="text-dark">E-MAIL:</strong> <span id="demoRespEmail">{{ config_pdf.responsable_email or 'S/N' }}</span></div>
                             </div>
-                            <div class="d-flex justify-content-between text-danger">
+                        </div>
+
+                        <!-- Derecha: Totales -->
+                        <div class="col-5 text-end">
+                            <div class="d-flex justify-content-between small text-muted">
+                                <span>Subtotal Bruto:</span>
+                                <strong class="text-dark">Bs 1,417.51</strong>
+                            </div>
+                            <div class="d-flex justify-content-between small text-danger">
                                 <span>Descuento Comercial (0.00%):</span>
                                 <strong>-Bs 0.00</strong>
                             </div>
@@ -674,16 +685,6 @@
                                 <span>TOTAL FINAL:</span>
                                 <span>Bs 1,417.51</span>
                             </div>
-                        </div>
-                    </div>
-
-                    <!-- Datos del Responsable -->
-                    <div class="responsable-section">
-                        <div class="fw-bold text-dark mb-1 small text-uppercase" style="letter-spacing: 0.5px;">RESPONSABLE</div>
-                        <div class="row g-2">
-                            <div class="col-md-4"><strong>NOMBRE:</strong> <span id="demoRespNombre">{{ config_pdf.responsable_nombre or 'Usuario Administrador' }}</span></div>
-                            <div class="col-md-4"><strong>TELÉFONO:</strong> <span id="demoRespTelefono">{{ config_pdf.responsable_telefono or 'S/N' }}</span></div>
-                            <div class="col-md-4"><strong>E-MAIL:</strong> <span id="demoRespEmail">{{ config_pdf.responsable_email or 'S/N' }}</span></div>
                         </div>
                     </div>
                 </div>

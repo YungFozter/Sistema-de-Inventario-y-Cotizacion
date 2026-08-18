@@ -710,53 +710,63 @@
             </table>
         </div>
 
-        <!-- Sección de totales y monto literal (siempre al final) -->
-        <div class="totales-section last-page-content">
-            <div class="dashed-line"></div>
-            <div class="monto-letras">
+        <!-- Contenedor para evitar cortes de página entre totales/responsable, condiciones y firmas -->
+        <div style="page-break-inside: avoid; width: 100%;">
+
+        <!-- Sección de totales y Responsable (Side by Side como formato original) -->
+        <div class="totales-section last-page-content" style="margin-top: 5px;">
+            <div class="dashed-line" style="margin: 8px 0 10px;"></div>
+            
+            <!-- Monto Literal -->
+            <div class="monto-letras" style="margin-bottom: 10px;">
                 <strong>SON:</strong> {{ total_letras }}
             </div>
 
-            <table class="totales-table">
+            <!-- Tabla de Distribución: Responsable (Izquierda) + Totales (Derecha) -->
+            <table style="width: 100%; border: none; margin-bottom: 15px; border-collapse: collapse;">
                 <tr>
-                    <td style="text-align: left;">Subtotal Bruto</td>
-                    <td style="text-align: right;">BS {{ "{:,.2f}".format(subtotal) if subtotal is not none else "0.00"
-                        }}</td>
-                </tr>
-                {% if descuento_porcentaje and descuento_porcentaje|float > 0 %}
-                <tr>
-                    <td style="text-align: left; color: #dc3545; font-weight: 600;">Descuento Comercial ({{
-                        "{:,.2f}".format(descuento_porcentaje|float) }}%)</td>
-                    <td style="text-align: right; color: #dc3545; font-weight: 600;">-BS {{
-                        "{:,.2f}".format(monto_descuento) if monto_descuento is not none else "0.00" }}</td>
-                </tr>
-                {% endif %}
-                <tr>
-                    <td style="text-align: left; font-weight: bold; font-size: 10pt;">Total Final</td>
-                    <td style="text-align: right; font-weight: bold; font-size: 10pt; color: #2c3e50;">BS {{
-                        "{:,.2f}".format(total) if total is not none else "0.00" }}</td>
+                    <!-- Columna Izquierda: RESPONSABLE Y CONSULTA -->
+                    <td style="width: 58%; vertical-align: top; text-align: left; border: none; padding: 0 15px 0 0;">
+                        <div style="font-weight: bold; font-size: 9.5pt; color: #2c3e50; text-decoration: underline; margin-bottom: 6px; letter-spacing: 0.5px;">
+                            RESPONSABLE Y CONSULTA
+                        </div>
+                        <table style="width: 100%; border: none; font-size: 8pt; border-collapse: collapse;">
+                            <tr>
+                                <td style="width: 80px; font-weight: bold; color: #2c3e50; border: none; padding: 2px 0; text-align: left;">NOMBRE:</td>
+                                <td style="color: #333; border: none; padding: 2px 0; text-align: left;">{{ config_pdf.responsable_nombre if config_pdf and config_pdf.responsable_nombre else (usuario.nombre if usuario and usuario.nombre else usuario_sesion) }}</td>
+                            </tr>
+                            <tr>
+                                <td style="font-weight: bold; color: #2c3e50; border: none; padding: 2px 0; text-align: left;">CELULAR:</td>
+                                <td style="color: #333; border: none; padding: 2px 0; text-align: left;">{{ config_pdf.responsable_telefono if config_pdf and config_pdf.responsable_telefono else (usuario.telefono if usuario and usuario.telefono else "S/N") }}</td>
+                            </tr>
+                            <tr>
+                                <td style="font-weight: bold; color: #2c3e50; border: none; padding: 2px 0; text-align: left;">E-MAIL:</td>
+                                <td style="color: #333; border: none; padding: 2px 0; text-align: left;">{{ config_pdf.responsable_email if config_pdf and config_pdf.responsable_email else (usuario.email if usuario and usuario.email else "S/N") }}</td>
+                            </tr>
+                        </table>
+                    </td>
+
+                    <!-- Columna Derecha: TOTALES -->
+                    <td style="width: 42%; vertical-align: top; border: none; padding: 0;">
+                        <table class="totales-table" style="width: 100%; border: none; border-collapse: collapse;">
+                            <tr>
+                                <td style="text-align: left; border: none; padding: 2px 0; font-size: 8.5pt;">Subtotal</td>
+                                <td style="text-align: right; border: none; padding: 2px 0; font-size: 8.5pt;">BS {{ "{:,.2f}".format(subtotal) if subtotal is not none else "0.00" }}</td>
+                            </tr>
+                            {% if descuento_porcentaje and descuento_porcentaje|float > 0 %}
+                            <tr>
+                                <td style="text-align: left; color: #dc3545; font-weight: 600; border: none; padding: 2px 0; font-size: 8.5pt;">Descuento ({{ "{:,.2f}".format(descuento_porcentaje|float) }}%)</td>
+                                <td style="text-align: right; color: #dc3545; font-weight: 600; border: none; padding: 2px 0; font-size: 8.5pt;">-BS {{ "{:,.2f}".format(monto_descuento) if monto_descuento is not none else "0.00" }}</td>
+                            </tr>
+                            {% endif %}
+                            <tr style="border-top: 1.5px solid #2c3e50;">
+                                <td style="text-align: left; font-weight: bold; font-size: 10pt; color: #2c3e50; border: none; padding-top: 5px;">Total</td>
+                                <td style="text-align: right; font-weight: bold; font-size: 10pt; color: #2c3e50; border: none; padding-top: 5px;">BS {{ "{:,.2f}".format(total) if total is not none else "0.00" }}</td>
+                            </tr>
+                        </table>
+                    </td>
                 </tr>
             </table>
-        </div>
-
-        <!-- Contenedor para evitar cortes de página entre responsable, condiciones y firmas -->
-        <div style="page-break-inside: avoid; width: 100%;">
-        
-        <!-- SECCIÓN RESPONSABLE -->
-        <div class="section-title">RESPONSABLE</div>
-        <div style="margin-bottom: 20px;">
-            <div class="data-row">
-                <span class="data-label">NOMBRE:</span>
-                <span class="data-value">{{ usuario.nombre if usuario and usuario.nombre else usuario_sesion }}</span>
-            </div>
-            <div class="data-row">
-                <span class="data-label">TELÉFONO:</span>
-                <span class="data-value">{{ usuario.telefono if usuario and usuario.telefono else "S/N" }}</span>
-            </div>
-            <div class="data-row">
-                <span class="data-label">E-MAIL:</span>
-                <span class="data-value">{{ usuario.email if usuario and usuario.email else "S/N" }}</span>
-            </div>
         </div>
 
         <!-- NUEVA SECCIÓN CONDICIONES -->

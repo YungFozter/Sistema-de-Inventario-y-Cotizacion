@@ -330,6 +330,16 @@ def register_routes(app):
                     SET nombre = ?, telefono = ?, correo = ?
                     WHERE id = ?
                 ''', (nombre, telefono, correo, session['user_id']))
+
+                try:
+                    cursor.execute('''
+                        UPDATE configuracion_pdf
+                        SET responsable_nombre = ?, responsable_telefono = ?, responsable_email = ?
+                        WHERE usuario_id = ?
+                    ''', (nombre, telefono, correo, session['user_id']))
+                except Exception:
+                    pass
+
                 conexion.commit()
 
                 # Actualizar la sesión

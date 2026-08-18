@@ -1245,12 +1245,11 @@ def obtener_configuracion_pdf(usuario_id):
                     res['header_layout'] = 'default'
                 
                 # Rellenar con información real del usuario/admin si no hay o si contiene placeholders de prueba
-                placeholder_telefonos = ['+591 76543210', '+59176543210', '76543210']
-                
                 if not res.get('responsable_nombre') or str(res.get('responsable_nombre')).strip() in ['Administrador', '']:
-                    res['responsable_nombre'] = u_nombre or 'Administrador'
+                    if u_nombre:
+                        res['responsable_nombre'] = u_nombre
                 
-                if not res.get('responsable_telefono') or str(res.get('responsable_telefono')).strip() in placeholder_telefonos:
+                if not res.get('responsable_telefono') or '76543210' in str(res.get('responsable_telefono', '')) or str(res.get('responsable_telefono')).strip() in ['+591 76543210', '+59176543210', '76543210', '']:
                     if u_telefono:
                         res['responsable_telefono'] = u_telefono
                 
@@ -1267,7 +1266,7 @@ def obtener_configuracion_pdf(usuario_id):
                 if (not res.get('correo') or str(res.get('correo')).strip() == 'ventas@electrored.bo') and u_correo:
                     res['correo'] = u_correo
 
-                if (not res.get('telefono') or str(res.get('telefono')).strip() in placeholder_telefonos) and u_telefono:
+                if (not res.get('telefono') or '76543210' in str(res.get('telefono', '')) or str(res.get('telefono')).strip() in ['+591 76543210', '+59176543210', '76543210', '']) and u_telefono:
                     res['telefono'] = u_telefono
 
                 return res

@@ -771,15 +771,24 @@
 
         <!-- NUEVA SECCIÓN CONDICIONES -->
         <div class="section-title">CONDICIONES</div>
-        <div class="conditions-container">
-            <div class="condition-item">
-                <span class="condition-label">TIEMPO DE VALIDEZ:</span>
-                <span class="data-value">1 Día</span>
+        <div class="conditions-container" style="display: block; padding: 10px 12px; margin: 10px 0 15px;">
+            <table style="width: 100%; border: none; margin-bottom: {% if config_pdf and config_pdf.terminos_condiciones %}6px{% else %}0{% endif %}; border-collapse: collapse;">
+                <tr>
+                    <td style="width: 50%; border: none; padding: 0; text-align: left;">
+                        <span class="condition-label">TIEMPO DE VALIDEZ:</span>
+                        <span class="data-value">{{ cotizacion.validez if cotizacion and cotizacion.validez else "15 Días" }}</span>
+                    </td>
+                    <td style="width: 50%; border: none; padding: 0; text-align: left;">
+                        <span class="condition-label">PLAZO DE ENTREGA:</span>
+                        <span class="data-value">{{ config_pdf.plazo_entrega if config_pdf and config_pdf.plazo_entrega else "De acuerdo a la existencia / 48 horas" }}</span>
+                    </td>
+                </tr>
+            </table>
+            {% if config_pdf and config_pdf.terminos_condiciones %}
+            <div style="border-top: 1px solid #e2e8f0; padding-top: 6px; margin-top: 4px; font-size: 7.5pt; color: #555; white-space: pre-line; line-height: 1.35;">
+                {{ config_pdf.terminos_condiciones }}
             </div>
-            <div class="condition-item">
-                <span class="condition-label">PLAZO DE ENTREGA:</span>
-                <span class="data-value">De acuerdo a la existencia</span>
-            </div>
+            {% endif %}
         </div>
 
         <!-- SECCIÓN FIRMA -->

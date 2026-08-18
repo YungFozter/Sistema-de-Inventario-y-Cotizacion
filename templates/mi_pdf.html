@@ -697,10 +697,11 @@
                     <!-- Condiciones -->
                     <div class="condiciones-box">
                         <div class="fw-bold text-dark mb-1 small text-uppercase">CONDICIONES</div>
-                        <div class="row">
+                        <div class="row mb-1">
                             <div class="col-6"><strong>TIEMPO DE VALIDEZ:</strong> 15 Días</div>
                             <div class="col-6"><strong>PLAZO DE ENTREGA:</strong> <span id="demoPlazoEntrega">{{ config_pdf.plazo_entrega or 'De acuerdo a la existencia / 48 horas' }}</span></div>
                         </div>
+                        <div class="border-top pt-1 mt-1 text-secondary" id="demoTerminos" style="font-size: 7.5pt; white-space: pre-line; line-height: 1.35;">{{ config_pdf.terminos_condiciones or '1. Validez de la oferta: 15 días.\n2. Precios incluyen impuestos de ley.\n3. Tiempo de entrega a convenir.' }}</div>
                     </div>
 
                     <!-- Doble Área de Firma (Responsable y Cliente) -->
@@ -1347,6 +1348,7 @@
         const respTel = document.getElementById('editRespTelefono').value;
         const respMail = document.getElementById('editRespEmail').value;
         const plazo = document.getElementById('editPlazoEntrega').value;
+        const terminos = document.getElementById('editTerminos') ? document.getElementById('editTerminos').value : '';
 
         // Datos de muestra del Cliente
         const demoCliNom = document.getElementById('editDemoClienteNombre');
@@ -1367,6 +1369,7 @@
         if (respTel) document.getElementById('demoRespTelefono').innerText = respTel;
         if (respMail) document.getElementById('demoRespEmail').innerText = respMail;
         if (plazo) document.getElementById('demoPlazoEntrega').innerText = plazo;
+        if (terminos && document.getElementById('demoTerminos')) document.getElementById('demoTerminos').innerText = terminos;
 
         if (demoCliNom && document.getElementById('demoClienteNombre')) {
             document.getElementById('demoClienteNombre').innerText = demoCliNom.value;

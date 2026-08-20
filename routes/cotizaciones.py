@@ -32,6 +32,41 @@ import logging
 from utils.decorators import login_required, superadmin_required, admin_required, standard_required
 from utils.helpers import format_date, aplicar_fondos_por_pagina, generar_pdf_margenes_dinamicos
 
+def _validar_acceso_cotizacion(cursor, cotizacion_id, user_id, user_rol):
+    """Verifica si el usuario actual tiene permisos para acceder a una cotización específica (Anti-IDOR)"""
+    if user_rol == 'superadmin':
+        return True
+    
+    cursor.execute("""
+        SELECT c.id, c.creador_id, creador.creador_id as admin_padre_id
+        FROM cotizaciones c
+        LEFT JOIN clientes creador ON c.creador_id = creador.id
+        WHERE c.id = ?
+    """, (cotizacion_id,))
+    row = cursor.fetchone()
+    if not row:
+        return False
+    
+    creador_id = row['creador_id'] if hasattr(row, 'keys') else row[1]
+    admin_padre_id = row['admin_padre_id'] if hasattr(row, 'keys') else row[2]
+    
+    # 1. Si el usuario es el creador directo
+    if creador_id == user_id:
+        return True
+    
+    # 2. Si el usuario es el Administrador de la empresa dueña del vendedor
+    if admin_padre_id == user_id:
+        return True
+        
+    # 3. Si el usuario es un Vendedor perteneciente al mismo Administrador
+    cursor.execute("SELECT creador_id FROM clientes WHERE id = ?", (user_id,))
+    u = cursor.fetchone()
+    mi_admin_id = u[0] if u else None
+    if mi_admin_id and (creador_id == mi_admin_id or admin_padre_id == mi_admin_id):
+        return True
+        
+    return False
+
 def register_routes(app):
     @app.route('/cotizaciones', methods=['GET', 'POST'])
     @login_required
@@ -180,6 +215,9 @@ def register_routes(app):
             tipo_producto=tipo_producto)
 
     def guardar_cotizacion():
+        MAX_RETRIES = 3
+        RETRY_DELAY = 0.5
+
         # Validación inicial de claves presentes
         if not all(key in request.form for key in ['cliente_id', 'producto_id[]', 'cantidad[]', 'precio_unitario[]']):
             flash('Datos incompletos en el formulario', 'danger')
@@ -427,8 +465,15 @@ def register_routes(app):
         conexion = get_db_connection()
         conexion.row_factory = sqlite3.Row  # Para acceso por nombre de columna
         cursor = conexion.cursor()
+        user_id = session.get('user_id')
+        user_rol = session.get('user_rol')
 
         try:
+            # Validar acceso a la cotización (Anti-IDOR)
+            if not _validar_acceso_cotizacion(cursor, id, user_id, user_rol):
+                flash('No tienes permisos para visualizar esta cotización.', 'danger')
+                return redirect(url_for('gestion_cotizaciones'))
+
             # Obtener información básica de la cotización
             cursor.execute('''
                 SELECT 
@@ -436,7 +481,7 @@ def register_routes(app):
                     clientes.nombre,
                     clientes.correo,
                     clientes.telefono,
-                    'No disponible' as direccion, -- Valor por defecto ya que la columna no existe
+                    'No disponible' as direccion,
                     cotizaciones.fecha, 
                     cotizaciones.total,
                     cotizaciones.estado,
@@ -500,18 +545,57 @@ def register_routes(app):
 
     @app.route('/cotizaciones/eliminar/<int:id>')
     @login_required
+    @admin_required
     def eliminar_cotizacion(id):
         conexion = get_db_connection()
+        conexion.row_factory = sqlite3.Row
         cursor = conexion.cursor()
+        user_id = session.get('user_id')
+        user_rol = session.get('user_rol')
 
-        # Eliminar primero los productos asociados
-        cursor.execute('DELETE FROM cotizacion_productos WHERE cotizacion_id=?', (id,))
+        try:
+            # Validar permisos (Anti-IDOR)
+            if not _validar_acceso_cotizacion(cursor, id, user_id, user_rol):
+                flash('No tienes permisos para eliminar esta cotización.', 'danger')
+                return redirect(url_for('gestion_cotizaciones'))
 
-        # Luego eliminar la cotización
-        cursor.execute('DELETE FROM cotizaciones WHERE id=?', (id,))
+            cursor.execute("SELECT estado FROM cotizaciones WHERE id = ?", (id,))
+            cot_row = cursor.fetchone()
+            if not cot_row:
+                flash('Cotización no encontrada.', 'danger')
+                return redirect(url_for('gestion_cotizaciones'))
 
-        conexion.commit()
-        conexion.close()
+            estado_actual = cot_row['estado'] if hasattr(cot_row, 'keys') else cot_row[0]
+
+            # Si la cotización estaba pendiente, liberar el stock_reservado
+            if estado_actual == 'pendiente':
+                cursor.execute("SELECT producto_id, cantidad FROM cotizacion_productos WHERE cotizacion_id = ?", (id,))
+                for item in cursor.fetchall():
+                    prod_id = item['producto_id'] if hasattr(item, 'keys') else item[0]
+                    cant = item['cantidad'] if hasattr(item, 'keys') else item[1]
+                    cursor.execute("""
+                        UPDATE productos 
+                        SET stock_reservado = CASE WHEN COALESCE(stock_reservado, 0) - ? < 0 THEN 0 ELSE COALESCE(stock_reservado, 0) - ? END 
+                        WHERE id = ?
+                    """, (cant, cant, prod_id))
+
+            # Eliminar productos asociados y cotización
+            cursor.execute('DELETE FROM cotizacion_productos WHERE cotizacion_id=?', (id,))
+            cursor.execute('DELETE FROM cotizaciones WHERE id=?', (id,))
+            conexion.commit()
+
+            registrar_log(
+                usuario_id=user_id,
+                accion="eliminar_cotizacion",
+                detalle={"cotizacion_id": id}
+            )
+
+            flash('Cotización eliminada exitosamente y stock liberado.', 'success')
+        except Exception as e:
+            flash(f'Error al eliminar cotización: {str(e)}', 'danger')
+        finally:
+            conexion.close()
+
         return redirect(url_for('gestion_cotizaciones'))
 
     @app.route('/cotizaciones/<int:id>/estado', methods=['POST'])
@@ -534,7 +618,7 @@ def register_routes(app):
             if not cotizacion:
                 return jsonify({'success': False, 'message': 'Cotización no encontrada'}), 404
                 
-            if session.get('user_rol') != 'superadmin' and cotizacion['creador_id'] != session.get('user_id'):
+            if session.get('user_rol') != 'superadmin' and not _validar_acceso_cotizacion(cursor, id, session.get('user_id'), session.get('user_rol')):
                 return jsonify({'success': False, 'message': 'No tienes permiso para modificar esta cotización'}), 403
 
             estado_anterior = cotizacion['estado']
@@ -613,12 +697,30 @@ def register_routes(app):
         conexion = get_db_connection()
         conexion.row_factory = sqlite3.Row
         cursor = conexion.cursor()
+        user_id = session.get('user_id')
+        user_rol = session.get('user_rol')
+
+        # Validar permisos sobre la cotización (Anti-IDOR)
+        if not _validar_acceso_cotizacion(cursor, id, user_id, user_rol):
+            conexion.close()
+            flash('No tienes permisos para modificar esta cotización.', 'danger')
+            return redirect(url_for('gestion_cotizaciones'))
 
         if request.method == 'POST':
             # Actualizar cliente
-            cliente_id = request.form['cliente_id']
-            cursor.execute("UPDATE cotizaciones SET cliente_id=? WHERE id=?",
-                           (cliente_id, id))
+            cliente_id = request.form.get('cliente_id')
+            # Validar pertenencia del cliente
+            if user_rol == 'superadmin':
+                cursor.execute("SELECT id FROM clientes WHERE id = ? AND rol = 'cliente'", (cliente_id,))
+            else:
+                admin_owner_id = session.get('creador_id') or user_id
+                cursor.execute("SELECT id FROM clientes WHERE id = ? AND rol = 'cliente' AND (creador_id = ? OR creador_id = ?)", (cliente_id, admin_owner_id, user_id))
+            if not cursor.fetchone():
+                conexion.close()
+                flash('El cliente seleccionado no es válido o no pertenece a tu empresa.', 'danger')
+                return redirect(url_for('gestion_cotizaciones'))
+
+            cursor.execute("UPDATE cotizaciones SET cliente_id=? WHERE id=?", (cliente_id, id))
 
             # Eliminar productos antiguos
             cursor.execute("DELETE FROM cotizacion_productos WHERE cotizacion_id=?", (id,))
@@ -632,9 +734,7 @@ def register_routes(app):
 
             total_general = 0.0
             for producto_id, cantidad, precio_unitario in items:
-                # Asegurar conversión a números
                 cantidad = int(cantidad) if cantidad else 0
-
                 precio_unitario = float(precio_unitario) if precio_unitario else 0.0
                 subtotal = cantidad * precio_unitario
                 total_general += subtotal
@@ -658,15 +758,32 @@ def register_routes(app):
             cursor.execute("UPDATE cotizaciones SET total=?, descuento_porcentaje=?, descuento_monto=?, subtotal=? WHERE id=?", 
                            (total_final, descuento_porcentaje, monto_descuento, subtotal_bruto, id))
             conexion.commit()
+
+            registrar_log(
+                usuario_id=user_id,
+                accion="editar_cotizacion",
+                detalle={"cotizacion_id": id, "total": total_final}
+            )
+
             conexion.close()
+            flash('Cotización actualizada exitosamente.', 'success')
             return redirect(url_for('gestion_cotizaciones'))
 
-        # Obtener datos para edición
-        cursor.execute("SELECT * FROM clientes")
-        clientes = cursor.fetchall()
-
-        cursor.execute("SELECT * FROM productos")
-        productos = cursor.fetchall()
+        # GET - Obtener clientes y productos acotados al tenant
+        if user_rol == 'superadmin':
+            cursor.execute("SELECT id, nombre, codigo_cliente FROM clientes WHERE rol = 'cliente' ORDER BY nombre")
+            clientes = cursor.fetchall()
+            cursor.execute("SELECT * FROM productos ORDER BY descripcion")
+            productos = cursor.fetchall()
+        else:
+            admin_owner_id = session.get('creador_id') or user_id
+            cursor.execute("SELECT id, nombre, codigo_cliente FROM clientes WHERE (creador_id = ? OR creador_id = ?) AND rol = 'cliente' ORDER BY nombre", (admin_owner_id, user_id))
+            clientes = cursor.fetchall()
+            cursor.execute("SELECT empresa_nombre, nombre FROM clientes WHERE id = ?", (admin_owner_id,))
+            u_row = cursor.fetchone()
+            emp_nom = u_row[0] or u_row[1] or 'General' if u_row else 'General'
+            cursor.execute("SELECT * FROM productos WHERE (empresa = ? OR empresa = 'General') ORDER BY descripcion", (emp_nom,))
+            productos = cursor.fetchall()
 
         # Obtener cotización actual
         cursor.execute('''
@@ -686,7 +803,6 @@ def register_routes(app):
 
         conexion.close()
 
-        # Crear diccionario de filtros para evitar errores en la plantilla
         filtros = {
             'cliente': '',
             'codigo_cliente': '',
@@ -707,6 +823,13 @@ def register_routes(app):
     def pdf_cotizacion(id):
         conexion = get_db_connection()
         cursor = conexion.cursor()
+        user_id = session.get('user_id')
+        user_rol = session.get('user_rol')
+
+        if not _validar_acceso_cotizacion(cursor, id, user_id, user_rol):
+            conexion.close()
+            flash('No tienes permisos para descargar el PDF de esta cotización.', 'danger')
+            return redirect(url_for('gestion_cotizaciones'))
 
         # Obtener datos completos del cliente y la cotización
         cursor.execute('''
@@ -961,6 +1084,13 @@ def register_routes(app):
     def vista_previa_cotizacion(id):
         conexion = get_db_connection()
         cursor = conexion.cursor()
+        user_id = session.get('user_id')
+        user_rol = session.get('user_rol')
+
+        if not _validar_acceso_cotizacion(cursor, id, user_id, user_rol):
+            conexion.close()
+            flash('No tienes permisos para visualizar esta cotización.', 'danger')
+            return redirect(url_for('gestion_cotizaciones'))
 
         # Obtener datos completos del cliente y la cotización
         cursor.execute('''
@@ -1040,27 +1170,20 @@ def register_routes(app):
                 fecha_cotizacion = fecha_obj.strftime("%d/%m/%Y")
             except Exception as e:
                 print(f"Error formateando fecha: {e}")
-                # Mantener el valor por defecto si hay error
 
         # LOGO ANULADO - No cargar logo de ElectroRed
-        logo_base64 = ""  # Logo anulado
+        logo_base64 = ""
 
         # Cargar imagen de fondo para la cotización
         fondo_path = os.path.join(app.static_folder, 'images', 'FondoCotizacion.png')
         fondo_base64 = ""
-        print(f"Intentando cargar imagen de fondo desde: {fondo_path}")
-    
         if os.path.exists(fondo_path):
             try:
                 with open(fondo_path, "rb") as image_file:
                     image_data = image_file.read()
-                    print(f"Imagen de fondo leída correctamente: {len(image_data)} bytes")
                     fondo_base64 = f"data:image/png;base64,{base64.b64encode(image_data).decode('utf-8')}"
-                    print(f"Imagen de fondo codificada en base64: {len(fondo_base64)} caracteres")
             except Exception as e:
                 print(f"Error al procesar la imagen de fondo: {str(e)}")
-        else:
-            print(f"El archivo de fondo no existe en la ruta: {fondo_path}")
 
         # Datos para la plantilla
         usuario = {
@@ -1097,7 +1220,7 @@ def register_routes(app):
                 'codigo': p[1] if p[1] else "S/N",
                 'descripcion': p[2] if p[2] else "Producto sin descripción",
                 'marca': p[3] if p[3] else "S/M",
-                'procedencia': "Taiwán",  # Valor predeterminado
+                'procedencia': "Taiwán",
                 'cantidad': p[6] if p[6] else 0,
                 'um': p[5] if p[5] else "UN",
                 'precio_unitario': p[7] if p[7] else 0.0,
@@ -1111,15 +1234,9 @@ def register_routes(app):
             'total_letras': total_letras,
             'usuario_sesion': session.get('user_nombre', 'Usuario del sistema'),
             'usuario': usuario,
-            'logo_base64': None,  # Logo anulado por solicitud del usuario
+            'logo_base64': None,
             'fondo_base64': fondo_base64 if fondo_base64 else None
         }
-    
-        # DEBUG: Verificar si la imagen de fondo se está cargando en vista previa
-        print(f"VISTA PREVIA - fondo_base64 valor: {'Si' if fondo_base64 else 'No'}")
-        if fondo_base64:
-            print(f"VISTA PREVIA - Longitud fondo_base64: {len(fondo_base64)}")
-            print(f"VISTA PREVIA - Prefijo fondo_base64: {fondo_base64[:50]}...")
 
         # Añadir configuración de PDF a los datos
         from models import obtener_configuracion_pdf
@@ -1147,6 +1264,19 @@ def register_routes(app):
                 WHERE 1=1
             '''
             params = []
+
+            # Aislamiento multi-tenant de productos para cotización
+            user_id = session.get('user_id')
+            user_rol = session.get('user_rol')
+            if user_rol != 'superadmin':
+                with get_db_connection() as con_t:
+                    cur_t = con_t.cursor()
+                    admin_id = session.get('creador_id') or user_id
+                    cur_t.execute("SELECT empresa_nombre, nombre FROM clientes WHERE id = ?", (admin_id,))
+                    u_t = cur_t.fetchone()
+                    emp_t = u_t[0] or u_t[1] or 'General' if u_t else 'General'
+                query += " AND (p.empresa = ? OR p.empresa = 'General')"
+                params.append(emp_t)
 
             # Filtrar por tipo de producto (registrados vs importados)
             if tipo_producto == 'importados':

@@ -35,20 +35,13 @@ from utils.helpers import format_date, aplicar_fondos_por_pagina, generar_pdf_ma
 def register_routes(app):
     @app.route('/')
     def index():
-        # Forzar cierre de sesión al iniciar
-        session.clear()
-
-        # Si no está autenticado o el rol no es válido, mostrar landing
-        return render_template('landing.html')
-
-        # Verificar si el usuario ya está autenticado
+        # Si el usuario ya está autenticado, redirigir a su panel correspondiente sin destruir sesión
         if 'user_id' in session:
             if session.get('user_rol') == 'standard':
                 return redirect(url_for('standard_dashboard'))
-            elif session.get('user_rol') == 'admin':
-                return redirect(url_for('dashboard'))
+            return redirect(url_for('dashboard'))
 
-        # Si no está autenticado o el rol no es válido, mostrar landing
+        # Si no está autenticado, mostrar landing page
         return render_template('landing.html')
 
     @app.route('/acerca-de')
@@ -61,131 +54,125 @@ def register_routes(app):
         if 'user_id' not in session:
             return redirect(url_for('login'))
 
+        user_id = session.get('user_id')
         user_rol = session.get('user_rol', 'standard')
 
         # Redirigir usuarios standard inmediatamente
         if user_rol == 'standard':
             return redirect(url_for('standard_dashboard'))
 
-        if user_rol == 'superadmin':
-            conexion = get_db_connection()
-            conexion.row_factory = sqlite3.Row
-            cursor = conexion.cursor()
-        
-            # --- MÉTRICAS SAAS PARA SUPERADMIN ---
-            cursor.execute("SELECT COUNT(*) FROM clientes WHERE rol = 'admin'")
-            total_admins = cursor.fetchone()[0]
-
-            cursor.execute("SELECT COUNT(*) FROM clientes WHERE rol = 'standard'")
-            total_vendors = cursor.fetchone()[0]
-
-            cursor.execute("SELECT COUNT(*) FROM cotizaciones")
-            total_cotizaciones = cursor.fetchone()[0]
-        
-            # Cotizaciones recientes globales (viendo quién la hizo)
-            cursor.execute('''
-                SELECT c.id, c.fecha, cli.nombre as cliente, v.nombre as vendedor, c.total, c.estado
-                FROM cotizaciones c
-                JOIN clientes cli ON c.cliente_id = cli.id
-                LEFT JOIN clientes v ON c.creador_id = v.id
-                ORDER BY c.fecha DESC LIMIT 10
-            ''')
-            cotizaciones = cursor.fetchall()
-            conexion.close()
-        
-            return render_template('admin/dashboard_superadmin.html',
-                total_admins=total_admins,
-                total_vendors=total_vendors,
-                total_cotizaciones=total_cotizaciones,
-                cotizaciones=cotizaciones
-            )
-
-        # Conexión a BD solo para admins
-
         conexion = get_db_connection()
         conexion.row_factory = sqlite3.Row
         cursor = conexion.cursor()
 
-        cursor.execute('SELECT COUNT(*) FROM clientes')
-        total_usuarios = cursor.fetchone()[0]
+        try:
+            # ─── VISTA SUPERADMIN (MÉTRICAS SAAS GLOBALES) ───────────────────────────
+            if user_rol == 'superadmin':
+                cursor.execute("SELECT COUNT(*) FROM clientes WHERE rol = 'admin'")
+                row = cursor.fetchone()
+                total_admins = row[0] if row else 0
 
-        cursor.execute('SELECT COUNT(*) FROM productos')
-        total_productos = cursor.fetchone()[0]
+                cursor.execute("SELECT COUNT(*) FROM clientes WHERE rol = 'standard'")
+                row = cursor.fetchone()
+                total_vendors = row[0] if row else 0
 
-        cursor.execute('SELECT COUNT(*) FROM cotizaciones')
-        total_cotizaciones = cursor.fetchone()[0]
-
-
-        # Obtener las 10 cotizaciones más recientes con datos de cliente
-        cursor.execute('''
-            SELECT c.id, c.fecha, cli.nombre as cliente, c.total, c.estado
-            FROM cotizaciones c
-            JOIN clientes cli ON c.cliente_id = cli.id
-            ORDER BY c.fecha DESC
-            LIMIT 10
-        ''')
-        actividades_recientes = cursor.fetchall()
-
-        # Estadísticas: conteos y listados por estado
-        estados = ['Aprobada', 'Pendiente', 'Rechazada']
-        cotizaciones_estado = {'aprobadas': [], 'pendientes': [], 'rechazadas': []}
-        cotizaciones_aprobadas = cotizaciones_pendientes = cotizaciones_rechazadas = 0
-
-        for estado, key in zip(estados, ['aprobadas', 'pendientes', 'rechazadas']):
-            if estado == 'Pendiente':
+                cursor.execute("SELECT COUNT(*) FROM cotizaciones")
+                row = cursor.fetchone()
+                total_cotizaciones = row[0] if row else 0
+            
                 cursor.execute('''
-                    SELECT c.id, c.fecha, cli.nombre as cliente, c.total
+                    SELECT c.id, c.fecha, cli.nombre as cliente, v.nombre as vendedor, c.total, c.estado
                     FROM cotizaciones c
                     JOIN clientes cli ON c.cliente_id = cli.id
-                    WHERE c.estado = ? OR c.estado = ?
-                    ORDER BY c.fecha DESC
-                ''', (estado, 'pendiente'))
-            else:
-                cursor.execute('''
-                    SELECT c.id, c.fecha, cli.nombre as cliente, c.total
-                    FROM cotizaciones c
-                    JOIN clientes cli ON c.cliente_id = cli.id
-                    WHERE c.estado = ?
-                    ORDER BY c.fecha DESC
-                ''', (estado,))
-            cotizaciones_estado[key] = cursor.fetchall()
-            count = len(cotizaciones_estado[key])
-            if key == 'aprobadas':
-                cotizaciones_aprobadas = count
-            elif key == 'pendientes':
-                cotizaciones_pendientes = count
-            elif key == 'rechazadas':
-                cotizaciones_rechazadas = count
+                    LEFT JOIN clientes v ON c.creador_id = v.id
+                    ORDER BY c.fecha DESC LIMIT 10
+                ''')
+                cotizaciones = cursor.fetchall()
+            
+                return render_template('admin/dashboard_superadmin.html',
+                    total_admins=total_admins,
+                    total_vendors=total_vendors,
+                    total_cotizaciones=total_cotizaciones,
+                    cotizaciones=cotizaciones
+                )
 
-        conexion.close()
+            # ─── VISTA ADMIN (MÉTRICAS Y ACTIVIDADES AISLADAS POR EMPRESA / TENANT) ──
+            # 1. Total Clientes creados por el admin
+            cursor.execute("SELECT COUNT(*) FROM clientes WHERE creador_id = ? AND rol = 'cliente'", (user_id,))
+            row = cursor.fetchone()
+            total_usuarios = row[0] if row else 0
 
-        # Renderizar template según rol
-        if user_rol == 'superadmin':
-            return render_template('admin/superadmin_dashboard.html',
-                               nombre=session['user_nombre'],
-                               rol=user_rol,
-                               total_usuarios=total_usuarios,
-                               total_productos=total_productos,
-                               total_cotizaciones=total_cotizaciones,
-                               actividades_recientes=actividades_recientes,
-                               cotizaciones_aprobadas=cotizaciones_aprobadas,
-                               cotizaciones_pendientes=cotizaciones_pendientes,
-                               cotizaciones_rechazadas=cotizaciones_rechazadas,
-                               cotizaciones_estado=cotizaciones_estado,
-                               autenticado=True)
-        else:  # Rol 'admin'
+            # 2. Total Productos disponibles para el admin
+            cursor.execute("SELECT COUNT(*) FROM productos WHERE creador_id = ? OR creador_id IS NULL", (user_id,))
+            row = cursor.fetchone()
+            total_productos = row[0] if row else 0
+
+            # 3. Total Cotizaciones del negocio (admin + sus vendedores)
+            cursor.execute('''
+                SELECT COUNT(*) FROM cotizaciones 
+                WHERE creador_id = ? OR creador_id IN (SELECT id FROM clientes WHERE creador_id = ?)
+            ''', (user_id, user_id))
+            row = cursor.fetchone()
+            total_cotizaciones = row[0] if row else 0
+
+            # 4. Actividad Reciente del negocio (Top 10)
+            cursor.execute('''
+                SELECT c.id, c.fecha, cli.nombre as cliente, c.total, c.estado
+                FROM cotizaciones c
+                JOIN clientes cli ON c.cliente_id = cli.id
+                WHERE c.creador_id = ? OR c.creador_id IN (SELECT id FROM clientes WHERE creador_id = ?)
+                ORDER BY c.fecha DESC
+                LIMIT 10
+            ''', (user_id, user_id))
+            actividades_recientes = cursor.fetchall()
+
+            # 5. Estadísticas de Cotizaciones por Estado del negocio
+            estados = ['Aprobada', 'Pendiente', 'Rechazada']
+            cotizaciones_estado = {'aprobadas': [], 'pendientes': [], 'rechazadas': []}
+            cotizaciones_aprobadas = cotizaciones_pendientes = cotizaciones_rechazadas = 0
+
+            for estado, key in zip(estados, ['aprobadas', 'pendientes', 'rechazadas']):
+                if estado == 'Pendiente':
+                    cursor.execute('''
+                        SELECT c.id, c.fecha, cli.nombre as cliente, c.total
+                        FROM cotizaciones c
+                        JOIN clientes cli ON c.cliente_id = cli.id
+                        WHERE (c.creador_id = ? OR c.creador_id IN (SELECT id FROM clientes WHERE creador_id = ?))
+                          AND (LOWER(c.estado) = 'pendiente' OR c.estado IS NULL OR c.estado = '')
+                        ORDER BY c.fecha DESC
+                    ''', (user_id, user_id))
+                else:
+                    cursor.execute('''
+                        SELECT c.id, c.fecha, cli.nombre as cliente, c.total
+                        FROM cotizaciones c
+                        JOIN clientes cli ON c.cliente_id = cli.id
+                        WHERE (c.creador_id = ? OR c.creador_id IN (SELECT id FROM clientes WHERE creador_id = ?))
+                          AND LOWER(c.estado) = ?
+                        ORDER BY c.fecha DESC
+                    ''', (user_id, user_id, estado.lower()))
+                cotizaciones_estado[key] = cursor.fetchall()
+                count = len(cotizaciones_estado[key])
+                if key == 'aprobadas':
+                    cotizaciones_aprobadas = count
+                elif key == 'pendientes':
+                    cotizaciones_pendientes = count
+                elif key == 'rechazadas':
+                    cotizaciones_rechazadas = count
+
             return render_template('admin/admin_dashboard.html',
-                               nombre=session['user_nombre'],
-                               rol=user_rol,
-                               total_usuarios=total_usuarios,
-                               total_productos=total_productos,
-                               total_cotizaciones=total_cotizaciones,
-                               actividades_recientes=actividades_recientes,
-                               cotizaciones_aprobadas=cotizaciones_aprobadas,
-                               cotizaciones_pendientes=cotizaciones_pendientes,
-                               cotizaciones_rechazadas=cotizaciones_rechazadas,
-                               cotizaciones_estado=cotizaciones_estado,
-                               autenticado=True)
+                                   nombre=session.get('user_nombre', 'Administrador'),
+                                   rol=user_rol,
+                                   total_usuarios=total_usuarios,
+                                   total_productos=total_productos,
+                                   total_cotizaciones=total_cotizaciones,
+                                   actividades_recientes=actividades_recientes,
+                                   cotizaciones_aprobadas=cotizaciones_aprobadas,
+                                   cotizaciones_pendientes=cotizaciones_pendientes,
+                                   cotizaciones_rechazadas=cotizaciones_rechazadas,
+                                   cotizaciones_estado=cotizaciones_estado,
+                                   autenticado=True)
+        finally:
+            conexion.close()
 
     @app.route('/standard/dashboard')
     @standard_required
@@ -197,25 +184,25 @@ def register_routes(app):
         cursor = conexion.cursor()
 
         try:
-            # 1. Cotizaciones del usuario estándar
+            # 1. Cotizaciones creadas exclusivamente por este vendedor
             cursor.execute('''
                 SELECT c.id, c.fecha, c.total, c.estado,
                        co.nombre as cliente_nombre
                 FROM cotizaciones c
                 LEFT JOIN clientes co ON c.cliente_id = co.id
-                WHERE c.cliente_id = ? OR c.creador_id = ?
+                WHERE c.creador_id = ?
                 ORDER BY c.fecha DESC
-            ''', (user_id, user_id))
+            ''', (user_id,))
             cotizaciones = [dict(row) for row in cursor.fetchall()]
 
-            # Métricas
+            # Métricas calculadas con normalización case-insensitive
             total_cotizaciones = len(cotizaciones)
-            total_cotizado = sum(float(c['total'] or 0) for c in cotizaciones)
-            cotizaciones_aprobadas = sum(1 for c in cotizaciones if c['estado'] == 'aprobada')
-            cotizaciones_pendientes = sum(1 for c in cotizaciones if c['estado'] == 'pendiente')
-            cotizaciones_rechazadas = sum(1 for c in cotizaciones if c['estado'] == 'rechazada')
+            total_cotizado = sum(float(c.get('total') or 0) for c in cotizaciones)
+            cotizaciones_aprobadas = sum(1 for c in cotizaciones if str(c.get('estado') or '').lower() == 'aprobada')
+            cotizaciones_pendientes = sum(1 for c in cotizaciones if str(c.get('estado') or '').lower() in ['pendiente', ''])
+            cotizaciones_rechazadas = sum(1 for c in cotizaciones if str(c.get('estado') or '').lower() == 'rechazada')
 
-            # 2. Tareas activas del usuario
+            # 2. Tareas asignadas al usuario
             cursor.execute('''
                 SELECT t.id, t.creador_id, uc.nombre as creador_nombre,
                        t.titulo, t.descripcion, t.prioridad, t.estado,

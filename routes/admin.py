@@ -37,14 +37,7 @@ def register_routes(app):
     @app.route('/admin')
     @login_required
     def admin_panel():
-        if session.get('user_rol') == 'superadmin':
-            # Cargar datos exclusivos para superadmin
-            return render_template('admin/superadmin_dashboard.html',
-                                 funciones_exclusivas=True)
-        elif session.get('user_rol') == 'admin':
-            return render_template('admin/admin_dashboard.html')  # Panel normal
-        else:
-            return redirect(url_for('standard_dashboard'))
+        return redirect(url_for('dashboard'))
 
     @app.route('/admin/logs')
     @superadmin_required

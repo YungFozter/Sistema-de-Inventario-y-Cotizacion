@@ -377,12 +377,17 @@
                   onclick="abrirModalEditarProveedorBtn(this)" title="Editar Proveedor">
                   <i class="bi bi-pencil-fill"></i>
                 </button>
-                <a href="/proveedores/eliminar/{{ p.id }}"
+                <button type="button"
                   class="btn btn-sm btn-outline-danger rounded-circle d-inline-flex align-items-center justify-content-center"
                   style="width: 34px; height: 34px; border: 1.5px solid #dc2626;"
-                  onclick="return confirm('¿Eliminar al proveedor {{ p.nombre }}?')" title="Eliminar Proveedor">
+                  data-id="{{ p.id }}"
+                  data-nombre="{{ p.nombre or '' }}"
+                  data-nit="{{ p.nit_ruc or '' }}"
+                  data-contacto="{{ p.contacto_nombre or '' }}"
+                  data-rubro="{{ p.rubro or '' }}"
+                  onclick="abrirModalEliminarProveedorBtn(this)" title="Eliminar Proveedor">
                   <i class="bi bi-trash-fill"></i>
-                </a>
+                </button>
               </div>
             </td>
           </tr>
@@ -472,6 +477,73 @@
             style="background-color: #FF6B35; border: 2px solid #141414;">Guardar Cambios</button>
         </div>
       </form>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL DE CONFIRMACIÓN DE ELIMINACIÓN DE PROVEEDOR (BENTO / CLAY PRO) -->
+<div class="modal fade" id="modalConfirmarEliminarProveedor" tabindex="-1" aria-labelledby="modalEliminarProveedorLabel" aria-hidden="true" style="z-index: 1085 !important;">
+  <div class="modal-dialog modal-dialog-centered" style="max-width: 480px;">
+    <div class="modal-content bento-clay-modal-content" style="background: #FFFFFF; border: 2.5px solid #141414; border-radius: 24px; box-shadow: 12px 12px 30px rgba(0, 0, 0, 0.25), -6px -6px 20px #ffffff; overflow: hidden;">
+      
+      <!-- CABECERA EN NEGRO SOBRIO CON BORDE INFERIOR NARANJA -->
+      <div class="d-flex align-items-center justify-content-between px-4 py-3" style="background: #141414; border-bottom: 3.5px solid #FF6B35;">
+        <div class="d-flex align-items-center gap-3">
+          <div class="rounded-3 d-flex align-items-center justify-content-center" style="width: 44px; height: 44px; background: #FFFFFF; color: #FF6B35; border: 2px solid #141414; box-shadow: 3px 3px 8px rgba(255, 107, 53, 0.4);">
+            <i class="fa-solid fa-truck-field-un fs-5"></i>
+          </div>
+          <div>
+            <h5 class="modal-title fw-bold text-white mb-0 fs-6" id="modalEliminarProveedorLabel">
+              ¿Eliminar Proveedor?
+            </h5>
+            <small class="text-white-50" style="font-size: 0.78rem;">Confirmación de Seguridad</small>
+          </div>
+        </div>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <!-- CUERPO BENTO GRID -->
+      <div class="p-4" style="background: #FAF8F5;">
+        
+        <!-- BENTO BOX: INFORMACIÓN DEL PROVEEDOR SELECCIONADO -->
+        <div class="mb-3" style="background: #FFFFFF; border: 2px solid #141414; border-radius: 18px; padding: 1.25rem; box-shadow: 4px 4px 12px rgba(0, 0, 0, 0.04);">
+          <div class="d-flex align-items-center justify-content-between mb-2 pb-2 border-bottom">
+            <span class="fw-bold text-uppercase" style="font-size: 0.72rem; letter-spacing: 0.06em; color: #FF6B35;">
+              <i class="bi bi-exclamation-circle-fill me-1"></i> Proveedor Seleccionado
+            </span>
+            <span class="badge rounded-pill px-3 py-1 fw-bold text-white" style="background: #141414; border: 1px solid #141414; font-size: 0.75rem;" id="eliminarProveedorRubro">General</span>
+          </div>
+          
+          <div class="fs-5 fw-bold text-dark mb-2" id="eliminarProveedorNombre">--</div>
+          
+          <div class="row g-2 small text-secondary">
+            <div class="col-6">
+              <i class="bi bi-card-text me-1 text-dark"></i> NIT/RUC: <strong class="text-dark" id="eliminarProveedorNit">--</strong>
+            </div>
+            <div class="col-6">
+              <i class="bi bi-person-badge me-1 text-dark"></i> Contacto: <strong class="text-dark" id="eliminarProveedorContacto">--</strong>
+            </div>
+          </div>
+        </div>
+
+        <!-- AVISO DE ADVERTENCIA -->
+        <div class="p-3 mb-3 rounded-3" style="background: #141414; color: #FFFFFF; border-left: 4px solid #FF6B35; font-size: 0.83rem; font-weight: 600;">
+          <i class="bi bi-info-circle-fill me-1 text-warning"></i>
+          Esta acción eliminará permanentemente al proveedor del sistema.
+        </div>
+
+        <!-- BOTONES DE ACCIÓN -->
+        <div class="d-flex gap-2 justify-content-end align-items-center pt-2">
+          <button type="button" class="btn btn-outline-dark rounded-pill py-2 px-4 fw-bold" data-bs-dismiss="modal" style="border: 2px solid #141414; font-size: 0.9rem;">
+            Cancelar
+          </button>
+          <a href="#" id="btnConfirmarEliminarProveedorHref" class="btn text-white rounded-pill py-2 px-4 fw-bold shadow-sm" style="background: #FF6B35; border: 2px solid #141414; font-size: 0.9rem; display: inline-flex; align-items: center; gap: 8px;">
+            <i class="bi bi-trash-fill"></i> Sí, Eliminar
+          </a>
+        </div>
+
+      </div>
+
     </div>
   </div>
 </div>
@@ -584,12 +656,17 @@
                         onclick="abrirModalEditarProveedorBtn(this)" title="Editar Proveedor">
                         <i class="bi bi-pencil-fill"></i>
                       </button>
-                      <a href="/proveedores/eliminar/${p.id}"
+                      <button type="button"
                         class="btn btn-sm btn-outline-danger rounded-circle d-inline-flex align-items-center justify-content-center"
                         style="width: 34px; height: 34px; border: 1.5px solid #dc2626;"
-                        onclick="return confirm('¿Eliminar al proveedor ${p.nombre}?')" title="Eliminar Proveedor">
+                        data-id="${p.id}"
+                        data-nombre="${p.nombre || ''}"
+                        data-nit="${p.nit_ruc || ''}"
+                        data-contacto="${p.contacto_nombre || ''}"
+                        data-rubro="${p.rubro || ''}"
+                        onclick="abrirModalEliminarProveedorBtn(this)" title="Eliminar Proveedor">
                         <i class="bi bi-trash-fill"></i>
-                      </a>
+                      </button>
                     </div>
                   </td>
                 </tr>
@@ -641,6 +718,37 @@
     document.getElementById('editTelefono').value = provTelefono || '';
     document.getElementById('editContacto').value = provContacto || '';
     document.getElementById('editRubro').value = provRubro || '';
+
+    const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+    modal.show();
+  }
+
+  function abrirModalEliminarProveedorBtn(btn) {
+    const provId = btn.getAttribute('data-id');
+    const provNombre = btn.getAttribute('data-nombre');
+    const provNit = btn.getAttribute('data-nit');
+    const provContacto = btn.getAttribute('data-contacto');
+    const provRubro = btn.getAttribute('data-rubro');
+
+    const modalEl = document.getElementById('modalConfirmarEliminarProveedor');
+    if (modalEl && modalEl.parentNode !== document.body) {
+      document.body.appendChild(modalEl);
+    }
+
+    const nombreEl = document.getElementById('eliminarProveedorNombre');
+    if (nombreEl) nombreEl.textContent = provNombre || 'Proveedor';
+
+    const nitEl = document.getElementById('eliminarProveedorNit');
+    if (nitEl) nitEl.textContent = provNit || 'S/N';
+
+    const contactoEl = document.getElementById('eliminarProveedorContacto');
+    if (contactoEl) contactoEl.textContent = provContacto || 'N/A';
+
+    const rubroEl = document.getElementById('eliminarProveedorRubro');
+    if (rubroEl) rubroEl.textContent = provRubro || 'General';
+
+    const hrefBtn = document.getElementById('btnConfirmarEliminarProveedorHref');
+    if (hrefBtn) hrefBtn.href = `/proveedores/eliminar/${provId}`;
 
     const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
     modal.show();

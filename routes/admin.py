@@ -40,8 +40,8 @@ def register_routes(app):
         return redirect(url_for('dashboard'))
 
     @app.route('/admin/logs')
-    @superadmin_required
     @login_required
+    @superadmin_required
     def auditoria_logs():
         conexion = get_db_connection()
         conexion.row_factory = sqlite3.Row
@@ -57,8 +57,8 @@ def register_routes(app):
         return render_template('admin/logs.html', logs=logs_data)
 
     @app.route('/admin/usuarios')
-    @superadmin_required
     @login_required
+    @superadmin_required
     def gestion_usuarios():
         try:
             conexion = get_db_connection()
@@ -126,6 +126,7 @@ def register_routes(app):
             return redirect(url_for('admin_panel'))
 
     @app.route('/admin/historial-usuarios')
+    @login_required
     @superadmin_required
     def historial_usuarios():
         try:
@@ -201,8 +202,8 @@ def register_routes(app):
                 conexion.close()
 
     @app.route('/admin/usuarios', methods=['POST'])
-    @admin_required
     @login_required
+    @admin_required
     def crear_usuario():
         try:
             # Obtener datos (compatible con form-data y JSON)
@@ -232,6 +233,7 @@ def register_routes(app):
                 return jsonify({'error': 'Solo superadmin puede crear usuarios admin'}), 403
 
             conexion = get_db_connection()
+            conexion.row_factory = sqlite3.Row
             cursor = conexion.cursor()
 
             # Verificar correo único (insensible a mayúsculas)
@@ -240,14 +242,21 @@ def register_routes(app):
                 conexion.close()
                 return jsonify({'error': 'El correo ya está registrado'}), 400
 
+            # Obtener empresa_nombre del creador para herencia
+            empresa_creador = None
+            cursor.execute("SELECT empresa_nombre, nombre FROM clientes WHERE id = ?", (session['user_id'],))
+            u_creador = cursor.fetchone()
+            if u_creador:
+                empresa_creador = u_creador['empresa_nombre'] or u_creador['nombre'] or 'General'
+
             # Crear hash de la contraseña
             contrasena_hash = generate_password_hash(contrasena)
 
             # Insertar nuevo usuario
             cursor.execute('''
-                INSERT INTO clientes (nombre, correo, telefono, rol, contrasena, creador_id, activo)
-                VALUES (?, ?, ?, ?, ?, ?, TRUE)
-            ''', (nombre, correo, telefono, rol, contrasena_hash, session['user_id']))
+                INSERT INTO clientes (nombre, correo, telefono, rol, contrasena, creador_id, activo, empresa_nombre)
+                VALUES (?, ?, ?, ?, ?, ?, TRUE, ?)
+            ''', (nombre, correo, telefono, rol, contrasena_hash, session['user_id'], empresa_creador))
 
             # Registrar en el historial
             registrar_log(
@@ -282,8 +291,8 @@ def register_routes(app):
             return jsonify({'error': 'Error del servidor'}), 500
 
     @app.route('/admin/usuarios/<int:id>', methods=['PUT'])
-    @admin_required
     @login_required
+    @admin_required
     def actualizar_usuario(id):
         try:
             data = request.get_json() if request.is_json else request.form
@@ -366,8 +375,8 @@ def register_routes(app):
             return jsonify({'error': 'Error del servidor'}), 500
 
     @app.route('/admin/usuarios/<int:id>/rol', methods=['PUT'])
-    @superadmin_required
     @login_required
+    @superadmin_required
     def cambiar_rol_usuario(id):
         # Validar que no sea el usuario actual
         if id == session['user_id']:
@@ -381,7 +390,16 @@ def register_routes(app):
 
         try:
             conexion = get_db_connection()
+            conexion.row_factory = sqlite3.Row
             cursor = conexion.cursor()
+            
+            cursor.execute("SELECT id, rol, nombre FROM clientes WHERE id = ?", (id,))
+            target_user = cursor.fetchone()
+            if not target_user:
+                conexion.close()
+                return jsonify({'error': 'Usuario no encontrado'}), 404
+
+            rol_anterior = target_user['rol']
             cursor.execute("UPDATE clientes SET rol = ? WHERE id = ?", (nuevo_rol, id))
             conexion.commit()
 
@@ -390,6 +408,8 @@ def register_routes(app):
                 accion="cambio_rol_usuario",
                 detalle={
                     "usuario_afectado": id,
+                    "nombre": target_user['nombre'],
+                    "rol_anterior": rol_anterior,
                     "nuevo_rol": nuevo_rol
                 }
             )
@@ -460,8 +480,8 @@ def register_routes(app):
                 conexion.close()
 
     @app.route('/admin/usuarios/<int:id>', methods=['DELETE'])
-    @superadmin_required
     @login_required
+    @superadmin_required
     def eliminar_usuario_completo(id):
         if id == session.get('user_id'):
             return jsonify({'error': 'No puedes eliminar tu propia cuenta'}), 400
@@ -528,8 +548,8 @@ def register_routes(app):
             conexion.close()
 
     @app.route('/admin/renovar_suscripcion/<int:id>', methods=['POST'])
-    @superadmin_required
     @login_required
+    @superadmin_required
     def renovar_suscripcion(id):
         try:
             dias = int(request.form.get('dias', 30))
@@ -589,8 +609,8 @@ def register_routes(app):
         return redirect(url_for('gestion_usuarios'))
 
     @app.route('/admin/usuarios/<int:id>/historial_renovaciones', methods=['GET'])
-    @superadmin_required
     @login_required
+    @superadmin_required
     def obtener_historial_renovaciones(id):
         try:
             conexion = get_db_connection()
@@ -615,8 +635,8 @@ def register_routes(app):
                 conexion.close()
 
     @app.route('/admin/exportar_clientes_csv')
-    @superadmin_required
     @login_required
+    @superadmin_required
     def exportar_clientes_csv():
         try:
             conexion = get_db_connection()
@@ -660,11 +680,8 @@ def register_routes(app):
 
     @app.route('/admin/pines', methods=['GET', 'POST'])
     @login_required
+    @superadmin_required
     def gestion_pines():
-        if session.get('user_rol') != 'superadmin':
-            flash('Acceso denegado. Solo el superadmin puede gestionar PINs.', 'danger')
-            return redirect(url_for('index'))
-
         conexion = get_db_connection()
         conexion.row_factory = sqlite3.Row
         cursor = conexion.cursor()
@@ -734,34 +751,43 @@ def register_routes(app):
 
 
     @app.route('/admin/usuarios/<int:id>', methods=['GET'])
-    @admin_required
     @login_required
+    @admin_required
     def obtener_usuario(id):
         try:
+            caller_rol = session.get('user_rol')
+            caller_id = session.get('user_id')
+
             conexion = get_db_connection()
+            conexion.row_factory = sqlite3.Row
             cursor = conexion.cursor()
-            cursor.execute("SELECT id, nombre, correo, telefono, rol FROM clientes WHERE id = ?", (id,))
+            cursor.execute("SELECT id, nombre, correo, telefono, rol, creador_id FROM clientes WHERE id = ?", (id,))
             usuario = cursor.fetchone()
             conexion.close()
     
-            if usuario:
-                return jsonify({
-                    'id': usuario[0],
-                    'nombre': usuario[1],
-                    'correo': usuario[2],
-                    'telefono': usuario[3],
-                    'rol': usuario[4]
-                })
-            else:
+            if not usuario:
                 return jsonify({'error': 'Usuario no encontrado'}), 404
+
+            # Anti-IDOR: Superadmin puede ver a todos, un admin normal solo puede ver sus propios datos o los de sus subordinados
+            if caller_rol != 'superadmin':
+                if usuario['id'] != caller_id and usuario['creador_id'] != caller_id:
+                    return jsonify({'error': 'No tienes permisos para consultar este usuario'}), 403
+    
+            return jsonify({
+                'id': usuario['id'],
+                'nombre': usuario['nombre'],
+                'correo': usuario['correo'],
+                'telefono': usuario['telefono'],
+                'rol': usuario['rol']
+            })
     
         except Exception as e:
             app.logger.error(f"Error al obtener usuario {id}: {str(e)}")
             return jsonify({'error': 'Error del servidor'}), 500
     
     @app.route('/admin/respaldos')
-    @superadmin_required
     @login_required
+    @superadmin_required
     def gestion_respaldos():
         try:
             backups = listar_backups()
@@ -773,8 +799,8 @@ def register_routes(app):
             return redirect(url_for('admin_panel'))
 
     @app.route('/admin/respaldos/crear', methods=['POST'])
-    @superadmin_required
     @login_required
+    @superadmin_required
     def crear_respaldo_route():
         try:
             filename, _ = crear_backup()
@@ -785,8 +811,8 @@ def register_routes(app):
         return redirect(url_for('gestion_respaldos'))
 
     @app.route('/admin/respaldos/descargar/<filename>')
-    @superadmin_required
     @login_required
+    @superadmin_required
     def descargar_respaldo(filename):
         try:
             safe_filename = os.path.basename(filename)
@@ -798,8 +824,8 @@ def register_routes(app):
             return redirect(url_for('gestion_respaldos'))
 
     @app.route('/admin/respaldos/eliminar/<filename>', methods=['POST'])
-    @superadmin_required
     @login_required
+    @superadmin_required
     def eliminar_respaldo_route(filename):
         try:
             safe_filename = os.path.basename(filename)
@@ -811,8 +837,8 @@ def register_routes(app):
         return redirect(url_for('gestion_respaldos'))
 
     @app.route('/admin/respaldos/restaurar/<filename>', methods=['POST'])
-    @superadmin_required
     @login_required
+    @superadmin_required
     def restaurar_respaldo_route(filename):
         try:
             safe_filename = os.path.basename(filename)

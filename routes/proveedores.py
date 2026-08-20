@@ -4,6 +4,36 @@ import json
 import os
 from db_wrapper import get_db_connection
 from utils.decorators import login_required, admin_required
+from models import registrar_log
+
+def _obtener_info_tenant_proveedor(cursor, user_id, user_rol):
+    """Devuelve (owner_id, empresa_nombre) para aislamiento multi-tenant de proveedores"""
+    if user_rol == 'superadmin':
+        return None, None
+
+    cursor.execute("SELECT id, nombre, empresa_nombre, creador_id, rol FROM clientes WHERE id = ?", (user_id,))
+    u = cursor.fetchone()
+    if not u:
+        return user_id, 'General'
+
+    nombre = u['nombre'] if hasattr(u, 'keys') else u[1]
+    empresa_nom = u['empresa_nombre'] if hasattr(u, 'keys') else u[2]
+    creador_id = u['creador_id'] if hasattr(u, 'keys') else u[3]
+    rol = u['rol'] if hasattr(u, 'keys') else u[4]
+
+    owner_id = user_id
+    empresa_final = empresa_nom or nombre or 'General'
+
+    if rol == 'standard' and creador_id:
+        owner_id = creador_id
+        cursor.execute("SELECT nombre, empresa_nombre FROM clientes WHERE id = ?", (creador_id,))
+        p = cursor.fetchone()
+        if p:
+            p_emp = p['empresa_nombre'] if hasattr(p, 'keys') else p[1]
+            p_nom = p['nombre'] if hasattr(p, 'keys') else p[0]
+            empresa_final = p_emp or p_nom or 'General'
+
+    return owner_id, empresa_final.strip()
 
 def register_routes(app):
     @app.route('/proveedores', methods=['GET', 'POST'])
@@ -14,12 +44,9 @@ def register_routes(app):
         user_id = session.get('user_id')
         user_rol = session.get('user_rol')
         
-        # Determinar empresa/creador_id del usuario
         with get_db_connection() as conexion:
             cursor = conexion.cursor()
-            cursor.execute("SELECT empresa_nombre, nombre FROM clientes WHERE id = ?", (user_id,))
-            u = cursor.fetchone()
-            empresa_usuario = u[0] if u and u[0] else (u[1] if u and u[1] else 'General')
+            owner_id, empresa_usuario = _obtener_info_tenant_proveedor(cursor, user_id, user_rol)
 
         if request.method == 'POST':
             try:
@@ -38,16 +65,28 @@ def register_routes(app):
                         contacto_nombre = 'N/A'
                     with get_db_connection() as conexion:
                         cursor = conexion.cursor()
-                        # Validar si ya existe
-                        cursor.execute("SELECT COUNT(*) FROM proveedores WHERE empresa = ? AND nombre = ?", (empresa_usuario, nombre))
+                        # Validar duplicados dentro de la empresa
+                        if user_rol == 'superadmin':
+                            cursor.execute("SELECT COUNT(*) FROM proveedores WHERE LOWER(nombre) = LOWER(?)", (nombre,))
+                        else:
+                            cursor.execute("SELECT COUNT(*) FROM proveedores WHERE (creador_id = ? OR creador_id = ? OR empresa = ?) AND LOWER(nombre) = LOWER(?)", 
+                                           (user_id, owner_id, empresa_usuario, nombre))
                         if cursor.fetchone()[0] > 0:
-                            flash(f'⚠️ El proveedor "{nombre}" ya se encuentra registrado.', 'warning')
+                            flash(f'⚠️ El proveedor "{nombre}" ya se encuentra registrado en tu empresa.', 'warning')
                         else:
                             cursor.execute('''
                                 INSERT INTO proveedores (empresa, nombre, nit_ruc, contacto_nombre, telefono, correo, direccion, rubro, creador_id)
                                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
                             ''', (empresa_usuario, nombre, nit_ruc, contacto_nombre, telefono, correo, direccion, rubro, user_id))
+                            nuevo_prov_id = cursor.lastrowid
                             conexion.commit()
+
+                            registrar_log(
+                                usuario_id=user_id,
+                                accion="crear_proveedor",
+                                detalle={"proveedor_id": nuevo_prov_id, "nombre": nombre, "empresa": empresa_usuario}
+                            )
+
                             flash(f'¡Proveedor "{nombre}" registrado exitosamente!', 'success')
                             return redirect(url_for('proveedores'))
             except Exception as e:
@@ -68,8 +107,12 @@ def register_routes(app):
                 conexion.row_factory = sqlite3.Row
                 cursor = conexion.cursor()
 
-                base_sql = "FROM proveedores WHERE (creador_id = ? OR empresa = ?)"
-                params = [user_id, empresa_usuario]
+                if user_rol == 'superadmin':
+                    base_sql = "FROM proveedores WHERE 1=1"
+                    params = []
+                else:
+                    base_sql = "FROM proveedores WHERE (creador_id = ? OR creador_id = ? OR empresa = ?)"
+                    params = [user_id, owner_id, empresa_usuario]
 
                 if query_search:
                     base_sql += " AND (LOWER(nombre) LIKE LOWER(?) OR LOWER(nit_ruc) LIKE LOWER(?) OR LOWER(contacto_nombre) LIKE LOWER(?) OR LOWER(rubro) LIKE LOWER(?))"
@@ -105,6 +148,8 @@ def register_routes(app):
     @login_required
     @admin_required
     def editar_proveedor(id):
+        user_id = session.get('user_id')
+        user_rol = session.get('user_rol')
         try:
             nombre = request.form.get('nombre', '').strip()
             nit_ruc = request.form.get('nit_ruc', '').strip()
@@ -123,11 +168,24 @@ def register_routes(app):
 
             with get_db_connection() as conexion:
                 cursor = conexion.cursor()
+                owner_id, empresa_usuario = _obtener_info_tenant_proveedor(cursor, user_id, user_rol)
 
-                # 1. Obtener el nombre anterior del proveedor
-                cursor.execute("SELECT nombre, empresa FROM proveedores WHERE id = ?", (id,))
+                # 1. Validar propiedad del proveedor (Anti-IDOR)
+                cursor.execute("SELECT nombre, empresa, creador_id FROM proveedores WHERE id = ?", (id,))
                 prov_anterior = cursor.fetchone()
-                nombre_anterior = prov_anterior[0] if prov_anterior else None
+                if not prov_anterior:
+                    flash('El proveedor no existe.', 'danger')
+                    return redirect(url_for('proveedores'))
+
+                prov_nombre = prov_anterior[0]
+                prov_emp = prov_anterior[1]
+                prov_creador = prov_anterior[2]
+
+                if user_rol != 'superadmin' and prov_creador not in [user_id, owner_id] and prov_emp != empresa_usuario:
+                    flash('No tienes permisos para editar este proveedor.', 'danger')
+                    return redirect(url_for('proveedores'))
+
+                nombre_anterior = prov_nombre
 
                 # 2. Actualizar proveedor
                 cursor.execute('''
@@ -136,27 +194,50 @@ def register_routes(app):
                     WHERE id=?
                 ''', (nombre, nit_ruc, contacto_nombre, telefono, correo, direccion, rubro, id))
 
-                # 3. Cascada: Actualizar el nombre en todos los productos que usaban el proveedor anterior
+                # 3. Cascada: Actualizar el nombre en productos de esta empresa
                 if nombre_anterior and nombre != nombre_anterior:
                     try:
                         cursor.execute("PRAGMA table_info(productos)")
                         cols_prod = [c[1] for c in cursor.fetchall()]
                         if 'proveedor_id' in cols_prod:
-                            cursor.execute('''
-                                UPDATE productos
-                                SET proveedor = ?, proveedor_id = ?
-                                WHERE proveedor_id = ? OR LOWER(proveedor) = LOWER(?)
-                            ''', (nombre, id, id, nombre_anterior))
+                            if user_rol == 'superadmin':
+                                cursor.execute('''
+                                    UPDATE productos
+                                    SET proveedor = ?, proveedor_id = ?
+                                    WHERE proveedor_id = ? OR LOWER(proveedor) = LOWER(?)
+                                ''', (nombre, id, id, nombre_anterior))
+                            else:
+                                cursor.execute('''
+                                    UPDATE productos
+                                    SET proveedor = ?, proveedor_id = ?
+                                    WHERE (proveedor_id = ? OR LOWER(proveedor) = LOWER(?))
+                                      AND (empresa = ? OR empresa = 'General')
+                                ''', (nombre, id, id, nombre_anterior, empresa_usuario))
                         else:
-                            cursor.execute('''
-                                UPDATE productos
-                                SET proveedor = ?
-                                WHERE LOWER(proveedor) = LOWER(?)
-                            ''', (nombre, nombre_anterior))
+                            if user_rol == 'superadmin':
+                                cursor.execute('''
+                                    UPDATE productos
+                                    SET proveedor = ?
+                                    WHERE LOWER(proveedor) = LOWER(?)
+                                ''', (nombre, nombre_anterior))
+                            else:
+                                cursor.execute('''
+                                    UPDATE productos
+                                    SET proveedor = ?
+                                    WHERE LOWER(proveedor) = LOWER(?)
+                                      AND (empresa = ? OR empresa = 'General')
+                                ''', (nombre, nombre_anterior, empresa_usuario))
                     except Exception as e_casc:
                         print(f"[WARN] Error actualizando productos asociados: {e_casc}")
 
                 conexion.commit()
+
+                registrar_log(
+                    usuario_id=user_id,
+                    accion="editar_proveedor",
+                    detalle={"proveedor_id": id, "nombre_nuevo": nombre, "nombre_anterior": nombre_anterior}
+                )
+
                 flash(f'¡Proveedor "{nombre}" y sus productos asociados actualizados correctamente!', 'success')
         except Exception as e:
             flash(f'Error al actualizar proveedor: {str(e)}', 'danger')
@@ -167,12 +248,37 @@ def register_routes(app):
     @login_required
     @admin_required
     def eliminar_proveedor(id):
+        user_id = session.get('user_id')
+        user_rol = session.get('user_rol')
         try:
             with get_db_connection() as conexion:
                 cursor = conexion.cursor()
+                owner_id, empresa_usuario = _obtener_info_tenant_proveedor(cursor, user_id, user_rol)
+
+                cursor.execute("SELECT id, nombre, empresa, creador_id FROM proveedores WHERE id = ?", (id,))
+                prov = cursor.fetchone()
+                if not prov:
+                    flash('Proveedor no encontrado.', 'danger')
+                    return redirect(url_for('proveedores'))
+
+                prov_nombre = prov[1]
+                prov_emp = prov[2]
+                prov_creador = prov[3]
+
+                if user_rol != 'superadmin' and prov_creador not in [user_id, owner_id] and prov_emp != empresa_usuario:
+                    flash('No tienes permisos para eliminar este proveedor.', 'danger')
+                    return redirect(url_for('proveedores'))
+
                 cursor.execute("DELETE FROM proveedores WHERE id=?", (id,))
                 conexion.commit()
-                flash('Proveedor eliminado exitosamente', 'success')
+
+                registrar_log(
+                    usuario_id=user_id,
+                    accion="eliminar_proveedor",
+                    detalle={"proveedor_id": id, "nombre": prov_nombre}
+                )
+
+                flash(f'Proveedor "{prov_nombre}" eliminado exitosamente.', 'success')
         except Exception as e:
             flash(f'Error al eliminar proveedor: {str(e)}', 'danger')
 
@@ -182,6 +288,7 @@ def register_routes(app):
     @login_required
     def api_buscar_proveedores():
         user_id = session.get('user_id')
+        user_rol = session.get('user_rol')
         query_search = request.args.get('q', '').strip()
         try:
             page = max(1, int(request.args.get('page', 1)))
@@ -196,15 +303,17 @@ def register_routes(app):
 
         with get_db_connection() as conexion:
             cursor = conexion.cursor()
-            cursor.execute("SELECT empresa_nombre, nombre FROM clientes WHERE id = ?", (user_id,))
-            u = cursor.fetchone()
-            empresa_usuario = u[0] if u and u[0] else (u[1] if u and u[1] else 'General')
+            owner_id, empresa_usuario = _obtener_info_tenant_proveedor(cursor, user_id, user_rol)
 
             conexion.row_factory = sqlite3.Row
             cursor = conexion.cursor()
 
-            base_sql = "FROM proveedores WHERE (creador_id = ? OR empresa = ?)"
-            params = [user_id, empresa_usuario]
+            if user_rol == 'superadmin':
+                base_sql = "FROM proveedores WHERE 1=1"
+                params = []
+            else:
+                base_sql = "FROM proveedores WHERE (creador_id = ? OR creador_id = ? OR empresa = ?)"
+                params = [user_id, owner_id, empresa_usuario]
 
             if query_search:
                 base_sql += " AND (LOWER(nombre) LIKE LOWER(?) OR LOWER(nit_ruc) LIKE LOWER(?) OR LOWER(contacto_nombre) LIKE LOWER(?) OR LOWER(rubro) LIKE LOWER(?))"
@@ -236,9 +345,21 @@ def register_routes(app):
     @login_required
     def api_proveedores():
         user_id = session.get('user_id')
+        user_rol = session.get('user_rol')
         with get_db_connection() as conexion:
             conexion.row_factory = sqlite3.Row
             cursor = conexion.cursor()
-            cursor.execute("SELECT id, nombre, nit_ruc, contacto_nombre, telefono FROM proveedores ORDER BY nombre ASC")
+            owner_id, empresa_usuario = _obtener_info_tenant_proveedor(cursor, user_id, user_rol)
+
+            if user_rol == 'superadmin':
+                cursor.execute("SELECT id, nombre, nit_ruc, contacto_nombre, telefono FROM proveedores ORDER BY nombre ASC")
+            else:
+                cursor.execute("""
+                    SELECT id, nombre, nit_ruc, contacto_nombre, telefono 
+                    FROM proveedores 
+                    WHERE (creador_id = ? OR creador_id = ? OR empresa = ?)
+                    ORDER BY nombre ASC
+                """, (user_id, owner_id, empresa_usuario))
+
             rows = [dict(r) for r in cursor.fetchall()]
             return jsonify({'success': True, 'proveedores': rows})

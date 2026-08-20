@@ -218,18 +218,60 @@ def register_routes(app):
             con.row_factory = sqlite3.Row
             cur = con.cursor()
             
-            # Buscar si el usuario ya existe
-            query_select = 'SELECT * FROM clientes WHERE correo = %s' if is_postgres else 'SELECT * FROM clientes WHERE correo = ?'
+            # Buscar si el usuario ya existe y obtener estado del creador
+            query_select = '''
+                SELECT c.*, creador.activo as creador_activo, creador.fecha_vencimiento_suscripcion as creador_fecha_vencimiento
+                FROM clientes c 
+                LEFT JOIN clientes creador ON c.creador_id = creador.id 
+                WHERE LOWER(c.correo) = %s
+            ''' if is_postgres else '''
+                SELECT c.*, creador.activo as creador_activo, creador.fecha_vencimiento_suscripcion as creador_fecha_vencimiento
+                FROM clientes c 
+                LEFT JOIN clientes creador ON c.creador_id = creador.id 
+                WHERE LOWER(c.correo) = ?
+            '''
             cur.execute(query_select, (correo,))
             cliente = cur.fetchone()
             
             session_token = uuid.uuid4().hex
 
             es_nuevo_registro = False
+            suscripcion_activa = False
+            trial_usadas = 0
+
             if cliente:
+                # 1. Validar que sea un rol permitido
+                if cliente['rol'] not in ['superadmin', 'admin', 'standard']:
+                    con.close()
+                    flash('Este usuario no tiene permisos para acceder al sistema.', 'danger')
+                    return redirect(url_for('login'))
+
+                # 2. Validar que la cuenta no esté suspendida
+                if not cliente['activo']:
+                    con.close()
+                    flash('Tu cuenta ha sido suspendida. Contacta a soporte.', 'danger')
+                    return redirect(url_for('login'))
+
+                # 3. Validar Kill-Switch (si el Admin padre está inactivo, bloquear vendedores)
+                if cliente['creador_id'] and cliente['creador_activo'] == 0:
+                    con.close()
+                    flash('La suscripción del Administrador principal ha sido suspendida. Contacta a tu superior.', 'danger')
+                    return redirect(url_for('login'))
+
                 user_id = cliente['id']
                 rol = cliente['rol']
                 nombre_val = cliente['nombre']
+
+                # 4. Calcular estado real de suscripción y cotizaciones de prueba
+                if rol == 'admin':
+                    trial_usadas = cliente['cotizaciones_trial_usadas'] if 'cotizaciones_trial_usadas' in cliente.keys() else 0
+                    fecha_venc = cliente['fecha_vencimiento_suscripcion']
+                    if fecha_venc:
+                        try:
+                            venc_dt = datetime.strptime(str(fecha_venc).split('.')[0], '%Y-%m-%d %H:%M:%S')
+                            suscripcion_activa = venc_dt > datetime.now()
+                        except Exception:
+                            pass
                 
                 query_up = '''
                     UPDATE clientes 
@@ -250,7 +292,7 @@ def register_routes(app):
                 registrar_log(user_id, 'login_google', {'ip': request.remote_addr, 'rol': rol})
                 con.close()
             else:
-                # Registrar cliente nuevo via Google
+                # Registrar cliente nuevo via Google como admin con suscripción de prueba
                 es_nuevo_registro = True
                 nuevo_id = _insertar_cliente(
                     cur, con,
@@ -266,6 +308,8 @@ def register_routes(app):
                 user_id = nuevo_id
                 rol = 'admin'
                 nombre_val = nombre
+                suscripcion_activa = False
+                trial_usadas = 0
                 
                 query_tok = '''
                     UPDATE clientes SET session_token = %s WHERE id = %s
@@ -290,9 +334,12 @@ def register_routes(app):
             session['session_token'] = session_token
 
             if rol == 'admin':
-                session['trial_usadas'] = 0
-                session['trial_activo'] = True
+                session['trial_usadas'] = trial_usadas or 0
+                session['trial_activo'] = (not suscripcion_activa)
                 session['creador_id'] = None
+            elif rol == 'standard':
+                session['creador_id'] = cliente['creador_id'] if cliente else None
+                session['trial_activo'] = False
             else:
                 session['trial_activo'] = False
 
@@ -301,6 +348,8 @@ def register_routes(app):
                 return redirect(url_for('bienvenida_google'))
 
             flash('¡Sesión iniciada correctamente con Google!', 'success')
+            if rol == 'standard':
+                return redirect(url_for('standard_dashboard'))
             return redirect(url_for('dashboard'))
                 
         except Exception as e:

@@ -211,15 +211,18 @@ def register_routes(app):
             else:
                 data = request.form
 
-            nombre = data.get('nombre')
-            correo = data.get('correo')
-            telefono = data.get('telefono', '')
+            nombre = (data.get('nombre') or '').strip()
+            correo = (data.get('correo') or '').strip().lower()
+            telefono = (data.get('telefono') or '').strip()
             rol = data.get('rol')
-            contrasena = data.get('contrasena')
+            contrasena = data.get('contrasena') or ''
 
             # Validaciones básicas
             if not all([nombre, correo, rol, contrasena]):
                 return jsonify({'error': 'Faltan campos requeridos'}), 400
+
+            if len(contrasena) < 6:
+                return jsonify({'error': 'La contraseña debe tener al menos 6 caracteres'}), 400
 
             if rol not in ['admin', 'standard']:
                 return jsonify({'error': 'Rol no válido'}), 400
@@ -231,8 +234,8 @@ def register_routes(app):
             conexion = get_db_connection()
             cursor = conexion.cursor()
 
-            # Verificar correo único
-            cursor.execute("SELECT id FROM clientes WHERE correo = ?", (correo,))
+            # Verificar correo único (insensible a mayúsculas)
+            cursor.execute("SELECT id FROM clientes WHERE LOWER(correo) = ?", (correo,))
             if cursor.fetchone():
                 conexion.close()
                 return jsonify({'error': 'El correo ya está registrado'}), 400
@@ -242,8 +245,8 @@ def register_routes(app):
 
             # Insertar nuevo usuario
             cursor.execute('''
-                INSERT INTO clientes (nombre, correo, telefono, rol, contrasena, creador_id)
-                VALUES (?, ?, ?, ?, ?, ?)
+                INSERT INTO clientes (nombre, correo, telefono, rol, contrasena, creador_id, activo)
+                VALUES (?, ?, ?, ?, ?, ?, TRUE)
             ''', (nombre, correo, telefono, rol, contrasena_hash, session['user_id']))
 
             # Registrar en el historial

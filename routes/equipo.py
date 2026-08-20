@@ -12,6 +12,37 @@ def obtener_ahora_local():
     """Retorna la hora local (UTC-4) independientemente de la zona horaria del servidor en Render (UTC)"""
     return (datetime.now(timezone.utc) - timedelta(hours=4)).replace(tzinfo=None)
 
+def _obtener_info_tenant_equipo(cursor, user_id, user_rol):
+    """
+    Retorna (admin_owner_id, empresa_usuario) para aislar datos del equipo.
+    - Si es superadmin: (None, 'General')
+    - Si es admin: (user_id, empresa_nombre)
+    - Si es standard: (creador_id, empresa_nombre del admin)
+    """
+    if user_rol == 'superadmin':
+        return None, 'General'
+
+    cursor.execute("SELECT creador_id, empresa_nombre, nombre, rol FROM clientes WHERE id = ?", (user_id,))
+    u = cursor.fetchone()
+    if not u:
+        return user_id, 'General'
+
+    creador_id = u['creador_id'] if hasattr(u, 'keys') else u[0]
+    empresa_nombre = u['empresa_nombre'] if hasattr(u, 'keys') else u[1]
+    nombre = u['nombre'] if hasattr(u, 'keys') else u[2]
+    rol = u['rol'] if hasattr(u, 'keys') else u[3]
+
+    if rol == 'standard' and creador_id:
+        admin_owner_id = creador_id
+        cursor.execute("SELECT empresa_nombre, nombre FROM clientes WHERE id = ?", (creador_id,))
+        p = cursor.fetchone()
+        empresa_usuario = (p['empresa_nombre'] or p['nombre']) if p else (empresa_nombre or nombre or 'General')
+    else:
+        admin_owner_id = user_id
+        empresa_usuario = empresa_nombre or nombre or 'General'
+
+    return admin_owner_id, empresa_usuario
+
 def register_routes(app):
 
     @app.route('/equipo', methods=['GET'])
@@ -20,54 +51,96 @@ def register_routes(app):
         conexion = get_db_connection()
         conexion.row_factory = sqlite3.Row
         cursor = conexion.cursor()
+        user_id = session.get('user_id')
+        user_rol = session.get('user_rol')
         
         try:
-            is_postgres = bool(os.environ.get('DATABASE_URL') and os.environ.get('DATABASE_URL').startswith('postgres'))
-            
-            # 1. Purgar/filtrar chat de más de 7 días (Limpieza automática)
+            admin_owner_id, empresa_usuario = _obtener_info_tenant_equipo(cursor, user_id, user_rol)
             hace_siete_dias = (obtener_ahora_local() - timedelta(days=7)).strftime("%Y-%m-%d %H:%M:%S")
             
-            # Obtener mensajes del chat <= 7 días
-            cursor.execute('''
-                SELECT c.id, c.usuario_id, u.nombre as usuario_nombre, u.rol as usuario_rol,
-                       c.mensaje, c.es_fijado, c.fecha
-                FROM equipo_chat c
-                JOIN clientes u ON c.usuario_id = u.id
-                WHERE c.fecha >= ? OR c.es_fijado = TRUE
-                ORDER BY c.fecha ASC
-            ''', (hace_siete_dias,))
-            mensajes_chat = cursor.fetchall()
-            
-            # Mensajes fijados (Anuncios)
-            cursor.execute('''
-                SELECT c.id, c.usuario_id, u.nombre as usuario_nombre, c.mensaje, c.fecha
-                FROM equipo_chat c
-                JOIN clientes u ON c.usuario_id = u.id
-                WHERE c.es_fijado = TRUE
-                ORDER BY c.fecha DESC
-            ''')
-            mensajes_fijados = cursor.fetchall()
+            # 1. Chat <= 7 días (Aislado por tenant)
+            if user_rol == 'superadmin':
+                cursor.execute('''
+                    SELECT c.id, c.usuario_id, u.nombre as usuario_nombre, u.rol as usuario_rol,
+                           c.mensaje, c.es_fijado, c.fecha
+                    FROM equipo_chat c
+                    JOIN clientes u ON c.usuario_id = u.id
+                    WHERE c.fecha >= ? OR c.es_fijado = TRUE
+                    ORDER BY c.fecha ASC
+                ''', (hace_siete_dias,))
+                mensajes_chat = cursor.fetchall()
+                
+                cursor.execute('''
+                    SELECT c.id, c.usuario_id, u.nombre as usuario_nombre, c.mensaje, c.fecha
+                    FROM equipo_chat c
+                    JOIN clientes u ON c.usuario_id = u.id
+                    WHERE c.es_fijado = TRUE
+                    ORDER BY c.fecha DESC
+                ''')
+                mensajes_fijados = cursor.fetchall()
+            else:
+                cursor.execute('''
+                    SELECT c.id, c.usuario_id, u.nombre as usuario_nombre, u.rol as usuario_rol,
+                           c.mensaje, c.es_fijado, c.fecha
+                    FROM equipo_chat c
+                    JOIN clientes u ON c.usuario_id = u.id
+                    WHERE (u.id = ? OR u.creador_id = ?) AND (c.fecha >= ? OR c.es_fijado = TRUE)
+                    ORDER BY c.fecha ASC
+                ''', (admin_owner_id, admin_owner_id, hace_siete_dias))
+                mensajes_chat = cursor.fetchall()
 
-            # 2. Obtener Tareas Pendientes y Completadas
-            cursor.execute('''
-                SELECT t.id, t.creador_id, uc.nombre as creador_nombre,
-                       t.asignado_a, ua.nombre as asignado_nombre,
-                       t.titulo, t.descripcion, t.prioridad, t.estado,
-                       t.fecha_creacion, t.fecha_completada, t.fecha_limite,
-                       t.completado_por_id, ucomp.nombre as completado_por_nombre
-                FROM equipo_tareas t
-                JOIN clientes uc ON t.creador_id = uc.id
-                LEFT JOIN clientes ua ON t.asignado_a = ua.id
-                LEFT JOIN clientes ucomp ON t.completado_por_id = ucomp.id
-                ORDER BY t.estado DESC, t.id DESC
-            ''')
+                cursor.execute('''
+                    SELECT c.id, c.usuario_id, u.nombre as usuario_nombre, c.mensaje, c.fecha
+                    FROM equipo_chat c
+                    JOIN clientes u ON c.usuario_id = u.id
+                    WHERE (u.id = ? OR u.creador_id = ?) AND c.es_fijado = TRUE
+                    ORDER BY c.fecha DESC
+                ''', (admin_owner_id, admin_owner_id))
+                mensajes_fijados = cursor.fetchall()
+
+            # 2. Tareas Pendientes y Completadas (Aisladas por tenant)
+            if user_rol == 'superadmin':
+                cursor.execute('''
+                    SELECT t.id, t.creador_id, uc.nombre as creador_nombre,
+                           t.asignado_a, ua.nombre as asignado_nombre,
+                           t.titulo, t.descripcion, t.prioridad, t.estado,
+                           t.fecha_creacion, t.fecha_completada, t.fecha_limite,
+                           t.completado_por_id, ucomp.nombre as completado_por_nombre
+                    FROM equipo_tareas t
+                    JOIN clientes uc ON t.creador_id = uc.id
+                    LEFT JOIN clientes ua ON t.asignado_a = ua.id
+                    LEFT JOIN clientes ucomp ON t.completado_por_id = ucomp.id
+                    ORDER BY t.estado DESC, t.id DESC
+                ''')
+            else:
+                cursor.execute('''
+                    SELECT t.id, t.creador_id, uc.nombre as creador_nombre,
+                           t.asignado_a, ua.nombre as asignado_nombre,
+                           t.titulo, t.descripcion, t.prioridad, t.estado,
+                           t.fecha_creacion, t.fecha_completada, t.fecha_limite,
+                           t.completado_por_id, ucomp.nombre as completado_por_nombre
+                    FROM equipo_tareas t
+                    JOIN clientes uc ON t.creador_id = uc.id
+                    LEFT JOIN clientes ua ON t.asignado_a = ua.id
+                    LEFT JOIN clientes ucomp ON t.completado_por_id = ucomp.id
+                    WHERE (uc.id = ? OR uc.creador_id = ? OR t.asignado_a = ? OR t.creador_id = ?)
+                    ORDER BY t.estado DESC, t.id DESC
+                ''', (admin_owner_id, admin_owner_id, user_id, user_id))
             todas_tareas = cursor.fetchall()
             
             tareas_pendientes = [t for t in todas_tareas if t['estado'] == 'pendiente']
             tareas_completadas = [t for t in todas_tareas if t['estado'] == 'hecho']
 
-            # 3. Lista de usuarios activos para asignación de tareas
-            cursor.execute("SELECT id, nombre, rol FROM clientes WHERE activo = TRUE ORDER BY nombre ASC")
+            # 3. Lista de usuarios del propio equipo para asignación de tareas
+            if user_rol == 'superadmin':
+                cursor.execute("SELECT id, nombre, rol FROM clientes WHERE activo = TRUE AND rol IN ('admin', 'standard') ORDER BY nombre ASC")
+            else:
+                cursor.execute("""
+                    SELECT id, nombre, rol 
+                    FROM clientes 
+                    WHERE (id = ? OR creador_id = ?) AND activo = TRUE AND rol IN ('admin', 'standard')
+                    ORDER BY nombre ASC
+                """, (admin_owner_id, admin_owner_id))
             usuarios_equipo = cursor.fetchall()
             
             # 4. Notificaciones del usuario actual
@@ -76,20 +149,30 @@ def register_routes(app):
                 FROM equipo_notificaciones
                 WHERE usuario_id = ?
                 ORDER BY fecha DESC LIMIT 15
-            ''', (session.get('user_id'),))
+            ''', (user_id,))
             notificaciones = cursor.fetchall()
 
             # 5. Solicitudes de ingreso pendientes (solo para admin/superadmin)
             solicitudes_pendientes = []
-            if session.get('user_rol') in ['admin', 'superadmin']:
-                cursor.execute('''
-                    SELECT s.id, s.admin_id, s.empleado_id, s.estado, s.fecha_solicitud,
-                           u.nombre as empleado_nombre, u.correo as empleado_correo, u.telefono as empleado_telefono
-                    FROM equipo_solicitudes s
-                    JOIN clientes u ON s.empleado_id = u.id
-                    WHERE s.admin_id = ? AND s.estado = 'pendiente'
-                    ORDER BY s.fecha_solicitud DESC
-                ''', (session.get('user_id'),))
+            if user_rol in ['admin', 'superadmin']:
+                if user_rol == 'superadmin':
+                    cursor.execute('''
+                        SELECT s.id, s.admin_id, s.empleado_id, s.estado, s.fecha_solicitud,
+                               u.nombre as empleado_nombre, u.correo as empleado_correo, u.telefono as empleado_telefono
+                        FROM equipo_solicitudes s
+                        JOIN clientes u ON s.empleado_id = u.id
+                        WHERE s.estado = 'pendiente'
+                        ORDER BY s.fecha_solicitud DESC
+                    ''')
+                else:
+                    cursor.execute('''
+                        SELECT s.id, s.admin_id, s.empleado_id, s.estado, s.fecha_solicitud,
+                               u.nombre as empleado_nombre, u.correo as empleado_correo, u.telefono as empleado_telefono
+                        FROM equipo_solicitudes s
+                        JOIN clientes u ON s.empleado_id = u.id
+                        WHERE s.admin_id = ? AND s.estado = 'pendiente'
+                        ORDER BY s.fecha_solicitud DESC
+                    ''', (user_id,))
                 solicitudes_pendientes = cursor.fetchall()
 
             return render_template(
@@ -137,23 +220,37 @@ def register_routes(app):
         conexion = get_db_connection()
         conexion.row_factory = sqlite3.Row
         cursor = conexion.cursor()
+        user_id = session.get('user_id')
+        user_rol = session.get('user_rol')
         try:
+            admin_owner_id, _ = _obtener_info_tenant_equipo(cursor, user_id, user_rol)
             hace_siete_dias = (obtener_ahora_local() - timedelta(days=7)).strftime("%Y-%m-%d %H:%M:%S")
-            cursor.execute('''
-                SELECT c.id, c.usuario_id, u.nombre as usuario_nombre, u.rol as usuario_rol,
-                       c.mensaje, c.es_fijado, c.fecha
-                FROM equipo_chat c
-                JOIN clientes u ON c.usuario_id = u.id
-                WHERE c.fecha >= ? OR c.es_fijado = TRUE
-                ORDER BY c.fecha ASC
-            ''', (hace_siete_dias,))
+            
+            if user_rol == 'superadmin':
+                cursor.execute('''
+                    SELECT c.id, c.usuario_id, u.nombre as usuario_nombre, u.rol as usuario_rol,
+                           c.mensaje, c.es_fijado, c.fecha
+                    FROM equipo_chat c
+                    JOIN clientes u ON c.usuario_id = u.id
+                    WHERE c.fecha >= ? OR c.es_fijado = TRUE
+                    ORDER BY c.fecha ASC
+                ''', (hace_siete_dias,))
+            else:
+                cursor.execute('''
+                    SELECT c.id, c.usuario_id, u.nombre as usuario_nombre, u.rol as usuario_rol,
+                           c.mensaje, c.es_fijado, c.fecha
+                    FROM equipo_chat c
+                    JOIN clientes u ON c.usuario_id = u.id
+                    WHERE (u.id = ? OR u.creador_id = ?) AND (c.fecha >= ? OR c.es_fijado = TRUE)
+                    ORDER BY c.fecha ASC
+                ''', (admin_owner_id, admin_owner_id, hace_siete_dias))
             rows = cursor.fetchall()
             mensajes = [dict(row) for row in rows]
             return jsonify({
                 'success': True,
                 'mensajes': mensajes,
-                'current_user_id': session.get('user_id'),
-                'is_admin': session.get('user_rol') in ['admin', 'superadmin']
+                'current_user_id': user_id,
+                'is_admin': user_rol in ['admin', 'superadmin']
             })
         except Exception as e:
             return jsonify({'success': False, 'message': str(e)}), 500
@@ -163,21 +260,41 @@ def register_routes(app):
     @app.route('/equipo/chat/<int:id>/fijar', methods=['POST'])
     @login_required
     def fijar_mensaje_chat(id):
-        if session.get('user_rol') not in ['admin', 'superadmin']:
+        user_id = session.get('user_id')
+        user_rol = session.get('user_rol')
+        if user_rol not in ['admin', 'superadmin']:
             return jsonify({'success': False, 'message': 'Permisos insuficientes'}), 403
 
         conexion = get_db_connection()
         conexion.row_factory = sqlite3.Row
         cursor = conexion.cursor()
         try:
-            cursor.execute("SELECT es_fijado FROM equipo_chat WHERE id = ?", (id,))
+            admin_owner_id, _ = _obtener_info_tenant_equipo(cursor, user_id, user_rol)
+            cursor.execute("""
+                SELECT c.id, c.es_fijado, u.id as u_id, u.creador_id as u_creador
+                FROM equipo_chat c
+                JOIN clientes u ON c.usuario_id = u.id
+                WHERE c.id = ?
+            """, (id,))
             msg = cursor.fetchone()
             if not msg:
                 return jsonify({'success': False, 'message': 'Mensaje no encontrado'}), 404
             
+            # Anti-IDOR: verificar pertenencia a la empresa
+            if user_rol != 'superadmin':
+                if msg['u_id'] != admin_owner_id and msg['u_creador'] != admin_owner_id:
+                    return jsonify({'success': False, 'message': 'No tienes permisos sobre este mensaje'}), 403
+
             nuevo_estado = not bool(msg['es_fijado'])
             cursor.execute("UPDATE equipo_chat SET es_fijado = ? WHERE id = ?", (nuevo_estado, id))
             conexion.commit()
+
+            registrar_log(
+                usuario_id=user_id,
+                accion="fijar_mensaje_chat",
+                detalle={"mensaje_id": id, "es_fijado": nuevo_estado}
+            )
+
             return jsonify({'success': True, 'es_fijado': nuevo_estado})
         except Exception as e:
             conexion.rollback()
@@ -188,7 +305,9 @@ def register_routes(app):
     @app.route('/equipo/tareas', methods=['POST'])
     @login_required
     def crear_tarea():
-        if session.get('user_rol') not in ['admin', 'superadmin']:
+        user_id = session.get('user_id')
+        user_rol = session.get('user_rol')
+        if user_rol not in ['admin', 'superadmin']:
             flash('Solo administradores pueden asignar tareas', 'danger')
             return redirect(url_for('vista_equipo'))
 
@@ -213,28 +332,41 @@ def register_routes(app):
                 hora_limite_val += ":00"
             fecha_limite_str = f"{fecha_limite_val} {hora_limite_val}"
 
-        # Procesar asignados
-        asignados_ids = []
-        for val in asignados_raw:
-            if val and val.isdigit():
-                asignados_ids.append(int(val))
-
         conexion = get_db_connection()
         cursor = conexion.cursor()
         try:
+            admin_owner_id, _ = _obtener_info_tenant_equipo(cursor, user_id, user_rol)
             fecha_actual = obtener_ahora_local().strftime("%Y-%m-%d %H:%M:%S")
+
+            # Procesar y validar asignados para evitar asignar usuarios de otras empresas
+            asignados_ids = []
+            for val in asignados_raw:
+                if val and val.isdigit():
+                    u_cand = int(val)
+                    if user_rol == 'superadmin':
+                        asignados_ids.append(u_cand)
+                    else:
+                        cursor.execute("SELECT id FROM clientes WHERE id = ? AND (id = ? OR creador_id = ?)", (u_cand, admin_owner_id, admin_owner_id))
+                        if cursor.fetchone():
+                            asignados_ids.append(u_cand)
             
             if asignados_ids:
                 for u_id in asignados_ids:
                     cursor.execute('''
                         INSERT INTO equipo_tareas (creador_id, asignado_a, titulo, descripcion, prioridad, estado, fecha_creacion, fecha_limite)
                         VALUES (?, ?, ?, ?, ?, 'pendiente', ?, ?)
-                    ''', (session.get('user_id'), u_id, titulo, descripcion, prioridad, fecha_actual, fecha_limite_str))
+                    ''', (user_id, u_id, titulo, descripcion, prioridad, fecha_actual, fecha_limite_str))
             else:
                 cursor.execute('''
                     INSERT INTO equipo_tareas (creador_id, asignado_a, titulo, descripcion, prioridad, estado, fecha_creacion, fecha_limite)
                     VALUES (?, NULL, ?, ?, ?, 'pendiente', ?, ?)
-                ''', (session.get('user_id'), titulo, descripcion, prioridad, fecha_actual, fecha_limite_str))
+                ''', (user_id, titulo, descripcion, prioridad, fecha_actual, fecha_limite_str))
+
+            registrar_log(
+                usuario_id=user_id,
+                accion="crear_tarea",
+                detalle={"titulo": titulo, "prioridad": prioridad, "asignados": asignados_ids}
+            )
 
             conexion.commit()
             flash('Tarea(s) asignada(s) exitosamente', 'success')
@@ -252,11 +384,32 @@ def register_routes(app):
         conexion = get_db_connection()
         conexion.row_factory = sqlite3.Row
         cursor = conexion.cursor()
+        user_id = session.get('user_id')
+        user_rol = session.get('user_rol')
         try:
-            cursor.execute("SELECT id, titulo, creador_id, estado FROM equipo_tareas WHERE id = ?", (id,))
+            admin_owner_id, _ = _obtener_info_tenant_equipo(cursor, user_id, user_rol)
+            cursor.execute("""
+                SELECT t.id, t.titulo, t.creador_id, t.asignado_a, t.estado,
+                       uc.creador_id as creador_admin_id
+                FROM equipo_tareas t
+                JOIN clientes uc ON t.creador_id = uc.id
+                WHERE t.id = ?
+            """, (id,))
             tarea = cursor.fetchone()
             if not tarea:
                 return jsonify({'success': False, 'message': 'Tarea no encontrada'}), 404
+
+            # Anti-IDOR: Validar que pertenezca a la empresa del usuario
+            if user_rol != 'superadmin':
+                creador_id = tarea['creador_id']
+                asignado_a = tarea['asignado_a']
+                creador_admin_id = tarea['creador_admin_id']
+                pertenece = (
+                    user_id in [creador_id, asignado_a] or
+                    admin_owner_id in [creador_id, creador_admin_id]
+                )
+                if not pertenece:
+                    return jsonify({'success': False, 'message': 'No tienes permisos para completar esta tarea'}), 403
 
             if tarea['estado'] == 'hecho':
                 return jsonify({'success': False, 'message': 'La tarea ya estaba completada'}), 400
@@ -267,7 +420,6 @@ def register_routes(app):
             fecha_completada_str = ahora.strftime("%Y-%m-%d %H:%M:%S")
             fecha_formateada = f"{nombre_dia} {ahora.strftime('%d/%m/%Y a las %H:%M')}"
 
-            user_id = session.get('user_id')
             user_nombre = session.get('user_nombre', 'Un usuario')
 
             cursor.execute('''
@@ -299,13 +451,39 @@ def register_routes(app):
     @app.route('/equipo/tareas/<int:id>/eliminar', methods=['POST'])
     @login_required
     def eliminar_tarea(id):
-        if session.get('user_rol') not in ['admin', 'superadmin']:
+        user_id = session.get('user_id')
+        user_rol = session.get('user_rol')
+        if user_rol not in ['admin', 'superadmin']:
             return jsonify({'success': False, 'message': 'Permisos insuficientes'}), 403
 
         conexion = get_db_connection()
+        conexion.row_factory = sqlite3.Row
         cursor = conexion.cursor()
         try:
+            admin_owner_id, _ = _obtener_info_tenant_equipo(cursor, user_id, user_rol)
+            cursor.execute("""
+                SELECT t.id, t.titulo, t.creador_id, uc.creador_id as creador_admin_id
+                FROM equipo_tareas t
+                JOIN clientes uc ON t.creador_id = uc.id
+                WHERE t.id = ?
+            """, (id,))
+            tarea = cursor.fetchone()
+            if not tarea:
+                return jsonify({'success': False, 'message': 'Tarea no encontrada'}), 404
+
+            # Anti-IDOR: Solo el admin creador o el superadmin pueden eliminar la tarea
+            if user_rol != 'superadmin':
+                if tarea['creador_id'] != user_id and tarea['creador_admin_id'] != user_id and tarea['creador_id'] != admin_owner_id:
+                    return jsonify({'success': False, 'message': 'No tienes permisos para eliminar esta tarea'}), 403
+
             cursor.execute("DELETE FROM equipo_tareas WHERE id = ?", (id,))
+            
+            registrar_log(
+                usuario_id=user_id,
+                accion="eliminar_tarea",
+                detalle={"tarea_id": id, "titulo": tarea['titulo']}
+            )
+
             conexion.commit()
             return jsonify({'success': True})
         except Exception as e:
@@ -321,7 +499,9 @@ def register_routes(app):
     @app.route('/equipo/invitaciones/crear', methods=['POST'])
     @login_required
     def crear_invitacion():
-        if session.get('user_rol') not in ['admin', 'superadmin']:
+        user_id = session.get('user_id')
+        user_rol = session.get('user_rol')
+        if user_rol not in ['admin', 'superadmin']:
             return jsonify({'success': False, 'message': 'Permisos insuficientes'}), 403
 
         tipo_expiracion = request.form.get('tipo_expiracion', 'uso_unico')
@@ -349,7 +529,14 @@ def register_routes(app):
             cursor.execute('''
                 INSERT INTO equipo_invitaciones (admin_id, token, tipo_expiracion, usos_restantes, fecha_expiracion)
                 VALUES (?, ?, ?, ?, ?)
-            ''', (session.get('user_id'), token, tipo_expiracion, usos_restantes, fecha_expiracion))
+            ''', (user_id, token, tipo_expiracion, usos_restantes, fecha_expiracion))
+
+            registrar_log(
+                usuario_id=user_id,
+                accion="crear_invitacion_equipo",
+                detalle={"tipo_expiracion": tipo_expiracion}
+            )
+
             conexion.commit()
 
             link_invitacion = url_for('unirse_equipo', token=token, _external=True)
@@ -455,7 +642,7 @@ def register_routes(app):
                 flash('Ya tienes una solicitud pendiente enviada a este Administrador', 'info')
                 return redirect(url_for('unirse_equipo', token=token))
 
-            # Registrar solicitud (sin fecha de expiración)
+            # Registrar solicitud
             fecha_actual = obtener_ahora_local().strftime("%Y-%m-%d %H:%M:%S")
             cursor.execute('''
                 INSERT INTO equipo_solicitudes (admin_id, empleado_id, estado, fecha_solicitud)
@@ -487,7 +674,9 @@ def register_routes(app):
     @app.route('/equipo/solicitudes/<int:id>/aprobar', methods=['POST'])
     @login_required
     def aprobar_solicitud_ingreso(id):
-        if session.get('user_rol') not in ['admin', 'superadmin']:
+        user_id = session.get('user_id')
+        user_rol = session.get('user_rol')
+        if user_rol not in ['admin', 'superadmin']:
             return jsonify({'success': False, 'message': 'Permisos insuficientes'}), 403
 
         conexion = get_db_connection()
@@ -499,7 +688,7 @@ def register_routes(app):
             if not sol:
                 return jsonify({'success': False, 'message': 'Solicitud no encontrada'}), 404
 
-            if sol['admin_id'] != session.get('user_id') and session.get('user_rol') != 'superadmin':
+            if sol['admin_id'] != user_id and user_rol != 'superadmin':
                 return jsonify({'success': False, 'message': 'No tienes permiso para aprobar esta solicitud'}), 403
 
             # Aprobar solicitud y vincular empleado al Admin con rol standard
@@ -507,7 +696,7 @@ def register_routes(app):
             cursor.execute("UPDATE clientes SET creador_id = ?, rol = 'standard' WHERE id = ?", (sol['admin_id'], sol['empleado_id']))
 
             registrar_log(
-                usuario_id=session.get('user_id'),
+                usuario_id=user_id,
                 accion="aprobar_solicitud_equipo",
                 detalle={"solicitud_id": id, "empleado_id": sol['empleado_id']}
             )
@@ -523,13 +712,32 @@ def register_routes(app):
     @app.route('/equipo/solicitudes/<int:id>/rechazar', methods=['POST'])
     @login_required
     def rechazar_solicitud_ingreso(id):
-        if session.get('user_rol') not in ['admin', 'superadmin']:
+        user_id = session.get('user_id')
+        user_rol = session.get('user_rol')
+        if user_rol not in ['admin', 'superadmin']:
             return jsonify({'success': False, 'message': 'Permisos insuficientes'}), 403
 
         conexion = get_db_connection()
+        conexion.row_factory = sqlite3.Row
         cursor = conexion.cursor()
         try:
+            cursor.execute("SELECT id, admin_id, empleado_id, estado FROM equipo_solicitudes WHERE id = ?", (id,))
+            sol = cursor.fetchone()
+            if not sol:
+                return jsonify({'success': False, 'message': 'Solicitud no encontrada'}), 404
+
+            # Anti-IDOR: Solo el admin destinatario o el superadmin pueden rechazar la solicitud
+            if sol['admin_id'] != user_id and user_rol != 'superadmin':
+                return jsonify({'success': False, 'message': 'No tienes permiso para rechazar esta solicitud'}), 403
+
             cursor.execute("UPDATE equipo_solicitudes SET estado = 'rechazada' WHERE id = ?", (id,))
+
+            registrar_log(
+                usuario_id=user_id,
+                accion="rechazar_solicitud_equipo",
+                detalle={"solicitud_id": id, "empleado_id": sol['empleado_id']}
+            )
+
             conexion.commit()
             return jsonify({'success': True, 'message': 'Solicitud rechazada.'})
         except Exception as e:

@@ -645,8 +645,9 @@ def register_routes(app):
                 cursor.execute('INSERT INTO pines_admin (pin, creado_en) VALUES (?, ?)', (nuevo_pin, fecha_str))
                 conexion.commit()
                 flash(f'Nuevo PIN generado: {nuevo_pin}', 'success')
-            except sqlite3.IntegrityError:
-                flash('Error al generar el PIN (colisión). Intenta de nuevo.', 'danger')
+            except Exception as ex_pin:
+                conexion.rollback()
+                flash('Error al generar el PIN (posible colisión). Intenta nuevamente.', 'danger')
             finally:
                 conexion.close()
             return redirect(url_for('gestion_pines'))

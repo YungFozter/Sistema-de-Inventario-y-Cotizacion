@@ -60,6 +60,26 @@ def register_routes(app):
         }
     )
 
+    # ─── Rate Limiting en memoria para Prevención de Fuerza Bruta ────────────
+    _login_failed_attempts = {}  # {key: [timestamps]}
+    _pin_failed_attempts = {}    # {user_id: [timestamps]}
+
+    def _is_rate_limited(bucket, key, max_attempts=5, window_seconds=300):
+        now = time.time()
+        attempts = bucket.get(key, [])
+        attempts = [t for t in attempts if now - t < window_seconds]
+        bucket[key] = attempts
+        return len(attempts) >= max_attempts
+
+    def _record_failed_attempt(bucket, key):
+        now = time.time()
+        attempts = bucket.get(key, [])
+        attempts.append(now)
+        bucket[key] = attempts
+
+    def _clear_failed_attempts(bucket, key):
+        if key in bucket:
+            del bucket[key]
 
     # ─── Helpers de validación reutilizables ──────────────────────────────────
     def _validar_telefono_bo(telefono: str):
@@ -110,7 +130,7 @@ def register_routes(app):
         return render_template('autenticacion/registro.html')
 
 
-    # ─── /registro POST (Manual, sin verificación) ───────────────────────────
+    # ─── /registro POST (Validación y Creación Segura) ───────────────────────
     @app.route('/registro', methods=['POST'])
     def registro_post():
         data = request.form
@@ -124,14 +144,24 @@ def register_routes(app):
             flash('Faltan campos obligatorios.', 'danger')
             return redirect(url_for('registro'))
 
+        # Validación de formato de correo electrónico
+        if not _re_global.match(r'^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$', correo):
+            flash('Por favor ingresa un correo electrónico válido.', 'warning')
+            return redirect(url_for('registro'))
+
+        # Validación de seguridad de contraseña (mínimo 6 caracteres)
+        if len(contrasena) < 6:
+            flash('La contraseña debe tener al menos 6 caracteres para mayor seguridad.', 'warning')
+            return redirect(url_for('registro'))
+
         try:
             con = get_db_connection()
             cur = con.cursor()
             cur.execute('SELECT id FROM clientes WHERE correo = ?', (correo,))
             if cur.fetchone():
-                flash('Este correo ya está registrado.', 'warning')
+                flash('Este correo ya está registrado. Por favor inicia sesión.', 'warning')
                 con.close()
-                return redirect(url_for('registro'))
+                return redirect(url_for('login'))
             
             # Formatear telefono (opcional)
             tel_ok = _validar_telefono_bo(telefono)
@@ -150,10 +180,11 @@ def register_routes(app):
             con.commit()
             con.close()
             
-            flash('¡Bienvenido a COTIZAPro! Tu cuenta ha sido creada.', 'success')
+            registrar_log(nuevo_id, 'registro_manual', {'ip': request.remote_addr, 'correo': correo})
+            flash('¡Bienvenido a COTIZAPro! Tu cuenta ha sido creada exitosamente.', 'success')
             return redirect(url_for('login'))
         except Exception as e:
-            flash(f'Error: {str(e)}', 'danger')
+            flash(f'Error al registrar la cuenta: {str(e)}', 'danger')
             return redirect(url_for('registro'))
 
     # ─── Google OAuth 2.0 ────────────────────────────────────────────────────
@@ -317,16 +348,23 @@ def register_routes(app):
         return render_template('autenticacion/bienvenida_google.html', usuario=dict(usuario))
 
     @app.route('/login', methods=['GET', 'POST'])
-
     def login():
         tipo_login = request.args.get('tipo', 'admin')  # Valor por defecto 'admin'
         error = None
 
         if request.method == 'POST':
-            correo = request.form['correo']
-            contrasena = request.form['contrasena']
+            correo = (request.form.get('correo') or '').strip().lower()
+            contrasena = request.form.get('contrasena', '')
             tipo_login = request.form.get('tipo_login', 'admin')  # Valor por defecto 'admin'
-            pin_admin = request.form.get('pin_admin', '')
+            pin_admin = (request.form.get('pin_admin') or '').strip()
+
+            client_ip = request.headers.get('X-Forwarded-For', request.remote_addr or 'unknown').split(',')[0].strip()
+            rate_key = f"{client_ip}_{correo}"
+
+            # 1. Protección contra Fuerza Bruta (Rate Limiting)
+            if _is_rate_limited(_login_failed_attempts, rate_key, max_attempts=5, window_seconds=300):
+                error = 'Demasiados intentos fallidos. Por seguridad, espera 5 minutos antes de volver a intentar.'
+                return render_template('autenticacion/login.html', error=error, tipo=tipo_login), 429
 
             # Conexión a DB
             conexion = get_db_connection()
@@ -338,11 +376,20 @@ def register_routes(app):
                 SELECT c.*, creador.activo as creador_activo, creador.fecha_vencimiento_suscripcion as creador_fecha_vencimiento
                 FROM clientes c 
                 LEFT JOIN clientes creador ON c.creador_id = creador.id 
-                WHERE c.correo = ?
+                WHERE LOWER(c.correo) = ?
             ''', (correo,))
             cliente = cursor.fetchone()
 
-            if cliente and check_password_hash(cliente['contrasena'], contrasena):
+            # Verificación de cuenta creada con Google OAuth
+            if cliente and cliente['auth_provider'] == 'google' and not cliente['contrasena']:
+                conexion.close()
+                _record_failed_attempt(_login_failed_attempts, rate_key)
+                error = 'Esta cuenta fue registrada con Google. Por favor, inicia sesión con el botón "Continuar con Google".'
+                return render_template('autenticacion/login.html', error=error, tipo=tipo_login)
+
+            if cliente and cliente['contrasena'] and check_password_hash(cliente['contrasena'], contrasena):
+                # Limpiar intentos fallidos al tener éxito
+                _clear_failed_attempts(_login_failed_attempts, rate_key)
             
                 # 1. Verificar si la cuenta está activa
                 if not cliente['activo']:
@@ -408,6 +455,7 @@ def register_routes(app):
                     conexion.close()
 
                 # Guardar sesión
+                session.clear()
                 session['user_id'] = cliente['id']
                 session['user_nombre'] = cliente['nombre']
                 session['user_rol'] = rol
@@ -448,6 +496,7 @@ def register_routes(app):
 
             else:
                 conexion.close()
+                _record_failed_attempt(_login_failed_attempts, rate_key)
                 error = 'Credenciales incorrectas'
 
         return render_template('autenticacion/login.html', error=error, tipo=tipo_login)
@@ -471,11 +520,16 @@ def register_routes(app):
     @app.route('/suscripcion/activar-pin', methods=['POST'])
     def activar_pin_paywall():
         """Endpoint JSON para activar un PIN de suscripción desde el modal paywall."""
-        if 'user_id' not in session or session.get('user_rol') != 'admin':
+        user_id = session.get('user_id')
+        if not user_id or session.get('user_rol') != 'admin':
             return jsonify({'ok': False, 'msg': 'No autorizado'}), 403
 
+        # Protección contra Fuerza Bruta de PINs
+        if _is_rate_limited(_pin_failed_attempts, user_id, max_attempts=5, window_seconds=600):
+            return jsonify({'ok': False, 'msg': 'Demasiados intentos fallidos. Espera 10 minutos.'}), 429
+
         data = request.get_json(silent=True) or {}
-        pin_ingresado = (data.get('pin') or '').strip()
+        pin_ingresado = (data.get('pin') or '').strip().upper()
 
         if not pin_ingresado:
             return jsonify({'ok': False, 'msg': 'Debes ingresar un PIN'}), 400
@@ -489,7 +543,10 @@ def register_routes(app):
 
             if not pin_rec or pin_rec[1]:
                 conexion.close()
+                _record_failed_attempt(_pin_failed_attempts, user_id)
                 return jsonify({'ok': False, 'msg': 'PIN inválido o ya utilizado'}), 400
+
+            _clear_failed_attempts(_pin_failed_attempts, user_id)
 
             from models import obtener_fecha_bolivia
             from datetime import timedelta
@@ -498,11 +555,11 @@ def register_routes(app):
 
             cursor.execute(
                 'UPDATE clientes SET fecha_vencimiento_suscripcion = ? WHERE id = ?',
-                (fecha_venc, session['user_id'])
+                (fecha_venc, user_id)
             )
             cursor.execute(
                 'UPDATE pines_admin SET usado = 1, usado_por = ? WHERE id = ?',
-                (session['user_id'], pin_rec[0])
+                (user_id, pin_rec[0])
             )
             conexion.commit()
             conexion.close()
@@ -516,7 +573,13 @@ def register_routes(app):
 
     @app.route('/setup-superadmin')
     def setup_superadmin():
-        # Esta ruta es temporal para arreglar el acceso Superadmin en Render (Producción)
+        # Endpoint estrictamente protegido mediante token secreto de entorno
+        token_ingresado = request.args.get('token', '').strip()
+        token_esperado = os.environ.get('SETUP_SUPERADMIN_SECRET', '')
+
+        if not token_esperado or token_ingresado != token_esperado:
+            return "Acceso denegado: Se requiere un token de inicialización secreto válido en la URL (?token=...).", 403
+
         try:
             from werkzeug.security import generate_password_hash
             conexion = get_db_connection()
@@ -527,10 +590,8 @@ def register_routes(app):
             user = cursor.fetchone()
         
             if user:
-                # Si existe, solo le actualizamos la contraseña y el rol a superadmin
                 cursor.execute("UPDATE clientes SET rol = 'superadmin', contrasena = ? WHERE correo = 'admin@sistema.com'", (contrasena_hash,))
             else:
-                # Si no existe, lo creamos forzosamente (usando el formato compatible)
                 cursor.execute('''
                     INSERT INTO clientes (nombre, correo, telefono, rol, contrasena, activo)
                     VALUES (?, ?, ?, ?, ?, TRUE)

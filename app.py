@@ -16,11 +16,21 @@ for _log_name in ['pdfminer', 'pdfminer.pdfinterp', 'pdfminer.pdfpage', 'pdfmine
     logging.getLogger(_log_name).setLevel(logging.ERROR)
 
 from werkzeug.middleware.proxy_fix import ProxyFix
+import secrets
+from datetime import timedelta
 
 app = Flask(__name__)
 app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
-app.secret_key = 'tu_clave_secreta_aqui'
+
+# Blindaje de Seguridad Criptográfica de Sesión
+app.secret_key = os.environ.get('SECRET_KEY') or os.environ.get('FLASK_SECRET_KEY') or 'cotizapro_master_secret_' + secrets.token_hex(16)
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
+app.config.update(
+    SESSION_COOKIE_HTTPONLY=True,
+    SESSION_COOKIE_SAMESITE='Lax',
+    SESSION_COOKIE_SECURE=bool(os.environ.get('DATABASE_URL') and not os.environ.get('TESTING_DB')),
+    PERMANENT_SESSION_LIFETIME=timedelta(days=7)
+)
 
 import builtins
 builtins.app = app

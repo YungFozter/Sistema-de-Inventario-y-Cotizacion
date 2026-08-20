@@ -304,16 +304,36 @@ def register_routes(app):
             if rol not in ['admin', 'standard']:
                 return jsonify({'error': 'Rol no válido'}), 400
 
-            # Verificar si el usuario existe
+            # Verificar si el usuario existe y validar permisos de acceso
             conexion = get_db_connection()
+            conexion.row_factory = sqlite3.Row
             cursor = conexion.cursor()
-            cursor.execute("SELECT id FROM clientes WHERE id = ?", (id,))
-            if not cursor.fetchone():
+            cursor.execute("SELECT id, rol, creador_id FROM clientes WHERE id = ?", (id,))
+            target_user = cursor.fetchone()
+            if not target_user:
                 conexion.close()
                 return jsonify({'error': 'Usuario no encontrado'}), 404
 
+            caller_rol = session.get('user_rol')
+            caller_id = session.get('user_id')
+
+            # Control estricto de privilegios (Evitar IDOR y escalada de privilegios)
+            if caller_rol != 'superadmin':
+                # Un admin normal no puede modificar a un superadmin ni a otro admin
+                if target_user['rol'] in ['superadmin', 'admin'] and target_user['id'] != caller_id:
+                    conexion.close()
+                    return jsonify({'error': 'No tienes permisos para modificar este usuario'}), 403
+                # Un admin normal solo puede editar sus propios subordinados (vendedores)
+                if target_user['rol'] == 'standard' and target_user['creador_id'] != caller_id:
+                    conexion.close()
+                    return jsonify({'error': 'No tienes permisos para modificar usuarios de otra organización'}), 403
+                # Un admin normal no puede elevar a nadie a superadmin o admin
+                if rol != 'standard' and target_user['id'] != caller_id:
+                    conexion.close()
+                    return jsonify({'error': 'No puedes asignar privilegios de administrador'}), 403
+
             # Verificar si el correo ya existe para otro usuario
-            cursor.execute("SELECT id FROM clientes WHERE correo = ? AND id != ?", (correo, id))
+            cursor.execute("SELECT id FROM clientes WHERE LOWER(correo) = ? AND id != ?", (correo.lower(), id))
             if cursor.fetchone():
                 conexion.close()
                 return jsonify({'error': 'El correo ya está registrado por otro usuario'}), 400
@@ -329,7 +349,7 @@ def register_routes(app):
                         rol = ?,
                         contrasena = ?
                     WHERE id = ?
-                ''', (nombre, correo, telefono, rol, contrasena_hash, id))
+                ''', (nombre, correo.lower(), telefono, rol, contrasena_hash, id))
             else:
                 cursor.execute('''
                     UPDATE clientes SET 
@@ -338,7 +358,7 @@ def register_routes(app):
                         telefono = ?,
                         rol = ?
                     WHERE id = ?
-                ''', (nombre, correo, telefono, rol, id))
+                ''', (nombre, correo.lower(), telefono, rol, id))
 
             conexion.commit()
             conexion.close()
@@ -390,25 +410,44 @@ def register_routes(app):
     @login_required
     def cambiar_estado_usuario(id):
         # Verificar permisos
-        if session.get('user_rol') not in ['admin', 'superadmin']:
+        caller_rol = session.get('user_rol')
+        caller_id = session.get('user_id')
+
+        if caller_rol not in ['admin', 'superadmin']:
             return jsonify({'error': 'No autorizado'}), 403
 
         # Validar que no sea el usuario actual
-        if id == session['user_id']:
+        if id == caller_id:
             return jsonify({'error': 'No puedes cambiar tu propio estado'}), 400
 
-        # Resto de la lógica común
-        data = request.json
+        data = request.json or {}
         activo = data.get('activo')
 
         try:
             conexion = get_db_connection()
+            conexion.row_factory = sqlite3.Row
             cursor = conexion.cursor()
+
+            # Validar permisos sobre el usuario objetivo
+            cursor.execute("SELECT id, rol, creador_id FROM clientes WHERE id = ?", (id,))
+            target_user = cursor.fetchone()
+            if not target_user:
+                conexion.close()
+                return jsonify({'error': 'Usuario no encontrado'}), 404
+
+            if caller_rol != 'superadmin':
+                if target_user['rol'] in ['superadmin', 'admin']:
+                    conexion.close()
+                    return jsonify({'error': 'No puedes suspender a otro administrador'}), 403
+                if target_user['creador_id'] != caller_id:
+                    conexion.close()
+                    return jsonify({'error': 'No puedes suspender usuarios de otra empresa'}), 403
+
             cursor.execute("UPDATE clientes SET activo = ? WHERE id = ?", (activo, id))
             conexion.commit()
 
             registrar_log(
-                usuario_id=session['user_id'],
+                usuario_id=caller_id,
                 accion="cambio_estado_usuario",
                 detalle={
                     "usuario_afectado_id": id,

@@ -84,16 +84,33 @@ def verificar_sesion_unica():
     if user_id and token_sesion:
         try:
             conexion = get_db_connection()
+            conexion.row_factory = sqlite3.Row
             cursor = conexion.cursor()
-            cursor.execute("SELECT session_token FROM clientes WHERE id = ?", (user_id,))
+            cursor.execute("SELECT session_token, activo FROM clientes WHERE id = ?", (user_id,))
             row = cursor.fetchone()
             conexion.close()
 
             if row:
-                db_token = row[0] if isinstance(row, (tuple, list)) else row['session_token']
+                db_token = row['session_token'] if isinstance(row, sqlite3.Row) or hasattr(row, 'keys') else row[0]
+                db_activo = row['activo'] if isinstance(row, sqlite3.Row) or hasattr(row, 'keys') else (row[1] if len(row) > 1 else True)
+
+                # 1. Verificar si la cuenta fue suspendida en tiempo real
+                if not db_activo:
+                    session.clear()
+                    is_ajax = (
+                        request.headers.get('X-Requested-With') == 'XMLHttpRequest'
+                        or 'application/json' in request.headers.get('Accept', '')
+                        or (request.path.startswith('/api/'))
+                    )
+                    if is_ajax:
+                        from flask import jsonify
+                        return jsonify({'success': False, 'error': 'cuenta_suspendida', 'redirect': '/login'}), 401
+                    flash('Tu cuenta ha sido suspendida. Contacta al soporte o a tu administrador.', 'danger')
+                    return redirect(url_for('login'))
+
+                # 2. Verificar concurrencia de sesión única activa
                 if db_token and db_token != token_sesion:
                     session.clear()
-                    # Detectar si es una petición AJAX/API para retornar JSON en vez de redirect
                     is_ajax = (
                         request.headers.get('X-Requested-With') == 'XMLHttpRequest'
                         or 'application/json' in request.headers.get('Accept', '')

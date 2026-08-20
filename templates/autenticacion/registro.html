@@ -704,6 +704,27 @@
             }
         });
 
+        // ── Validación de envío de formulario ─────────────────────────
+        if (form) {
+            form.addEventListener('submit', function (e) {
+                if (pwInput && confInput) {
+                    if (pwInput.value.length < 6) {
+                        e.preventDefault();
+                        pwInput.focus();
+                        alert('La contraseña debe tener al menos 6 caracteres.');
+                        return false;
+                    }
+                    if (pwInput.value !== confInput.value) {
+                        e.preventDefault();
+                        confInput.focus();
+                        confInput.style.borderColor = '#ef4444';
+                        alert('Las contraseñas no coinciden. Por favor verifícalas.');
+                        return false;
+                    }
+                }
+            });
+        }
+
     });
 
     // Toggle password outside DOMContentLoaded or inside, either way works.

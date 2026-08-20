@@ -502,9 +502,9 @@ def register_routes(app):
             if sol['admin_id'] != session.get('user_id') and session.get('user_rol') != 'superadmin':
                 return jsonify({'success': False, 'message': 'No tienes permiso para aprobar esta solicitud'}), 403
 
-            # Aprobar solicitud y vincular empleado al Admin
+            # Aprobar solicitud y vincular empleado al Admin con rol standard
             cursor.execute("UPDATE equipo_solicitudes SET estado = 'aprobada' WHERE id = ?", (id,))
-            cursor.execute("UPDATE clientes SET creador_id = ? WHERE id = ?", (sol['admin_id'], sol['empleado_id']))
+            cursor.execute("UPDATE clientes SET creador_id = ?, rol = 'standard' WHERE id = ?", (sol['admin_id'], sol['empleado_id']))
 
             registrar_log(
                 usuario_id=session.get('user_id'),

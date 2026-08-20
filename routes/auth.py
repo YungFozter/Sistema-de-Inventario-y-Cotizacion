@@ -138,10 +138,16 @@ def register_routes(app):
         empresa = data.get('empresa_nombre', '').strip()
         correo = data.get('correo', '').strip().lower()
         contrasena = data.get('contrasena', '')
+        confirmar = data.get('confirmar_contrasena', '')
         telefono = data.get('telefono', '').strip()
 
         if not nombre or not correo or not contrasena:
             flash('Faltan campos obligatorios.', 'danger')
+            return redirect(url_for('registro'))
+
+        # Validación de coincidencia de contraseñas
+        if contrasena != confirmar:
+            flash('Las contraseñas no coinciden. Por favor verifícalas.', 'warning')
             return redirect(url_for('registro'))
 
         # Validación de formato de correo electrónico
@@ -388,6 +394,12 @@ def register_routes(app):
                 return render_template('autenticacion/login.html', error=error, tipo=tipo_login)
 
             if cliente and cliente['contrasena'] and check_password_hash(cliente['contrasena'], contrasena):
+                # Validar que sea un usuario con rol de acceso autorizado (evitar login de rol 'cliente')
+                if cliente['rol'] not in ['superadmin', 'admin', 'standard']:
+                    conexion.close()
+                    error = 'Este usuario no tiene permisos para acceder al sistema.'
+                    return render_template('autenticacion/login.html', error=error, tipo=tipo_login)
+
                 # Limpiar intentos fallidos al tener éxito
                 _clear_failed_attempts(_login_failed_attempts, rate_key)
             

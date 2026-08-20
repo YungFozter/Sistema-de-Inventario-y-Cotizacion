@@ -47,12 +47,38 @@ def _obtener_columnas_productos(cursor):
     except Exception:
         return ['id', 'empresa', 'codigo', 'descripcion', 'marca', 'tm', 'um', 'cantidad', 'precio_unitario', 'precio_total', 'categoria_id', 'categoria', 'proveedor', 'proveedor_id', 'campos_personalizados', 'es_importado']
 
+def _obtener_empresa_usuario(cursor, user_id, user_rol):
+    """Devuelve la empresa/organización del usuario actual para aislamiento multi-tenant"""
+    if user_rol == 'superadmin':
+        return None
+    cursor.execute("SELECT nombre, empresa_nombre, creador_id, rol FROM clientes WHERE id = ?", (user_id,))
+    u = cursor.fetchone()
+    if not u:
+        return 'General'
+    nombre = u['nombre'] if hasattr(u, 'keys') else u[0]
+    empresa_nom = u['empresa_nombre'] if hasattr(u, 'keys') else u[1]
+    creador_id = u['creador_id'] if hasattr(u, 'keys') else u[2]
+    rol = u['rol'] if hasattr(u, 'keys') else u[3]
+    
+    if empresa_nom and empresa_nom.strip():
+        return empresa_nom.strip()
+    if rol == 'standard' and creador_id:
+        cursor.execute("SELECT nombre, empresa_nombre FROM clientes WHERE id = ?", (creador_id,))
+        p = cursor.fetchone()
+        if p:
+            p_emp = p['empresa_nombre'] if hasattr(p, 'keys') else p[1]
+            p_nom = p['nombre'] if hasattr(p, 'keys') else p[0]
+            return (p_emp or p_nom or 'General').strip()
+    return (nombre or 'General').strip()
+
 def register_routes(app):
     @app.route('/productos', methods=['GET', 'POST'], strict_slashes=False)
     @login_required
     @admin_required
     def productos():
         mensaje_error = None
+        user_id = session.get('user_id')
+        user_rol = session.get('user_rol')
 
         # Manejo del formulario POST (registro de nuevos productos)
         if request.method == 'POST':
@@ -60,11 +86,10 @@ def register_routes(app):
                 with get_db_connection() as conexion:
                     cursor = conexion.cursor()
                 
+                    user_empresa = _obtener_empresa_usuario(cursor, user_id, user_rol)
                     empresa = request.form.get('empresa', '').strip()
-                    if not empresa:
-                        cursor.execute("SELECT nombre FROM clientes WHERE id = ?", (session.get('user_id'),))
-                        u = cursor.fetchone()
-                        empresa = u[0] if u and u[0] else 'General'
+                    if not empresa or user_rol != 'superadmin':
+                        empresa = user_empresa or 'General'
                     codigo = request.form.get('codigo', '').strip()
                     descripcion = request.form.get('descripcion', '').strip()
                     marca = request.form.get('marca', '').strip()
@@ -187,6 +212,12 @@ def register_routes(app):
 
         filter_sql = ""
         params = []
+
+        if user_rol != 'superadmin':
+            user_empresa = _obtener_empresa_usuario(cursor, user_id, user_rol)
+            if user_empresa:
+                filter_sql += " AND (p.empresa = ? OR p.empresa = 'General')" if use_alias else " AND (empresa = ? OR empresa = 'General')"
+                params.append(user_empresa)
 
         if empresa:
             filter_sql += " AND p.empresa LIKE ?" if use_alias else " AND empresa LIKE ?"
@@ -317,13 +348,16 @@ def register_routes(app):
                 cursor = conexion.cursor()
                 if session.get('user_rol') == 'superadmin':
                     cursor.execute("SELECT id, nombre FROM clientes WHERE rol = 'cliente' ORDER BY nombre")
+                    clientes = cursor.fetchall()
+                    cursor.execute("SELECT DISTINCT empresa FROM productos WHERE empresa IS NOT NULL AND empresa != '' ORDER BY empresa")
+                    lista_empresas = [row[0] for row in cursor.fetchall()]
                 else:
-                    cursor.execute("SELECT id, nombre FROM clientes WHERE creador_id = ? AND rol = 'cliente' ORDER BY nombre", 
-                                   (session['user_id'],))
-                clientes = cursor.fetchall()
-
-                cursor.execute("SELECT DISTINCT empresa FROM productos WHERE empresa IS NOT NULL AND empresa != '' ORDER BY empresa")
-                lista_empresas = [row[0] for row in cursor.fetchall()]
+                    admin_owner_id = session.get('creador_id') or session.get('user_id')
+                    cursor.execute("SELECT id, nombre FROM clientes WHERE (creador_id = ? OR creador_id = ?) AND rol = 'cliente' ORDER BY nombre", 
+                                   (admin_owner_id, session['user_id']))
+                    clientes = cursor.fetchall()
+                    user_empresa = _obtener_empresa_usuario(cursor, user_id, user_rol)
+                    lista_empresas = [user_empresa] if user_empresa else ['General']
 
                 cursor.execute("SELECT nombre FROM proveedores ORDER BY nombre ASC")
                 lista_proveedores = [row[0] for row in cursor.fetchall()]
@@ -364,9 +398,29 @@ def register_routes(app):
         marca_filtro = request.form.get('marca_filtro', request.args.get('marca', ''))
         categoria_filtro = request.form.get('categoria_filtro', request.args.get('categoria', ''))
 
+        user_id = session.get('user_id')
+        user_rol = session.get('user_rol')
+
+        # Validar permisos sobre el producto antes de editar
+        with get_db_connection() as conexion:
+            cursor = conexion.cursor()
+            user_empresa = _obtener_empresa_usuario(cursor, user_id, user_rol)
+            cursor.execute('SELECT id, empresa FROM productos WHERE id=?', (id,))
+            target_prod = cursor.fetchone()
+            if not target_prod:
+                flash('Producto no encontrado', 'danger')
+                return redirect(url_for('productos'))
+            
+            p_emp = target_prod[1] if isinstance(target_prod, tuple) else target_prod['empresa']
+            if user_rol != 'superadmin' and p_emp != user_empresa and p_emp != 'General':
+                flash('No tienes permisos para modificar productos de otra empresa.', 'danger')
+                return redirect(url_for('productos'))
+
         if request.method == 'POST':
             try:
                 empresa = request.form.get('empresa', '').strip()
+                if not empresa or user_rol != 'superadmin':
+                    empresa = user_empresa or 'General'
                 proveedor = request.form.get('proveedor', '').strip()
                 codigo = request.form.get('codigo', '').strip()
                 descripcion = request.form.get('descripcion', '').strip()
@@ -417,7 +471,6 @@ def register_routes(app):
                         prov_id = None
                         if proveedor:
                             try:
-                                user_id = session.get('user_id')
                                 cursor.execute("SELECT id, nombre FROM proveedores WHERE (creador_id = ? OR empresa = ?) AND LOWER(nombre) = LOWER(?)", (user_id, empresa, proveedor))
                                 p_row = cursor.fetchone()
                                 if not p_row:
@@ -454,6 +507,12 @@ def register_routes(app):
 
                     cursor.execute(f'UPDATE productos SET {update_str} WHERE id=?', update_vals)
                     conexion.commit()
+
+                    registrar_log(
+                        usuario_id=user_id,
+                        accion="editar_producto",
+                        detalle={"producto_id": id, "codigo": codigo, "empresa": empresa}
+                    )
             
                 flash('Producto actualizado correctamente', 'success')
                 return redirect(url_for('productos', tab=tab, page_reg=page_reg, page_imp=page_imp, empresa=empresa_filtro, codigo=codigo_filtro, descripcion=descripcion_filtro, marca=marca_filtro, categoria=categoria_filtro))
@@ -479,7 +538,6 @@ def register_routes(app):
             ''')
             categorias_en_uso = [dict(r) if hasattr(r, 'keys') else r for r in cursor.fetchall()]
         
-            user_id = session.get('user_id')
             cursor.execute('SELECT id, nombre FROM categorias WHERE activo = 1 AND (creador_id = ? OR creador_id IS NULL) ORDER BY nombre', (user_id,))
             todas_categorias = [dict(r) if hasattr(r, 'keys') else r for r in cursor.fetchall()]
         
@@ -510,9 +568,6 @@ def register_routes(app):
             filtros=filtros
         )
 
-
-        return render_template('productos/editar_producto.html', producto=producto, categorias=categorias, filtros=filtros, page=page)
-
     @app.route('/productos/eliminar-masivo', methods=['POST'])
     @login_required
     @admin_required
@@ -523,27 +578,62 @@ def register_routes(app):
             if not ids or not isinstance(ids, list):
                 return jsonify({'success': False, 'message': 'No se seleccionaron productos para eliminar.'}), 400
 
+            user_id = session.get('user_id')
+            user_rol = session.get('user_rol')
+
             with get_db_connection() as conexion:
                 cursor = conexion.cursor()
+                user_empresa = _obtener_empresa_usuario(cursor, user_id, user_rol)
                 placeholders = ','.join(['?'] * len(ids))
-                cursor.execute(f'DELETE FROM productos WHERE id IN ({placeholders})', ids)
+                if user_rol != 'superadmin':
+                    cursor.execute(f'DELETE FROM productos WHERE id IN ({placeholders}) AND (empresa = ? OR empresa = "General")', ids + [user_empresa])
+                else:
+                    cursor.execute(f'DELETE FROM productos WHERE id IN ({placeholders})', ids)
+                deleted_count = cursor.rowcount
                 conexion.commit()
+
+                registrar_log(
+                    usuario_id=user_id,
+                    accion="eliminar_productos_masivo",
+                    detalle={"total_eliminados": deleted_count, "ids": ids}
+                )
 
             return jsonify({
                 'success': True,
-                'message': f'{len(ids)} producto(s) eliminado(s) correctamente.'
+                'message': f'{deleted_count} producto(s) eliminado(s) correctamente.'
             })
         except Exception as e:
             return jsonify({'success': False, 'message': f'Error al eliminar los productos: {str(e)}'}), 500
 
     @app.route('/productos/eliminar/<int:id>')
     @login_required
+    @admin_required
     def eliminar_producto(id):
         try:
+            user_id = session.get('user_id')
+            user_rol = session.get('user_rol')
             with get_db_connection() as conexion:
                 cursor = conexion.cursor()
+                user_empresa = _obtener_empresa_usuario(cursor, user_id, user_rol)
+                cursor.execute('SELECT id, codigo, empresa FROM productos WHERE id=?', (id,))
+                prod = cursor.fetchone()
+                if not prod:
+                    flash('Producto no encontrado', 'danger')
+                    return redirect('/productos')
+
+                p_emp = prod[2] if isinstance(prod, tuple) else prod['empresa']
+                if user_rol != 'superadmin' and p_emp != user_empresa and p_emp != 'General':
+                    flash('No tienes permisos para eliminar productos de otra empresa.', 'danger')
+                    return redirect('/productos')
+
                 cursor.execute('DELETE FROM productos WHERE id=?', (id,))
                 conexion.commit()
+
+                registrar_log(
+                    usuario_id=user_id,
+                    accion="eliminar_producto",
+                    detalle={"producto_id": id, "codigo": prod[1] if isinstance(prod, tuple) else prod['codigo']}
+                )
             flash('Producto eliminado correctamente', 'success')
         except Exception as e:
             flash(f'Error al eliminar el producto: {str(e)}', 'danger')
@@ -840,9 +930,10 @@ def register_routes(app):
     @app.route('/productos/importaciones', methods=['GET'])
     @login_required
     def listar_importaciones():
-        """Retorna la lista de importaciones guardadas"""
+        """Retorna la lista de importaciones guardadas filtradas por usuario"""
         try:
-            importaciones = obtener_importaciones_pdf()
+            user_id = None if session.get('user_rol') == 'superadmin' else session.get('user_id')
+            importaciones = obtener_importaciones_pdf(usuario_id=user_id)
             return jsonify({'success': True, 'importaciones': importaciones})
         except Exception as e:
             return jsonify({'success': False, 'message': str(e)}), 500
@@ -850,11 +941,12 @@ def register_routes(app):
     @app.route('/productos/importacion/<int:importacion_id>', methods=['GET'])
     @login_required
     def detalle_importacion(importacion_id):
-        """Retorna los datos de una importación guardada y sus items"""
+        """Retorna los datos de una importación guardada y sus items validando propiedad"""
         try:
-            imp, items = obtener_importacion_por_id(importacion_id)
+            user_id = None if session.get('user_rol') == 'superadmin' else session.get('user_id')
+            imp, items = obtener_importacion_por_id(importacion_id, usuario_id=user_id)
             if not imp:
-                return jsonify({'success': False, 'message': 'Importación no encontrada'}), 404
+                return jsonify({'success': False, 'message': 'Importación no encontrada o sin permisos de acceso'}), 404
             return jsonify({'success': True, 'importacion': imp, 'items': items})
         except Exception as e:
             return jsonify({'success': False, 'message': str(e)}), 500
@@ -863,9 +955,12 @@ def register_routes(app):
     @login_required
     @admin_required
     def eliminar_importacion_route(importacion_id):
-        """Elimina una importación guardada y sus items del historial"""
+        """Elimina una importación guardada y sus items del historial validando propiedad"""
         try:
-            eliminar_importacion_pdf(importacion_id)
+            user_id = None if session.get('user_rol') == 'superadmin' else session.get('user_id')
+            eliminado = eliminar_importacion_pdf(importacion_id, usuario_id=user_id)
+            if not eliminado:
+                return jsonify({'success': False, 'message': 'Importación no encontrada o sin permisos para eliminar'}), 403
             return jsonify({'success': True, 'message': 'Importación eliminada correctamente del historial.'})
         except Exception as e:
             return jsonify({'success': False, 'message': f'Error al eliminar la importación: {str(e)}'}), 500
@@ -878,10 +973,19 @@ def register_routes(app):
         try:
             data = request.get_json() or {}
             items = data.get('items', [])
-            empresa = data.get('empresa', 'General').strip() or 'General'
             categoria_id = data.get('categoria_id')
             respetar_cantidades = data.get('respetar_cantidades', True)
             tipo_documento = data.get('tipo_documento', 'factura')
+
+            user_id = session.get('user_id')
+            user_rol = session.get('user_rol')
+            with get_db_connection() as conexion:
+                cursor = conexion.cursor()
+                user_empresa = _obtener_empresa_usuario(cursor, user_id, user_rol)
+
+            empresa = data.get('empresa', '').strip()
+            if not empresa or user_rol != 'superadmin':
+                empresa = user_empresa or 'General'
 
             if not items:
                 return jsonify({'success': False, 'message': 'No se seleccionó ningún producto para registrar'}), 400
@@ -897,7 +1001,7 @@ def register_routes(app):
             return jsonify({
                 'success': True,
                 'count': count,
-                'message': f'Se registraron/actualizaron exitosamente {count} producto(s) en el catálogo registrado.'
+                'message': f'Se registraron/actualizaron exitosamente {count} producto(s) en el catálogo de {empresa}.'
             })
 
         except Exception as e:

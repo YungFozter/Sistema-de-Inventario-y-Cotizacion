@@ -720,17 +720,25 @@ def guardar_importacion_pdf(nombre_importacion, items, usuario_id=None):
 
 
 
-def obtener_importaciones_pdf():
-    """Retorna la lista de todas las importaciones realizadas"""
+def obtener_importaciones_pdf(usuario_id=None):
+    """Retorna la lista de importaciones realizadas filtradas por usuario si se especifica"""
     conexion = get_db_connection()
     conexion.row_factory = sqlite3.Row
     cursor = conexion.cursor()
     try:
-        cursor.execute('''
-            SELECT id, nombre_importacion, fecha_importacion, total_items, estado
-            FROM importaciones_pdf
-            ORDER BY id DESC
-        ''')
+        if usuario_id is not None:
+            cursor.execute('''
+                SELECT id, nombre_importacion, fecha_importacion, total_items, estado
+                FROM importaciones_pdf
+                WHERE usuario_id = ?
+                ORDER BY id DESC
+            ''', (usuario_id,))
+        else:
+            cursor.execute('''
+                SELECT id, nombre_importacion, fecha_importacion, total_items, estado
+                FROM importaciones_pdf
+                ORDER BY id DESC
+            ''')
         rows = cursor.fetchall()
         importaciones = []
         tz_bolivia = timezone(timedelta(hours=-4))
@@ -755,13 +763,16 @@ def obtener_importaciones_pdf():
         conexion.close()
 
 
-def obtener_importacion_por_id(importacion_id):
-    """Obtiene los detalles y los items de una importación específica"""
+def obtener_importacion_por_id(importacion_id, usuario_id=None):
+    """Obtiene los detalles y los items de una importación específica validando usuario si aplica"""
     conexion = get_db_connection()
     conexion.row_factory = sqlite3.Row
     cursor = conexion.cursor()
     try:
-        cursor.execute('SELECT * FROM importaciones_pdf WHERE id = ?', (importacion_id,))
+        if usuario_id is not None:
+            cursor.execute('SELECT * FROM importaciones_pdf WHERE id = ? AND usuario_id = ?', (importacion_id, usuario_id))
+        else:
+            cursor.execute('SELECT * FROM importaciones_pdf WHERE id = ?', (importacion_id,))
         imp = cursor.fetchone()
         if not imp:
             return None, []
@@ -872,11 +883,15 @@ def registrar_productos_seleccionados(items, empresa="General", categoria_id=Non
         conexion.close()
 
 
-def eliminar_importacion_pdf(importacion_id):
-    """Elimina una importación guardada y sus ítems temporales asociados"""
+def eliminar_importacion_pdf(importacion_id, usuario_id=None):
+    """Elimina una importación guardada y sus ítems temporales asociados validando usuario si aplica"""
     conexion = get_db_connection()
     cursor = conexion.cursor()
     try:
+        if usuario_id is not None:
+            cursor.execute('SELECT id FROM importaciones_pdf WHERE id = ? AND usuario_id = ?', (importacion_id, usuario_id))
+            if not cursor.fetchone():
+                return False
         cursor.execute('DELETE FROM items_importados_temp WHERE importacion_id = ?', (importacion_id,))
         cursor.execute('DELETE FROM importaciones_pdf WHERE id = ?', (importacion_id,))
         conexion.commit()

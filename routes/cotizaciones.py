@@ -63,11 +63,12 @@ def register_routes(app):
                 cursor.execute("SELECT * FROM clientes WHERE rol = 'cliente' ORDER BY nombre LIMIT ? OFFSET ?", 
                                (clientes_per_page, offset_cliente))
             else:
-                cursor.execute("SELECT COUNT(*) FROM clientes WHERE creador_id = ? AND rol = 'cliente'", 
-                               (session['user_id'],))
+                admin_owner_id = session.get('creador_id') or session.get('user_id')
+                cursor.execute("SELECT COUNT(*) FROM clientes WHERE (creador_id = ? OR creador_id = ?) AND rol = 'cliente'", 
+                               (admin_owner_id, session['user_id']))
                 total_clientes = cursor.fetchone()[0]
-                cursor.execute("SELECT * FROM clientes WHERE creador_id = ? AND rol = 'cliente' ORDER BY nombre LIMIT ? OFFSET ?", 
-                               (session['user_id'], clientes_per_page, offset_cliente))
+                cursor.execute("SELECT * FROM clientes WHERE (creador_id = ? OR creador_id = ?) AND rol = 'cliente' ORDER BY nombre LIMIT ? OFFSET ?", 
+                               (admin_owner_id, session['user_id'], clientes_per_page, offset_cliente))
         clientes = cursor.fetchall()
         total_pages_clientes = (total_clientes + clientes_per_page - 1) // clientes_per_page
 
@@ -154,35 +155,31 @@ def register_routes(app):
         total_pages_cotizaciones = (total_cotizaciones + cotizaciones_per_page - 1) // cotizaciones_per_page
         conexion.close()
 
-        # Crear diccionario de filtros para pasar a la plantilla
-        filtros = {
-            'cliente': cliente,
-            'codigo_cliente': codigo_cliente,
-            'desde': desde,
-            'hasta': hasta
-        }
-
-        return render_template('cotizaciones/cotizaciones.html', 
-            cotizaciones=cotizaciones,
+        return render_template(
+            'cotizaciones/cotizaciones.html',
+            categorias=categorias,
             clientes=clientes,
             productos=productos,
-            categorias=categorias,
-            filtros=filtros,
-            page_cliente=page_cliente,
-            total_pages_clientes=total_pages_clientes,
-            page_producto=page_producto,
-            total_pages_productos=total_pages_productos,
-            page_cotizacion=page_cotizacion,
-            total_pages_cotizaciones=total_pages_cotizaciones,
+            cotizaciones=cotizaciones,
+            filtros={
+                'cliente': cliente,
+                'codigo_cliente': codigo_cliente,
+                'desde': desde,
+                'hasta': hasta
+            },
+            pagination={
+                'page_cliente': page_cliente,
+                'total_pages_clientes': total_pages_clientes,
+                'page_producto': page_producto,
+                'total_pages_productos': total_pages_productos,
+                'page_cotizacion': page_cotizacion,
+                'total_pages_cotizaciones': total_pages_cotizaciones
+            },
             total_registrados=total_registrados,
             total_importados=total_importados,
             tipo_producto=tipo_producto)
 
     def guardar_cotizacion():
-        """Versión reestructurada del guardado de cotizaciones"""
-        MAX_RETRIES = 3
-        RETRY_DELAY = 0.5  # segundos
-
         # Validación inicial de claves presentes
         if not all(key in request.form for key in ['cliente_id', 'producto_id[]', 'cantidad[]', 'precio_unitario[]']):
             flash('Datos incompletos en el formulario', 'danger')
@@ -197,6 +194,26 @@ def register_routes(app):
             cliente_id = int(raw_cliente_id)
         except (ValueError, TypeError):
             flash('El cliente seleccionado no es válido.', 'danger')
+            return redirect(url_for('gestion_cotizaciones'))
+
+        # Validar existencia, rol y pertenencia del cliente a la empresa
+        try:
+            with get_db_connection() as con_chk:
+                cur_chk = con_chk.cursor()
+                if session.get('user_rol') == 'superadmin':
+                    cur_chk.execute("SELECT id FROM clientes WHERE id = ? AND rol = 'cliente'", (cliente_id,))
+                else:
+                    admin_owner_id = session.get('creador_id') or session.get('user_id')
+                    cur_chk.execute('''
+                        SELECT id FROM clientes 
+                        WHERE id = ? AND rol = 'cliente' 
+                          AND (creador_id = ? OR creador_id = ?)
+                    ''', (cliente_id, admin_owner_id, session.get('user_id')))
+                if not cur_chk.fetchone():
+                    flash('El cliente seleccionado no existe o no pertenece a tu empresa.', 'danger')
+                    return redirect(url_for('gestion_cotizaciones'))
+        except Exception as ex_chk:
+            app.logger.error(f"Error al validar cliente en cotización: {ex_chk}")
             return redirect(url_for('gestion_cotizaciones'))
 
         # Preparar datos de productos
@@ -1244,11 +1261,12 @@ def register_routes(app):
                     query_params
                 )
             else:
-                base_where = "WHERE rol = 'cliente' AND creador_id = ?"
-                count_params = [session['user_id']]
+                admin_owner_id = session.get('creador_id') or session.get('user_id')
+                base_where = "WHERE rol = 'cliente' AND (creador_id = ? OR creador_id = ?)"
+                count_params = [admin_owner_id, session['user_id']]
                 if q:
                     base_where += " AND (nombre LIKE ? OR codigo_cliente LIKE ? OR nit LIKE ?)"
-                    count_params += [like, like, like]
+                    count_params.extend([like, like, like])
                 cursor.execute(f"SELECT COUNT(*) FROM clientes {base_where}", count_params)
                 total = cursor.fetchone()[0]
 

@@ -130,7 +130,21 @@ def register_routes(app):
                     referencia, session['user_id'], 'cliente'
                 ))
 
+                nuevo_id = cursor.lastrowid
                 conexion.commit()
+
+                # Registrar en logs de auditoría
+                registrar_log(
+                    usuario_id=session['user_id'],
+                    accion="crear_cliente",
+                    detalle={
+                        "cliente_id": nuevo_id,
+                        "nombre": razon_social,
+                        "codigo_cliente": codigo_cliente,
+                        "nit": nit
+                    }
+                )
+
                 flash('Cliente registrado exitosamente', 'success')
 
             except Exception as e:
@@ -353,14 +367,24 @@ def register_routes(app):
 
         conexion = get_db_connection()
         cursor = conexion.cursor()
-        cursor.execute("SELECT id, nombre FROM clientes WHERE nit = ? AND nit NOT IN ('S/A', 'S/N') AND rol = 'cliente'", (nit,))
+
+        owner_id = session.get('creador_id') or session.get('user_id')
+        if session.get('user_rol') == 'superadmin':
+            cursor.execute("SELECT id, nombre FROM clientes WHERE nit = ? AND nit NOT IN ('S/A', 'S/N') AND rol = 'cliente'", (nit,))
+        else:
+            cursor.execute('''
+                SELECT id, nombre FROM clientes 
+                WHERE nit = ? AND nit NOT IN ('S/A', 'S/N') AND rol = 'cliente' 
+                  AND (creador_id = ? OR creador_id = ?)
+            ''', (nit, owner_id, session.get('user_id')))
+
         existente = cursor.fetchone()
         conexion.close()
 
         if existente:
             return jsonify({
                 'valido': False,
-                'mensaje': f'El NIT/CI "{nit}" ya está registrado a nombre de: "{existente[1]}".'
+                'mensaje': f'El NIT/CI "{nit}" ya está registrado en tu empresa para el cliente: "{existente[1]}".'
             })
 
         return jsonify({

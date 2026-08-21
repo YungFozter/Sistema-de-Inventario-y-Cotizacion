@@ -1231,20 +1231,26 @@ def asegurar_tabla_configuracion_pdf(cursor):
         print(f"Error asegurando tabla configuracion_pdf: {e}")
 
 def obtener_configuracion_pdf(usuario_id):
-    """Obtiene la configuración de PDF para un usuario o retorna valores por defecto con datos reales del usuario/admin"""
+    """
+    Obtiene la configuración de PDF para un usuario (Admin o Vendedor).
+    Si el usuario es rol 'standard' (vendedor), hereda la configuración corporativa
+    (logo, color, términos, empresa, NIT, dirección) de su creador_id (Admin),
+    manteniendo sus datos personales de contacto como agente de ventas.
+    """
     try:
         with get_db_connection() as conexion:
             cursor = conexion.cursor()
             asegurar_tabla_configuracion_pdf(cursor)
             conexion.commit()
 
-            # Obtener datos reales del usuario actual / admin desde clientes
             u_nombre = ''
             u_telefono = ''
             u_correo = ''
             u_empresa = ''
             u_nit = ''
-            
+            u_rol = 'admin'
+            creador_id = None
+
             if usuario_id:
                 cursor.execute("SELECT id, nombre, telefono, correo, empresa_nombre, nit, rol, creador_id FROM clientes WHERE id = ?", (usuario_id,))
                 u_row = cursor.fetchone()
@@ -1256,10 +1262,12 @@ def obtener_configuracion_pdf(usuario_id):
                     u_correo = u_dict.get('correo') or ''
                     u_empresa = u_dict.get('empresa_nombre') or ''
                     u_nit = u_dict.get('nit') or ''
+                    u_rol = u_dict.get('rol') or 'admin'
+                    creador_id = u_dict.get('creador_id')
 
-                    # Si es un vendedor (standard) y no tiene empresa o nit, obtener del admin creador
-                    if u_dict.get('rol') == 'standard' and u_dict.get('creador_id'):
-                        cursor.execute("SELECT empresa_nombre, nit, telefono, correo FROM clientes WHERE id = ?", (u_dict['creador_id'],))
+                    # Si es vendedor y no tiene empresa o NIT, resolver del admin creador
+                    if u_rol == 'standard' and creador_id:
+                        cursor.execute("SELECT empresa_nombre, nit, telefono, correo FROM clientes WHERE id = ?", (creador_id,))
                         admin_row = cursor.fetchone()
                         if admin_row:
                             col_a = [col[0] for col in cursor.description]
@@ -1269,35 +1277,44 @@ def obtener_configuracion_pdf(usuario_id):
                             if not u_nit:
                                 u_nit = a_dict.get('nit') or ''
 
+            # 1. Buscar configuración propia del usuario
             cursor.execute("SELECT * FROM configuracion_pdf WHERE usuario_id = ?", (usuario_id,))
             row = cursor.fetchone()
+
+            # 2. Si es vendedor (standard) y no tiene config propia, heredar la del Admin creador
+            if not row and u_rol == 'standard' and creador_id:
+                cursor.execute("SELECT * FROM configuracion_pdf WHERE usuario_id = ?", (creador_id,))
+                row = cursor.fetchone()
+
             if row:
                 col_names = [col[0] for col in cursor.description]
                 res = dict(zip(col_names, row))
                 if not res.get('header_layout'):
                     res['header_layout'] = 'default'
-                
-                # Rellenar con información real del usuario/admin
-                if not res.get('responsable_nombre') or str(res.get('responsable_nombre')).strip() in ['Administrador', '']:
-                    res['responsable_nombre'] = u_nombre or 'Usuario Administrador'
-                
-                if not res.get('responsable_telefono') or '76543210' in str(res.get('responsable_telefono', '')) or str(res.get('responsable_telefono')).strip() in ['+591 76543210', '+59176543210', '76543210', '']:
-                    res['responsable_telefono'] = u_telefono or ''
-                
-                if not res.get('responsable_email') or str(res.get('responsable_email')).strip() in ['admin@sistema.com', '']:
-                    res['responsable_email'] = u_correo or ''
 
-                if not res.get('empresa_nombre') or str(res.get('empresa_nombre')).strip() in ['ELECTRORED BOLIVIA S.R.L.', '']:
+                # Asignar datos del responsable de la cotización
+                if u_rol == 'standard':
+                    res['responsable_nombre'] = u_nombre or res.get('responsable_nombre') or 'Agente de Ventas'
+                    res['responsable_telefono'] = u_telefono or res.get('responsable_telefono') or ''
+                    res['responsable_email'] = u_correo or res.get('responsable_email') or ''
+                else:
+                    if not res.get('responsable_nombre') or str(res.get('responsable_nombre')).strip() in ['Administrador', 'Usuario Administrador', '']:
+                        res['responsable_nombre'] = u_nombre or 'Usuario Administrador'
+                    if not res.get('responsable_telefono'):
+                        res['responsable_telefono'] = u_telefono or ''
+                    if not res.get('responsable_email'):
+                        res['responsable_email'] = u_correo or ''
+
+                if not res.get('empresa_nombre'):
                     res['empresa_nombre'] = u_empresa or ''
-
-                if not res.get('nit_emisor') or str(res.get('nit_emisor')).strip() in ['1029384021', '']:
+                if not res.get('nit_emisor'):
                     res['nit_emisor'] = u_nit or ''
-
-                if not res.get('correo') or str(res.get('correo')).strip() in ['ventas@electrored.bo', '']:
+                if not res.get('correo'):
                     res['correo'] = u_correo or ''
-
-                if not res.get('telefono') or '76543210' in str(res.get('telefono', '')) or str(res.get('telefono')).strip() in ['+591 76543210', '+59176543210', '76543210', '']:
+                if not res.get('telefono'):
                     res['telefono'] = u_telefono or ''
+                if not res.get('direccion'):
+                    res['direccion'] = ''
 
                 return res
             else:
@@ -1309,11 +1326,11 @@ def obtener_configuracion_pdf(usuario_id):
                     'nit_emisor': u_nit or '',
                     'telefono': u_telefono or '',
                     'correo': u_correo or '',
-                    'direccion': 'Av. Banzer Km 5.5 - Santa Cruz',
+                    'direccion': '',
                     'header_layout': 'default',
                     'terminos_condiciones': '1. Validez de la oferta: 15 días.\n2. Precios incluyen impuestos de ley.\n3. Tiempo de entrega a convenir.',
                     'nota_pie': '¡Gracias por su preferencia!',
-                    'responsable_nombre': u_nombre or 'Usuario Administrador',
+                    'responsable_nombre': u_nombre or 'Usuario del Sistema',
                     'responsable_telefono': u_telefono or '',
                     'responsable_email': u_correo or '',
                     'plazo_entrega': 'De acuerdo a la existencia / 48 horas',
@@ -1332,11 +1349,11 @@ def obtener_configuracion_pdf(usuario_id):
         'nit_emisor': '',
         'telefono': '',
         'correo': '',
-        'direccion': 'Av. Banzer Km 5.5 - Santa Cruz',
+        'direccion': '',
         'header_layout': 'default',
         'terminos_condiciones': '1. Validez de la oferta: 15 días.\n2. Precios incluyen impuestos de ley.\n3. Tiempo de entrega a convenir.',
         'nota_pie': '¡Gracias por su preferencia!',
-        'responsable_nombre': 'Usuario Administrador',
+        'responsable_nombre': 'Usuario del Sistema',
         'responsable_telefono': '',
         'responsable_email': '',
         'plazo_entrega': 'De acuerdo a la existencia / 48 horas',

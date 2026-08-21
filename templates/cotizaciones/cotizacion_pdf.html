@@ -638,8 +638,10 @@
                                 {% endif %}
                             </td>
                             <td style="width: 50%; text-align: left; vertical-align: middle; border: none; padding: 0; padding-left: 15px;">
-                                <div class="header-company">{{ config_pdf.empresa_nombre if config_pdf and config_pdf.empresa_nombre else 'ELECTRORED BOLIVIA S.R.L.' }}</div>
-                                <div class="header-muted">NIT: {{ config_pdf.nit_emisor if config_pdf and config_pdf.nit_emisor else '1029384021' }}</div>
+                                <div class="header-company">{{ config_pdf.empresa_nombre if config_pdf and config_pdf.empresa_nombre else (usuario.empresa_nombre if usuario and usuario.empresa_nombre else usuario_sesion) }}</div>
+                                {% if (config_pdf and config_pdf.nit_emisor) or (usuario and usuario.nit) %}
+                                <div class="header-muted">NIT: {{ config_pdf.nit_emisor if config_pdf and config_pdf.nit_emisor else usuario.nit }}</div>
+                                {% endif %}
                             </td>
                         </tr>
                     </table>
@@ -651,8 +653,10 @@
                     {% if config_pdf and config_pdf.logo_base64 %}
                         <img src="{{ config_pdf.logo_base64 }}" class="header-logo" alt="Logo">
                     {% endif %}
-                    <div class="header-company">{{ config_pdf.empresa_nombre if config_pdf and config_pdf.empresa_nombre else 'ELECTRORED BOLIVIA S.R.L.' }}</div>
-                    <div class="header-muted">NIT: {{ config_pdf.nit_emisor if config_pdf and config_pdf.nit_emisor else '1029384021' }}</div>
+                    <div class="header-company">{{ config_pdf.empresa_nombre if config_pdf and config_pdf.empresa_nombre else (usuario.empresa_nombre if usuario and usuario.empresa_nombre else usuario_sesion) }}</div>
+                    {% if (config_pdf and config_pdf.nit_emisor) or (usuario and usuario.nit) %}
+                    <div class="header-muted">NIT: {{ config_pdf.nit_emisor if config_pdf and config_pdf.nit_emisor else usuario.nit }}</div>
+                    {% endif %}
                 {% endif %}
             </div>
             <div class="header-right">
@@ -815,7 +819,9 @@
 
         <!-- Pie de Página -->
         <div class="footer-section">
-            {{ config_pdf.direccion if config_pdf and config_pdf.direccion else 'Av. Banzer Km 5.5 - Santa Cruz' }} | Email: {{ config_pdf.correo if config_pdf and config_pdf.correo else 'ventas@electrored.bo' }}
+            {% if config_pdf and config_pdf.direccion %}{{ config_pdf.direccion }}{% endif %}
+            {% if (config_pdf and config_pdf.direccion) and ((config_pdf and config_pdf.correo) or (usuario and usuario.email)) %} | {% endif %}
+            {% if config_pdf and config_pdf.correo %}Email: {{ config_pdf.correo }}{% elif usuario and usuario.email %}Email: {{ usuario.email }}{% endif %}
         </div>
         
         </div> <!-- Cierre del contenedor avoid-page-break -->

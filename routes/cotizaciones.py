@@ -1436,39 +1436,27 @@ def register_routes(app):
     @login_required
     @admin_required
     def api_pdf_config():
-        conn = get_db_connection()
-        cursor = conn.cursor()
         admin_id = session.get('user_id')
 
         if request.method == 'GET':
             try:
-                cursor.execute("SELECT pdf_config FROM clientes WHERE id = ?", (admin_id,))
-                res = cursor.fetchone()
-                config = {}
-                if res and res[0]:
-                    import json
-                    try:
-                        config = json.loads(res[0])
-                    except:
-                        pass
+                from models import obtener_configuracion_pdf
+                config = obtener_configuracion_pdf(admin_id)
                 return jsonify({'success': True, 'config': config})
             except Exception as e:
                 return jsonify({'success': False, 'message': str(e)}), 500
-            finally:
-                conn.close()
 
         elif request.method == 'POST':
             try:
-                data = request.json
+                data = request.get_json(silent=True) or request.form or {}
                 if not data:
                     return jsonify({'success': False, 'message': 'No data provided'}), 400
 
-                import json
-                config_json = json.dumps(data)
-                cursor.execute("UPDATE clientes SET pdf_config = ? WHERE id = ?", (config_json, admin_id))
-                conn.commit()
-                return jsonify({'success': True, 'message': 'Configuración guardada exitosamente'})
+                from models import guardar_configuracion_pdf
+                exito = guardar_configuracion_pdf(admin_id, data)
+                if exito:
+                    return jsonify({'success': True, 'message': 'Configuración guardada exitosamente'})
+                else:
+                    return jsonify({'success': False, 'message': 'Error al guardar la configuración'}), 500
             except Exception as e:
                 return jsonify({'success': False, 'message': str(e)}), 500
-            finally:
-                conn.close()

@@ -455,12 +455,22 @@ def register_routes(app):
                 # 1. Verificar si la cuenta está activa
                 if not cliente['activo']:
                     conexion.close()
+                    registrar_log(
+                        usuario_id=cliente['id'],
+                        accion="login_bloqueado_cuenta_suspendida",
+                        detalle={"correo": correo, "ip": client_ip, "rol": cliente['rol']}
+                    )
                     error = 'Tu cuenta ha sido suspendida.'
                     return render_template('autenticacion/login.html', error=error, tipo=tipo_login)
                 
                 # 2. Verificar el Kill-Switch (si el Administrador padre está inactivo, bloquear a los vendedores)
                 if cliente['creador_id'] and cliente['creador_activo'] == 0:
                     conexion.close()
+                    registrar_log(
+                        usuario_id=cliente['id'],
+                        accion="login_bloqueado_killswitch_admin",
+                        detalle={"correo": correo, "ip": client_ip, "creador_id": cliente['creador_id']}
+                    )
                     error = 'La suscripción del Administrador principal ha sido suspendida. Por favor, contacta a tu superior.'
                     return render_template('autenticacion/login.html', error=error, tipo=tipo_login)
 
@@ -558,6 +568,11 @@ def register_routes(app):
             else:
                 conexion.close()
                 _record_failed_attempt(_login_failed_attempts, rate_key)
+                registrar_log(
+                    usuario_id=cliente['id'] if cliente else None,
+                    accion="login_fallido",
+                    detalle={"correo_intentado": correo, "ip": client_ip, "razon": "credenciales_incorrectas"}
+                )
                 error = 'Credenciales incorrectas'
 
         return render_template('autenticacion/login.html', error=error, tipo=tipo_login)
@@ -565,8 +580,14 @@ def register_routes(app):
     @app.route('/logout')
     def logout():
         user_id = session.get('user_id')
+        user_email = session.get('user_email')
         if user_id:
             try:
+                registrar_log(
+                    usuario_id=user_id,
+                    accion="logout",
+                    detalle={"ip": request.remote_addr, "correo": user_email}
+                )
                 conexion = get_db_connection()
                 cursor = conexion.cursor()
                 cursor.execute("UPDATE clientes SET session_token = NULL WHERE id = ?", (user_id,))

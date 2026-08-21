@@ -68,6 +68,14 @@ def crear_tablas():
             ){";" if is_postgres else ""}
         ''')
 
+        # Índices de alto rendimiento para auditoría global
+        try:
+            cursor.execute('CREATE INDEX IF NOT EXISTS idx_logs_fecha ON logs(fecha)')
+            cursor.execute('CREATE INDEX IF NOT EXISTS idx_logs_usuario_id ON logs(usuario_id)')
+            cursor.execute('CREATE INDEX IF NOT EXISTS idx_logs_accion ON logs(accion)')
+        except Exception as e_idx:
+            print(f"[WARN] Error creando índices de logs: {e_idx}")
+
         # Tabla de categorías
         cursor.execute(f'''
             CREATE TABLE IF NOT EXISTS categorias (

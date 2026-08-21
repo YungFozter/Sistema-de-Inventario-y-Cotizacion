@@ -706,6 +706,13 @@ def register_routes(app):
             )
             categoria_id = cursor.lastrowid
             conexion.commit()
+
+            registrar_log(
+                usuario_id=user_id,
+                accion="crear_categoria",
+                detalle={"categoria_id": categoria_id, "nombre": nombre, "descripcion": descripcion}
+            )
+
             conexion.close()
         
             return jsonify({'success': True, 'categoria_id': categoria_id, 'message': f'Categoría "{nombre}" creada exitosamente'})
@@ -764,6 +771,13 @@ def register_routes(app):
                 pass
 
             conexion.commit()
+
+            registrar_log(
+                usuario_id=user_id,
+                accion="editar_categoria",
+                detalle={"categoria_id": categoria_id, "nombre": nombre, "descripcion": descripcion}
+            )
+
             conexion.close()
 
             return jsonify({'success': True, 'message': 'Categoría actualizada exitosamente'})
@@ -808,6 +822,13 @@ def register_routes(app):
             # Eliminar la categoría (marcado lógico)
             cursor.execute("UPDATE categorias SET activo = FALSE WHERE id = ?", (categoria_id,))
             conexion.commit()
+
+            registrar_log(
+                usuario_id=user_id,
+                accion="eliminar_categoria",
+                detalle={"categoria_id": categoria_id, "nombre": categoria[0]}
+            )
+
             conexion.close()
         
             return jsonify({'success': True, 'message': f'Categoría "{categoria[0]}" eliminada exitosamente'})

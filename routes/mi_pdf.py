@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, request, jsonify, session, redirect, url_for
 from utils.decorators import login_required
-from models import obtener_configuracion_pdf, guardar_configuracion_pdf
+from models import obtener_configuracion_pdf, guardar_configuracion_pdf, registrar_log
 
 mi_pdf_bp = Blueprint('mi_pdf', __name__)
 
@@ -39,6 +39,16 @@ def register_mi_pdf_routes(app):
         
         exito = guardar_configuracion_pdf(usuario_id, datos)
         if exito:
+            registrar_log(
+                usuario_id=usuario_id,
+                accion="guardar_configuracion_pdf",
+                detalle={
+                    "tipo_hoja": datos['tipo_hoja'],
+                    "color_tema": datos['color_tema'],
+                    "titulo_documento": datos['titulo_documento'],
+                    "empresa_nombre": datos['empresa_nombre']
+                }
+            )
             return jsonify({'success': True, 'message': 'Configuración de PDF guardada exitosamente'})
         else:
             return jsonify({'success': False, 'message': 'Error al guardar la configuración'}), 500

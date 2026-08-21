@@ -44,18 +44,182 @@ def register_routes(app):
     @login_required
     @superadmin_required
     def auditoria_logs():
-        conexion = get_db_connection()
-        conexion.row_factory = sqlite3.Row
-        cursor = conexion.cursor()
-        cursor.execute('''
-            SELECT l.*, c.nombre, c.rol 
-            FROM logs l
-            JOIN clientes c ON l.usuario_id = c.id
-            ORDER BY l.fecha DESC LIMIT 200
-        ''')
-        logs_data = cursor.fetchall()
-        conexion.close()
-        return render_template('admin/logs.html', logs=logs_data)
+        try:
+            conexion = get_db_connection()
+            conexion.row_factory = sqlite3.Row
+            cursor = conexion.cursor()
+
+            # Parámetros de filtrado
+            filtro_accion = request.args.get('accion', '').strip()
+            filtro_usuario_id = request.args.get('usuario_id', '').strip()
+            filtro_desde = request.args.get('desde', '').strip()
+            filtro_hasta = request.args.get('hasta', '').strip()
+            filtro_buscar = request.args.get('buscar', '').strip()
+            limite_val = request.args.get('limite', '200').strip()
+            try:
+                limite = min(max(int(limite_val), 50), 1000)
+            except ValueError:
+                limite = 200
+
+            # Construcción dinámica de la consulta
+            condiciones = []
+            parametros = []
+
+            if filtro_accion:
+                condiciones.append("l.accion = ?")
+                parametros.append(filtro_accion)
+
+            if filtro_usuario_id:
+                if filtro_usuario_id == 'anonimo':
+                    condiciones.append("l.usuario_id IS NULL")
+                elif filtro_usuario_id.isdigit():
+                    condiciones.append("l.usuario_id = ?")
+                    parametros.append(int(filtro_usuario_id))
+
+            if filtro_desde:
+                condiciones.append("l.fecha >= ?")
+                parametros.append(f"{filtro_desde} 00:00:00")
+
+            if filtro_hasta:
+                condiciones.append("l.fecha <= ?")
+                parametros.append(f"{filtro_hasta} 23:59:59")
+
+            if filtro_buscar:
+                condiciones.append("(l.detalle LIKE ? OR l.accion LIKE ? OR c.nombre LIKE ? OR c.correo LIKE ?)")
+                search_term = f"%{filtro_buscar}%"
+                parametros.extend([search_term, search_term, search_term, search_term])
+
+            where_clause = f"WHERE {' AND '.join(condiciones)}" if condiciones else ""
+
+            query = f'''
+                SELECT l.id, l.usuario_id, l.accion, l.detalle, l.fecha,
+                       COALESCE(c.nombre, 'Sistema / Anónimo') as nombre,
+                       COALESCE(c.rol, 'sistema') as rol,
+                       c.correo as usuario_correo
+                FROM logs l
+                LEFT JOIN clientes c ON l.usuario_id = c.id
+                {where_clause}
+                ORDER BY l.fecha DESC LIMIT ?
+            '''
+            parametros.append(limite)
+            cursor.execute(query, tuple(parametros))
+            logs_data = [dict(r) for r in cursor.fetchall()]
+
+            # Obtener catálogo de acciones distintas para el dropdown de filtro
+            cursor.execute("SELECT DISTINCT accion FROM logs ORDER BY accion ASC")
+            acciones_disponibles = [r['accion'] for r in cursor.fetchall() if r['accion']]
+
+            # Obtener catálogo de usuarios para el dropdown de filtro
+            cursor.execute("SELECT id, nombre, rol, correo FROM clientes WHERE rol IN ('superadmin', 'admin', 'standard') ORDER BY nombre ASC")
+            usuarios_disponibles = [dict(r) for r in cursor.fetchall()]
+
+            conexion.close()
+
+            filtros_aplicados = {
+                'accion': filtro_accion,
+                'usuario_id': filtro_usuario_id,
+                'desde': filtro_desde,
+                'hasta': filtro_hasta,
+                'buscar': filtro_buscar,
+                'limite': limite
+            }
+
+            return render_template(
+                'admin/logs.html',
+                logs=logs_data,
+                acciones=acciones_disponibles,
+                usuarios=usuarios_disponibles,
+                filtros=filtros_aplicados,
+                total_encontrados=len(logs_data)
+            )
+        except Exception as e:
+            app.logger.error(f"Error en auditoria_logs: {str(e)}")
+            flash('Error al consultar los registros de auditoría', 'danger')
+            return redirect(url_for('admin_panel'))
+
+    @app.route('/admin/logs/exportar-csv')
+    @login_required
+    @superadmin_required
+    def exportar_logs_csv():
+        try:
+            conexion = get_db_connection()
+            conexion.row_factory = sqlite3.Row
+            cursor = conexion.cursor()
+
+            filtro_accion = request.args.get('accion', '').strip()
+            filtro_usuario_id = request.args.get('usuario_id', '').strip()
+            filtro_desde = request.args.get('desde', '').strip()
+            filtro_hasta = request.args.get('hasta', '').strip()
+            filtro_buscar = request.args.get('buscar', '').strip()
+
+            condiciones = []
+            parametros = []
+
+            if filtro_accion:
+                condiciones.append("l.accion = ?")
+                parametros.append(filtro_accion)
+
+            if filtro_usuario_id:
+                if filtro_usuario_id == 'anonimo':
+                    condiciones.append("l.usuario_id IS NULL")
+                elif filtro_usuario_id.isdigit():
+                    condiciones.append("l.usuario_id = ?")
+                    parametros.append(int(filtro_usuario_id))
+
+            if filtro_desde:
+                condiciones.append("l.fecha >= ?")
+                parametros.append(f"{filtro_desde} 00:00:00")
+
+            if filtro_hasta:
+                condiciones.append("l.fecha <= ?")
+                parametros.append(f"{filtro_hasta} 23:59:59")
+
+            if filtro_buscar:
+                condiciones.append("(l.detalle LIKE ? OR l.accion LIKE ? OR c.nombre LIKE ? OR c.correo LIKE ?)")
+                search_term = f"%{filtro_buscar}%"
+                parametros.extend([search_term, search_term, search_term, search_term])
+
+            where_clause = f"WHERE {' AND '.join(condiciones)}" if condiciones else ""
+
+            query = f'''
+                SELECT l.id, l.fecha, l.usuario_id,
+                       COALESCE(c.nombre, 'Sistema / Anónimo') as nombre,
+                       COALESCE(c.correo, '-') as correo,
+                       COALESCE(c.rol, 'sistema') as rol,
+                       l.accion, l.detalle
+                FROM logs l
+                LEFT JOIN clientes c ON l.usuario_id = c.id
+                {where_clause}
+                ORDER BY l.fecha DESC LIMIT 5000
+            '''
+            cursor.execute(query, tuple(parametros))
+            logs = cursor.fetchall()
+            conexion.close()
+
+            from flask import Response
+            import csv
+            import io
+
+            output = io.StringIO()
+            writer = csv.writer(output)
+            writer.writerow(['ID', 'Fecha y Hora', 'Usuario ID', 'Nombre', 'Correo', 'Rol', 'Accion', 'Detalle'])
+
+            for r in logs:
+                writer.writerow([
+                    r['id'], r['fecha'], r['usuario_id'] or 'N/A',
+                    r['nombre'], r['correo'], r['rol'],
+                    r['accion'], r['detalle'] or ''
+                ])
+
+            return Response(
+                output.getvalue(),
+                mimetype="text/csv",
+                headers={"Content-Disposition": f"attachment;filename=auditoria_global_{obtener_fecha_bolivia().strftime('%Y%m%d_%H%M%S')}.csv"}
+            )
+        except Exception as e:
+            app.logger.error(f"Error exportando logs CSV: {str(e)}")
+            flash('Error al exportar logs de auditoría', 'danger')
+            return redirect(url_for('auditoria_logs'))
 
     @app.route('/admin/usuarios')
     @login_required
@@ -141,14 +305,14 @@ def register_routes(app):
                 SELECT 
                     l.id,
                     l.usuario_id,
-                    u.nombre as usuario_nombre,
+                    COALESCE(u.nombre, 'Sistema / Anónimo') as usuario_nombre,
                     l.accion,
                     l.detalle,
                     l.fecha,
-                    u.correo as usuario_email,
-                    u.rol as usuario_rol
+                    COALESCE(u.correo, '-') as usuario_email,
+                    COALESCE(u.rol, 'sistema') as usuario_rol
                 FROM logs l
-                JOIN clientes u ON l.usuario_id = u.id
+                LEFT JOIN clientes u ON l.usuario_id = u.id
                 ORDER BY l.fecha DESC
                 LIMIT 100
             ''')

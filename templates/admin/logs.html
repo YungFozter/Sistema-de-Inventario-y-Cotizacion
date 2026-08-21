@@ -1,88 +1,167 @@
 {% extends 'shared/layout.html' %}
 
-{% block titulo %}Auditoría Global (Logs){% endblock %}
+{% block titulo %}Auditoría Global (Logs) - Superadmin{% endblock %}
 
 {% block contenido %}
-<div class="container py-4">
-    <div class="d-flex justify-content-between align-items-center mb-4 fade-up-enter">
+<div class="container-fluid py-4 px-lg-5">
+    <!-- Header -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3 fade-up-enter">
         <div>
             <h2 class="fw-bold mb-1" style="color: var(--dark);">
-                <i class="bi bi-shield-check text-primary"></i> Auditoría Global (Logs)
+                <i class="bi bi-shield-check text-primary me-2"></i> Auditoría Global del Sistema
             </h2>
-            <p class="text-muted mb-0">Monitorea la actividad reciente de tus clientes y administradores.</p>
+            <p class="text-muted mb-0">Trazabilidad forense, registro de eventos y monitoreo de seguridad en tiempo real.</p>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+            <a href="{{ url_for('exportar_logs_csv', **filtros) }}" class="btn btn-outline-success rounded-pill px-4 shadow-sm fw-semibold">
+                <i class="bi bi-file-earmark-excel me-1"></i> Exportar CSV
+            </a>
+            <button class="btn btn-light rounded-pill px-3 shadow-sm border" onclick="location.reload()" title="Refrescar">
+                <i class="bi bi-arrow-clockwise"></i>
+            </button>
         </div>
     </div>
 
-    <div class="card border-0 shadow-sm rounded-4 fade-up-enter delay-100">
+    <!-- Filtros de Búsqueda Avanzada -->
+    <div class="card border-0 shadow-sm rounded-4 mb-4 fade-up-enter delay-100 bg-white">
+        <div class="card-body p-4">
+            <form method="GET" action="{{ url_for('auditoria_logs') }}" class="row g-3 align-items-end">
+                <div class="col-md-3">
+                    <label class="form-label small fw-bold text-muted mb-1"><i class="bi bi-search me-1"></i> Búsqueda en Detalle / Usuario</label>
+                    <input type="text" class="form-control rounded-pill px-3" name="buscar" value="{{ filtros.buscar }}" placeholder="IP, ID, correo, texto...">
+                </div>
+
+                <div class="col-md-2">
+                    <label class="form-label small fw-bold text-muted mb-1"><i class="bi bi-lightning-charge me-1"></i> Acción</label>
+                    <select class="form-select rounded-pill px-3" name="accion">
+                        <option value="">Todas las acciones</option>
+                        {% for ac in acciones %}
+                        <option value="{{ ac }}" {% if filtros.accion == ac %}selected{% endif %}>{{ ac }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="col-md-2">
+                    <label class="form-label small fw-bold text-muted mb-1"><i class="bi bi-person me-1"></i> Usuario</label>
+                    <select class="form-select rounded-pill px-3" name="usuario_id">
+                        <option value="">Todos los usuarios</option>
+                        <option value="anonimo" {% if filtros.usuario_id == 'anonimo' %}selected{% endif %}>[Sistema / No Autenticado]</option>
+                        {% for u in usuarios %}
+                        <option value="{{ u.id }}" {% if filtros.usuario_id == (u.id|string) %}selected{% endif %}>{{ u.nombre }} ({{ u.rol }})</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="col-md-2">
+                    <label class="form-label small fw-bold text-muted mb-1"><i class="bi bi-calendar-event me-1"></i> Desde</label>
+                    <input type="date" class="form-control rounded-pill px-3" name="desde" value="{{ filtros.desde }}">
+                </div>
+
+                <div class="col-md-2">
+                    <label class="form-label small fw-bold text-muted mb-1"><i class="bi bi-calendar-event me-1"></i> Hasta</label>
+                    <input type="date" class="form-control rounded-pill px-3" name="hasta" value="{{ filtros.hasta }}">
+                </div>
+
+                <div class="col-md-1 d-flex gap-2">
+                    <button type="submit" class="btn btn-primary rounded-pill w-100 shadow-sm fw-bold" title="Aplicar Filtros">
+                        <i class="bi bi-filter"></i>
+                    </button>
+                    {% if filtros.buscar or filtros.accion or filtros.usuario_id or filtros.desde or filtros.hasta %}
+                    <a href="{{ url_for('auditoria_logs') }}" class="btn btn-outline-secondary rounded-pill shadow-sm" title="Limpiar Filtros">
+                        <i class="bi bi-x-lg"></i>
+                    </a>
+                    {% endif %}
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Tabla de Logs -->
+    <div class="card border-0 shadow-sm rounded-4 fade-up-enter delay-200">
+        <div class="card-header bg-white border-bottom py-3 px-4 d-flex justify-content-between align-items-center">
+            <span class="fw-bold text-secondary">
+                <i class="bi bi-list-check me-1"></i> Mostrando <strong>{{ total_encontrados }}</strong> registros recientes
+            </span>
+            <span class="badge bg-light text-dark border px-3 py-2 rounded-pill small">
+                <i class="bi bi-clock-history me-1"></i> Zona Horaria: UTC-4 (Bolivia)
+            </span>
+        </div>
         <div class="card-body p-0">
             <div class="table-responsive">
                 <table class="table table-hover align-middle mb-0">
-                    <thead class="bg-light">
+                    <thead class="bg-light text-secondary">
                         <tr>
-                            <th class="border-0 px-4 py-3" style="border-top-left-radius: var(--radius-lg);">Fecha y Hora</th>
-                            <th class="border-0 py-3">Usuario (Rol)</th>
-                            <th class="border-0 py-3">Acción</th>
-                            <th class="border-0 px-4 py-3 text-end" style="border-top-right-radius: var(--radius-lg);">Detalles</th>
+                            <th class="border-0 px-4 py-3" style="width: 170px;">Fecha y Hora</th>
+                            <th class="border-0 py-3">Usuario Emisor</th>
+                            <th class="border-0 py-3">Acción Registrada</th>
+                            <th class="border-0 px-4 py-3 text-end">Detalles</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for log in logs %}
                         <tr>
-                            <td class="px-4 py-3 text-muted">
-                                <small><i class="bi bi-clock me-1"></i> {{ log.fecha | date('%Y-%m-%d %H:%M') }}</small>
+                            <td class="px-4 py-3 text-muted text-nowrap">
+                                <small class="fw-semibold"><i class="bi bi-clock me-1 text-primary"></i> {{ log.fecha | date('%Y-%m-%d %H:%M:%S') }}</small>
                             </td>
                             <td class="py-3">
-                                <div class="fw-bold text-dark">{{ log.nombre }}</div>
-                                <span class="badge bg-{% if log.rol == 'admin' %}danger{% elif log.rol == 'superadmin' %}dark{% else %}primary{% endif %} mt-1" style="font-size: 0.7rem;">
-                                    {{ log.rol|capitalize }}
-                                </span>
-                            </td>
-                            <td class="py-3">
-                                {% if log.accion == 'login_exitoso' %}
-                                    <span class="badge bg-success bg-opacity-10 text-success border border-success-subtle"><i class="bi bi-box-arrow-in-right me-1"></i> Inicio de Sesión</span>
-                                {% elif log.accion == 'cotizacion_creada' %}
-                                    <span class="badge bg-primary bg-opacity-10 text-primary border border-primary-subtle"><i class="bi bi-file-earmark-plus me-1"></i> Cotización Creada</span>
-                                {% elif log.accion == 'usuario_creado' %}
-                                    <span class="badge bg-info bg-opacity-10 text-info border border-info-subtle"><i class="bi bi-person-plus me-1"></i> Usuario Creado</span>
+                                {% if log.usuario_id %}
+                                    <div class="fw-bold text-dark">{{ log.nombre }}</div>
+                                    <div class="d-flex align-items-center gap-2 mt-1">
+                                        <span class="badge bg-{% if log.rol == 'superadmin' %}danger{% elif log.rol == 'admin' %}warning text-dark{% else %}primary{% endif %}" style="font-size: 0.7rem;">
+                                            {{ log.rol|capitalize }}
+                                        </span>
+                                        {% if log.usuario_correo and log.usuario_correo != '-' %}
+                                        <small class="text-muted" style="font-size: 0.75rem;">{{ log.usuario_correo }}</small>
+                                        {% endif %}
+                                    </div>
                                 {% else %}
-                                    <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary-subtle"><i class="bi bi-activity me-1"></i> {{ log.accion }}</span>
+                                    <div class="fw-bold text-secondary"><i class="bi bi-robot me-1"></i> Sistema / Anónimo</div>
+                                    <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary-subtle mt-1" style="font-size: 0.7rem;">
+                                        Sin Autenticación
+                                    </span>
+                                {% endif %}
+                            </td>
+                            <td class="py-3">
+                                {% if 'login' in log.accion or 'auth' in log.accion or 'activar_pin' in log.accion %}
+                                    <span class="badge bg-success bg-opacity-10 text-success border border-success-subtle px-3 py-2 rounded-pill fw-semibold">
+                                        <i class="bi bi-check-circle-fill me-1"></i> {{ log.accion }}
+                                    </span>
+                                {% elif 'eliminar' in log.accion or 'rechazar' in log.accion or 'suspender' in log.accion or 'no_autorizado' in log.accion or 'error' in log.accion %}
+                                    <span class="badge bg-danger bg-opacity-10 text-danger border border-danger-subtle px-3 py-2 rounded-pill fw-semibold">
+                                        <i class="bi bi-shield-exclamation me-1"></i> {{ log.accion }}
+                                    </span>
+                                {% elif 'crear' in log.accion or 'registro' in log.accion or 'generar' in log.accion or 'aprobar' in log.accion %}
+                                    <span class="badge bg-primary bg-opacity-10 text-primary border border-primary-subtle px-3 py-2 rounded-pill fw-semibold">
+                                        <i class="bi bi-plus-circle-fill me-1"></i> {{ log.accion }}
+                                    </span>
+                                {% elif 'cambio' in log.accion or 'actualizar' in log.accion or 'editar' in log.accion or 'renovar' in log.accion %}
+                                    <span class="badge bg-warning bg-opacity-10 text-warning-emphasis border border-warning-subtle px-3 py-2 rounded-pill fw-semibold">
+                                        <i class="bi bi-pencil-square me-1"></i> {{ log.accion }}
+                                    </span>
+                                {% else %}
+                                    <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary-subtle px-3 py-2 rounded-pill fw-semibold">
+                                        <i class="bi bi-activity me-1"></i> {{ log.accion }}
+                                    </span>
                                 {% endif %}
                             </td>
                             <td class="px-4 py-3 text-end">
                                 {% if log.detalle %}
-                                    <button class="btn btn-sm btn-outline-secondary rounded-circle" data-bs-toggle="modal" data-bs-target="#detalleModal{{ log.id }}" title="Ver Detalles">
-                                        <i class="bi bi-info-circle"></i>
+                                    <button class="btn btn-sm btn-outline-primary rounded-pill px-3 shadow-sm"
+                                            onclick="abrirModalDetalle('{{ log.id }}', '{{ log.accion }}', '{{ log.fecha }}', this)"
+                                            data-detalle="{{ log.detalle | e }}">
+                                        <i class="bi bi-code-square me-1"></i> Inspeccionar
                                     </button>
-
-                                    <!-- Modal de Detalles -->
-                                    <div class="modal fade text-start" id="detalleModal{{ log.id }}" tabindex="-1" aria-hidden="true">
-                                        <div class="modal-dialog modal-dialog-centered">
-                                            <div class="modal-content rounded-4 border-0 shadow">
-                                                <div class="modal-header border-bottom-0 pb-0">
-                                                    <h5 class="modal-title fw-bold text-primary"><i class="bi bi-journal-code me-2"></i> Detalles de Auditoría</h5>
-                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                                </div>
-                                                <div class="modal-body">
-                                                    <div class="bg-light p-3 rounded-3 font-monospace small" style="overflow-wrap: break-word;">
-                                                        {{ log.detalle }}
-                                                    </div>
-                                                </div>
-                                                <div class="modal-footer border-top-0 pt-0">
-                                                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cerrar</button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
                                 {% else %}
-                                    <span class="text-muted fst-italic small">-</span>
+                                    <span class="text-muted fst-italic small">- Sin detalle -</span>
                                 {% endif %}
                             </td>
                         </tr>
                         {% else %}
                         <tr>
                             <td colspan="4" class="text-center py-5 text-muted">
-                                <i class="bi bi-inbox fs-1 d-block mb-3 opacity-50"></i>
-                                No hay registros de actividad todavía.
+                                <i class="bi bi-search fs-1 d-block mb-3 opacity-50"></i>
+                                <h6 class="fw-bold">No se encontraron registros de auditoría.</h6>
+                                <p class="small mb-0">Prueba ajustando los filtros de búsqueda o el rango de fechas.</p>
                             </td>
                         </tr>
                         {% endfor %}
@@ -92,4 +171,92 @@
         </div>
     </div>
 </div>
+
+<!-- Modal Universal de Inspección de Logs -->
+<div class="modal fade" id="modalDetalleLog" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content rounded-4 border-0 shadow-lg overflow-hidden">
+            <div class="modal-header bg-dark text-white py-3 px-4">
+                <div>
+                    <h5 class="modal-title fw-bold mb-0" id="modalLogTitulo">
+                        <i class="bi bi-journal-code text-info me-2"></i> Inspección de Payload
+                    </h5>
+                    <small class="text-muted" id="modalLogSubtitulo"></small>
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4 bg-light">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="badge bg-secondary fw-semibold">JSON / Metadatos</span>
+                    <button class="btn btn-sm btn-outline-secondary rounded-pill px-3" onclick="copiarDetalleModal()">
+                        <i class="bi bi-clipboard me-1"></i> Copiar Payload
+                    </button>
+                </div>
+                <pre class="p-3 bg-white rounded-3 border shadow-sm font-monospace small mb-0" id="modalLogContenido" style="max-height: 400px; overflow-y: auto; overflow-x: auto; white-space: pre-wrap; word-break: break-word;"></pre>
+            </div>
+            <div class="modal-footer bg-white border-top-0 py-3 px-4">
+                <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let currentRawDetail = '';
+
+function abrirModalDetalle(id, accion, fecha, btn) {
+    const rawData = btn.getAttribute('data-detalle') || '';
+    currentRawDetail = rawData;
+
+    document.getElementById('modalLogTitulo').innerHTML = `<i class="bi bi-shield-shaded text-info me-2"></i> Evento: ${accion}`;
+    document.getElementById('modalLogSubtitulo').textContent = `ID #${id} — Registrado el ${fecha}`;
+
+    const container = document.getElementById('modalLogContenido');
+    
+    try {
+        const parsed = JSON.parse(rawData);
+        container.innerHTML = formatearJSON(parsed);
+    } catch (e) {
+        container.textContent = rawData;
+    }
+
+    const modal = new bootstrap.Modal(document.getElementById('modalDetalleLog'));
+    modal.show();
+}
+
+function formatearJSON(json) {
+    if (typeof json !== 'string') {
+        json = JSON.stringify(json, null, 2);
+    }
+    json = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    return json.replace(
+        /("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g,
+        function (match) {
+            let cls = 'text-dark';
+            if (/^"/.test(match)) {
+                if (/:$/.test(match)) {
+                    cls = 'text-primary fw-bold';
+                } else {
+                    cls = 'text-success';
+                }
+            } else if (/true|false/.test(match)) {
+                cls = 'text-info fw-bold';
+            } else if (/null/.test(match)) {
+                cls = 'text-danger fw-bold';
+            } else {
+                cls = 'text-warning-emphasis fw-bold';
+            }
+            return '<span class="' + cls + '">' + match + '</span>';
+        }
+    );
+}
+
+function copiarDetalleModal() {
+    navigator.clipboard.writeText(currentRawDetail).then(() => {
+        alert('¡Payload copiado al portapapeles!');
+    }).catch(() => {
+        alert('Error al copiar el payload.');
+    });
+}
+</script>
 {% endblock %}

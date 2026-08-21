@@ -362,30 +362,40 @@ def crear_tablas():
 
 def registrar_log(usuario_id, accion, detalle=None):
     """
-    Registra una acción en el log de auditoría
+    Registra una acción en el log de auditoría global con serialización segura y zona horaria local.
     
     Args:
         usuario_id (int): ID del usuario que realizó la acción (puede ser None)
         accion (str): Tipo de acción realizada
-        detalle (dict): Detalles adicionales sobre la acción
+        detalle (dict, list, str): Detalles adicionales sobre la acción
     """
     try:
         conexion = get_db_connection()
         cursor = conexion.cursor()
         
-        # Convertir el detalle a JSON si no es None
-        detalle_json = json.dumps(detalle) if detalle is not None else None
+        # Convertir el detalle de forma segura
+        detalle_str = None
+        if detalle is not None:
+            if isinstance(detalle, (dict, list, tuple)):
+                detalle_str = json.dumps(detalle, default=str, ensure_ascii=False)
+            elif isinstance(detalle, str):
+                detalle_str = detalle
+            else:
+                detalle_str = str(detalle)
         
+        fecha_local = obtener_fecha_bolivia().strftime('%Y-%m-%d %H:%M:%S')
+
         # Insertar el registro
         cursor.execute(
             'INSERT INTO logs (usuario_id, accion, detalle, fecha) VALUES (?, ?, ?, ?)',
-            (usuario_id, accion, detalle_json, datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+            (usuario_id, accion, detalle_str, fecha_local)
         )
         
         conexion.commit()
         
     except Exception as e:
-        print(f"Error al registrar log: {e}")
+        import logging
+        logging.getLogger("auditoria").error(f"Error al registrar log ({accion}): {e}")
     finally:
         if 'conexion' in locals():
             conexion.close()

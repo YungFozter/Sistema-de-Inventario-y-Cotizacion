@@ -11,6 +11,7 @@ import json
 import sqlite3
 import random
 import string
+import secrets
 from db_wrapper import get_db_connection
 from sqlite3 import connect  # Esta es la importación que faltaba
 from markupsafe import Markup
@@ -687,15 +688,22 @@ def register_routes(app):
         cursor = conexion.cursor()
 
         if request.method == 'POST':
-            # Generar un nuevo PIN de 8 caracteres alfanuméricos en mayúsculas
-            caracteres = string.ascii_uppercase + string.digits
-            nuevo_pin = ''.join(random.choice(caracteres) for _ in range(8))
+            # Generar un nuevo PIN criptográficamente seguro de 8 caracteres alfanuméricos sin ambigüedades
+            caracteres = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
+            nuevo_pin = ''.join(secrets.choice(caracteres) for _ in range(8))
             now_bo = obtener_fecha_bolivia()
             fecha_str = now_bo.strftime('%Y-%m-%d %H:%M:%S')
         
             try:
                 cursor.execute('INSERT INTO pines_admin (pin, creado_en) VALUES (?, ?)', (nuevo_pin, fecha_str))
                 conexion.commit()
+
+                registrar_log(
+                    usuario_id=session.get('user_id'),
+                    accion="generar_pin_admin",
+                    detalle={"pin": nuevo_pin, "fecha": fecha_str}
+                )
+
                 flash(f'Nuevo PIN generado: {nuevo_pin}', 'success')
             except Exception as ex_pin:
                 conexion.rollback()
@@ -740,9 +748,22 @@ def register_routes(app):
     def eliminar_pin(pin_id):
         try:
             conexion = get_db_connection()
+            conexion.row_factory = sqlite3.Row
             cursor = conexion.cursor()
+            
+            cursor.execute("SELECT id, pin, usado, usado_por FROM pines_admin WHERE id = ?", (pin_id,))
+            pin_row = cursor.fetchone()
+
             cursor.execute("DELETE FROM pines_admin WHERE id = ?", (pin_id,))
             conexion.commit()
+
+            if pin_row:
+                registrar_log(
+                    usuario_id=session.get('user_id'),
+                    accion="eliminar_pin_admin",
+                    detalle={"pin_id": pin_id, "pin": pin_row['pin'], "usado": bool(pin_row['usado'])}
+                )
+
             conexion.close()
             flash('PIN eliminado exitosamente del registro.', 'success')
         except Exception as e:

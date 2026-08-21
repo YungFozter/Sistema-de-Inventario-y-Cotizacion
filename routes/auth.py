@@ -585,8 +585,10 @@ def register_routes(app):
         if not user_id or session.get('user_rol') != 'admin':
             return jsonify({'ok': False, 'msg': 'No autorizado'}), 403
 
-        # Protección contra Fuerza Bruta de PINs
-        if _is_rate_limited(_pin_failed_attempts, user_id, max_attempts=5, window_seconds=600):
+        # Protección contra Fuerza Bruta de PINs (Combinación IP + UserID)
+        client_ip = request.headers.get('X-Forwarded-For', request.remote_addr or 'unknown').split(',')[0].strip()
+        rate_key = f"{client_ip}_{user_id}"
+        if _is_rate_limited(_pin_failed_attempts, rate_key, max_attempts=5, window_seconds=600):
             return jsonify({'ok': False, 'msg': 'Demasiados intentos fallidos. Espera 10 minutos.'}), 429
 
         data = request.get_json(silent=True) or {}
@@ -597,39 +599,81 @@ def register_routes(app):
 
         try:
             conexion = get_db_connection()
+            conexion.row_factory = sqlite3.Row
             cursor = conexion.cursor()
 
-            cursor.execute('SELECT id, usado FROM pines_admin WHERE pin = ?', (pin_ingresado,))
+            cursor.execute('SELECT id, pin, usado FROM pines_admin WHERE pin = ?', (pin_ingresado,))
             pin_rec = cursor.fetchone()
 
-            if not pin_rec or pin_rec[1]:
+            if not pin_rec or pin_rec['usado']:
                 conexion.close()
-                _record_failed_attempt(_pin_failed_attempts, user_id)
+                _record_failed_attempt(_pin_failed_attempts, rate_key)
                 return jsonify({'ok': False, 'msg': 'PIN inválido o ya utilizado'}), 400
 
-            _clear_failed_attempts(_pin_failed_attempts, user_id)
+            _clear_failed_attempts(_pin_failed_attempts, rate_key)
 
             from models import obtener_fecha_bolivia
-            from datetime import timedelta
+            from datetime import timedelta, datetime
             now_bo = obtener_fecha_bolivia()
-            fecha_venc = (now_bo + timedelta(days=30)).strftime('%Y-%m-%d %H:%M:%S')
 
+            # Obtener vencimiento actual para sumar días acumulativos en lugar de sobreescribir
+            cursor.execute("SELECT fecha_vencimiento_suscripcion, nombre FROM clientes WHERE id = ?", (user_id,))
+            cliente = cursor.fetchone()
+            
+            vence_actual = None
+            if cliente and cliente['fecha_vencimiento_suscripcion']:
+                try:
+                    vence_str = str(cliente['fecha_vencimiento_suscripcion']).split('.')[0]
+                    vence_actual = datetime.strptime(vence_str, '%Y-%m-%d %H:%M:%S')
+                except Exception:
+                    pass
+
+            now_naive = now_bo.replace(tzinfo=None) if hasattr(now_bo, 'tzinfo') and now_bo.tzinfo else now_bo
+            if vence_actual and vence_actual > now_naive:
+                nueva_fecha = vence_actual + timedelta(days=30)
+            else:
+                nueva_fecha = now_naive + timedelta(days=30)
+
+            nueva_fecha_str = nueva_fecha.strftime('%Y-%m-%d %H:%M:%S')
+
+            # Actualizar suscripción del cliente y reactivarlo
             cursor.execute(
-                'UPDATE clientes SET fecha_vencimiento_suscripcion = ? WHERE id = ?',
-                (fecha_venc, user_id)
+                'UPDATE clientes SET fecha_vencimiento_suscripcion = ?, activo = 1 WHERE id = ?',
+                (nueva_fecha_str, user_id)
             )
+            # Quemar el PIN
             cursor.execute(
                 'UPDATE pines_admin SET usado = 1, usado_por = ? WHERE id = ?',
-                (user_id, pin_rec[0])
+                (user_id, pin_rec['id'])
             )
+            # Registrar en el historial de renovaciones
+            cursor.execute('''
+                INSERT INTO historial_renovaciones (admin_id, dias_agregados, superadmin_id, notas)
+                VALUES (?, 30, NULL, ?)
+            ''', (user_id, f"Activación mediante PIN: {pin_ingresado}"))
+
+            registrar_log(
+                usuario_id=user_id,
+                accion="activar_pin_suscripcion",
+                detalle={
+                    "pin_id": pin_rec['id'],
+                    "pin": pin_ingresado,
+                    "dias_agregados": 30,
+                    "nueva_fecha": nueva_fecha_str
+                }
+            )
+
             conexion.commit()
             conexion.close()
 
             # Actualizar session: suscripción activa
             session['trial_activo'] = False
-            return jsonify({'ok': True, 'msg': 'Suscripción activada por 30 días'}), 200
+            return jsonify({'ok': True, 'msg': f'¡Suscripción activada con éxito! Vence el {nueva_fecha_str}.'}), 200
 
         except Exception as e:
+            if 'conexion' in locals():
+                conexion.rollback()
+                conexion.close()
             return jsonify({'ok': False, 'msg': f'Error: {str(e)}'}), 500
 
     @app.route('/setup-superadmin')

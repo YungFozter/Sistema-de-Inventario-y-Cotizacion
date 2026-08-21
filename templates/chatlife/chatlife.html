@@ -353,7 +353,19 @@
   <!-- TAB 4: LOG DE CONVERSACIONES -->
   <div id="tabHistorial" class="chatlife-tab-content" style="display: none;">
     <div class="card bento-input-card">
-      <h4 class="fw-bold text-dark mb-3"><i class="fa-solid fa-list-check text-info me-2"></i> Historial de Mensajes & Conversaciones</h4>
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+        <h4 class="fw-bold text-dark mb-0"><i class="fa-solid fa-list-check text-info me-2"></i> Historial de Mensajes & Conversaciones</h4>
+        {% if mensajes %}
+        <div class="d-flex gap-2">
+          <button type="button" class="btn btn-outline-secondary rounded-pill px-3 py-1.5 small fw-bold" onclick="limpiarHistorialChatLife('simulacion')">
+            <i class="fa-solid fa-eraser me-1"></i> Borrar Simulaciones
+          </button>
+          <button type="button" class="btn btn-outline-danger rounded-pill px-3 py-1.5 small fw-bold" onclick="limpiarHistorialChatLife('todo')">
+            <i class="fa-solid fa-trash-can me-1"></i> Borrar Todo el Historial
+          </button>
+        </div>
+        {% endif %}
+      </div>
       
       {% if mensajes %}
       <div class="table-responsive rounded-4 border border-2 border-dark overflow-hidden">
@@ -462,6 +474,31 @@
       botBubble.className = 'chat-bubble chat-bubble-bot text-danger';
       botBubble.textContent = '⚠️ Ocurrió un error al procesar el mensaje.';
       chatBody.appendChild(botBubble);
+    });
+  }
+
+  function limpiarHistorialChatLife(tipo) {
+    const mensaje = tipo === 'simulacion' 
+      ? '¿Estás seguro de que deseas eliminar únicamente los mensajes de prueba del simulador?'
+      : '¿Estás seguro de que deseas eliminar TODO el historial de mensajes (WhatsApp y simulador)? Esta acción no se puede deshacer.';
+    
+    if (!confirm(mensaje)) return;
+
+    fetch('/api/chatlife/limpiar-historial', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ tipo: tipo })
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        location.reload();
+      } else {
+        alert('Error: ' + (data.error || 'No se pudo limpiar el historial'));
+      }
+    })
+    .catch(err => {
+      alert('Error de conexión al limpiar el historial.');
     });
   }
 </script>

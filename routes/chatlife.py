@@ -2,26 +2,9 @@ import json
 import sqlite3
 import requests
 from flask import render_template, request, redirect, url_for, flash, jsonify, session
-from functools import wraps
-from models import get_db_connection
-
-def login_required(f):
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        if 'user_id' not in session:
-            flash('Por favor inicia sesión para acceder.', 'warning')
-            return redirect(url_for('login'))
-        return f(*args, **kwargs)
-    return decorated_function
-
-def admin_required(f):
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        if session.get('user_rol') not in ['admin', 'superadmin']:
-            flash('Acceso restringido a administradores.', 'danger')
-            return redirect(url_for('index'))
-        return f(*args, **kwargs)
-    return decorated_function
+from db_wrapper import get_db_connection
+from utils.decorators import login_required, admin_required
+from models import registrar_log
 
 def procesar_respuesta_ia(user_id, empresa, mensaje_cliente, system_prompt=None, openai_api_key=None):
     """
@@ -37,7 +20,7 @@ def procesar_respuesta_ia(user_id, empresa, mensaje_cliente, system_prompt=None,
                 SELECT p.codigo, p.descripcion, p.marca, p.precio_unitario, p.cantidad, p.um, c.nombre as categoria_nombre, p.categoria
                 FROM productos p
                 LEFT JOIN categorias c ON p.categoria_id = c.id
-                WHERE p.empresa = ? OR p.creador_id = ?
+                WHERE (p.empresa = ? OR p.creador_id = ?) AND (p.activo IS TRUE OR p.activo = 1)
                 LIMIT 50
             ''', (empresa, user_id))
             productos_lista = [dict(r) for r in cursor.fetchall()]
@@ -166,7 +149,7 @@ def register_routes(app):
                     config = dict(cursor.fetchone())
 
                 # Cargar historial de mensajes recientes
-                cursor.execute("SELECT * FROM chatlife_mensajes WHERE user_id = ? ORDER BY id DESC LIMIT 30", (user_id,))
+                cursor.execute("SELECT * FROM chatlife_mensajes WHERE user_id = ? ORDER BY id DESC LIMIT 50", (user_id,))
                 mensajes = [dict(m) for m in cursor.fetchall()]
 
         except Exception as e:
@@ -193,8 +176,8 @@ def register_routes(app):
             access_token = request.form.get('access_token', '').strip()
             openai_api_key = request.form.get('openai_api_key', '').strip()
             system_prompt = request.form.get('system_prompt', '').strip()
-            bot_activo = True if request.form.get('bot_activo') == '1' else False
-            auto_crear_clientes = True if request.form.get('auto_crear_clientes') == '1' else False
+            bot_activo = 1 if request.form.get('bot_activo') == '1' else 0
+            auto_crear_clientes = 1 if request.form.get('auto_crear_clientes') == '1' else 0
 
             with get_db_connection() as conexion:
                 cursor = conexion.cursor()
@@ -204,6 +187,18 @@ def register_routes(app):
                     WHERE user_id=?
                 ''', (phone_number_id, waba_id, verify_token, access_token, openai_api_key, system_prompt, bot_activo, auto_crear_clientes, user_id))
                 conexion.commit()
+
+            registrar_log(
+                usuario_id=user_id,
+                accion="guardar_config_chatlife",
+                detalle={
+                    "phone_number_id": phone_number_id,
+                    "waba_id": waba_id,
+                    "bot_activo": bool(bot_activo),
+                    "auto_crear_clientes": bool(auto_crear_clientes),
+                    "tiene_openai_key": bool(openai_api_key)
+                }
+            )
 
             flash('¡Configuración de ChatLife WhatsApp IA guardada correctamente!', 'success')
         except Exception as e:
@@ -241,8 +236,8 @@ def register_routes(app):
                 # Registrar mensaje simulado en el historial
                 cursor.execute('''
                     INSERT INTO chatlife_mensajes (user_id, telefono_remitente, nombre_remitente, mensaje_cliente, respuesta_bot, es_simulacion)
-                    VALUES (?, ?, ?, ?, ?, ?)
-                ''', (user_id, '+591 (Simulador)', 'Cliente Prueba', mensaje_cliente, respuesta_ia, True))
+                    VALUES (?, ?, ?, ?, ?, 1)
+                ''', (user_id, '+591 (Simulador)', 'Cliente Prueba', mensaje_cliente, respuesta_ia))
                 conexion.commit()
 
                 return jsonify({
@@ -251,6 +246,34 @@ def register_routes(app):
                 })
         except Exception as e:
             return jsonify({'success': False, 'error': str(e)})
+
+    @app.route('/api/chatlife/limpiar-historial', methods=['POST'])
+    @login_required
+    @admin_required
+    def limpiar_historial_chatlife():
+        """Elimina mensajes de simulación o historial completo del tenant actual (Anti-IDOR)."""
+        user_id = session.get('user_id')
+        data = request.get_json(silent=True) or request.form or {}
+        tipo = data.get('tipo', 'simulacion')
+
+        try:
+            with get_db_connection() as conexion:
+                cursor = conexion.cursor()
+                if tipo == 'simulacion':
+                    cursor.execute("DELETE FROM chatlife_mensajes WHERE user_id = ? AND (es_simulacion IS TRUE OR es_simulacion = 1)", (user_id,))
+                else:
+                    cursor.execute("DELETE FROM chatlife_mensajes WHERE user_id = ?", (user_id,))
+                conexion.commit()
+
+            registrar_log(
+                usuario_id=user_id,
+                accion="limpiar_historial_chatlife",
+                detalle={"tipo": tipo}
+            )
+
+            return jsonify({'success': True, 'message': 'Historial limpiado exitosamente.'})
+        except Exception as e:
+            return jsonify({'success': False, 'error': str(e)}), 500
 
     @app.route('/api/chatlife/webhook', methods=['GET', 'POST'])
     def webhook_chatlife():
@@ -264,9 +287,9 @@ def register_routes(app):
                 try:
                     with get_db_connection() as conexion:
                         cursor = conexion.cursor()
-                        cursor.execute("SELECT verify_token FROM chatlife_config WHERE verify_token = ?", (token,))
+                        cursor.execute("SELECT user_id, verify_token FROM chatlife_config WHERE verify_token = ?", (token,))
                         match = cursor.fetchone()
-                        if match or token.startswith('chatlife_token'):
+                        if match:
                             return challenge, 200
                 except Exception:
                     pass
@@ -284,6 +307,9 @@ def register_routes(app):
                         metadata = value.get('metadata', {})
                         phone_number_id = metadata.get('phone_number_id')
 
+                        if not phone_number_id:
+                            continue
+
                         messages = value.get('messages', [])
                         contacts = value.get('contacts', [])
                         nombre_cliente = contacts[0].get('profile', {}).get('name', 'Cliente WhatsApp') if contacts else 'Cliente WhatsApp'
@@ -297,7 +323,8 @@ def register_routes(app):
                                     conexion.row_factory = sqlite3.Row
                                     cursor = conexion.cursor()
 
-                                    cursor.execute("SELECT * FROM chatlife_config WHERE phone_number_id = ? OR bot_activo = 1 LIMIT 1", (phone_number_id,))
+                                    # Aislamiento Multi-Tenant Estricto por Phone Number ID
+                                    cursor.execute("SELECT * FROM chatlife_config WHERE phone_number_id = ? AND (bot_activo IS TRUE OR bot_activo = 1) LIMIT 1", (phone_number_id,))
                                     cfg = cursor.fetchone()
 
                                     if cfg and cfg['bot_activo']:
@@ -344,8 +371,8 @@ def register_routes(app):
                                         # Registrar en el historial de mensajes
                                         cursor.execute('''
                                             INSERT INTO chatlife_mensajes (user_id, telefono_remitente, nombre_remitente, mensaje_cliente, respuesta_bot, es_simulacion)
-                                            VALUES (?, ?, ?, ?, ?, ?)
-                                        ''', (user_id, from_phone, nombre_cliente, text_body, respuesta_bot, False))
+                                            VALUES (?, ?, ?, ?, ?, 0)
+                                        ''', (user_id, from_phone, nombre_cliente, text_body, respuesta_bot))
                                         conexion.commit()
 
             except Exception as e_main:

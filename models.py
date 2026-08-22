@@ -491,6 +491,16 @@ def migrar_esquema_productos():
                 print("[INFO] Agregando columna stock_reservado a la tabla productos (Postgres)...")
                 cursor.execute("ALTER TABLE productos ADD COLUMN stock_reservado INTEGER DEFAULT 0")
                 print("[OK] Columna stock_reservado agregada")
+
+            if 'creador_id' not in columnas_existentes:
+                print("[INFO] Agregando columna creador_id a la tabla productos (Postgres)...")
+                cursor.execute("ALTER TABLE productos ADD COLUMN creador_id INTEGER")
+                print("[OK] Columna creador_id agregada")
+
+            if 'activo' not in columnas_existentes:
+                print("[INFO] Agregando columna activo a la tabla productos (Postgres)...")
+                cursor.execute("ALTER TABLE productos ADD COLUMN activo BOOLEAN DEFAULT TRUE")
+                print("[OK] Columna activo agregada")
         else:
             cursor.execute("PRAGMA table_info(productos)")
             columnas = [col[1] for col in cursor.fetchall()]
@@ -504,6 +514,16 @@ def migrar_esquema_productos():
                 print("[INFO] Agregando columna stock_reservado a la tabla productos (SQLite)...")
                 cursor.execute("ALTER TABLE productos ADD COLUMN stock_reservado INTEGER DEFAULT 0")
                 print("[OK] Columna stock_reservado agregada")
+
+            if 'creador_id' not in columnas:
+                print("[INFO] Agregando columna creador_id a la tabla productos (SQLite)...")
+                cursor.execute("ALTER TABLE productos ADD COLUMN creador_id INTEGER")
+                print("[OK] Columna creador_id agregada")
+
+            if 'activo' not in columnas:
+                print("[INFO] Agregando columna activo a la tabla productos (SQLite)...")
+                cursor.execute("ALTER TABLE productos ADD COLUMN activo INTEGER DEFAULT 1")
+                print("[OK] Columna activo agregada")
         
         conexion.commit()
     except Exception as e:

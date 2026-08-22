@@ -4,6 +4,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="description" content="COTIZAPro - Sistema Inteligente de Inventario y Cotizaciones en Bolivia. Emite propuestas profesionales con IVA en segundos e importa catálogos con IA.">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="COTIZAPro - Sistema Inteligente de Cotizaciones e Inventario">
+  <meta property="og:description" content="Importa catálogos PDF, gestiona tu inventario y emite cotizaciones profesionales con cálculo automático de IVA en segundos.">
+  <meta property="og:site_name" content="COTIZAPro">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="COTIZAPro - Cotizaciones que Cierran Ventas">
+  <meta name="twitter:description" content="Software empresarial en la nube para cotizaciones rápidas, inventario y gestión comercial.">
   <title>{% block titulo %}Sistema de Cotizaciones{% endblock %}</title>
 
   <!-- CSS Principal -->
@@ -1059,8 +1067,11 @@
             <i class="bi bi-person-plus-fill"></i> Registrarse
           </a>
           {% else %}
+          <a href="{{ url_for('login') }}" class="d-none d-sm-inline-flex text-decoration-none fw-bold me-2 px-3 py-1.5 text-dark" style="font-size: 0.88rem;">
+            Iniciar Sesión
+          </a>
           <a href="{{ url_for('registro') }}" class="clay-btn-cta">
-            <i class="bi bi-lightning-charge-fill"></i> Acceder
+            <i class="bi bi-lightning-charge-fill"></i> Empezar Gratis
           </a>
           {% endif %}
 
@@ -1665,13 +1676,6 @@
       window.dispatchEvent(new Event('scroll'));
     }
 
-    // Limpiar localStorage/sessionStorage al cargar la página
-    window.addEventListener('load', function () {
-      if (!window.performance.navigation || performance.navigation.type !== 1) {
-        localStorage.clear();
-        sessionStorage.clear();
-      }
-    });
     // ─── MODAL SEGURIDAD & PRIVACIDAD ─────────────────────────────────────────
     function openPrivacyModal(e) {
       if (e) e.preventDefault();

@@ -97,39 +97,95 @@ def register_routes(app):
                 )
 
             # ─── VISTA ADMIN (MÉTRICAS Y ACTIVIDADES AISLADAS POR EMPRESA / TENANT) ──
-            # 1. Total Clientes creados por el admin
-            cursor.execute("SELECT COUNT(*) FROM clientes WHERE creador_id = ? AND rol = 'cliente'", (user_id,))
-            row = cursor.fetchone()
-            total_usuarios = row[0] if row else 0
+            # 1. Info de Empresa y Usuario
+            cursor.execute("SELECT nombre, empresa_nombre, telefono FROM clientes WHERE id = ?", (user_id,))
+            u_info = cursor.fetchone()
+            empresa_nombre = (u_info['empresa_nombre'] or u_info['nombre']) if u_info and (isinstance(u_info, sqlite3.Row) or hasattr(u_info, 'keys')) else (u_info[1] or u_info[0] if u_info else 'Mi Empresa')
+            if not empresa_nombre:
+                empresa_nombre = session.get('user_nombre', 'Mi Empresa')
 
-            # 2. Total Productos disponibles para el admin
-            cursor.execute("SELECT COUNT(*) FROM productos WHERE creador_id = ? OR creador_id IS NULL", (user_id,))
-            row = cursor.fetchone()
-            total_productos = row[0] if row else 0
-
-            # 3. Total Cotizaciones del negocio (admin + sus vendedores)
+            # 2. Conteo de Cotizaciones y Monto Total Cotizado (Bs.)
             cursor.execute('''
-                SELECT COUNT(*) FROM cotizaciones 
+                SELECT COUNT(*), COALESCE(SUM(c.total), 0)
+                FROM cotizaciones c
+                WHERE c.creador_id = ? OR c.creador_id IN (SELECT id FROM clientes WHERE creador_id = ?)
+            ''', (user_id, user_id))
+            r_totales = cursor.fetchone()
+            total_cotizaciones = r_totales[0] if r_totales else 0
+            total_monto_cotizado = float(r_totales[1] or 0) if r_totales else 0.0
+
+            # 3. Métricas por Estado y Conversión
+            cursor.execute('''
+                SELECT 
+                    COUNT(CASE WHEN LOWER(estado) = 'aprobada' THEN 1 END) as aprobadas,
+                    COUNT(CASE WHEN LOWER(estado) = 'pendiente' OR estado IS NULL OR estado = '' THEN 1 END) as pendientes,
+                    COUNT(CASE WHEN LOWER(estado) = 'rechazada' THEN 1 END) as rechazadas
+                FROM cotizaciones
                 WHERE creador_id = ? OR creador_id IN (SELECT id FROM clientes WHERE creador_id = ?)
             ''', (user_id, user_id))
-            row = cursor.fetchone()
-            total_cotizaciones = row[0] if row else 0
+            r_est = cursor.fetchone()
+            cotizaciones_aprobadas = r_est[0] if r_est else 0
+            cotizaciones_pendientes = r_est[1] if r_est else 0
+            cotizaciones_rechazadas = r_est[2] if r_est else 0
+            tasa_conversion = round((cotizaciones_aprobadas / total_cotizaciones * 100), 1) if total_cotizaciones > 0 else 0.0
+            ticket_promedio = round(total_monto_cotizado / total_cotizaciones, 2) if total_cotizaciones > 0 else 0.0
 
-            # 4. Actividad Reciente del negocio (Top 10)
+            # 4. Total Clientes & Total Productos
+            cursor.execute("SELECT COUNT(*) FROM clientes WHERE creador_id = ? AND rol = 'cliente'", (user_id,))
+            row_cli = cursor.fetchone()
+            total_usuarios = row_cli[0] if row_cli else 0
+
+            cursor.execute("SELECT COUNT(*) FROM productos WHERE creador_id = ? OR empresa = ? OR creador_id IS NULL", (user_id, empresa_nombre))
+            row_prod = cursor.fetchone()
+            total_productos = row_prod[0] if row_prod else 0
+
+            # 5. Alertas de Stock Crítico (Productos con stock <= stock_minimo)
             cursor.execute('''
-                SELECT c.id, c.fecha, COALESCE(cli.nombre, 'Sin asignar') as cliente, COALESCE(c.total, 0) as total, c.estado
+                SELECT id, codigo, descripcion, COALESCE(cantidad, 0) as stock, COALESCE(stock_minimo, 0) as min_stock
+                FROM productos
+                WHERE (creador_id = ? OR empresa = ? OR creador_id IS NULL)
+                  AND stock_minimo IS NOT NULL AND stock_minimo > 0
+                  AND COALESCE(cantidad, 0) <= COALESCE(stock_minimo, 0)
+                ORDER BY (COALESCE(cantidad, 0) - COALESCE(stock_minimo, 0)) ASC
+                LIMIT 5
+            ''', (user_id, empresa_nombre))
+            productos_stock_critico = [dict(row) for row in cursor.fetchall()]
+            total_stock_critico = len(productos_stock_critico)
+
+            # 6. Top 3 Clientes por Monto Cotizado
+            cursor.execute('''
+                SELECT COALESCE(cli.nombre, 'Sin asignar') as cliente_nombre,
+                       COUNT(c.id) as cotizaciones_count,
+                       COALESCE(SUM(c.total), 0) as total_monto
                 FROM cotizaciones c
                 LEFT JOIN clientes cli ON c.cliente_id = cli.id
+                WHERE c.creador_id = ? OR c.creador_id IN (SELECT id FROM clientes WHERE creador_id = ?)
+                GROUP BY cli.nombre
+                ORDER BY total_monto DESC
+                LIMIT 3
+            ''', (user_id, user_id))
+            top_clientes = [dict(row) for row in cursor.fetchall()]
+
+            # 7. Actividad Reciente del negocio (Top 10 con Vendedor y Teléfono)
+            cursor.execute('''
+                SELECT c.id, c.fecha,
+                       COALESCE(cli.nombre, 'Sin asignar') as cliente,
+                       COALESCE(cli.telefono, '') as cliente_telefono,
+                       COALESCE(c.total, 0) as total,
+                       c.estado,
+                       COALESCE(v.nombre, 'Admin') as vendedor_nombre
+                FROM cotizaciones c
+                LEFT JOIN clientes cli ON c.cliente_id = cli.id
+                LEFT JOIN clientes v ON c.creador_id = v.id
                 WHERE c.creador_id = ? OR c.creador_id IN (SELECT id FROM clientes WHERE creador_id = ?)
                 ORDER BY c.fecha DESC
                 LIMIT 10
             ''', (user_id, user_id))
-            actividades_recientes = cursor.fetchall()
+            actividades_recientes = [dict(row) for row in cursor.fetchall()]
 
-            # 5. Estadísticas de Cotizaciones por Estado del negocio
+            # 8. Listas agrupadas por estado para auditoría rápida
             estados = ['Aprobada', 'Pendiente', 'Rechazada']
             cotizaciones_estado = {'aprobadas': [], 'pendientes': [], 'rechazadas': []}
-            cotizaciones_aprobadas = cotizaciones_pendientes = cotizaciones_rechazadas = 0
 
             for estado, key in zip(estados, ['aprobadas', 'pendientes', 'rechazadas']):
                 if estado == 'Pendiente':
@@ -150,25 +206,25 @@ def register_routes(app):
                           AND LOWER(c.estado) = ?
                         ORDER BY c.fecha DESC
                     ''', (user_id, user_id, estado.lower()))
-                cotizaciones_estado[key] = cursor.fetchall()
-                count = len(cotizaciones_estado[key])
-                if key == 'aprobadas':
-                    cotizaciones_aprobadas = count
-                elif key == 'pendientes':
-                    cotizaciones_pendientes = count
-                elif key == 'rechazadas':
-                    cotizaciones_rechazadas = count
+                cotizaciones_estado[key] = [dict(row) for row in cursor.fetchall()]
 
             return render_template('admin/admin_dashboard.html',
                                    nombre=session.get('user_nombre', 'Administrador'),
+                                   empresa_nombre=empresa_nombre,
                                    rol=user_rol,
                                    total_usuarios=total_usuarios,
                                    total_productos=total_productos,
                                    total_cotizaciones=total_cotizaciones,
-                                   actividades_recientes=actividades_recientes,
+                                   total_monto_cotizado=total_monto_cotizado,
+                                   tasa_conversion=tasa_conversion,
+                                   ticket_promedio=ticket_promedio,
                                    cotizaciones_aprobadas=cotizaciones_aprobadas,
                                    cotizaciones_pendientes=cotizaciones_pendientes,
                                    cotizaciones_rechazadas=cotizaciones_rechazadas,
+                                   productos_stock_critico=productos_stock_critico,
+                                   total_stock_critico=total_stock_critico,
+                                   top_clientes=top_clientes,
+                                   actividades_recientes=actividades_recientes,
                                    cotizaciones_estado=cotizaciones_estado,
                                    autenticado=True)
         finally:

@@ -1,249 +1,459 @@
 {% extends 'shared/layout.html' %}
 
-{% block titulo %}Dashboard Admin{% endblock %}
+{% block titulo %}Panel Ejecutivo | {{ empresa_nombre or 'COTIZAPro' }}{% endblock %}
+
+{% block styles %}
+{{ super() }}
+<style>
+    .kpi-card {
+        background: #FFFFFF;
+        border-radius: 20px;
+        border: 1px solid rgba(0, 0, 0, 0.06);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+        transition: transform 0.25s ease, box-shadow 0.25s ease;
+        overflow: hidden;
+    }
+    .kpi-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.07);
+    }
+    .kpi-icon-box {
+        width: 52px;
+        height: 52px;
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+    }
+    .badge-soft-success {
+        background-color: #dcfce7;
+        color: #15803d;
+        border: 1px solid #bbf7d0;
+    }
+    .badge-soft-warning {
+        background-color: #fef3c7;
+        color: #b45309;
+        border: 1px solid #fde68a;
+    }
+    .badge-soft-danger {
+        background-color: #fee2e2;
+        color: #b91c1c;
+        border: 1px solid #fecaca;
+    }
+    .badge-soft-info {
+        background-color: #e0e7ff;
+        color: #4338ca;
+        border: 1px solid #c7d2fe;
+    }
+    .btn-action-pill {
+        border-radius: 50px;
+        font-weight: 700;
+        font-size: 0.88rem;
+        padding: 8px 18px;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        text-decoration: none;
+        transition: all 0.2s ease;
+    }
+    .btn-action-primary {
+        background: #FF6B35;
+        color: #FFFFFF !important;
+        border: none;
+        box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);
+    }
+    .btn-action-primary:hover {
+        background: #e65a26;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(255, 107, 53, 0.4);
+    }
+    .btn-action-ghost {
+        background: rgba(255, 255, 255, 0.9);
+        color: #141414 !important;
+        border: 1.5px solid rgba(0,0,0,0.12);
+    }
+    .btn-action-ghost:hover {
+        background: #FFFFFF;
+        border-color: #141414;
+        transform: translateY(-2px);
+    }
+    .table-modern thead th {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        font-weight: 800;
+        color: #888;
+        background: #FAFAFA;
+        border-bottom: 1px solid rgba(0,0,0,0.06);
+        padding: 12px 16px;
+    }
+    .table-modern tbody td {
+        padding: 14px 16px;
+        vertical-align: middle;
+        border-bottom: 1px solid rgba(0,0,0,0.04);
+        font-size: 0.92rem;
+    }
+    .table-modern tbody tr:hover {
+        background-color: #FBFBFA;
+    }
+    .progress-slim {
+        height: 8px;
+        border-radius: 10px;
+        background-color: #f1f5f9;
+        overflow: hidden;
+    }
+</style>
+{% endblock %}
 
 {% block contenido %}
-<div class="container mt-4">
-    <!-- Encabezado limpio -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="text-center">
-                <h1 class="fw-bold">Bienvenido, {{ session.user_nombre }}</h1>
-                <p class="lead">Panel de control completo del sistema</p>
-                <span class="badge bg-primary">Administrador</span>
-            </div>
-        </div>
-    </div>
+<div class="container-fluid py-4 px-lg-5" style="max-width: 1400px; margin: 0 auto;">
 
-    <!-- Sección de módulos -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="card shadow-sm">
-                <div class="card-body">
-                    <h4 class="mb-4">Módulos Principales</h4>
-                    <div class="row text-center">
-                        <div class="col-md-3 mb-3">
-                            <a href="{{ url_for('clientes') }}" class="btn btn-primary w-100 py-3">
-                                <i class="bi bi-people-fill fs-2 d-block mb-2"></i>
-                                CLIENTES
-                            </a>
-                        </div>
-                        <div class="col-md-3 mb-3">
-                            <a href="{{ url_for('productos') }}" class="btn btn-success w-100 py-3">
-                                <i class="bi bi-box-seam fs-2 d-block mb-2"></i>
-                                PRODUCTOS
-                            </a>
-                        </div>
-                        <div class="col-md-3 mb-3">
-                            <a href="{{ url_for('gestion_cotizaciones') }}" class="btn btn-warning w-100 py-3">
-                                <i class="bi bi-file-earmark-text fs-2 d-block mb-2"></i>
-                                COTIZACIONES
-                            </a>
-                        </div>
-                        <div class="col-md-3 mb-3">
-                            <a href="{{ url_for('vista_equipo') }}" class="btn btn-info text-white w-100 py-3">
-                                <i class="bi bi-kanban fs-2 d-block mb-2"></i>
-                                EQUIPO Y TAREAS
-                            </a>
-                        </div>
+    <!-- ============================================================
+         1. HERO HEADER EJECUTIVO (Bienvenida + Acciones Rápidas)
+    ============================================================ -->
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4"
+         style="background: linear-gradient(135deg, #1E1B4B 0%, #312E81 50%, #4338CA 100%);">
+        <div class="card-body p-4 p-lg-5 text-white">
+            <div class="row align-items-center">
+                <div class="col-lg-7 mb-3 mb-lg-0">
+                    <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
+                        <span class="badge bg-white bg-opacity-20 text-white rounded-pill px-3 py-1.5 fs-7 fw-bold">
+                            <i class="bi bi-building me-1"></i> {{ empresa_nombre }}
+                        </span>
+                        <span class="badge bg-success bg-opacity-80 text-white rounded-pill px-3 py-1.5 fs-7 fw-bold">
+                            <i class="bi bi-shield-check me-1"></i> Administrador
+                        </span>
+                    </div>
+                    <h1 class="display-6 fw-bold mb-2">¡Hola, {{ nombre }}! 👋</h1>
+                    <p class="mb-0 text-white-50 fs-6">
+                        Centro de inteligencia comercial. Supervisa ventas, cotizaciones en seguimiento y stock en tiempo real.
+                    </p>
+                </div>
+                <div class="col-lg-5 text-lg-end">
+                    <div class="d-flex flex-wrap gap-2 justify-content-lg-end align-items-center">
+                        <a href="{{ url_for('gestion_cotizaciones') }}" class="btn-action-pill btn-action-primary">
+                            <i class="bi bi-plus-circle-fill"></i> Nueva Cotización
+                        </a>
+                        <a href="{{ url_for('productos') }}" class="btn-action-pill btn-action-ghost">
+                            <i class="bi bi-file-earmark-pdf-fill text-danger"></i> Catálogo / IA
+                        </a>
+                        <a href="/equipo" class="btn-action-pill btn-action-ghost d-none d-sm-inline-flex">
+                            <i class="bi bi-people-fill text-primary"></i> Equipo
+                        </a>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Acciones rápidas -->
-    <div class="row">
-        <div class="col-12">
-            <div class="card shadow-sm">
-                <div class="card-body">
-                    <h4 class="mb-4">Acciones Rápidas</h4>
-                    <div class="row">
-                        <div class="col-md-3 mb-3">
-                            <a href="{{ url_for('clientes') }}" class="btn btn-outline-primary w-100">
-                                <i class="bi bi-plus-circle"></i> Nuevo Cliente
-                            </a>
-                        </div>
-                        <div class="col-md-3 mb-3">
-                            <a href="{{ url_for('productos') }}" class="btn btn-outline-success w-100">
-                                <i class="bi bi-plus-square"></i> Agregar Producto
-                            </a>
-                        </div>
-                        <div class="col-md-3 mb-3">
-                            <a href="{{ url_for('gestion_cotizaciones') }}" class="btn btn-outline-warning w-100">
-                                <i class="bi bi-file-earmark-plus"></i> Crear Cotización
-                            </a>
-                        </div>
-                        <div class="col-md-3 mb-3">
-                            <a href="{{ url_for('vista_equipo') }}" class="btn btn-outline-info w-100">
-                                <i class="bi bi-chat-dots"></i> Chat & Pizarra de Equipo
-                            </a>
-                        </div>
+    <!-- ============================================================
+         2. TARJETAS BENTO KPI (4 Métricas Clave de Negocio)
+    ============================================================ -->
+    <div class="row g-3 mb-4">
+
+        <!-- KPI 1: Volumen Total Cotizado -->
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="kpi-card p-3 h-100">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                    <span class="text-muted small fw-bold text-uppercase">Volumen Cotizado</span>
+                    <div class="kpi-icon-box" style="background: rgba(255, 107, 53, 0.12); color: #FF6B35;">
+                        <i class="bi bi-currency-dollar"></i>
                     </div>
+                </div>
+                <h3 class="fw-bold text-dark mb-1 fs-4">
+                    Bs. {{ "%.2f"|format(total_monto_cotizado or 0) }}
+                </h3>
+                <div class="d-flex align-items-center justify-content-between text-muted small border-top pt-2 mt-2">
+                    <span>Ticket Promedio:</span>
+                    <span class="fw-bold text-dark">Bs. {{ "%.2f"|format(ticket_promedio or 0) }}</span>
                 </div>
             </div>
         </div>
-    </div>
-</div>
 
-    <!-- Última Actividad -->
-    <div class="row">
-        <div class="col-lg-8 mb-4">
-            <div class="card h-100 shadow-sm">
-                <div class="card-header bg-white border-0">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0"><i class="bi bi-clock-history text-primary me-2"></i> Actividad Reciente</h5>
-                        <a href="{{ url_for('gestion_cotizaciones') }}" class="btn btn-sm btn-outline-primary">Ver Todas</a>
+        <!-- KPI 2: Tasa de Cierre / Efectividad -->
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="kpi-card p-3 h-100">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                    <span class="text-muted small fw-bold text-uppercase">Tasa de Aprobación</span>
+                    <div class="kpi-icon-box" style="background: rgba(34, 197, 94, 0.12); color: #16a34a;">
+                        <i class="bi bi-graph-up-arrow"></i>
                     </div>
                 </div>
-                <div class="card-body">
+                <h3 class="fw-bold text-success mb-1 fs-4">
+                    {{ tasa_conversion or 0 }}%
+                </h3>
+                <div class="d-flex align-items-center justify-content-between text-muted small border-top pt-2 mt-2">
+                    <span>Efectividad de cierre:</span>
+                    <span class="badge badge-soft-success rounded-pill">{{ cotizaciones_aprobadas }} de {{ total_cotizaciones }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- KPI 3: Cotizaciones por Seguimiento -->
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="kpi-card p-3 h-100">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                    <span class="text-muted small fw-bold text-uppercase">Por Seguimiento</span>
+                    <div class="kpi-icon-box" style="background: rgba(245, 158, 11, 0.12); color: #d97706;">
+                        <i class="bi bi-hourglass-split"></i>
+                    </div>
+                </div>
+                <h3 class="fw-bold text-warning mb-1 fs-4">
+                    {{ cotizaciones_pendientes }} <small class="fs-6 text-muted">pendientes</small>
+                </h3>
+                <div class="d-flex align-items-center justify-content-between text-muted small border-top pt-2 mt-2">
+                    <span>Requieren atención:</span>
+                    <span class="text-danger fw-semibold"><i class="bi bi-x-circle me-1"></i>{{ cotizaciones_rechazadas }} rechazadas</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- KPI 4: Catálogo y Alerta de Stock -->
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="kpi-card p-3 h-100">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                    <span class="text-muted small fw-bold text-uppercase">Inventario & Catálogo</span>
+                    <div class="kpi-icon-box" style="background: rgba(79, 70, 229, 0.12); color: #4F46E5;">
+                        <i class="bi bi-boxes"></i>
+                    </div>
+                </div>
+                <h3 class="fw-bold text-dark mb-1 fs-4">
+                    {{ total_productos }} <small class="fs-6 text-muted">productos</small>
+                </h3>
+                <div class="d-flex align-items-center justify-content-between text-muted small border-top pt-2 mt-2">
+                    <span>Nivel crítico:</span>
+                    {% if total_stock_critico > 0 %}
+                    <span class="badge badge-soft-danger rounded-pill fw-bold">{{ total_stock_critico }} bajo mínimo</span>
+                    {% else %}
+                    <span class="badge badge-soft-success rounded-pill fw-semibold">Stock óptimo</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ============================================================
+         3. CUERPO PRINCIPAL (Columna 70% Tabla + Columna 30% BI Lateral)
+    ============================================================ -->
+    <div class="row g-4">
+
+        <!-- COLUMNA PRINCIPAL (70%): Actividad Reciente con Acciones Directas -->
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm rounded-4 h-100 bg-white">
+                <div class="card-header bg-white py-3 px-4 border-0 d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="fw-bold mb-0 text-dark">
+                            <i class="bi bi-clock-history text-primary me-2"></i>Últimas Cotizaciones Emitidas
+                        </h5>
+                        <small class="text-muted">Movimientos comerciales de todo tu equipo de ventas</small>
+                    </div>
+                    <a href="{{ url_for('gestion_cotizaciones') }}" class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-bold">
+                        Ver todas →
+                    </a>
+                </div>
+
+                <div class="card-body p-0">
+                    {% if actividades_recientes %}
                     <div class="table-responsive">
-                        <table class="table table-hover">
+                        <table class="table table-modern align-middle mb-0">
                             <thead>
                                 <tr>
+                                    <th>#ID</th>
                                     <th>Fecha</th>
-                                    <th>Cotización</th>
                                     <th>Cliente</th>
+                                    <th>Vendedor</th>
                                     <th>Total</th>
                                     <th>Estado</th>
+                                    <th class="text-end">Acciones</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {% for actividad in actividades_recientes %}
+                                {% for act in actividades_recientes %}
                                 <tr>
-                                    <td>{{ actividad.fecha|date('%d/%m/%Y %H:%M') }}</td>
-                                    <td>#{{ actividad.id }}</td>
-                                    <td>{{ actividad.cliente }}</td>
-                                    <td>Bs {{ "%.2f"|format(actividad.total or 0) }}</td>
+                                    <td class="fw-bold text-primary">#{{ act.id }}</td>
+                                    <td class="text-muted small">{{ act.fecha|date('%d/%m/%Y %H:%M') }}</td>
                                     <td>
-                                        <span class="badge 
-                                            {% if actividad.estado|lower == 'aprobada' %}bg-success
-                                            {% elif actividad.estado|lower == 'pendiente' %}bg-warning text-dark
-                                            {% elif actividad.estado|lower == 'rechazada' %}bg-danger
-                                            {% else %}bg-secondary{% endif %}">
-                                            {{ actividad.estado }}
+                                        <div class="fw-bold text-dark">{{ act.cliente }}</div>
+                                        {% if act.cliente_telefono %}
+                                        <small class="text-muted"><i class="bi bi-telephone me-1"></i>{{ act.cliente_telefono }}</small>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-light text-dark border rounded-pill px-2.5 py-1 small">
+                                            <i class="bi bi-person me-1"></i>{{ act.vendedor_nombre }}
                                         </span>
+                                    </td>
+                                    <td class="fw-bold text-dark">
+                                        Bs. {{ "%.2f"|format(act.total or 0) }}
+                                    </td>
+                                    <td>
+                                        {% if act.estado|lower == 'aprobada' %}
+                                        <span class="badge badge-soft-success rounded-pill px-3 py-1 fw-bold">
+                                            <i class="bi bi-check-circle me-1"></i>Aprobada
+                                        </span>
+                                        {% elif act.estado|lower == 'pendiente' or not act.estado %}
+                                        <span class="badge badge-soft-warning rounded-pill px-3 py-1 fw-bold">
+                                            <i class="bi bi-hourglass-split me-1"></i>Pendiente
+                                        </span>
+                                        {% elif act.estado|lower == 'rechazada' %}
+                                        <span class="badge badge-soft-danger rounded-pill px-3 py-1 fw-bold">
+                                            <i class="bi bi-x-circle me-1"></i>Rechazada
+                                        </span>
+                                        {% else %}
+                                        <span class="badge bg-secondary rounded-pill px-3 py-1">
+                                            {{ act.estado }}
+                                        </span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-end">
+                                        <div class="d-inline-flex gap-1">
+                                            <a href="{{ url_for('vista_previa_cotizacion', id=act.id) }}"
+                                               class="btn btn-sm btn-light text-primary rounded-pill px-2.5 py-1"
+                                               title="Ver / Descargar PDF">
+                                                <i class="bi bi-file-earmark-pdf-fill"></i>
+                                            </a>
+                                            {% if act.cliente_telefono %}
+                                            <a href="https://wa.me/591{{ act.cliente_telefono|replace(' ', '')|replace('-', '') }}?text=Hola%20{{ act.cliente|urlencode }}%2C%20le%20escribo%20de%20{{ empresa_nombre|urlencode }}%20respecto%20a%20su%20cotizaci%C3%B3n%20%23{{ act.id }}."
+                                               target="_blank" rel="noopener noreferrer"
+                                               class="btn btn-sm btn-light text-success rounded-pill px-2.5 py-1"
+                                               title="Enviar WhatsApp">
+                                                <i class="bi bi-whatsapp"></i>
+                                            </a>
+                                            {% endif %}
+                                        </div>
                                     </td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
                         </table>
                     </div>
+                    {% else %}
+                    <div class="p-5 text-center text-muted">
+                        <i class="bi bi-inbox fs-1 d-block mb-3 opacity-50"></i>
+                        <p class="mb-3">Aún no se han generado cotizaciones en tu negocio.</p>
+                        <a href="{{ url_for('gestion_cotizaciones') }}" class="btn-action-pill btn-action-primary">
+                            <i class="bi bi-plus-circle-fill"></i> Crear mi primera cotización
+                        </a>
+                    </div>
+                    {% endif %}
                 </div>
             </div>
         </div>
 
-        <!-- Estadísticas -->
-        <div class="col-lg-4 mb-4">
-            <div class="card h-100 shadow-sm">
-                <div class="card-header bg-white border-0 pb-2 pt-2">
-                    <h5 class="mb-1" style="font-size:1.1rem;"><i class="bi bi-bar-chart-line text-success me-2"></i> Estadísticas</h5>
+        <!-- COLUMNA LATERAL (30%): Resumen de Salud Comercial & Alertas -->
+        <div class="col-lg-4">
+
+            <!-- Card 1: Distribución Comercial de Estados -->
+            <div class="card border-0 shadow-sm rounded-4 mb-4 bg-white">
+                <div class="card-header bg-white py-3 px-4 border-0">
+                    <h6 class="fw-bold mb-0 text-dark">
+                        <i class="bi bi-pie-chart-fill text-primary me-2"></i>Salud de Cotizaciones
+                    </h6>
                 </div>
-                <div class="card-body pt-2 pb-2">
-                    <div>
-                        <div class="accordion" id="accordionEstados">
-                            <div class="accordion-item">
-                                <h2 class="accordion-header" id="headingAprobadas">
-                                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseAprobadas" aria-expanded="true" aria-controls="collapseAprobadas">
-                                        <span class="badge bg-success me-2">Aprobadas</span> ({{ cotizaciones_aprobadas }})
-                                    </button>
-                                </h2>
-                                <div id="collapseAprobadas" class="accordion-collapse collapse show" aria-labelledby="headingAprobadas" data-bs-parent="#accordionEstados">
-                                    <div class="accordion-body p-0">
-                                        <table class="table table-sm mb-0">
-                                            <thead><tr><th>ID</th><th>Cliente</th><th>Fecha</th><th>Total</th></tr></thead>
-                                            <tbody>
-                                            {% for c in cotizaciones_estado.aprobadas %}
-                                            <tr><td>#{{ c.id }}</td><td>{{ c.cliente }}</td><td>{{ c.fecha|date('%d/%m/%Y') }}</td><td>Bs {{ '%.2f'|format(c.total or 0) }}</td></tr>
-                                            {% else %}
-                                            <tr><td colspan="4" class="text-center text-muted">Sin cotizaciones aprobadas</td></tr>
-                                            {% endfor %}
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="accordion-item">
-                                <h2 class="accordion-header" id="headingPendientes">
-                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapsePendientes" aria-expanded="false" aria-controls="collapsePendientes">
-                                        <span class="badge bg-warning text-dark me-2">Pendientes</span> ({{ cotizaciones_pendientes }})
-                                    </button>
-                                </h2>
-                                <div id="collapsePendientes" class="accordion-collapse collapse" aria-labelledby="headingPendientes" data-bs-parent="#accordionEstados">
-                                    <div class="accordion-body p-0">
-                                        <table class="table table-sm mb-0">
-                                            <thead><tr><th>ID</th><th>Cliente</th><th>Fecha</th><th>Total</th></tr></thead>
-                                            <tbody>
-                                            {% for c in cotizaciones_estado.pendientes %}
-                                            <tr><td>#{{ c.id }}</td><td>{{ c.cliente }}</td><td>{{ c.fecha|date('%d/%m/%Y') }}</td><td>Bs {{ '%.2f'|format(c.total or 0) }}</td></tr>
-                                            {% else %}
-                                            <tr><td colspan="4" class="text-center text-muted">Sin cotizaciones pendientes</td></tr>
-                                            {% endfor %}
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="accordion-item">
-                                <h2 class="accordion-header" id="headingRechazadas">
-                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseRechazadas" aria-expanded="false" aria-controls="collapseRechazadas">
-                                        <span class="badge bg-danger me-2">Rechazadas</span> ({{ cotizaciones_rechazadas }})
-                                    </button>
-                                </h2>
-                                <div id="collapseRechazadas" class="accordion-collapse collapse" aria-labelledby="headingRechazadas" data-bs-parent="#accordionEstados">
-                                    <div class="accordion-body p-0">
-                                        <table class="table table-sm mb-0">
-                                            <thead><tr><th>ID</th><th>Cliente</th><th>Fecha</th><th>Total</th></tr></thead>
-                                            <tbody>
-                                            {% for c in cotizaciones_estado.rechazadas %}
-                                            <tr><td>#{{ c.id }}</td><td>{{ c.cliente }}</td><td>{{ c.fecha|date('%d/%m/%Y') }}</td><td>Bs {{ '%.2f'|format(c.total or 0) }}</td></tr>
-                                            {% else %}
-                                            <tr><td colspan="4" class="text-center text-muted">Sin cotizaciones rechazadas</td></tr>
-                                            {% endfor %}
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-                            </div>
+                <div class="card-body px-4 py-2">
+                    <!-- Aprobadas -->
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between small fw-bold mb-1">
+                            <span class="text-success"><i class="bi bi-check-circle me-1"></i>Aprobadas</span>
+                            <span>{{ cotizaciones_aprobadas }} ({{ tasa_conversion }}%)</span>
+                        </div>
+                        <div class="progress-slim">
+                            <div class="progress-bar bg-success" role="progressbar" style="width: {{ tasa_conversion }}%;"></div>
+                        </div>
+                    </div>
+
+                    <!-- Pendientes -->
+                    {% set pct_pend = ((cotizaciones_pendientes / total_cotizaciones * 100)|round(1)) if total_cotizaciones > 0 else 0 %}
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between small fw-bold mb-1">
+                            <span class="text-warning"><i class="bi bi-hourglass-split me-1"></i>Pendientes</span>
+                            <span>{{ cotizaciones_pendientes }} ({{ pct_pend }}%)</span>
+                        </div>
+                        <div class="progress-slim">
+                            <div class="progress-bar bg-warning" role="progressbar" style="width: {{ pct_pend }}%;"></div>
+                        </div>
+                    </div>
+
+                    <!-- Rechazadas -->
+                    {% set pct_rech = ((cotizaciones_rechazadas / total_cotizaciones * 100)|round(1)) if total_cotizaciones > 0 else 0 %}
+                    <div class="mb-2">
+                        <div class="d-flex justify-content-between small fw-bold mb-1">
+                            <span class="text-danger"><i class="bi bi-x-circle me-1"></i>Rechazadas</span>
+                            <span>{{ cotizaciones_rechazadas }} ({{ pct_rech }}%)</span>
+                        </div>
+                        <div class="progress-slim">
+                            <div class="progress-bar bg-danger" role="progressbar" style="width: {{ pct_rech }}%;"></div>
                         </div>
                     </div>
                 </div>
             </div>
+
+            <!-- Card 2: Top Clientes de Mayor Volumen -->
+            <div class="card border-0 shadow-sm rounded-4 mb-4 bg-white">
+                <div class="card-header bg-white py-3 px-4 border-0 d-flex justify-content-between align-items-center">
+                    <h6 class="fw-bold mb-0 text-dark">
+                        <i class="bi bi-trophy-fill text-warning me-2"></i>Top Clientes
+                    </h6>
+                    <a href="{{ url_for('clientes') }}" class="small text-decoration-none fw-semibold">Ver cartera →</a>
+                </div>
+                <div class="card-body px-4 py-2">
+                    {% if top_clientes %}
+                    <div class="list-group list-group-flush">
+                        {% for tc in top_clientes %}
+                        <div class="list-group-item px-0 py-2.5 border-bottom border-light d-flex justify-content-between align-items-center">
+                            <div>
+                                <div class="fw-bold text-dark small">{{ tc.cliente_nombre }}</div>
+                                <small class="text-muted">{{ tc.cotizaciones_count }} cotizaciones</small>
+                            </div>
+                            <span class="badge badge-soft-info rounded-pill fw-bold">
+                                Bs. {{ "%.2f"|format(tc.total_monto or 0) }}
+                            </span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="text-muted small mb-0 py-2 text-center">Sin datos de facturación de clientes aún.</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Card 3: Alertas de Inventario Crítico -->
+            <div class="card border-0 shadow-sm rounded-4 bg-white">
+                <div class="card-header bg-white py-3 px-4 border-0 d-flex justify-content-between align-items-center">
+                    <h6 class="fw-bold mb-0 text-dark">
+                        <i class="bi bi-exclamation-triangle-fill text-danger me-2"></i>Stock Crítico
+                    </h6>
+                    <a href="{{ url_for('productos') }}" class="small text-decoration-none fw-semibold">Inventario →</a>
+                </div>
+                <div class="card-body px-4 py-2">
+                    {% if productos_stock_critico %}
+                    <div class="list-group list-group-flush">
+                        {% for prod in productos_stock_critico %}
+                        <div class="list-group-item px-0 py-2.5 border-bottom border-light">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <span class="fw-bold text-dark small text-truncate" style="max-width: 180px;">{{ prod.descripcion }}</span>
+                                <span class="badge badge-soft-danger rounded-pill fw-bold">
+                                    Stock: {{ prod.stock }} (Mín: {{ prod.min_stock }})
+                                </span>
+                            </div>
+                            <small class="text-muted">SKU: {{ prod.codigo }}</small>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="text-center py-3 text-muted small">
+                        <i class="bi bi-shield-check text-success fs-4 d-block mb-1"></i>
+                        Todos tus productos tienen stock suficiente.
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
         </div>
+
     </div>
+
 </div>
 {% endblock %}
-
-<!-- Scripts para gráficos -->
-{% block scripts %}
-<!-- Scripts limpios: se eliminó Chart.js porque ya no se usa en el dashboard -->
-{% endblock %}
-
-<style>
-    .action-card {
-        transition: all 0.3s ease;
-        border: 1px solid rgba(0,0,0,0.05);
-    }
-    .action-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-    }
-    .icon-lg {
-        width: 60px;
-        height: 60px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin: 0 auto;
-    }
-    .icon-shape {
-        width: 48px;
-        height: 48px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-    .chart-container {
-        position: relative;
-    }
-</style>

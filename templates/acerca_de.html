@@ -67,7 +67,7 @@
     }
 
     .faq-item.active .faq-body {
-        max-height: 300px;
+        max-height: 600px;
         padding: 0 1.5rem 1.25rem 1.5rem;
     }
 
@@ -308,10 +308,11 @@
                     <h4 style="font-size: 1.1rem; font-weight: 800; color: #141414; margin-bottom: 0.5rem;">Motor
                         Principal & IA</h4>
                     <ul style="padding-left: 1.2rem; margin: 0; font-size: 0.88rem; color: #555; line-height: 1.7;">
-                        <li>Extracción con IA desde PDFs</li>
+                        <li>Extracción con IA desde PDFs y catálogos</li>
+                        <li>ChatLive WhatsApp Bot IA 24/7 y Catálogo</li>
                         <li>Generador de PDF profesional con IVA</li>
                         <li>Control de Roles & Permisos</li>
-                        <li>Respaldos de Datos y Auditoría</li>
+                        <li>Respaldos de Datos y Auditoría Global</li>
                         <li>Simulador de cotizaciones interactivo</li>
                     </ul>
                 </div>
@@ -363,7 +364,7 @@
             </div>
 
             <div class="faq-item">
-                <div class="faq-header" onclick="toggleFaq(this)">
+                <div class="faq-header" onclick="toggleFaq(this)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleFaq(this);}" tabindex="0" role="button" aria-expanded="false">
                     <span>¿Necesito instalar algún programa en mi computadora?</span>
                     <i class="bi bi-chevron-down"></i>
                 </div>
@@ -374,7 +375,7 @@
             </div>
 
             <div class="faq-item">
-                <div class="faq-header" onclick="toggleFaq(this)">
+                <div class="faq-header" onclick="toggleFaq(this)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleFaq(this);}" tabindex="0" role="button" aria-expanded="false">
                     <span>¿Mis datos y catálogo de productos están seguros?</span>
                     <i class="bi bi-chevron-down"></i>
                 </div>
@@ -385,7 +386,7 @@
             </div>
 
             <div class="faq-item">
-                <div class="faq-header" onclick="toggleFaq(this)">
+                <div class="faq-header" onclick="toggleFaq(this)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleFaq(this);}" tabindex="0" role="button" aria-expanded="false">
                     <span>¿Cómo funciona el registro y la prueba del sistema?</span>
                     <i class="bi bi-chevron-down"></i>
                 </div>
@@ -396,7 +397,7 @@
             </div>
 
             <div class="faq-item">
-                <div class="faq-header" onclick="toggleFaq(this)">
+                <div class="faq-header" onclick="toggleFaq(this)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleFaq(this);}" tabindex="0" role="button" aria-expanded="false">
                     <span>¿Puedo personalizar los documentos PDF con mi branding?</span>
                     <i class="bi bi-chevron-down"></i>
                 </div>
@@ -407,7 +408,7 @@
             </div>
 
             <div class="faq-item">
-                <div class="faq-header" onclick="toggleFaq(this)">
+                <div class="faq-header" onclick="toggleFaq(this)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleFaq(this);}" tabindex="0" role="button" aria-expanded="false">
                     <span>¿Cómo funciona el cálculo del IVA en Bolivia?</span>
                     <i class="bi bi-chevron-down"></i>
                 </div>
@@ -505,10 +506,13 @@
         // Cerrar otros
         document.querySelectorAll('.faq-item').forEach(function (el) {
             el.classList.remove('active');
+            var h = el.querySelector('.faq-header');
+            if (h) h.setAttribute('aria-expanded', 'false');
         });
 
         if (!isActive) {
             item.classList.add('active');
+            header.setAttribute('aria-expanded', 'true');
         }
     }
 </script>

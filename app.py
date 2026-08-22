@@ -65,6 +65,28 @@ def from_json_filter(value):
     except Exception:
         return {}
 
+@app.template_filter('date')
+def format_date(value, format='%d/%m/%Y'):
+    if value is None:
+        return ""
+    if isinstance(value, datetime):
+        return value.strftime(format)
+    if isinstance(value, str):
+        formats_to_try = [
+            '%Y-%m-%d %H:%M:%S',
+            '%Y-%m-%d %H:%M:%S.%f',
+            '%Y-%m-%d',
+            '%d/%m/%Y %H:%M:%S',
+            '%d/%m/%Y',
+            '%m/%d/%Y'
+        ]
+        for fmt in formats_to_try:
+            try:
+                return datetime.strptime(value, fmt).strftime(format)
+            except ValueError:
+                continue
+    return str(value)
+
 # Context Processor
 @app.context_processor
 def inject_now():

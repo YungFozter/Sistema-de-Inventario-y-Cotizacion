@@ -114,7 +114,7 @@
                                     <td>{{ actividad.fecha|date('%d/%m/%Y %H:%M') }}</td>
                                     <td>#{{ actividad.id }}</td>
                                     <td>{{ actividad.cliente }}</td>
-                                    <td>Bs {{ "%.2f"|format(actividad.total) }}</td>
+                                    <td>Bs {{ "%.2f"|format(actividad.total or 0) }}</td>
                                     <td>
                                         <span class="badge 
                                             {% if actividad.estado|lower == 'aprobada' %}bg-success
@@ -154,7 +154,7 @@
                                             <thead><tr><th>ID</th><th>Cliente</th><th>Fecha</th><th>Total</th></tr></thead>
                                             <tbody>
                                             {% for c in cotizaciones_estado.aprobadas %}
-                                            <tr><td>#{{ c.id }}</td><td>{{ c.cliente }}</td><td>{{ c.fecha|date('%d/%m/%Y') }}</td><td>Bs {{ '%.2f'|format(c.total) }}</td></tr>
+                                            <tr><td>#{{ c.id }}</td><td>{{ c.cliente }}</td><td>{{ c.fecha|date('%d/%m/%Y') }}</td><td>Bs {{ '%.2f'|format(c.total or 0) }}</td></tr>
                                             {% else %}
                                             <tr><td colspan="4" class="text-center text-muted">Sin cotizaciones aprobadas</td></tr>
                                             {% endfor %}
@@ -175,7 +175,7 @@
                                             <thead><tr><th>ID</th><th>Cliente</th><th>Fecha</th><th>Total</th></tr></thead>
                                             <tbody>
                                             {% for c in cotizaciones_estado.pendientes %}
-                                            <tr><td>#{{ c.id }}</td><td>{{ c.cliente }}</td><td>{{ c.fecha|date('%d/%m/%Y') }}</td><td>Bs {{ '%.2f'|format(c.total) }}</td></tr>
+                                            <tr><td>#{{ c.id }}</td><td>{{ c.cliente }}</td><td>{{ c.fecha|date('%d/%m/%Y') }}</td><td>Bs {{ '%.2f'|format(c.total or 0) }}</td></tr>
                                             {% else %}
                                             <tr><td colspan="4" class="text-center text-muted">Sin cotizaciones pendientes</td></tr>
                                             {% endfor %}
@@ -196,7 +196,7 @@
                                             <thead><tr><th>ID</th><th>Cliente</th><th>Fecha</th><th>Total</th></tr></thead>
                                             <tbody>
                                             {% for c in cotizaciones_estado.rechazadas %}
-                                            <tr><td>#{{ c.id }}</td><td>{{ c.cliente }}</td><td>{{ c.fecha|date('%d/%m/%Y') }}</td><td>Bs {{ '%.2f'|format(c.total) }}</td></tr>
+                                            <tr><td>#{{ c.id }}</td><td>{{ c.cliente }}</td><td>{{ c.fecha|date('%d/%m/%Y') }}</td><td>Bs {{ '%.2f'|format(c.total or 0) }}</td></tr>
                                             {% else %}
                                             <tr><td colspan="4" class="text-center text-muted">Sin cotizaciones rechazadas</td></tr>
                                             {% endfor %}

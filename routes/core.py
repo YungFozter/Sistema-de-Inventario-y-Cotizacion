@@ -117,9 +117,9 @@ def register_routes(app):
 
             # 4. Actividad Reciente del negocio (Top 10)
             cursor.execute('''
-                SELECT c.id, c.fecha, cli.nombre as cliente, c.total, c.estado
+                SELECT c.id, c.fecha, COALESCE(cli.nombre, 'Sin asignar') as cliente, COALESCE(c.total, 0) as total, c.estado
                 FROM cotizaciones c
-                JOIN clientes cli ON c.cliente_id = cli.id
+                LEFT JOIN clientes cli ON c.cliente_id = cli.id
                 WHERE c.creador_id = ? OR c.creador_id IN (SELECT id FROM clientes WHERE creador_id = ?)
                 ORDER BY c.fecha DESC
                 LIMIT 10
@@ -134,18 +134,18 @@ def register_routes(app):
             for estado, key in zip(estados, ['aprobadas', 'pendientes', 'rechazadas']):
                 if estado == 'Pendiente':
                     cursor.execute('''
-                        SELECT c.id, c.fecha, cli.nombre as cliente, c.total
+                        SELECT c.id, c.fecha, COALESCE(cli.nombre, 'Sin asignar') as cliente, COALESCE(c.total, 0) as total
                         FROM cotizaciones c
-                        JOIN clientes cli ON c.cliente_id = cli.id
+                        LEFT JOIN clientes cli ON c.cliente_id = cli.id
                         WHERE (c.creador_id = ? OR c.creador_id IN (SELECT id FROM clientes WHERE creador_id = ?))
                           AND (LOWER(c.estado) = 'pendiente' OR c.estado IS NULL OR c.estado = '')
                         ORDER BY c.fecha DESC
                     ''', (user_id, user_id))
                 else:
                     cursor.execute('''
-                        SELECT c.id, c.fecha, cli.nombre as cliente, c.total
+                        SELECT c.id, c.fecha, COALESCE(cli.nombre, 'Sin asignar') as cliente, COALESCE(c.total, 0) as total
                         FROM cotizaciones c
-                        JOIN clientes cli ON c.cliente_id = cli.id
+                        LEFT JOIN clientes cli ON c.cliente_id = cli.id
                         WHERE (c.creador_id = ? OR c.creador_id IN (SELECT id FROM clientes WHERE creador_id = ?))
                           AND LOWER(c.estado) = ?
                         ORDER BY c.fecha DESC

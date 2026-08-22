@@ -192,10 +192,13 @@ def register_routes(app):
             per_page = 5
 
         columnas_nombres = []
+        user_empresa = None
         try:
-            with get_db_connection() as conexion:
-                cursor = conexion.cursor()
-                columnas_nombres = _obtener_columnas_productos(cursor)
+            with get_db_connection() as conexion_init:
+                cursor_init = conexion_init.cursor()
+                columnas_nombres = _obtener_columnas_productos(cursor_init)
+                if user_rol != 'superadmin':
+                    user_empresa = _obtener_empresa_usuario(cursor_init, user_id, user_rol)
 
             if 'categoria_id' in columnas_nombres:
                 base_query = "SELECT p.*, c.nombre as categoria_nombre FROM productos p LEFT JOIN categorias c ON p.categoria_id = c.id WHERE 1=1"
@@ -213,11 +216,9 @@ def register_routes(app):
         filter_sql = ""
         params = []
 
-        if user_rol != 'superadmin':
-            user_empresa = _obtener_empresa_usuario(cursor, user_id, user_rol)
-            if user_empresa:
-                filter_sql += " AND (p.empresa = ? OR p.empresa = 'General')" if use_alias else " AND (empresa = ? OR empresa = 'General')"
-                params.append(user_empresa)
+        if user_rol != 'superadmin' and user_empresa:
+            filter_sql += " AND (p.empresa = ? OR p.empresa = 'General')" if use_alias else " AND (empresa = ? OR empresa = 'General')"
+            params.append(user_empresa)
 
         if empresa:
             filter_sql += " AND p.empresa LIKE ?" if use_alias else " AND empresa LIKE ?"

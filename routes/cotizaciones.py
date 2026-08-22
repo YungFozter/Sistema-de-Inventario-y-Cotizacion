@@ -210,6 +210,14 @@ def register_routes(app):
                 'page_cotizacion': page_cotizacion,
                 'total_pages_cotizaciones': total_pages_cotizaciones
             },
+            page_cliente=page_cliente,
+            total_pages_clientes=total_pages_clientes,
+            page_producto=page_producto,
+            total_pages_productos=total_pages_productos,
+            page_cotizacion=page_cotizacion,
+            total_pages_cotizaciones=total_pages_cotizaciones,
+            per_page=per_page_param,
+            total_productos=total_productos,
             total_registrados=total_registrados,
             total_importados=total_importados,
             tipo_producto=tipo_producto)
@@ -902,15 +910,15 @@ def register_routes(app):
         fecha_cotizacion = datetime.now().strftime("%d/%m/%Y")  # Valor por defecto
         if cotizacion_data and cotizacion_data[5]:
             try:
-                if isinstance(cotizacion_data[5], str):
-                    fecha_obj = datetime.strptime(cotizacion_data[5], "%Y-%m-%d %H:%M:%S")
+                if isinstance(cotizacion_data[5], datetime):
+                    fecha_obj = cotizacion_data[5]
+                elif isinstance(cotizacion_data[5], str):
+                    fecha_obj = datetime.strptime(cotizacion_data[5].split('.')[0], "%Y-%m-%d %H:%M:%S")
                 else:
-                    # Si la fecha no es string, asumimos que es timestamp
-                    fecha_obj = datetime.fromtimestamp(cotizacion_data[5])
+                    fecha_obj = datetime.fromtimestamp(float(cotizacion_data[5]))
                 fecha_cotizacion = fecha_obj.strftime("%d/%m/%Y")
             except Exception as e:
                 print(f"Error formateando fecha: {e}")
-                # Mantener el valor por defecto si hay error
 
         # LOGO ANULADO - No cargar logo de ElectroRed
         logo_base64 = ""  # Logo anulado
@@ -1163,10 +1171,12 @@ def register_routes(app):
         fecha_cotizacion = datetime.now().strftime("%d/%m/%Y")  # Valor por defecto
         if cotizacion_data and cotizacion_data[5]:
             try:
-                if isinstance(cotizacion_data[5], str):
-                    fecha_obj = datetime.strptime(cotizacion_data[5], "%Y-%m-%d %H:%M:%S")
+                if isinstance(cotizacion_data[5], datetime):
+                    fecha_obj = cotizacion_data[5]
+                elif isinstance(cotizacion_data[5], str):
+                    fecha_obj = datetime.strptime(cotizacion_data[5].split('.')[0], "%Y-%m-%d %H:%M:%S")
                 else:
-                    fecha_obj = datetime.fromtimestamp(cotizacion_data[5])
+                    fecha_obj = datetime.fromtimestamp(float(cotizacion_data[5]))
                 fecha_cotizacion = fecha_obj.strftime("%d/%m/%Y")
             except Exception as e:
                 print(f"Error formateando fecha: {e}")

@@ -20,9 +20,9 @@ def procesar_respuesta_ia(user_id, empresa, mensaje_cliente, system_prompt=None,
                 SELECT p.codigo, p.descripcion, p.marca, p.precio_unitario, p.cantidad, p.um, c.nombre as categoria_nombre, p.categoria
                 FROM productos p
                 LEFT JOIN categorias c ON p.categoria_id = c.id
-                WHERE (p.empresa = ? OR p.creador_id = ?) AND (p.activo IS TRUE OR p.activo = 1)
+                WHERE (p.creador_id = ? OR p.empresa = ? OR p.creador_id IS NULL) AND (p.activo IS TRUE OR p.activo = 1)
                 LIMIT 50
-            ''', (empresa, user_id))
+            ''', (user_id, empresa))
             productos_lista = [dict(r) for r in cursor.fetchall()]
     except Exception as e:
         print(f"[WARN ChatLive] Error cargando catálogo: {e}")

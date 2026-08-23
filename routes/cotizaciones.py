@@ -117,22 +117,42 @@ def register_routes(app):
         except ValueError:
             productos_per_page = 15
 
-        page_producto = int(request.args.get('page_producto', 1))
-        tipo_producto = request.args.get('tipo_producto', 'registrados')
-        offset_producto = (page_producto - 1) * productos_per_page
+        user_id = session.get('user_id')
+        user_rol = session.get('user_rol')
+        admin_owner_id = session.get('creador_id') or user_id
 
-        cursor.execute("SELECT COUNT(*) FROM productos WHERE (es_importado IS NULL OR es_importado = 0)")
-        total_registrados = cursor.fetchone()[0]
+        if user_rol == 'superadmin':
+            cursor.execute("SELECT COUNT(*) FROM productos WHERE (es_importado IS NULL OR es_importado = 0) AND (activo IS TRUE OR activo = 1 OR activo IS NULL)")
+            total_registrados = cursor.fetchone()[0]
 
-        cursor.execute("SELECT COUNT(*) FROM productos WHERE es_importado = 1")
-        total_importados = cursor.fetchone()[0]
+            cursor.execute("SELECT COUNT(*) FROM productos WHERE es_importado = 1 AND (activo IS TRUE OR activo = 1 OR activo IS NULL)")
+            total_importados = cursor.fetchone()[0]
 
-        if tipo_producto == 'importados':
-            cursor.execute("SELECT * FROM productos WHERE es_importado = 1 ORDER BY empresa, codigo LIMIT ? OFFSET ?", (productos_per_page, offset_producto))
-            total_productos = total_importados
+            if tipo_producto == 'importados':
+                cursor.execute("SELECT * FROM productos WHERE es_importado = 1 AND (activo IS TRUE OR activo = 1 OR activo IS NULL) ORDER BY empresa, codigo LIMIT ? OFFSET ?", (productos_per_page, offset_producto))
+                total_productos = total_importados
+            else:
+                cursor.execute("SELECT * FROM productos WHERE (es_importado IS NULL OR es_importado = 0) AND (activo IS TRUE OR activo = 1 OR activo IS NULL) ORDER BY empresa, codigo LIMIT ? OFFSET ?", (productos_per_page, offset_producto))
+                total_productos = total_registrados
         else:
-            cursor.execute("SELECT * FROM productos WHERE (es_importado IS NULL OR es_importado = 0) ORDER BY empresa, codigo LIMIT ? OFFSET ?", (productos_per_page, offset_producto))
-            total_productos = total_registrados
+            cursor.execute("SELECT empresa_nombre, nombre FROM clientes WHERE id = ?", (admin_owner_id,))
+            u_row = cursor.fetchone()
+            emp_nom = u_row[0] or u_row[1] or 'General' if u_row else 'General'
+            tenant_prod_cond = " AND (creador_id = ? OR creador_id = ? OR empresa = ? OR empresa = 'General' OR creador_id IS NULL) AND (activo IS TRUE OR activo = 1 OR activo IS NULL)"
+            tenant_params = [user_id, admin_owner_id, emp_nom]
+
+            cursor.execute("SELECT COUNT(*) FROM productos WHERE (es_importado IS NULL OR es_importado = 0)" + tenant_prod_cond, tenant_params)
+            total_registrados = cursor.fetchone()[0]
+
+            cursor.execute("SELECT COUNT(*) FROM productos WHERE es_importado = 1" + tenant_prod_cond, tenant_params)
+            total_importados = cursor.fetchone()[0]
+
+            if tipo_producto == 'importados':
+                cursor.execute("SELECT * FROM productos WHERE es_importado = 1" + tenant_prod_cond + " ORDER BY empresa, codigo LIMIT ? OFFSET ?", tenant_params + [productos_per_page, offset_producto])
+                total_productos = total_importados
+            else:
+                cursor.execute("SELECT * FROM productos WHERE (es_importado IS NULL OR es_importado = 0)" + tenant_prod_cond + " ORDER BY empresa, codigo LIMIT ? OFFSET ?", tenant_params + [productos_per_page, offset_producto])
+                total_productos = total_registrados
 
         productos = cursor.fetchall()
         total_pages_productos = max(1, (total_productos + productos_per_page - 1) // productos_per_page) if productos_per_page < 999999 else 1
@@ -781,7 +801,7 @@ def register_routes(app):
         if user_rol == 'superadmin':
             cursor.execute("SELECT id, nombre, codigo_cliente FROM clientes WHERE rol = 'cliente' ORDER BY nombre")
             clientes = cursor.fetchall()
-            cursor.execute("SELECT * FROM productos ORDER BY descripcion")
+            cursor.execute("SELECT * FROM productos WHERE (activo IS TRUE OR activo = 1 OR activo IS NULL) ORDER BY descripcion")
             productos = cursor.fetchall()
         else:
             admin_owner_id = session.get('creador_id') or user_id
@@ -790,7 +810,7 @@ def register_routes(app):
             cursor.execute("SELECT empresa_nombre, nombre FROM clientes WHERE id = ?", (admin_owner_id,))
             u_row = cursor.fetchone()
             emp_nom = u_row[0] or u_row[1] or 'General' if u_row else 'General'
-            cursor.execute("SELECT * FROM productos WHERE (empresa = ? OR empresa = 'General') ORDER BY descripcion", (emp_nom,))
+            cursor.execute("SELECT * FROM productos WHERE (creador_id = ? OR creador_id = ? OR empresa = ? OR empresa = 'General' OR creador_id IS NULL) AND (activo IS TRUE OR activo = 1 OR activo IS NULL) ORDER BY descripcion", (user_id, admin_owner_id, emp_nom))
             productos = cursor.fetchall()
 
         # Obtener cotización actual
@@ -1285,8 +1305,8 @@ def register_routes(app):
                     cur_t.execute("SELECT empresa_nombre, nombre FROM clientes WHERE id = ?", (admin_id,))
                     u_t = cur_t.fetchone()
                     emp_t = u_t[0] or u_t[1] or 'General' if u_t else 'General'
-                query += " AND (p.empresa = ? OR p.empresa = 'General')"
-                params.append(emp_t)
+                query += " AND (p.creador_id = ? OR p.creador_id = ? OR p.empresa = ? OR p.empresa = 'General' OR p.creador_id IS NULL) AND (p.activo IS TRUE OR p.activo = 1 OR p.activo IS NULL)"
+                params.extend([user_id, admin_id, emp_t])
 
             # Filtrar por tipo de producto (registrados vs importados)
             if tipo_producto == 'importados':

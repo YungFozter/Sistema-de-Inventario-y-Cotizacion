@@ -129,8 +129,11 @@ def crear_tablas():
                 fecha_actualizacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 es_importado INTEGER DEFAULT 0,
                 campos_personalizados TEXT,
+                creador_id INTEGER,
+                activo {"BOOLEAN DEFAULT TRUE" if is_postgres else "BOOLEAN DEFAULT 1"},
                 FOREIGN KEY (categoria_id) REFERENCES categorias(id),
                 FOREIGN KEY (proveedor_id) REFERENCES proveedores(id),
+                FOREIGN KEY (creador_id) REFERENCES clientes(id),
                 UNIQUE(empresa, codigo)
             ){";" if is_postgres else ""}
         ''')
@@ -525,6 +528,18 @@ def migrar_esquema_productos():
                 cursor.execute("ALTER TABLE productos ADD COLUMN activo INTEGER DEFAULT 1")
                 print("[OK] Columna activo agregada")
         
+        # Backfill de productos con creador_id NULL al admin principal
+        try:
+            cursor.execute("SELECT id FROM clientes WHERE correo = 'ieeimendoza@gmail.com' OR rol = 'admin' ORDER BY CASE WHEN correo = 'ieeimendoza@gmail.com' THEN 0 ELSE 1 END, id ASC LIMIT 1")
+            admin_row = cursor.fetchone()
+            if admin_row:
+                admin_id_default = admin_row[0] if isinstance(admin_row, (list, tuple)) else admin_row['id']
+                cursor.execute("UPDATE productos SET creador_id = ? WHERE creador_id IS NULL", (admin_id_default,))
+                if cursor.rowcount > 0:
+                    print(f"[OK] Backfilled {cursor.rowcount} productos con creador_id={admin_id_default}")
+        except Exception as e_bf:
+            print(f"[WARN] Error en backfill creador_id productos: {e_bf}")
+
         conexion.commit()
     except Exception as e:
         print(f"[ERROR] Error en migración de esquema de productos: {str(e)}")
@@ -822,7 +837,7 @@ def obtener_importacion_por_id(importacion_id, usuario_id=None):
         conexion.close()
 
 
-def registrar_productos_seleccionados(items, empresa="General", categoria_id=None, respetar_cantidades=True, tipo_documento="factura"):
+def registrar_productos_seleccionados(items, empresa="General", categoria_id=None, respetar_cantidades=True, tipo_documento="factura", creador_id=None):
     """
     Inserta o actualiza un grupo de productos importados en la tabla oficial 'productos'.
     Si respetar_cantidades es True, guarda la cantidad extraída.
@@ -888,9 +903,9 @@ def registrar_productos_seleccionados(items, empresa="General", categoria_id=Non
 
                 cursor.execute('''
                     UPDATE productos
-                    SET descripcion = ?, marca = ?, um = ?, cantidad = ?, precio_unitario = ?, precio_total = ?, categoria_id = ?, categoria = COALESCE(?, categoria), campos_personalizados = COALESCE(?, campos_personalizados), es_importado = 1, fecha_actualizacion = CURRENT_TIMESTAMP
+                    SET descripcion = ?, marca = ?, um = ?, cantidad = ?, precio_unitario = ?, precio_total = ?, categoria_id = ?, categoria = COALESCE(?, categoria), campos_personalizados = COALESCE(?, campos_personalizados), es_importado = 1, fecha_actualizacion = CURRENT_TIMESTAMP, creador_id = COALESCE(creador_id, ?)
                     WHERE id = ?
-                ''', (descripcion, marca, um, final_cantidad, precio_unitario, final_precio_total, categoria_id, categoria_nombre, campos_pers_json, existente[0]))
+                ''', (descripcion, marca, um, final_cantidad, precio_unitario, final_precio_total, categoria_id, categoria_nombre, campos_pers_json, creador_id, existente[0]))
             else:
                 if tipo_documento == 'catalogo':
                     final_cantidad = 0.0
@@ -900,9 +915,9 @@ def registrar_productos_seleccionados(items, empresa="General", categoria_id=Non
                 final_precio_total = round(final_cantidad * precio_unitario, 2)
                 
                 cursor.execute('''
-                    INSERT INTO productos (empresa, codigo, descripcion, marca, tm, um, cantidad, precio_unitario, precio_total, categoria_id, categoria, campos_personalizados, es_importado)
-                    VALUES (?, ?, ?, ?, 'Bs', ?, ?, ?, ?, ?, ?, ?, 1)
-                ''', (empresa_item, codigo, descripcion, marca, um, final_cantidad, precio_unitario, final_precio_total, categoria_id, categoria_nombre, campos_pers_json))
+                    INSERT INTO productos (empresa, codigo, descripcion, marca, tm, um, cantidad, precio_unitario, precio_total, categoria_id, categoria, campos_personalizados, es_importado, creador_id)
+                    VALUES (?, ?, ?, ?, 'Bs', ?, ?, ?, ?, ?, ?, ?, 1, ?)
+                ''', (empresa_item, codigo, descripcion, marca, um, final_cantidad, precio_unitario, final_precio_total, categoria_id, categoria_nombre, campos_pers_json, creador_id))
 
             
             # Si el item venía de una importación guardada, marcarlo como registrado

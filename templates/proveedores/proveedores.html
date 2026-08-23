@@ -603,7 +603,7 @@
 
               let telefonoHtml = '<span class="text-muted small">Sin teléfono</span>';
               if (p.telefono && p.telefono.trim().length > 0) {
-                const telClean = p.telefono.replace(/\s+/g, '');
+                const telClean = p.telefono.replace(/[^\d]/g, '');
                 telefonoHtml = `<a href="https://wa.me/${telClean}" target="_blank" class="badge bg-success bg-opacity-10 text-success border border-success rounded-pill px-3 py-1.5 fw-bold text-decoration-none"><i class="bi bi-whatsapp me-1"></i> ${p.telefono}</a>`;
               }
 
@@ -611,6 +611,8 @@
               if (p.direccion && p.direccion.trim().length > 0) {
                 direccionHtml = `<small class="text-muted d-block" style="font-size: 0.8rem;"><i class="bi bi-geo-alt me-1"></i>${p.direccion}</small>`;
               }
+
+              const esc = str => String(str || '').replace(/"/g, '&quot;');
 
               html += `
                 <tr class="bento-table-row" style="border-bottom: 1px solid rgba(20, 20, 20, 0.08);">
@@ -648,11 +650,11 @@
                         class="btn btn-sm btn-outline-dark rounded-circle d-inline-flex align-items-center justify-content-center"
                         style="width: 34px; height: 34px; border: 1.5px solid #141414;"
                         data-id="${p.id}"
-                        data-nombre="${p.nombre || ''}"
-                        data-nit="${p.nit_ruc || ''}"
-                        data-telefono="${p.telefono || ''}"
-                        data-contacto="${p.contacto_nombre || ''}"
-                        data-rubro="${p.rubro || ''}"
+                        data-nombre="${esc(p.nombre)}"
+                        data-nit="${esc(p.nit_ruc)}"
+                        data-telefono="${esc(p.telefono)}"
+                        data-contacto="${esc(p.contacto_nombre)}"
+                        data-rubro="${esc(p.rubro)}"
                         onclick="abrirModalEditarProveedorBtn(this)" title="Editar Proveedor">
                         <i class="bi bi-pencil-fill"></i>
                       </button>
@@ -660,10 +662,10 @@
                         class="btn btn-sm btn-outline-danger rounded-circle d-inline-flex align-items-center justify-content-center"
                         style="width: 34px; height: 34px; border: 1.5px solid #dc2626;"
                         data-id="${p.id}"
-                        data-nombre="${p.nombre || ''}"
-                        data-nit="${p.nit_ruc || ''}"
-                        data-contacto="${p.contacto_nombre || ''}"
-                        data-rubro="${p.rubro || ''}"
+                        data-nombre="${esc(p.nombre)}"
+                        data-nit="${esc(p.nit_ruc)}"
+                        data-contacto="${esc(p.contacto_nombre)}"
+                        data-rubro="${esc(p.rubro)}"
                         onclick="abrirModalEliminarProveedorBtn(this)" title="Eliminar Proveedor">
                         <i class="bi bi-trash-fill"></i>
                       </button>

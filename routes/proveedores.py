@@ -9,7 +9,7 @@ from models import registrar_log
 def _obtener_info_tenant_proveedor(cursor, user_id, user_rol):
     """Devuelve (owner_id, empresa_nombre) para aislamiento multi-tenant de proveedores"""
     if user_rol == 'superadmin':
-        return None, None
+        return None, 'General'
 
     cursor.execute("SELECT id, nombre, empresa_nombre, creador_id, rol FROM clientes WHERE id = ?", (user_id,))
     u = cursor.fetchone()
@@ -69,22 +69,23 @@ def register_routes(app):
                         if user_rol == 'superadmin':
                             cursor.execute("SELECT COUNT(*) FROM proveedores WHERE LOWER(nombre) = LOWER(?)", (nombre,))
                         else:
-                            cursor.execute("SELECT COUNT(*) FROM proveedores WHERE (creador_id = ? OR creador_id = ? OR empresa = ?) AND LOWER(nombre) = LOWER(?)", 
+                            cursor.execute("SELECT COUNT(*) FROM proveedores WHERE (creador_id = ? OR creador_id = ? OR empresa = ? OR empresa = 'General' OR creador_id IS NULL) AND LOWER(nombre) = LOWER(?)", 
                                            (user_id, owner_id, empresa_usuario, nombre))
                         if cursor.fetchone()[0] > 0:
                             flash(f'⚠️ El proveedor "{nombre}" ya se encuentra registrado en tu empresa.', 'warning')
                         else:
+                            emp_to_save = empresa_usuario or 'General'
                             cursor.execute('''
                                 INSERT INTO proveedores (empresa, nombre, nit_ruc, contacto_nombre, telefono, correo, direccion, rubro, creador_id)
                                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-                            ''', (empresa_usuario, nombre, nit_ruc, contacto_nombre, telefono, correo, direccion, rubro, user_id))
+                            ''', (emp_to_save, nombre, nit_ruc, contacto_nombre, telefono, correo, direccion, rubro, user_id))
                             nuevo_prov_id = cursor.lastrowid
                             conexion.commit()
 
                             registrar_log(
                                 usuario_id=user_id,
                                 accion="crear_proveedor",
-                                detalle={"proveedor_id": nuevo_prov_id, "nombre": nombre, "empresa": empresa_usuario}
+                                detalle={"proveedor_id": nuevo_prov_id, "nombre": nombre, "empresa": emp_to_save}
                             )
 
                             flash(f'¡Proveedor "{nombre}" registrado exitosamente!', 'success')
@@ -111,7 +112,7 @@ def register_routes(app):
                     base_sql = "FROM proveedores WHERE 1=1"
                     params = []
                 else:
-                    base_sql = "FROM proveedores WHERE (creador_id = ? OR creador_id = ? OR empresa = ?)"
+                    base_sql = "FROM proveedores WHERE (creador_id = ? OR creador_id = ? OR empresa = ? OR empresa = 'General' OR creador_id IS NULL)"
                     params = [user_id, owner_id, empresa_usuario]
 
                 if query_search:
@@ -144,10 +145,13 @@ def register_routes(app):
             mensaje_error=mensaje_error
         )
 
-    @app.route('/proveedores/editar/<int:id>', methods=['POST'])
+    @app.route('/proveedores/editar/<int:id>', methods=['GET', 'POST'])
     @login_required
     @admin_required
     def editar_proveedor(id):
+        if request.method == 'GET':
+            return redirect(url_for('proveedores'))
+
         user_id = session.get('user_id')
         user_rol = session.get('user_rol')
         try:
@@ -181,7 +185,7 @@ def register_routes(app):
                 prov_emp = prov_anterior[1]
                 prov_creador = prov_anterior[2]
 
-                if user_rol != 'superadmin' and prov_creador not in [user_id, owner_id] and prov_emp != empresa_usuario:
+                if user_rol != 'superadmin' and prov_creador not in [user_id, owner_id] and prov_emp != empresa_usuario and prov_emp != 'General' and prov_creador is not None:
                     flash('No tienes permisos para editar este proveedor.', 'danger')
                     return redirect(url_for('proveedores'))
 
@@ -265,9 +269,15 @@ def register_routes(app):
                 prov_emp = prov[2]
                 prov_creador = prov[3]
 
-                if user_rol != 'superadmin' and prov_creador not in [user_id, owner_id] and prov_emp != empresa_usuario:
+                if user_rol != 'superadmin' and prov_creador not in [user_id, owner_id] and prov_emp != empresa_usuario and prov_emp != 'General' and prov_creador is not None:
                     flash('No tienes permisos para eliminar este proveedor.', 'danger')
                     return redirect(url_for('proveedores'))
+
+                # Desvincular productos antes de eliminar (limpieza de huérfanos)
+                try:
+                    cursor.execute("UPDATE productos SET proveedor_id = NULL WHERE proveedor_id = ?", (id,))
+                except Exception as e_unl:
+                    print(f"[WARN] Error desvinculando productos de proveedor {id}: {e_unl}")
 
                 cursor.execute("DELETE FROM proveedores WHERE id=?", (id,))
                 conexion.commit()
@@ -312,7 +322,7 @@ def register_routes(app):
                 base_sql = "FROM proveedores WHERE 1=1"
                 params = []
             else:
-                base_sql = "FROM proveedores WHERE (creador_id = ? OR creador_id = ? OR empresa = ?)"
+                base_sql = "FROM proveedores WHERE (creador_id = ? OR creador_id = ? OR empresa = ? OR empresa = 'General' OR creador_id IS NULL)"
                 params = [user_id, owner_id, empresa_usuario]
 
             if query_search:
@@ -357,7 +367,7 @@ def register_routes(app):
                 cursor.execute("""
                     SELECT id, nombre, nit_ruc, contacto_nombre, telefono 
                     FROM proveedores 
-                    WHERE (creador_id = ? OR creador_id = ? OR empresa = ?)
+                    WHERE (creador_id = ? OR creador_id = ? OR empresa = ? OR empresa = 'General' OR creador_id IS NULL)
                     ORDER BY nombre ASC
                 """, (user_id, owner_id, empresa_usuario))
 

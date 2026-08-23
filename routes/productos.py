@@ -141,14 +141,14 @@ def register_routes(app):
                             prov_id = None
                             if proveedor:
                                 try:
-                                    user_id = session.get('user_id')
-                                    cursor.execute("SELECT id, nombre FROM proveedores WHERE (creador_id = ? OR empresa = ?) AND LOWER(nombre) = LOWER(?)", (user_id, empresa, proveedor))
+                                    admin_owner_id = session.get('creador_id') or user_id
+                                    cursor.execute("SELECT id, nombre FROM proveedores WHERE (creador_id = ? OR creador_id = ? OR empresa = ? OR empresa = 'General' OR creador_id IS NULL) AND LOWER(nombre) = LOWER(?)", (user_id, admin_owner_id, empresa, proveedor))
                                     p_row = cursor.fetchone()
                                     if not p_row:
                                         cursor.execute('''
                                             INSERT INTO proveedores (empresa, nombre, contacto_nombre, rubro, creador_id)
                                             VALUES (?, ?, 'N/A', 'Suministros', ?)
-                                        ''', (empresa, proveedor, user_id))
+                                        ''', (empresa or 'General', proveedor, user_id))
                                         prov_id = cursor.lastrowid
                                     else:
                                         prov_id = p_row[0]
@@ -504,13 +504,14 @@ def register_routes(app):
                         prov_id = None
                         if proveedor:
                             try:
-                                cursor.execute("SELECT id, nombre FROM proveedores WHERE (creador_id = ? OR empresa = ?) AND LOWER(nombre) = LOWER(?)", (user_id, empresa, proveedor))
+                                admin_owner_id = session.get('creador_id') or user_id
+                                cursor.execute("SELECT id, nombre FROM proveedores WHERE (creador_id = ? OR creador_id = ? OR empresa = ? OR empresa = 'General' OR creador_id IS NULL) AND LOWER(nombre) = LOWER(?)", (user_id, admin_owner_id, empresa, proveedor))
                                 p_row = cursor.fetchone()
                                 if not p_row:
                                     cursor.execute('''
                                         INSERT INTO proveedores (empresa, nombre, contacto_nombre, rubro, creador_id)
                                         VALUES (?, ?, 'N/A', 'Suministros', ?)
-                                    ''', (empresa, proveedor, user_id))
+                                    ''', (empresa or 'General', proveedor, user_id))
                                     prov_id = cursor.lastrowid
                                 else:
                                     prov_id = p_row[0]

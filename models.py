@@ -171,6 +171,44 @@ def crear_tablas():
             ){";" if is_postgres else ""}
         ''')
 
+        # Tabla de ventas (Punto de Venta / POS)
+        cursor.execute(f'''
+            CREATE TABLE IF NOT EXISTS ventas (
+                id {"SERIAL PRIMARY KEY" if is_postgres else "INTEGER PRIMARY KEY AUTOINCREMENT"},
+                codigo_venta TEXT NOT NULL,
+                cliente_id INTEGER,
+                vendedor_id INTEGER NOT NULL,
+                creador_id INTEGER NOT NULL,
+                empresa TEXT NOT NULL,
+                fecha TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                subtotal REAL NOT NULL DEFAULT 0.0,
+                descuento_porcentaje REAL DEFAULT 0.0,
+                descuento_monto REAL DEFAULT 0.0,
+                total REAL NOT NULL DEFAULT 0.0,
+                metodo_pago TEXT DEFAULT 'efectivo',
+                estado_pago TEXT DEFAULT 'pagado',
+                notas TEXT,
+                FOREIGN KEY (cliente_id) REFERENCES clientes(id),
+                FOREIGN KEY (vendedor_id) REFERENCES clientes(id),
+                FOREIGN KEY (creador_id) REFERENCES clientes(id)
+            ){";" if is_postgres else ""}
+        ''')
+
+        # Tabla de productos en ventas (Punto de Venta / POS)
+        cursor.execute(f'''
+            CREATE TABLE IF NOT EXISTS venta_productos (
+                id {"SERIAL PRIMARY KEY" if is_postgres else "INTEGER PRIMARY KEY AUTOINCREMENT"},
+                venta_id INTEGER NOT NULL,
+                producto_id INTEGER NOT NULL,
+                cantidad INTEGER NOT NULL,
+                precio_unitario REAL NOT NULL,
+                subtotal REAL NOT NULL,
+                descuento REAL DEFAULT 0.0,
+                FOREIGN KEY (venta_id) REFERENCES ventas(id) ON DELETE CASCADE,
+                FOREIGN KEY (producto_id) REFERENCES productos(id)
+            ){";" if is_postgres else ""}
+        ''')
+
         # Tabla de configuración ChatLife (Meta WhatsApp Cloud API + IA)
         cursor.execute(f'''
             CREATE TABLE IF NOT EXISTS chatlife_config (
@@ -1225,7 +1263,7 @@ def migrar_columnas_nuevas_productos():
 
 def asegurar_tabla_configuracion_pdf(cursor):
     """Crea la tabla configuracion_pdf si no existe en la base de datos (SQLite y PostgreSQL)"""
-    is_postgres = bool(os.environ.get('DATABASE_URL') and os.environ.get('DATABASE_URL').startswith('postgres'))
+    is_postgres = bool(not os.environ.get('TESTING_DB') and os.environ.get('DATABASE_URL') and os.environ.get('DATABASE_URL').startswith('postgres'))
     try:
         cursor.execute(f'''
             CREATE TABLE IF NOT EXISTS configuracion_pdf (

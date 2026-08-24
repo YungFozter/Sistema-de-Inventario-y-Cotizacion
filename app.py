@@ -157,6 +157,7 @@ from routes.mi_pdf import register_mi_pdf_routes as init_mi_pdf
 from routes.equipo import register_routes as init_equipo
 from routes.proveedores import register_routes as init_proveedores
 from routes.chatlife import register_routes as init_chatlife
+from routes.ventas import register_routes as init_ventas
 
 init_auth(app)
 init_admin(app)
@@ -168,6 +169,7 @@ init_mi_pdf(app)
 init_equipo(app)
 init_proveedores(app)
 init_chatlife(app)
+init_ventas(app)
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)

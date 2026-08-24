@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Comprobante de Venta - {{ venta.codigo_venta }}</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+  
+  <style>
+    body {
+      background: #F4F6F8;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      color: #141414;
+    }
+
+    .no-print-bar {
+      background: #141414;
+      color: #fff;
+      padding: 12px 20px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    /* FORMATO TICKET TÉRMICO 80mm */
+    .ticket-container {
+      width: 80mm;
+      background: #fff;
+      margin: 20px auto;
+      padding: 15px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+      font-size: 12px;
+      line-height: 1.3;
+    }
+
+    .ticket-header {
+      text-align: center;
+      border-bottom: 1px dashed #000;
+      padding-bottom: 10px;
+      margin-bottom: 10px;
+    }
+
+    .ticket-title {
+      font-weight: 900;
+      font-size: 16px;
+      text-transform: uppercase;
+    }
+
+    .ticket-table {
+      width: 100%;
+      margin-bottom: 10px;
+      border-collapse: collapse;
+    }
+
+    .ticket-table th {
+      border-bottom: 1px solid #000;
+      text-align: left;
+      font-size: 11px;
+    }
+
+    .ticket-table td {
+      padding: 4px 0;
+      font-size: 11px;
+    }
+
+    .ticket-footer {
+      border-top: 1px dashed #000;
+      padding-top: 10px;
+      text-align: center;
+      font-size: 11px;
+    }
+
+    /* FORMATO HOJA CARTA */
+    .carta-container {
+      max-width: 800px;
+      background: #fff;
+      margin: 30px auto;
+      padding: 40px;
+      border-radius: 16px;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+    }
+
+    /* MEDIA PRINT */
+    @media print {
+      .no-print-bar {
+        display: none !important;
+      }
+      body {
+        background: #fff;
+      }
+      .ticket-container, .carta-container {
+        margin: 0;
+        box-shadow: none;
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Barra Superior de Control (Oculta al Imprimir) -->
+  <div class="no-print-bar d-flex align-items-center justify-content-between">
+    <div class="fw-bold">
+      <i class="bi bi-receipt text-warning"></i> Comprobante {{ venta.codigo_venta }}
+    </div>
+    <div class="d-flex align-items-center gap-2">
+      <a href="{{ url_for('ver_comprobante_venta', id=venta.id, formato='ticket') }}" class="btn btn-sm {% if formato == 'ticket' %}btn-warning fw-bold{% else %}btn-outline-light{% endif %}">
+        <i class="bi bi-receipt-cutoff"></i> Ticket (80mm)
+      </a>
+      <a href="{{ url_for('ver_comprobante_venta', id=venta.id, formato='carta') }}" class="btn btn-sm {% if formato == 'carta' %}btn-warning fw-bold{% else %}btn-outline-light{% endif %}">
+        <i class="bi bi-file-earmark-text"></i> Carta PDF
+      </a>
+      <button onclick="window.print()" class="btn btn-warning btn-sm fw-bold px-3">
+        <i class="bi bi-printer-fill"></i> Imprimir
+      </button>
+    </div>
+  </div>
+
+  {% if formato == 'ticket' %}
+  <!-- ❶ FORMATO TICKET TÉRMICO (80mm) -->
+  <div class="ticket-container">
+    <div class="ticket-header">
+      <div class="ticket-title">{{ venta.empresa or 'COTIZAPro' }}</div>
+      <div>Nit/Tel: {{ user_data.telefono or 'N/A' }}</div>
+      <div>{{ user_data.correo or '' }}</div>
+      <div class="mt-2 fw-bold fs-6">RECIBO DE VENTA</div>
+      <div><strong>N°: {{ venta.codigo_venta }}</strong></div>
+      <div>Fecha: {{ venta.fecha|date('%d/%m/%Y %H:%M') }}</div>
+    </div>
+
+    <div class="mb-2">
+      <div><strong>Cliente:</strong> {{ venta.cliente_nombre }}</div>
+      {% if venta.cliente_nit and venta.cliente_nit != 'N/A' %}
+      <div><strong>NIT/CI:</strong> {{ venta.cliente_nit }}</div>
+      {% endif %}
+      <div><strong>Vendedor:</strong> {{ venta.vendedor_nombre or 'General' }}</div>
+    </div>
+
+    <table class="ticket-table">
+      <thead>
+        <tr>
+          <th>Cant/Prod</th>
+          <th class="text-end">P.Unit</th>
+          <th class="text-end">Subtotal</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in items %}
+        <tr>
+          <td colspan="3" class="fw-bold text-dark pt-1">{{ item.descripcion }}</td>
+        </tr>
+        <tr>
+          <td>{{ item.cantidad }} {{ item.um or 'Pza' }}</td>
+          <td class="text-end">Bs. {{ "%.2f"|format(item.precio_unitario) }}</td>
+          <td class="text-end fw-bold">Bs. {{ "%.2f"|format(item.subtotal) }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <div class="border-top pt-2 mt-2">
+      <div class="d-flex justify-content-between">
+        <span>Subtotal:</span>
+        <span>Bs. {{ "%.2f"|format(venta.subtotal) }}</span>
+      </div>
+      {% if venta.descuento_monto > 0 %}
+      <div class="d-flex justify-content-between text-danger">
+        <span>Descuento ({{ venta.descuento_porcentaje }}%):</span>
+        <span>- Bs. {{ "%.2f"|format(venta.descuento_monto) }}</span>
+      </div>
+      {% endif %}
+      <div class="d-flex justify-content-between fw-bold fs-6 border-top border-bottom py-1 my-1">
+        <span>TOTAL:</span>
+        <span>Bs. {{ "%.2f"|format(venta.total) }}</span>
+      </div>
+      <div class="d-flex justify-content-between text-muted">
+        <span>Método Pago:</span>
+        <span class="text-uppercase">{{ venta.metodo_pago }}</span>
+      </div>
+    </div>
+
+    <div class="ticket-footer mt-3">
+      <div>¡Gracias por su compra!</div>
+      <div class="text-muted" style="font-size: 9px;">COTIZAPro - Sistema Inteligente de Ventas</div>
+    </div>
+  </div>
+
+  {% else %}
+  <!-- ❷ FORMATO HOJA CARTA COMPLETO -->
+  <div class="carta-container">
+    <div class="d-flex justify-content-between align-items-start border-bottom pb-4 mb-4">
+      <div>
+        <h2 class="fw-bold text-primary mb-1">{{ venta.empresa or 'COTIZAPro' }}</h2>
+        <div class="text-muted">Teléfono: {{ user_data.telefono or 'N/A' }} | Email: {{ user_data.correo or 'N/A' }}</div>
+      </div>
+      <div class="text-end">
+        <h4 class="fw-bold text-dark mb-0">COMPROBANTE DE VENTA</h4>
+        <div class="fs-5 text-warning fw-bold">{{ venta.codigo_venta }}</div>
+        <div class="text-muted small">Fecha: {{ venta.fecha|date('%d/%m/%Y %H:%M') }}</div>
+      </div>
+    </div>
+
+    <div class="row mb-4">
+      <div class="col-6">
+        <div class="bg-light p-3 rounded-3 border">
+          <h6 class="fw-bold text-secondary mb-2">Datos del Cliente</h6>
+          <div class="fw-bold fs-6">{{ venta.cliente_nombre }}</div>
+          {% if venta.cliente_nit and venta.cliente_nit != 'N/A' %}
+          <div>NIT / CI: {{ venta.cliente_nit }}</div>
+          {% endif %}
+          {% if venta.cliente_telefono and venta.cliente_telefono != 'N/A' %}
+          <div>Teléfono: {{ venta.cliente_telefono }}</div>
+          {% endif %}
+        </div>
+      </div>
+      <div class="col-6">
+        <div class="bg-light p-3 rounded-3 border">
+          <h6 class="fw-bold text-secondary mb-2">Detalles de la Transacción</h6>
+          <div>Método de Pago: <strong class="text-uppercase">{{ venta.metodo_pago }}</strong></div>
+          <div>Atendido por: <strong>{{ venta.vendedor_nombre or 'Sistema' }}</strong></div>
+          <div>Estado: <span class="badge bg-success">Completado</span></div>
+        </div>
+      </div>
+    </div>
+
+    <table class="table table-bordered align-middle mb-4">
+      <thead class="table-dark">
+        <tr>
+          <th>Código</th>
+          <th>Descripción del Producto</th>
+          <th class="text-center">Cant.</th>
+          <th class="text-end">Precio Unit.</th>
+          <th class="text-end">Subtotal</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in items %}
+        <tr>
+          <td class="fw-bold text-secondary">{{ item.codigo }}</td>
+          <td>{{ item.descripcion }}</td>
+          <td class="text-center">{{ item.cantidad }} {{ item.um or 'Pza' }}</td>
+          <td class="text-end">Bs. {{ "%.2f"|format(item.precio_unitario) }}</td>
+          <td class="text-end fw-bold">Bs. {{ "%.2f"|format(item.subtotal) }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <div class="row justify-content-end">
+      <div class="col-md-5">
+        <div class="bg-light p-3 rounded-3 border">
+          <div class="d-flex justify-content-between mb-2">
+            <span>Subtotal Bruto:</span>
+            <span class="fw-bold">Bs. {{ "%.2f"|format(venta.subtotal) }}</span>
+          </div>
+          {% if venta.descuento_monto > 0 %}
+          <div class="d-flex justify-content-between text-danger mb-2">
+            <span>Descuento ({{ venta.descuento_porcentaje }}%):</span>
+            <span class="fw-bold">- Bs. {{ "%.2f"|format(venta.descuento_monto) }}</span>
+          </div>
+          {% endif %}
+          <div class="d-flex justify-content-between fw-bold fs-5 text-warning border-top pt-2">
+            <span>TOTAL FINAL:</span>
+            <span>Bs. {{ "%.2f"|format(venta.total) }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    {% if venta.notas %}
+    <div class="mt-4 p-3 bg-light rounded-3 border">
+      <strong>Notas:</strong> {{ venta.notas }}
+    </div>
+    {% endif %}
+
+    <div class="text-center text-muted small mt-5 border-top pt-3">
+      Gracias por su preferencia. Documento emitido mediante el sistema COTIZAPro.
+    </div>
+  </div>
+  {% endif %}
+
+</body>
+</html>

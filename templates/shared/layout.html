@@ -1033,6 +1033,9 @@
           <a href="{{ url_for('gestion_cotizaciones') }}" class="clay-nav-link {% if request.path.startswith('/cotizaciones') %}active{% endif %}">
             <i class="bi bi-file-earmark-text-fill" style="color:inherit;"></i> Cotizaciones
           </a>
+          <a href="/ventas" class="clay-nav-link {% if request.path.startswith('/ventas') %}active{% endif %}">
+            <i class="bi bi-cart-check-fill" style="color:inherit;"></i> Ventas POS
+          </a>
           <a href="/equipo" class="clay-nav-link {% if request.path.startswith('/equipo') %}active{% endif %}">
             <i class="bi bi-people-fill" style="color:inherit;"></i> Equipo
           </a>
@@ -1042,6 +1045,9 @@
           </a>
           <a href="/cotizar" class="clay-nav-link {% if request.path == '/cotizar' %}active{% endif %}">
             <i class="bi bi-plus-circle-fill" style="color:inherit;"></i> Nueva Cotización
+          </a>
+          <a href="/ventas" class="clay-nav-link {% if request.path.startswith('/ventas') %}active{% endif %}">
+            <i class="bi bi-cart-check-fill" style="color:inherit;"></i> Ventas POS
           </a>
           <a href="{{ url_for('standard_cotizaciones') }}" class="clay-nav-link {% if request.path.startswith('/standard/cotizaciones') %}active{% endif %}">
             <i class="bi bi-file-earmark-text-fill" style="color:inherit;"></i> Mis Cotizaciones
@@ -1159,6 +1165,7 @@
         <a href="/productos" class="clay-mobile-item"><i class="bi bi-box-seam"></i> Productos</a>
         <a href="{{ url_for('gestion_cotizaciones') }}" class="clay-mobile-item"><i class="bi bi-file-earmark-text"></i>
           Cotizaciones</a>
+        <a href="/ventas" class="clay-mobile-item"><i class="bi bi-cart-check-fill"></i> Ventas POS</a>
         <a href="/mi-pdf" class="clay-mobile-item"><i class="bi bi-file-earmark-pdf-fill"></i> MI PDF</a>
         <a href="/equipo" class="clay-mobile-item"><i class="bi bi-kanban"></i> Equipo & Tareas</a>
         <a href="/chatlife" class="clay-mobile-item"><i class="fa-brands fa-whatsapp text-success me-1"></i> ChatLive (Bot IA)</a>
@@ -1173,6 +1180,7 @@
         {% elif session.get('user_rol') == 'standard' %}
         <a href="/standard/dashboard" class="clay-mobile-item"><i class="bi bi-speedometer2"></i> Panel Principal</a>
         <a href="/cotizar" class="clay-mobile-item"><i class="bi bi-plus-circle"></i> Nueva Cotización</a>
+        <a href="/ventas" class="clay-mobile-item"><i class="bi bi-cart-check-fill"></i> Ventas POS</a>
         <a href="{{ url_for('standard_cotizaciones') }}" class="clay-mobile-item"><i
             class="bi bi-file-earmark-text"></i> Mis Cotizaciones</a>
         <a href="/equipo" class="clay-mobile-item"><i class="bi bi-people-fill"></i> Mi Equipo & Chat</a>

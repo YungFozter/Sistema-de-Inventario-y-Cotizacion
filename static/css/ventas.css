@@ -1,0 +1,289 @@
+/* ====================================================================
+   COTIZAPro - VENTAS / PUNTO DE VENTA (POS) CLAYMORPHISM STYLES
+   ==================================================================== */
+
+.pos-container {
+    padding-bottom: 3rem;
+}
+
+/* Header de la sección POS */
+.pos-header {
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 20px;
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+}
+
+.pos-title {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-weight: 800;
+    font-size: 1.5rem;
+    color: #141414;
+    letter-spacing: -0.03em;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.pos-badge {
+    background: #FF6B35;
+    color: #fff;
+    font-size: 0.75rem;
+    font-weight: 800;
+    padding: 4px 10px;
+    border-radius: 20px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+/* Tarjeta del Catálogo de Productos */
+.catalog-card {
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 20px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+}
+
+/* Buscador e Inputs en POS */
+.pos-search-input {
+    border-radius: 12px;
+    border: 1.5px solid rgba(0, 0, 0, 0.1);
+    padding: 10px 16px;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+}
+
+.pos-search-input:focus {
+    border-color: #FF6B35;
+    box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.15);
+}
+
+/* Tabla de Productos POS */
+.pos-table-container {
+    max-height: 520px;
+    overflow-y: auto;
+}
+
+.pos-table {
+    margin-bottom: 0;
+}
+
+.pos-table th {
+    background: #F8F9FA;
+    font-size: 0.78rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #6C757D;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    padding: 12px 16px;
+    position: sticky;
+    top: 0;
+    z-index: 5;
+}
+
+.pos-table td {
+    padding: 12px 16px;
+    vertical-align: middle;
+    font-size: 0.88rem;
+}
+
+.pos-table tbody tr {
+    transition: background 0.15s ease;
+    cursor: pointer;
+}
+
+.pos-table tbody tr:hover {
+    background: rgba(255, 107, 53, 0.04);
+}
+
+.pos-table tbody tr.selected {
+    background: rgba(255, 107, 53, 0.09);
+}
+
+/* Checkbox directo */
+.pos-check-input {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    accent-color: #FF6B35;
+}
+
+/* Badges de Stock */
+.stock-pill {
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 12px;
+}
+
+.stock-ok {
+    background: #E6F4EA;
+    color: #137333;
+}
+
+.stock-low {
+    background: #FEF7E0;
+    color: #B06000;
+}
+
+.stock-empty {
+    background: #FCE8E6;
+    color: #C5221F;
+}
+
+/* Drawer / Sidebar de Carrito POS */
+.cart-sidebar {
+    background: #FFFFFF;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 20px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+    padding: 1.5rem;
+    position: sticky;
+    top: 80px;
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 110px);
+    max-height: 750px;
+}
+
+.cart-header {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    padding-bottom: 1rem;
+    margin-bottom: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.cart-title {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-weight: 800;
+    font-size: 1.2rem;
+    color: #141414;
+}
+
+.cart-items-container {
+    flex: 1;
+    overflow-y: auto;
+    padding-right: 4px;
+    margin-bottom: 1rem;
+}
+
+.cart-item {
+    background: #F8F9FA;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    border-radius: 14px;
+    padding: 10px 12px;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: all 0.15s ease;
+}
+
+.cart-item:hover {
+    border-color: rgba(255, 107, 53, 0.3);
+}
+
+.cart-item-title {
+    font-weight: 700;
+    font-size: 0.85rem;
+    color: #212529;
+    line-height: 1.2;
+}
+
+.cart-item-sub {
+    font-size: 0.75rem;
+    color: #6C757D;
+}
+
+/* Control de Cantidad (+ / -) */
+.qty-btn {
+    width: 26px;
+    height: 26px;
+    border-radius: 8px;
+    border: 1.5px solid rgba(0, 0, 0, 0.1);
+    background: #fff;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.qty-btn:hover {
+    background: #FF6B35;
+    color: #fff;
+    border-color: #FF6B35;
+}
+
+.qty-input {
+    width: 36px;
+    text-align: center;
+    border: 1.5px solid rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 0.85rem;
+    padding: 2px;
+}
+
+/* Totales y Resumen del Carrito */
+.cart-summary {
+    background: #F8F9FA;
+    border-radius: 16px;
+    padding: 1rem;
+    border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.summary-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.88rem;
+    margin-bottom: 6px;
+    color: #495057;
+}
+
+.summary-total {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 1.35rem;
+    font-weight: 900;
+    color: #FF6B35;
+    border-top: 1px dashed rgba(0, 0, 0, 0.15);
+    padding-top: 8px;
+    margin-top: 8px;
+}
+
+/* Botón Procesa Venta 3D Clay */
+.btn-process-sale {
+    background: #FF6B35;
+    color: #FFFFFF !important;
+    border: none;
+    border-radius: 14px;
+    padding: 12px 20px;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 1rem;
+    font-weight: 800;
+    width: 100%;
+    margin-top: 1rem;
+    box-shadow: 0 4px 0 #C44E1E, 0 8px 20px rgba(255, 107, 53, 0.35);
+    transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.btn-process-sale:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 0 #C44E1E, 0 12px 28px rgba(255, 107, 53, 0.45);
+}
+
+.btn-process-sale:disabled {
+    background: #CED4DA;
+    box-shadow: none;
+    cursor: not-allowed;
+    transform: none;
+}

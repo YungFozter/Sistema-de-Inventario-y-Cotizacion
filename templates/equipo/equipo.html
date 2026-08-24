@@ -373,9 +373,8 @@
                         <span class="input-group-text bg-white border-end-0 text-success fw-bold">
                             <i class="bi bi-whatsapp"></i>
                         </span>
-                        <input type="tel" class="form-control border-start-0 ps-1 fw-semibold" id="wa-telefono" placeholder="Ej: 59170000000 o 70000000" required>
+                        <input type="tel" class="form-control border-start-0 ps-1 fw-semibold" id="wa-telefono" placeholder="+591 XXXXXXXX" required>
                     </div>
-                    <small class="form-text text-muted extra-small mt-1 d-block">Ingresa el número con el código de país (ej. 591 para Bolivia) o directo si es local.</small>
                     <div id="wa-error-msg" class="text-danger small mt-1 d-none fw-bold"><i class="bi bi-exclamation-circle me-1"></i>Por favor ingresa un número de teléfono válido.</div>
                 </div>
                 <div class="mb-3">
@@ -467,9 +466,8 @@
                         <span class="input-group-text bg-white border-end-0 text-success fw-bold">
                             <i class="bi bi-whatsapp"></i>
                         </span>
-                        <input type="tel" class="form-control border-start-0 ps-1 fw-semibold" id="share-wa-telefono" placeholder="Ej: 59170000000 o 70000000" autofocus>
+                        <input type="tel" class="form-control border-start-0 ps-1 fw-semibold" id="share-wa-telefono" placeholder="+591 XXXXXXXX" autofocus>
                     </div>
-                    <small class="form-text text-muted extra-small mt-1 d-block">Ingresa el número con el código de país (ej. 591 para Bolivia) o directo si es local.</small>
                     <div id="share-wa-error-msg" class="text-danger small mt-1 d-none fw-bold"><i class="bi bi-exclamation-circle me-1"></i>Por favor ingresa un número de teléfono válido.</div>
                 </div>
 
@@ -517,7 +515,10 @@ function generarYEnviarWhatsApp() {
     }
     if (errorMsg) errorMsg.classList.add('d-none');
 
-    const cleanTel = tel.replace(/[^0-9]/g, '');
+    let cleanTel = tel.replace(/[^0-9]/g, '');
+    if (cleanTel.length === 8) {
+        cleanTel = '591' + cleanTel;
+    }
 
     fetch('/equipo/invitaciones/crear', {
         method: 'POST',
@@ -606,7 +607,10 @@ function ejecutarEnvioWhatsAppModal() {
     }
     if (errorMsg) errorMsg.classList.add('d-none');
 
-    const cleanTel = tel.replace(/[^0-9]/g, '');
+    let cleanTel = tel.replace(/[^0-9]/g, '');
+    if (cleanTel.length === 8) {
+        cleanTel = '591' + cleanTel;
+    }
     const mensajeWa = `¡Hola! Te invito a unirte a nuestro equipo de trabajo en la plataforma. Abre este enlace para registrarte: ${currentQRLink}`;
     const waUrl = `https://wa.me/${cleanTel}?text=${encodeURIComponent(mensajeWa)}`;
     window.open(waUrl, '_blank');

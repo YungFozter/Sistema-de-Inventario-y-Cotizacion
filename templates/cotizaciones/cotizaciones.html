@@ -57,7 +57,7 @@
 
             <!-- Lista de resultados con Scroll Interno fluido -->
             <div id="lista-clientes-ajax" class="list-group list-group-flush" 
-                 style="max-height: 240px; overflow-y: auto; scroll-behavior: smooth; border-radius: 8px; border: 1px solid rgba(0,0,0,0.06); scrollbar-width: thin;"></div>
+                 style="max-height: 280px; overflow-y: auto; scroll-behavior: smooth; border-radius: 8px; border: 1px solid rgba(0,0,0,0.06); scrollbar-width: thin; padding: 4px;"></div>
 
             <!-- Controles de paginación -->
             <div class="d-flex align-items-center justify-content-between mt-2 pt-1 border-top">
@@ -123,27 +123,48 @@
               return;
             }
 
-            // Usar data-* en lugar de onclick inline para evitar
-            // conflicto de comillas dobles en atributos HTML
-            lista.innerHTML = data.clientes.map(c => {
+            // Renderizado de clientes (1 columna para 5, 2 columnas 5-5 para 10, 2 columnas 8-7 para 15)
+            function renderClientItem(c) {
               const nombre = (c.nombre || '').replace(/&/g,'&amp;').replace(/"/g,'&quot;');
               const codigo = (c.codigo_cliente || '').replace(/&/g,'&amp;').replace(/"/g,'&quot;');
               const nit    = (c.nit || '').replace(/&/g,'&amp;').replace(/"/g,'&quot;');
               return `
               <button type="button"
-                      class="btn-seleccionar-cliente list-group-item list-group-item-action d-flex justify-content-between align-items-center py-2 px-3"
+                      class="btn-seleccionar-cliente list-group-item list-group-item-action d-flex justify-content-between align-items-center py-2 px-3 rounded-3 mb-1 border shadow-xs"
                       data-id="${c.id}"
                       data-nombre="${nombre}"
                       data-codigo="${codigo}"
                       data-nit="${nit}">
-                <div>
+                <div class="text-truncate me-2">
                   <i class="bi bi-person me-2 text-primary"></i>
                   <strong>${c.nombre}</strong>
                   ${c.codigo_cliente ? `<span class="badge bg-primary bg-opacity-10 text-primary ms-2 small">${c.codigo_cliente}</span>` : ''}
                 </div>
-                <small class="text-muted">${c.nit ? 'NIT: ' + c.nit : ''}</small>
+                <small class="text-muted text-nowrap flex-shrink-0">${c.nit ? 'NIT: ' + c.nit : ''}</small>
               </button>`;
-            }).join('');
+            }
+
+            if (perPage === 10 || perPage === 15) {
+              const splitIndex = (perPage === 15) ? 8 : 5;
+              const col1 = data.clientes.slice(0, splitIndex);
+              const col2 = data.clientes.slice(splitIndex);
+
+              lista.innerHTML = `
+                <div class="row g-2 w-100 m-0">
+                  <div class="col-12 col-md-6 px-1">
+                    <div class="d-flex flex-column">
+                      ${col1.map(renderClientItem).join('')}
+                    </div>
+                  </div>
+                  <div class="col-12 col-md-6 px-1">
+                    <div class="d-flex flex-column">
+                      ${col2.map(renderClientItem).join('')}
+                    </div>
+                  </div>
+                </div>`;
+            } else {
+              lista.innerHTML = `<div class="d-flex flex-column w-100">${data.clientes.map(renderClientItem).join('')}</div>`;
+            }
 
             // Scroll interno suave arriba al paginar
             lista.scrollTop = 0;

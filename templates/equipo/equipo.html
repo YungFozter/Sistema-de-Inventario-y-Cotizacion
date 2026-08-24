@@ -280,14 +280,22 @@
 <!-- Modal Nueva Tarea (Solo Admin/Superadmin) -->
 {% if session.user_rol in ['admin', 'superadmin'] %}
 <div class="modal fade" id="modalNuevaTarea" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header bg-primary text-white">
-                <h5 class="modal-title fw-bold"><i class="bi bi-plus-circle me-2"></i>Crear Tarea para el Equipo</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content" style="border-radius: 24px; border: 1.5px solid rgba(0,0,0,0.08); overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.2);">
+            <div class="modal-header" style="background: #141414; color: #fff; border: none; padding: 1.25rem 1.75rem;">
+                <div class="d-flex align-items-center gap-3">
+                    <div style="width: 40px; height: 40px; border-radius: 12px; background: rgba(255,107,53,0.18); color: #FF6B35; display: flex; align-items: center; justify-content: center; font-size: 1.25rem;">
+                        <i class="bi bi-plus-circle"></i>
+                    </div>
+                    <div>
+                        <h5 class="modal-title fw-bold text-white mb-0" style="font-size: 1.15rem;">Crear Tarea para el Equipo</h5>
+                        <div style="font-size: 0.75rem; color: rgba(255,255,255,0.65);">Asigna actividades y establece prioridades</div>
+                    </div>
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
             </div>
             <form action="{{ url_for('crear_tarea') }}" method="POST">
-                <div class="modal-body">
+                <div class="modal-body" style="padding: 1.75rem; background: #FAFAFA;">
                     <div class="mb-3">
                         <label for="titulo" class="form-label fw-bold">Título de la Tarea <span class="text-danger">*</span></label>
                         <input type="text" class="form-control" id="titulo" name="titulo" placeholder="Ej: Contar inventario de cables" required>
@@ -318,7 +326,7 @@
                         </div>
                     </div>
 
-                    <div class="card bg-light border-0 p-3 mb-2">
+                    <div class="card bg-white border p-3 mb-2 rounded-3 shadow-xs">
                         <h6 class="fw-bold text-danger mb-2"><i class="bi bi-clock-history me-1"></i>Fecha y Hora Límite (Opcional)</h6>
                         <div class="row">
                             <div class="col-md-6 mb-2">
@@ -333,9 +341,9 @@
                         </div>
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-primary fw-bold"><i class="bi bi-save me-1"></i> Asignar Tarea</button>
+                <div class="modal-footer" style="background: #FFFFFF; border-top: 1px solid rgba(0,0,0,0.06); padding: 1rem 1.75rem;">
+                    <button type="button" class="btn btn-secondary rounded-pill px-3" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary rounded-pill px-4 fw-bold"><i class="bi bi-save me-1"></i> Asignar Tarea</button>
                 </div>
             </form>
         </div>
@@ -344,33 +352,37 @@
 
 <!-- Modal Invitar por WhatsApp -->
 <div class="modal fade" id="modalWhatsApp" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header bg-success text-white">
-                <h5 class="modal-title fw-bold"><i class="bi bi-whatsapp me-2"></i>Invitar Empleado por WhatsApp</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius: 24px; border: 1.5px solid rgba(0,0,0,0.08); overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.2);">
+            <div class="modal-header" style="background: #141414; color: #fff; border: none; padding: 1.25rem 1.75rem;">
+                <div class="d-flex align-items-center gap-3">
+                    <div style="width: 40px; height: 40px; border-radius: 12px; background: rgba(37,211,102,0.18); color: #25D366; display: flex; align-items: center; justify-content: center; font-size: 1.25rem;">
+                        <i class="bi bi-whatsapp"></i>
+                    </div>
+                    <div>
+                        <h5 class="modal-title fw-bold text-white mb-0" style="font-size: 1.15rem;">Invitar por WhatsApp</h5>
+                        <div style="font-size: 0.75rem; color: rgba(255,255,255,0.65);">Envía una invitación directa a tu empleado</div>
+                    </div>
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
             </div>
-            <div class="modal-body">
+            <div class="modal-body" style="padding: 1.75rem; background: #FAFAFA;">
                 <div class="mb-3">
                     <label for="wa-telefono" class="form-label fw-bold">Número de Teléfono del Empleado <span class="text-danger">*</span></label>
                     <input type="tel" class="form-control" id="wa-telefono" placeholder="Ej: 59170000000 o 70000000" required>
                     <small class="form-text text-muted">Ingresa el número con el código de país o directo.</small>
                 </div>
                 <div class="mb-3">
-                    <label for="wa-expiracion" class="form-label fw-bold">Validez del Enlace</label>
-                    <select class="form-select" id="wa-expiracion">
-                        <option value="uso_unico" selected>Uso Único (Caduca al usar 1 vez)</option>
-                        <option value="1_dia">1 Día</option>
-                        <option value="1_semana">1 Semana</option>
-                        <option value="1_mes">1 Mes</option>
-                        <option value="3_meses">3 Meses</option>
-                        <option value="6_meses">6 Meses</option>
+                    <label for="wa-expiracion" class="form-label fw-bold small text-dark"><i class="bi bi-shield-check me-1 text-success"></i>Validez del Enlace</label>
+                    <select class="form-select fw-semibold" id="wa-expiracion">
+                        <option value="uso_unico" selected>Uso Único (1 Solo uso)</option>
                     </select>
+                    <small class="text-muted extra-small d-block mt-1"><i class="bi bi-info-circle me-1"></i>El enlace caduca automáticamente al ser utilizado por primera vez.</small>
                 </div>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                <button type="button" class="btn btn-success fw-bold" onclick="generarYEnviarWhatsApp()">
+            <div class="modal-footer" style="background: #FFFFFF; border-top: 1px solid rgba(0,0,0,0.06); padding: 1rem 1.75rem;">
+                <button type="button" class="btn btn-secondary rounded-pill px-3" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-success rounded-pill px-4 fw-bold" onclick="generarYEnviarWhatsApp()">
                     <i class="bi bi-send-fill me-1"></i> Abrir WhatsApp
                 </button>
             </div>
@@ -380,41 +392,45 @@
 
 <!-- Modal Generar Código QR -->
 <div class="modal fade" id="modalQR" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog text-center">
-        <div class="modal-content">
-            <div class="modal-header bg-dark text-white">
-                <h5 class="modal-title fw-bold"><i class="bi bi-qr-code me-2"></i>Código QR de Invitación al Equipo</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+    <div class="modal-dialog modal-dialog-centered text-center">
+        <div class="modal-content" style="border-radius: 24px; border: 1.5px solid rgba(0,0,0,0.08); overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.2);">
+            <div class="modal-header" style="background: #141414; color: #fff; border: none; padding: 1.25rem 1.75rem;">
+                <div class="d-flex align-items-center gap-3">
+                    <div style="width: 40px; height: 40px; border-radius: 12px; background: rgba(255,107,53,0.18); color: #FF6B35; display: flex; align-items: center; justify-content: center; font-size: 1.25rem;">
+                        <i class="bi bi-qr-code"></i>
+                    </div>
+                    <div class="text-start">
+                        <h5 class="modal-title fw-bold text-white mb-0" style="font-size: 1.15rem;">Código QR de Invitación al Equipo</h5>
+                        <div style="font-size: 0.75rem; color: rgba(255,255,255,0.65);">Acceso seguro y exclusivo para nuevos miembros</div>
+                    </div>
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
             </div>
-            <div class="modal-body">
+            <div class="modal-body" style="padding: 1.75rem; background: #FAFAFA;">
                 <div class="mb-3 text-start">
-                    <label for="qr-expiracion" class="form-label fw-bold">Validez del Código QR</label>
-                    <select class="form-select" id="qr-expiracion" onchange="generarQRModal()">
-                        <option value="uso_unico">Uso Único (1 Solo uso)</option>
-                        <option value="1_dia">1 Día</option>
-                        <option value="1_semana" selected>1 Semana</option>
-                        <option value="1_mes">1 Mes</option>
-                        <option value="3_meses">3 Meses</option>
-                        <option value="6_meses">6 Meses</option>
+                    <label for="qr-expiracion" class="form-label fw-bold small text-dark"><i class="bi bi-shield-check me-1 text-primary"></i>Validez del Código QR</label>
+                    <select class="form-select fw-semibold" id="qr-expiracion" onchange="generarQRModal()">
+                        <option value="uso_unico" selected>Uso Único (1 Solo uso)</option>
                     </select>
+                    <small class="text-muted extra-small d-block mt-1"><i class="bi bi-info-circle me-1"></i>El código QR es exclusivo de un solo uso y se invalida automáticamente tras ser utilizado.</small>
                 </div>
 
-                <div class="my-4 d-flex justify-content-center">
-                    <div id="qr-code-container" class="p-3 bg-white border rounded-3 shadow-sm"></div>
+                <div class="my-3 d-flex justify-content-center">
+                    <div id="qr-code-container" class="p-3 bg-white border rounded-4 shadow-sm" style="display: inline-block;"></div>
                 </div>
 
-                <div class="input-group mb-3">
-                    <input type="text" class="form-control text-center" id="qr-link-text" readonly>
+                <div class="input-group mb-2">
+                    <input type="text" class="form-control text-center bg-white small" id="qr-link-text" readonly style="font-size: 0.85rem;">
                 </div>
             </div>
-            <div class="modal-footer justify-content-center flex-wrap gap-2">
-                <button type="button" class="btn btn-outline-primary" onclick="copiarLinkQR()">
+            <div class="modal-footer justify-content-center flex-wrap gap-2" style="background: #FFFFFF; border-top: 1px solid rgba(0,0,0,0.06); padding: 1rem 1.5rem;">
+                <button type="button" class="btn btn-outline-secondary rounded-pill px-3 py-1.5 small fw-bold" onclick="copiarLinkQR()">
                     <i class="bi bi-clipboard me-1"></i> Copiar Enlace
                 </button>
-                <button type="button" class="btn btn-primary" onclick="descargarImagenQR()">
-                    <i class="bi bi-download me-1"></i> Descargar QR (PNG)
+                <button type="button" class="btn btn-dark rounded-pill px-3 py-1.5 small fw-bold" onclick="descargarImagenQR()">
+                    <i class="bi bi-download me-1"></i> Descargar QR
                 </button>
-                <button type="button" class="btn btn-success" onclick="compartirQRWhatsApp()">
+                <button type="button" class="btn btn-success rounded-pill px-3 py-1.5 small fw-bold" onclick="compartirQRWhatsApp()">
                     <i class="bi bi-whatsapp me-1"></i> Compartir
                 </button>
             </div>
@@ -481,7 +497,7 @@ function generarQRModal() {
                 text: data.link_invitacion,
                 width: 200,
                 height: 200,
-                colorDark : "#0d6efd",
+                colorDark : "#141414",
                 colorLight : "#ffffff",
                 correctLevel : QRCode.CorrectLevel.H
             });

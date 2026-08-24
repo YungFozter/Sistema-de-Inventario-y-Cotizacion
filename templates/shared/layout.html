@@ -883,6 +883,59 @@
       position: relative;
       z-index: 1;
     }
+
+    @media (max-width: 768px) {
+      .clay-footer {
+        padding: 2rem 1rem 1.5rem;
+        text-align: center;
+      }
+
+      .clay-footer-inner {
+        flex-direction: column !important;
+        justify-content: center !important;
+        align-items: center !important;
+        text-align: center !important;
+        gap: 1.25rem;
+      }
+
+      .clay-footer-brand-block {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        width: 100%;
+      }
+
+      .clay-footer-brand {
+        justify-content: center !important;
+        margin: 0 auto;
+      }
+
+      .clay-footer-tagline {
+        text-align: center !important;
+        margin-top: 5px;
+        line-height: 1.4;
+      }
+
+      .clay-footer-links {
+        justify-content: center !important;
+        align-items: center !important;
+        gap: 8px;
+        width: 100%;
+      }
+
+      .clay-footer-link {
+        padding: 6px 14px;
+        font-size: 0.84rem;
+      }
+
+      .clay-footer-copy {
+        margin-top: 1.25rem;
+        padding-top: 1rem;
+        font-size: 0.76rem;
+        line-height: 1.5;
+      }
+    }
   </style>
 
   {% block styles %}
@@ -1352,7 +1405,7 @@
     <div class="container" style="max-width: 1280px;">
       <div class="clay-footer-inner">
         <!-- Marca izquierda -->
-        <div>
+        <div class="clay-footer-brand-block">
           <a href="{% if 'user_id' in session %}{% if session.get('user_rol') == 'admin' %}{{ url_for('dashboard') }}{% elif session.get('user_rol') == 'standard' %}{{ url_for('standard_dashboard') }}{% else %}{{ url_for('index') }}{% endif %}{% else %}{{ url_for('index') }}{% endif %}"
             class="clay-footer-brand">
             <span class="clay-footer-brand-dot"></span>

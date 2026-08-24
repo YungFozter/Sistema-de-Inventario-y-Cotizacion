@@ -77,170 +77,190 @@ def register_routes(app):
             conexion = get_db_connection()
             conexion.row_factory = sqlite3.Row  # Para acceder a columnas por nombre
             cursor = conexion.cursor()
-        
-            # Obtener todas las categorías
-            cursor.execute("SELECT id, nombre FROM categorias WHERE activo = 1 ORDER BY nombre")
-            categorias = cursor.fetchall()
 
-            # Obtener parámetros de filtro
-            cliente = request.args.get('cliente', '')
-            codigo_cliente = request.args.get('codigo_cliente', '')
-            desde = request.args.get('desde', '')
-            hasta = request.args.get('hasta', '')
+            try:
+                # Obtener todas las categorías
+                cursor.execute("SELECT id, nombre FROM categorias WHERE activo = 1 ORDER BY nombre")
+                categorias = cursor.fetchall()
 
-            # Paginación de clientes para el dropdown
-            clientes_per_page = 5
-            page_cliente = int(request.args.get('page_cliente', 1))
-            offset_cliente = (page_cliente - 1) * clientes_per_page
-            if session.get('user_rol') == 'superadmin':
-                cursor.execute("SELECT COUNT(*) FROM clientes WHERE rol = 'cliente'")
-                total_clientes = cursor.fetchone()[0]
-                cursor.execute("SELECT * FROM clientes WHERE rol = 'cliente' ORDER BY nombre LIMIT ? OFFSET ?", 
-                               (clientes_per_page, offset_cliente))
-            else:
-                admin_owner_id = session.get('creador_id') or session.get('user_id')
-                cursor.execute("SELECT COUNT(*) FROM clientes WHERE (creador_id = ? OR creador_id = ?) AND rol = 'cliente'", 
-                               (admin_owner_id, session['user_id']))
-                total_clientes = cursor.fetchone()[0]
-                cursor.execute("SELECT * FROM clientes WHERE (creador_id = ? OR creador_id = ?) AND rol = 'cliente' ORDER BY nombre LIMIT ? OFFSET ?", 
-                               (admin_owner_id, session['user_id'], clientes_per_page, offset_cliente))
-        clientes = cursor.fetchall()
-        total_pages_clientes = (total_clientes + clientes_per_page - 1) // clientes_per_page
+                # Obtener parámetros de filtro
+                cliente = request.args.get('cliente', '')
+                codigo_cliente = request.args.get('codigo_cliente', '')
+                desde = request.args.get('desde', '')
+                hasta = request.args.get('hasta', '')
 
-        # Paginación de productos para el catálogo
-        per_page_param = request.args.get('per_page', '15')
-        try:
-            if per_page_param == 'todos':
-                productos_per_page = 999999
-            else:
-                productos_per_page = int(per_page_param)
-        except ValueError:
-            productos_per_page = 15
+                # Paginación de clientes para el dropdown
+                clientes_per_page = 5
+                try:
+                    page_cliente = int(request.args.get('page_cliente', 1))
+                except (ValueError, TypeError):
+                    page_cliente = 1
+                offset_cliente = (page_cliente - 1) * clientes_per_page
 
-        user_id = session.get('user_id')
-        user_rol = session.get('user_rol')
-        admin_owner_id = session.get('creador_id') or user_id
+                user_id = session.get('user_id')
+                user_rol = session.get('user_rol')
+                admin_owner_id = session.get('creador_id') or user_id
 
-        if user_rol == 'superadmin':
-            cursor.execute("SELECT COUNT(*) FROM productos WHERE (es_importado IS NULL OR es_importado = 0) AND (activo IS TRUE OR activo = 1 OR activo IS NULL)")
-            total_registrados = cursor.fetchone()[0]
+                if user_rol == 'superadmin':
+                    cursor.execute("SELECT COUNT(*) FROM clientes WHERE rol = 'cliente'")
+                    total_clientes = cursor.fetchone()[0]
+                    cursor.execute("SELECT * FROM clientes WHERE rol = 'cliente' ORDER BY nombre LIMIT ? OFFSET ?", 
+                                   (clientes_per_page, offset_cliente))
+                else:
+                    cursor.execute("SELECT COUNT(*) FROM clientes WHERE (creador_id = ? OR creador_id = ?) AND rol = 'cliente'", 
+                                   (admin_owner_id, user_id))
+                    total_clientes = cursor.fetchone()[0]
+                    cursor.execute("SELECT * FROM clientes WHERE (creador_id = ? OR creador_id = ?) AND rol = 'cliente' ORDER BY nombre LIMIT ? OFFSET ?", 
+                                   (admin_owner_id, user_id, clientes_per_page, offset_cliente))
+                clientes = cursor.fetchall()
+                total_pages_clientes = max(1, (total_clientes + clientes_per_page - 1) // clientes_per_page)
 
-            cursor.execute("SELECT COUNT(*) FROM productos WHERE es_importado = 1 AND (activo IS TRUE OR activo = 1 OR activo IS NULL)")
-            total_importados = cursor.fetchone()[0]
+                # Paginación de productos para el catálogo
+                tipo_producto = request.args.get('tipo_producto', 'registrados')
+                per_page_param = request.args.get('per_page', '15')
+                try:
+                    if per_page_param == 'todos':
+                        productos_per_page = 999999
+                    else:
+                        productos_per_page = int(per_page_param)
+                except (ValueError, TypeError):
+                    productos_per_page = 15
 
-            if tipo_producto == 'importados':
-                cursor.execute("SELECT * FROM productos WHERE es_importado = 1 AND (activo IS TRUE OR activo = 1 OR activo IS NULL) ORDER BY empresa, codigo LIMIT ? OFFSET ?", (productos_per_page, offset_producto))
-                total_productos = total_importados
-            else:
-                cursor.execute("SELECT * FROM productos WHERE (es_importado IS NULL OR es_importado = 0) AND (activo IS TRUE OR activo = 1 OR activo IS NULL) ORDER BY empresa, codigo LIMIT ? OFFSET ?", (productos_per_page, offset_producto))
-                total_productos = total_registrados
-        else:
-            cursor.execute("SELECT empresa_nombre, nombre FROM clientes WHERE id = ?", (admin_owner_id,))
-            u_row = cursor.fetchone()
-            emp_nom = u_row[0] or u_row[1] or 'General' if u_row else 'General'
-            tenant_prod_cond = " AND (creador_id = ? OR creador_id = ? OR empresa = ? OR empresa = 'General' OR creador_id IS NULL) AND (activo IS TRUE OR activo = 1 OR activo IS NULL)"
-            tenant_params = [user_id, admin_owner_id, emp_nom]
+                try:
+                    page_producto = int(request.args.get('page_producto', 1))
+                except (ValueError, TypeError):
+                    page_producto = 1
+                offset_producto = (page_producto - 1) * productos_per_page
 
-            cursor.execute("SELECT COUNT(*) FROM productos WHERE (es_importado IS NULL OR es_importado = 0)" + tenant_prod_cond, tenant_params)
-            total_registrados = cursor.fetchone()[0]
+                if user_rol == 'superadmin':
+                    cursor.execute("SELECT COUNT(*) FROM productos WHERE (es_importado IS NULL OR es_importado = 0) AND (activo IS TRUE OR activo = 1 OR activo IS NULL)")
+                    total_registrados = cursor.fetchone()[0]
 
-            cursor.execute("SELECT COUNT(*) FROM productos WHERE es_importado = 1" + tenant_prod_cond, tenant_params)
-            total_importados = cursor.fetchone()[0]
+                    cursor.execute("SELECT COUNT(*) FROM productos WHERE es_importado = 1 AND (activo IS TRUE OR activo = 1 OR activo IS NULL)")
+                    total_importados = cursor.fetchone()[0]
 
-            if tipo_producto == 'importados':
-                cursor.execute("SELECT * FROM productos WHERE es_importado = 1" + tenant_prod_cond + " ORDER BY empresa, codigo LIMIT ? OFFSET ?", tenant_params + [productos_per_page, offset_producto])
-                total_productos = total_importados
-            else:
-                cursor.execute("SELECT * FROM productos WHERE (es_importado IS NULL OR es_importado = 0)" + tenant_prod_cond + " ORDER BY empresa, codigo LIMIT ? OFFSET ?", tenant_params + [productos_per_page, offset_producto])
-                total_productos = total_registrados
+                    if tipo_producto == 'importados':
+                        cursor.execute("SELECT * FROM productos WHERE es_importado = 1 AND (activo IS TRUE OR activo = 1 OR activo IS NULL) ORDER BY empresa, codigo LIMIT ? OFFSET ?", (productos_per_page, offset_producto))
+                        total_productos = total_importados
+                    else:
+                        cursor.execute("SELECT * FROM productos WHERE (es_importado IS NULL OR es_importado = 0) AND (activo IS TRUE OR activo = 1 OR activo IS NULL) ORDER BY empresa, codigo LIMIT ? OFFSET ?", (productos_per_page, offset_producto))
+                        total_productos = total_registrados
+                else:
+                    cursor.execute("SELECT empresa_nombre, nombre FROM clientes WHERE id = ?", (admin_owner_id,))
+                    u_row = cursor.fetchone()
+                    emp_nom = (u_row[0] or u_row[1] or 'General') if u_row else 'General'
+                    tenant_prod_cond = " AND (creador_id = ? OR creador_id = ? OR empresa = ? OR empresa = 'General' OR creador_id IS NULL) AND (activo IS TRUE OR activo = 1 OR activo IS NULL)"
+                    tenant_params = [user_id, admin_owner_id, emp_nom]
 
-        productos = cursor.fetchall()
-        total_pages_productos = max(1, (total_productos + productos_per_page - 1) // productos_per_page) if productos_per_page < 999999 else 1
+                    cursor.execute("SELECT COUNT(*) FROM productos WHERE (es_importado IS NULL OR es_importado = 0)" + tenant_prod_cond, tenant_params)
+                    total_registrados = cursor.fetchone()[0]
 
-        # Si es una solicitud AJAX, devolver solo la tabla de productos y paginación
-        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-            return jsonify({
-                'productos': [{
-                    'id': p[0],
-                    'empresa': p[1],
-                    'codigo': p[2],
-                    'descripcion': p[3],
-                    'marca': p[4],
-                    'um': p[6],
-                    'cantidad': p[7],
-                    'precio_unitario': float(p[8]),
-                    'cantidad_total': p[7] if session.get('user_rol') == 'superadmin' else None
-                } for p in productos],
-                'page_producto': page_producto,
-                'total_pages_productos': total_pages_productos,
-                'total_productos': total_productos
-            })
+                    cursor.execute("SELECT COUNT(*) FROM productos WHERE es_importado = 1" + tenant_prod_cond, tenant_params)
+                    total_importados = cursor.fetchone()[0]
 
-        # Paginación de cotizaciones registradas
-        cotizaciones_per_page = 5
-        page_cotizacion = int(request.args.get('page_cotizacion', 1))
-        offset_cotizacion = (page_cotizacion - 1) * cotizaciones_per_page
+                    if tipo_producto == 'importados':
+                        cursor.execute("SELECT * FROM productos WHERE es_importado = 1" + tenant_prod_cond + " ORDER BY empresa, codigo LIMIT ? OFFSET ?", tenant_params + [productos_per_page, offset_producto])
+                        total_productos = total_importados
+                    else:
+                        cursor.execute("SELECT * FROM productos WHERE (es_importado IS NULL OR es_importado = 0)" + tenant_prod_cond + " ORDER BY empresa, codigo LIMIT ? OFFSET ?", tenant_params + [productos_per_page, offset_producto])
+                        total_productos = total_registrados
 
-        if session.get('user_rol') == 'superadmin':
-            cursor.execute('SELECT COUNT(*) FROM cotizaciones')
-            total_cotizaciones = cursor.fetchone()[0]
-            query = '''
-                SELECT c.id, c.fecha, c.total, c.estado, cli.nombre, cli.codigo_cliente
-                FROM cotizaciones c
-                JOIN clientes cli ON c.cliente_id = cli.id
-                ORDER BY c.fecha DESC
-                LIMIT ? OFFSET ?
-            '''
-            params = [cotizaciones_per_page, offset_cotizacion]
-        else:
-            cursor.execute('SELECT COUNT(*) FROM cotizaciones WHERE creador_id = ?', (session['user_id'],))
-            total_cotizaciones = cursor.fetchone()[0]
-            query = '''
-                SELECT c.id, c.fecha, c.total, c.estado, cli.nombre, cli.codigo_cliente
-                FROM cotizaciones c
-                JOIN clientes cli ON c.cliente_id = cli.id
-                WHERE c.creador_id = ?
-                ORDER BY c.fecha DESC
-                LIMIT ? OFFSET ?
-            '''
-            params = [session['user_id'], cotizaciones_per_page, offset_cotizacion]
+                productos = cursor.fetchall()
+                total_pages_productos = max(1, (total_productos + productos_per_page - 1) // productos_per_page) if productos_per_page < 999999 else 1
 
-        cursor.execute(query, params)
-        cotizaciones = cursor.fetchall()
-        total_pages_cotizaciones = (total_cotizaciones + cotizaciones_per_page - 1) // cotizaciones_per_page
-        conexion.close()
+                # Si es una solicitud AJAX, devolver solo la tabla de productos y paginación
+                if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                    return jsonify({
+                        'productos': [{
+                            'id': p['id'] if hasattr(p, 'keys') else p[0],
+                            'empresa': p['empresa'] if hasattr(p, 'keys') else p[1],
+                            'codigo': p['codigo'] if hasattr(p, 'keys') else p[2],
+                            'descripcion': p['descripcion'] if hasattr(p, 'keys') else p[3],
+                            'marca': p['marca'] if hasattr(p, 'keys') else p[4],
+                            'um': p['um'] if hasattr(p, 'keys') else p[6],
+                            'cantidad': p['cantidad'] if hasattr(p, 'keys') else p[7],
+                            'precio_unitario': float(p['precio_unitario'] if hasattr(p, 'keys') else p[8]),
+                            'cantidad_total': (p['cantidad'] if hasattr(p, 'keys') else p[7]) if session.get('user_rol') == 'superadmin' else None
+                        } for p in productos],
+                        'page_producto': page_producto,
+                        'total_pages_productos': total_pages_productos,
+                        'total_productos': total_productos
+                    })
 
-        return render_template(
-            'cotizaciones/cotizaciones.html',
-            categorias=categorias,
-            clientes=clientes,
-            productos=productos,
-            cotizaciones=cotizaciones,
-            filtros={
-                'cliente': cliente,
-                'codigo_cliente': codigo_cliente,
-                'desde': desde,
-                'hasta': hasta
-            },
-            pagination={
-                'page_cliente': page_cliente,
-                'total_pages_clientes': total_pages_clientes,
-                'page_producto': page_producto,
-                'total_pages_productos': total_pages_productos,
-                'page_cotizacion': page_cotizacion,
-                'total_pages_cotizaciones': total_pages_cotizaciones
-            },
-            page_cliente=page_cliente,
-            total_pages_clientes=total_pages_clientes,
-            page_producto=page_producto,
-            total_pages_productos=total_pages_productos,
-            page_cotizacion=page_cotizacion,
-            total_pages_cotizaciones=total_pages_cotizaciones,
-            per_page=per_page_param,
-            total_productos=total_productos,
-            total_registrados=total_registrados,
-            total_importados=total_importados,
-            tipo_producto=tipo_producto)
+                # Paginación de cotizaciones registradas
+                cotizaciones_per_page = 5
+                try:
+                    page_cotizacion = int(request.args.get('page_cotizacion', 1))
+                except (ValueError, TypeError):
+                    page_cotizacion = 1
+                offset_cotizacion = (page_cotizacion - 1) * cotizaciones_per_page
+
+                if session.get('user_rol') == 'superadmin':
+                    cursor.execute('SELECT COUNT(*) FROM cotizaciones')
+                    total_cotizaciones = cursor.fetchone()[0]
+                    query = '''
+                        SELECT c.id, c.fecha, c.total, c.estado, cli.nombre, cli.codigo_cliente
+                        FROM cotizaciones c
+                        JOIN clientes cli ON c.cliente_id = cli.id
+                        ORDER BY c.fecha DESC
+                        LIMIT ? OFFSET ?
+                    '''
+                    params = [cotizaciones_per_page, offset_cotizacion]
+                else:
+                    cursor.execute('SELECT COUNT(*) FROM cotizaciones WHERE creador_id = ?', (session['user_id'],))
+                    total_cotizaciones = cursor.fetchone()[0]
+                    query = '''
+                        SELECT c.id, c.fecha, c.total, c.estado, cli.nombre, cli.codigo_cliente
+                        FROM cotizaciones c
+                        JOIN clientes cli ON c.cliente_id = cli.id
+                        WHERE c.creador_id = ?
+                        ORDER BY c.fecha DESC
+                        LIMIT ? OFFSET ?
+                    '''
+                    params = [session['user_id'], cotizaciones_per_page, offset_cotizacion]
+
+                cursor.execute(query, params)
+                cotizaciones = cursor.fetchall()
+                total_pages_cotizaciones = max(1, (total_cotizaciones + cotizaciones_per_page - 1) // cotizaciones_per_page)
+
+                return render_template(
+                    'cotizaciones/cotizaciones.html',
+                    categorias=categorias,
+                    clientes=clientes,
+                    productos=productos,
+                    cotizaciones=cotizaciones,
+                    filtros={
+                        'cliente': cliente,
+                        'codigo_cliente': codigo_cliente,
+                        'desde': desde,
+                        'hasta': hasta
+                    },
+                    pagination={
+                        'page_cliente': page_cliente,
+                        'total_pages_clientes': total_pages_clientes,
+                        'page_producto': page_producto,
+                        'total_pages_productos': total_pages_productos,
+                        'page_cotizacion': page_cotizacion,
+                        'total_pages_cotizaciones': total_pages_cotizaciones
+                    },
+                    page_cliente=page_cliente,
+                    total_pages_clientes=total_pages_clientes,
+                    page_producto=page_producto,
+                    total_pages_productos=total_pages_productos,
+                    page_cotizacion=page_cotizacion,
+                    total_pages_cotizaciones=total_pages_cotizaciones,
+                    per_page=per_page_param,
+                    total_productos=total_productos,
+                    total_registrados=total_registrados,
+                    total_importados=total_importados,
+                    tipo_producto=tipo_producto)
+
+            except Exception as err:
+                app.logger.error(f"Error en gestion_cotizaciones: {err}")
+                flash(f"Ocurrió un error al cargar la vista de cotizaciones: {str(err)}", "danger")
+                return redirect(url_for('dashboard') if session.get('user_rol') in ['admin', 'superadmin'] else url_for('standard_dashboard'))
+            finally:
+                conexion.close()
 
     def guardar_cotizacion():
         MAX_RETRIES = 3

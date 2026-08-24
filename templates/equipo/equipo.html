@@ -368,9 +368,15 @@
             </div>
             <div class="modal-body" style="padding: 1.75rem; background: #FAFAFA;">
                 <div class="mb-3">
-                    <label for="wa-telefono" class="form-label fw-bold">Número de Teléfono del Empleado <span class="text-danger">*</span></label>
-                    <input type="tel" class="form-control" id="wa-telefono" placeholder="Ej: 59170000000 o 70000000" required>
-                    <small class="form-text text-muted">Ingresa el número con el código de país o directo.</small>
+                    <label for="wa-telefono" class="form-label fw-bold small text-dark"><i class="bi bi-telephone-fill me-1 text-success"></i>Número de Teléfono del Empleado <span class="text-danger">*</span></label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-white border-end-0 text-success fw-bold">
+                            <i class="bi bi-whatsapp"></i>
+                        </span>
+                        <input type="tel" class="form-control border-start-0 ps-1 fw-semibold" id="wa-telefono" placeholder="Ej: 59170000000 o 70000000" required>
+                    </div>
+                    <small class="form-text text-muted extra-small mt-1 d-block">Ingresa el número con el código de país (ej. 591 para Bolivia) o directo si es local.</small>
+                    <div id="wa-error-msg" class="text-danger small mt-1 d-none fw-bold"><i class="bi bi-exclamation-circle me-1"></i>Por favor ingresa un número de teléfono válido.</div>
                 </div>
                 <div class="mb-3">
                     <label for="wa-expiracion" class="form-label fw-bold small text-dark"><i class="bi bi-shield-check me-1 text-success"></i>Validez del Enlace</label>
@@ -382,7 +388,7 @@
             </div>
             <div class="modal-footer" style="background: #FFFFFF; border-top: 1px solid rgba(0,0,0,0.06); padding: 1rem 1.75rem;">
                 <button type="button" class="btn btn-secondary rounded-pill px-3" data-bs-dismiss="modal">Cancelar</button>
-                <button type="button" class="btn btn-success rounded-pill px-4 fw-bold" onclick="generarYEnviarWhatsApp()">
+                <button type="button" class="btn btn-success rounded-pill px-4 fw-bold shadow-sm" onclick="generarYEnviarWhatsApp()">
                     <i class="bi bi-send-fill me-1"></i> Abrir WhatsApp
                 </button>
             </div>
@@ -430,8 +436,57 @@
                 <button type="button" class="btn btn-dark rounded-pill px-3 py-1.5 small fw-bold" onclick="descargarImagenQR()">
                     <i class="bi bi-download me-1"></i> Descargar QR
                 </button>
-                <button type="button" class="btn btn-success rounded-pill px-3 py-1.5 small fw-bold" onclick="compartirQRWhatsApp()">
+                <button type="button" class="btn btn-success rounded-pill px-3 py-1.5 small fw-bold shadow-sm" onclick="compartirQRWhatsApp()">
                     <i class="bi bi-whatsapp me-1"></i> Compartir
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Compartir Enlace/QR por WhatsApp (Reemplaza al prompt) -->
+<div class="modal fade" id="modalCompartirWhatsApp" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius: 24px; border: 1.5px solid rgba(0,0,0,0.08); overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.2);">
+            <div class="modal-header" style="background: #141414; color: #fff; border: none; padding: 1.25rem 1.75rem;">
+                <div class="d-flex align-items-center gap-3">
+                    <div style="width: 40px; height: 40px; border-radius: 12px; background: rgba(37,211,102,0.18); color: #25D366; display: flex; align-items: center; justify-content: center; font-size: 1.25rem;">
+                        <i class="bi bi-whatsapp"></i>
+                    </div>
+                    <div>
+                        <h5 class="modal-title fw-bold text-white mb-0" style="font-size: 1.15rem;">Enviar Invitación por WhatsApp</h5>
+                        <div style="font-size: 0.75rem; color: rgba(255,255,255,0.65);">Envía el enlace directo a tu empleado</div>
+                    </div>
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body" style="padding: 1.75rem; background: #FAFAFA;">
+                <div class="mb-3">
+                    <label for="share-wa-telefono" class="form-label fw-bold small text-dark"><i class="bi bi-telephone-fill me-1 text-success"></i>Número de Teléfono del Empleado <span class="text-danger">*</span></label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-white border-end-0 text-success fw-bold">
+                            <i class="bi bi-whatsapp"></i>
+                        </span>
+                        <input type="tel" class="form-control border-start-0 ps-1 fw-semibold" id="share-wa-telefono" placeholder="Ej: 59170000000 o 70000000" autofocus>
+                    </div>
+                    <small class="form-text text-muted extra-small mt-1 d-block">Ingresa el número con el código de país (ej. 591 para Bolivia) o directo si es local.</small>
+                    <div id="share-wa-error-msg" class="text-danger small mt-1 d-none fw-bold"><i class="bi bi-exclamation-circle me-1"></i>Por favor ingresa un número de teléfono válido.</div>
+                </div>
+
+                <div class="p-3 bg-white border rounded-3 shadow-2xs mb-1">
+                    <div class="d-flex align-items-center gap-2 mb-1">
+                        <i class="bi bi-chat-quote-fill text-success"></i>
+                        <span class="small fw-bold text-dark">Mensaje que se enviará:</span>
+                    </div>
+                    <p class="small text-muted mb-0 fst-italic" style="font-size: 0.82rem; word-break: break-all;" id="share-wa-preview-text">
+                        "¡Hola! Te invito a unirte a nuestro equipo de trabajo en la plataforma. Abre este enlace para registrarte: ..."
+                    </p>
+                </div>
+            </div>
+            <div class="modal-footer" style="background: #FFFFFF; border-top: 1px solid rgba(0,0,0,0.06); padding: 1rem 1.75rem;">
+                <button type="button" class="btn btn-secondary rounded-pill px-3" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-success rounded-pill px-4 fw-bold shadow-sm" onclick="ejecutarEnvioWhatsAppModal()">
+                    <i class="bi bi-send-fill me-1"></i> Abrir WhatsApp
                 </button>
             </div>
         </div>
@@ -450,12 +505,17 @@ document.addEventListener('DOMContentLoaded', function() {
 let currentQRLink = "";
 
 function generarYEnviarWhatsApp() {
-    const tel = document.getElementById('wa-telefono').value.trim();
+    const inputTel = document.getElementById('wa-telefono');
+    const errorMsg = document.getElementById('wa-error-msg');
+    const tel = inputTel.value.trim();
     const exp = document.getElementById('wa-expiracion').value;
+    
     if (!tel) {
-        alert('Por favor ingresa un número de teléfono válido.');
+        if (errorMsg) errorMsg.classList.remove('d-none');
+        inputTel.focus();
         return;
     }
+    if (errorMsg) errorMsg.classList.add('d-none');
 
     const cleanTel = tel.replace(/[^0-9]/g, '');
 
@@ -467,7 +527,7 @@ function generarYEnviarWhatsApp() {
     .then(res => res.json())
     .then(data => {
         if (data.success) {
-            const mensajeWa = `Hola! Te invito a unirte a nuestro equipo de trabajo en el sistema de cotizaciones. Haz clic en el enlace para ingresar: ${data.link_invitacion}`;
+            const mensajeWa = `¡Hola! Te invito a unirte a nuestro equipo de trabajo en la plataforma. Abre este enlace para registrarte: ${data.link_invitacion}`;
             const waUrl = `https://wa.me/${cleanTel}?text=${encodeURIComponent(mensajeWa)}`;
             window.open(waUrl, '_blank');
             bootstrap.Modal.getInstance(document.getElementById('modalWhatsApp')).hide();
@@ -525,11 +585,32 @@ function descargarImagenQR() {
 
 function compartirQRWhatsApp() {
     if (!currentQRLink) return;
-    const tel = prompt('Ingresa el número de WhatsApp al que deseas enviar la invitación:');
-    if (!tel) return;
+    const errorMsg = document.getElementById('share-wa-error-msg');
+    if (errorMsg) errorMsg.classList.add('d-none');
+    document.getElementById('share-wa-preview-text').textContent = `¡Hola! Te invito a unirte a nuestro equipo de trabajo en la plataforma. Abre este enlace para registrarte: ${currentQRLink}`;
+    document.getElementById('share-wa-telefono').value = '';
+    
+    const shareModal = new bootstrap.Modal(document.getElementById('modalCompartirWhatsApp'));
+    shareModal.show();
+}
+
+function ejecutarEnvioWhatsAppModal() {
+    const inputTel = document.getElementById('share-wa-telefono');
+    const errorMsg = document.getElementById('share-wa-error-msg');
+    const tel = inputTel.value.trim();
+    
+    if (!tel) {
+        if (errorMsg) errorMsg.classList.remove('d-none');
+        inputTel.focus();
+        return;
+    }
+    if (errorMsg) errorMsg.classList.add('d-none');
+
     const cleanTel = tel.replace(/[^0-9]/g, '');
-    const mensajeWa = `Hola! Te invito a unirte a nuestro equipo de trabajo en la plataforma. Abre este enlace: ${currentQRLink}`;
-    window.open(`https://wa.me/${cleanTel}?text=${encodeURIComponent(mensajeWa)}`, '_blank');
+    const mensajeWa = `¡Hola! Te invito a unirte a nuestro equipo de trabajo en la plataforma. Abre este enlace para registrarte: ${currentQRLink}`;
+    const waUrl = `https://wa.me/${cleanTel}?text=${encodeURIComponent(mensajeWa)}`;
+    window.open(waUrl, '_blank');
+    bootstrap.Modal.getInstance(document.getElementById('modalCompartirWhatsApp')).hide();
 }
 
 function aprobarSolicitud(id) {

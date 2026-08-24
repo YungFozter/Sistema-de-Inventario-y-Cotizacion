@@ -1,4 +1,4 @@
-// Validación de formulario y botón Validar NIT
+// Validación de formulario y validación automática de NIT en segundo plano
 
 document.addEventListener('DOMContentLoaded', function() {
     const form = document.getElementById('clienteForm');
@@ -18,39 +18,52 @@ document.addEventListener('DOMContentLoaded', function() {
         }, false);
     }
 
-    const btnValidarNit = document.getElementById('btnValidarNit');
     const nitInput = document.querySelector('input[name="nit"]');
 
-    if (btnValidarNit && nitInput) {
-        btnValidarNit.addEventListener('click', function() {
-            const nit = nitInput.value.trim();
+    if (nitInput) {
+        let debounceTimer;
 
-            let feedbackEl = document.getElementById('nitFeedbackMsg');
-            if (!feedbackEl) {
-                feedbackEl = document.createElement('div');
-                feedbackEl.id = 'nitFeedbackMsg';
-                feedbackEl.className = 'mt-2 small fw-bold';
-                const parentBox = nitInput.closest('.bento-clay-box') || nitInput.closest('.col-md-6') || nitInput.parentElement.parentElement;
-                parentBox.appendChild(feedbackEl);
+        function validarNitAutomatico() {
+            const nit = nitInput.value.trim();
+            const feedbackEl = document.getElementById('nitFeedbackMsg');
+
+            // Si está vacío o es S/A, limpiar avisos
+            if (!nit || nit.toUpperCase() === 'S/A' || nit.toUpperCase() === 'S/N') {
+                if (feedbackEl) {
+                    feedbackEl.className = 'small mt-1 ps-1 d-none';
+                    feedbackEl.innerHTML = '';
+                }
+                return;
             }
 
             fetch('/api/validar-nit?nit=' + encodeURIComponent(nit))
                 .then(response => response.json())
                 .then(data => {
+                    if (!feedbackEl) return;
+
                     if (data.vacio) {
-                        feedbackEl.className = 'mt-2 small text-info fw-bold';
-                        feedbackEl.innerHTML = '<i class="bi bi-info-circle"></i> ' + data.mensaje;
+                        feedbackEl.className = 'small mt-1 ps-1 d-none';
+                        feedbackEl.innerHTML = '';
                     } else if (data.valido) {
-                        feedbackEl.className = 'mt-2 small text-success fw-bold';
-                        feedbackEl.innerHTML = '<i class="bi bi-check-circle-fill"></i> ' + data.mensaje;
+                        feedbackEl.className = 'small mt-1 ps-1 text-success fw-bold';
+                        feedbackEl.innerHTML = '<i class="bi bi-check-circle-fill me-1"></i> NIT/CI disponible';
                     } else {
-                        feedbackEl.className = 'mt-2 small text-danger fw-bold';
-                        feedbackEl.innerHTML = '<i class="bi bi-exclamation-triangle-fill"></i> ' + data.mensaje;
+                        feedbackEl.className = 'small mt-1 ps-1 text-danger fw-bold';
+                        feedbackEl.innerHTML = '<i class="bi bi-exclamation-triangle-fill me-1"></i> ' + data.mensaje;
                     }
                 })
                 .catch(err => {
-                    console.error('Error al validar NIT:', err);
+                    console.error('Error al validar NIT automáticamente:', err);
                 });
+        }
+
+        // Validación reactiva automática al dejar de escribir (debounce 400ms)
+        nitInput.addEventListener('input', function() {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(validarNitAutomatico, 400);
         });
+
+        // Validación inmediata al salir del campo
+        nitInput.addEventListener('blur', validarNitAutomatico);
     }
 });

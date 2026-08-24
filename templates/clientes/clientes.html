@@ -47,7 +47,7 @@
                         <div class="invalid-feedback ps-2">Por favor ingrese el nombre o razón social.</div>
                     </div>
 
-                    <!-- BENTO ITEM 2: NIT / CI (con botón Validar 3D) -->
+                    <!-- BENTO ITEM 2: NIT / CI -->
                     <div class="bento-clay-box">
                         <div class="d-flex align-items-center justify-content-between mb-2">
                             <label class="bento-label">
@@ -58,11 +58,9 @@
                         </div>
                         <div class="clay-input-group">
                             <span class="clay-input-icon"><i class="bi bi-file-text text-muted"></i></span>
-                            <input type="text" name="nit" class="clay-input" placeholder="Dejar en blanco para S/A">
-                            <button class="clay-btn-validar" type="button" id="btnValidarNit">
-                                <i class="bi bi-shield-check me-1"></i> Validar
-                            </button>
+                            <input type="text" name="nit" id="nitInput" class="clay-input" placeholder="Dejar en blanco para S/A" autocomplete="off">
                         </div>
+                        <div id="nitFeedbackMsg" class="small mt-1 ps-1 d-none"></div>
                         <small class="text-muted d-block mt-2 ps-1 fs-xs">Si se deja en blanco se guardará como <strong>S/A (Sin Asignar)</strong>.</small>
                     </div>
 

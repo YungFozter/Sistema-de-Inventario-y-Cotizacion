@@ -3,6 +3,7 @@
    Estética: Premium, Editorial, Cálida y Minimalista
    Paleta: Neutra (Crema #FAF8F5, Blanco #FFF, Negro #141414) + Naranja (#FF6B35)
    Tipografía: Serif ('Playfair Display') + Sans-Serif ('Plus Jakarta Sans')
+   Totalmente Responsivo: Móviles (320px-576px), Tablets y Escritorio
    ============================================================ */
 
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,600;1,700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap');
@@ -10,34 +11,52 @@
 /* ── CONTENEDOR HERO EDITORIAL BENTO ─────────────────────────── */
 .editorial-bento-hero {
     display: grid;
-    grid-template-columns: 360px 1fr;
+    grid-template-columns: 340px 1fr;
     background: #FAF8F5;
     border-radius: 28px;
     box-shadow: 0 16px 40px rgba(0, 0, 0, 0.05), 0 2px 8px rgba(0, 0, 0, 0.03);
     overflow: hidden;
     margin-bottom: 2rem;
     border: none;
+    width: 100%;
+    box-sizing: border-box;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 @media (max-width: 991.98px) {
     .editorial-bento-hero {
         grid-template-columns: 1fr;
+        border-radius: 22px;
     }
 }
 
-/* ── PANEL OSCURO EDITORIAL (IZQUIERDA) ───────────────────────── */
+@media (max-width: 576px) {
+    .editorial-bento-hero {
+        border-radius: 18px;
+        margin-bottom: 1.25rem;
+    }
+}
+
+/* ── PANEL OSCURO EDITORIAL (IZQUIERDA / SUPERIOR EN MÓVIL) ───── */
 .editorial-dark-panel {
-    background: linear-gradient(135deg, rgba(20, 20, 20, 0.88) 0%, rgba(30, 41, 59, 0.92) 100%), 
+    background: linear-gradient(135deg, rgba(20, 20, 20, 0.90) 0%, rgba(30, 41, 59, 0.94) 100%), 
                 url('/static/images/editorial_product_banner.jpg');
     background-size: cover;
     background-position: center;
-    padding: 2.75rem 2.25rem;
+    padding: 2.5rem 2.25rem;
     color: #FFFFFF;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
     position: relative;
+    box-sizing: border-box;
+}
+
+@media (max-width: 768px) {
+    .editorial-dark-panel {
+        padding: 1.5rem 1.25rem;
+        gap: 0.75rem;
+    }
 }
 
 .editorial-dark-panel::after {
@@ -62,12 +81,26 @@
     letter-spacing: -0.01em;
 }
 
+@media (max-width: 768px) {
+    .serif-editorial-title {
+        font-size: 1.45rem;
+        margin-bottom: 0.5rem;
+    }
+}
+
 .editorial-subtitle {
     font-family: 'Plus Jakarta Sans', sans-serif;
     font-size: 0.88rem;
     color: rgba(255, 255, 255, 0.75);
     line-height: 1.55;
     font-weight: 500;
+}
+
+@media (max-width: 768px) {
+    .editorial-subtitle {
+        font-size: 0.82rem;
+        line-height: 1.45;
+    }
 }
 
 .editorial-tag-badge {
@@ -85,6 +118,14 @@
     color: #FFFFFF;
     letter-spacing: 0.04em;
     width: fit-content;
+}
+
+@media (max-width: 768px) {
+    .editorial-tag-badge {
+        padding: 4px 12px;
+        font-size: 0.72rem;
+        margin-bottom: 0.75rem !important;
+    }
 }
 
 .editorial-tag-badge-dark {
@@ -114,6 +155,12 @@
     margin-bottom: 0.35rem;
 }
 
+@media (max-width: 768px) {
+    .register-title-executive {
+        font-size: 1.45rem;
+    }
+}
+
 .editorial-dot-orange {
     width: 8px;
     height: 8px;
@@ -122,41 +169,71 @@
     box-shadow: 0 0 8px #FF6B35;
 }
 
-/* ── PANEL CLARO FORMULARIO BENTO (DERECHA) ───────────────────── */
+/* ── PANEL CLARO FORMULARIO BENTO (DERECHA / INFERIOR EN MÓVIL) ── */
 .editorial-light-panel {
     background: #FAF8F5;
-    padding: 2.5rem 2.75rem;
+    padding: 2.25rem 2.5rem;
     display: flex;
     flex-direction: column;
     justify-content: center;
+    box-sizing: border-box;
+    width: 100%;
+}
+
+@media (max-width: 991.98px) {
+    .editorial-light-panel {
+        padding: 1.75rem 1.5rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .editorial-light-panel {
+        padding: 1.25rem 1rem;
+    }
 }
 
 .editorial-bento-grid {
     display: flex;
     flex-wrap: wrap;
-    gap: 1.25rem;
+    gap: 1.15rem;
     align-items: stretch;
+    width: 100%;
+    box-sizing: border-box;
 }
 
-@media (max-width: 576px) {
+@media (max-width: 768px) {
     .editorial-bento-grid {
         flex-direction: column;
+        gap: 0.85rem;
     }
 }
 
 .editorial-bento-item {
     position: relative;
-    flex: 1 1 270px;
-    min-width: 250px;
+    flex: 1 1 240px;
+    min-width: 220px;
     max-width: 100%;
     background: #FFFFFF;
     border-radius: 20px;
-    padding: 1.15rem 1.35rem;
-    box-shadow: 6px 8px 18px rgba(0, 0, 0, 0.04), -4px -4px 12px rgba(255, 255, 255, 0.9);
+    padding: 1.05rem 1.25rem;
+    box-shadow: 4px 6px 16px rgba(0, 0, 0, 0.04), -2px -2px 8px rgba(255, 255, 255, 0.9);
     border: 2px solid #141414;
-    transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.25s ease, border-color 0.25s ease, flex-grow 0.3s ease;
+    transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.25s ease, border-color 0.25s ease;
     overflow: hidden;
     z-index: 1;
+    box-sizing: border-box;
+}
+
+@media (max-width: 768px) {
+    .editorial-bento-item {
+        flex: 1 1 100% !important;
+        width: 100% !important;
+        min-width: 0 !important;
+        max-width: 100% !important;
+        padding: 0.85rem 1rem;
+        border-radius: 16px;
+        margin: 0;
+    }
 }
 
 /* Trazo animado que recorre el borde en hover o focus */
@@ -194,6 +271,12 @@
     pointer-events: none;
 }
 
+@media (max-width: 768px) {
+    .editorial-bento-item::after {
+        border-radius: 14px;
+    }
+}
+
 @keyframes borderRotate {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
@@ -201,8 +284,8 @@
 
 .editorial-bento-item:hover,
 .editorial-bento-item:focus-within {
-    transform: translateY(-3px);
-    box-shadow: 0 10px 24px rgba(255, 107, 53, 0.18), 0 4px 12px rgba(20, 20, 20, 0.12);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(255, 107, 53, 0.16), 0 3px 10px rgba(20, 20, 20, 0.1);
     border-color: transparent !important;
 }
 
@@ -221,15 +304,16 @@
     display: flex;
     align-items: center;
     gap: 6px;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.45rem;
 }
 
-/* ── INPUTS Y SELECTS CLAY PILL ──────────────────────────────── */
+/* ── INPUTS Y SELECTS CLAY PILL (COMPACTOS Y EXACTOS) ──────────── */
 .clay-pill-input-group {
     position: relative;
     display: flex;
     align-items: center;
     width: 100%;
+    box-sizing: border-box;
 }
 
 .clay-pill-input-icon {
@@ -239,21 +323,27 @@
     font-size: 1.05rem;
     pointer-events: none;
     z-index: 3;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .clay-pill-input {
     width: 100% !important;
-    min-width: 100% !important;
-    field-sizing: content;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    height: 44px !important;
+    box-sizing: border-box !important;
     border-radius: 50px !important;
     background: #FAF8F5 !important;
     border: none !important;
     box-shadow: inset 2px 3px 6px rgba(0, 0, 0, 0.05), inset -2px -3px 6px rgba(255, 255, 255, 0.9) !important;
-    padding: 0.65rem 1.25rem 0.65rem 2.6rem !important;
+    padding: 0.55rem 1rem 0.55rem 2.5rem !important;
     font-family: 'Plus Jakarta Sans', sans-serif !important;
     font-size: 0.9rem !important;
     font-weight: 600 !important;
     color: #141414 !important;
+    line-height: 1.3 !important;
     outline: none !important;
     transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
 }
@@ -273,7 +363,8 @@
     background: #FF6B35;
     color: #FFFFFF !important;
     border: none;
-    padding: 0.75rem 2.2rem;
+    padding: 0.75rem 2rem;
+    min-height: 44px;
     border-radius: 50px;
     font-family: 'Plus Jakarta Sans', sans-serif;
     font-weight: 800;
@@ -283,8 +374,10 @@
     transition: all 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     gap: 8px;
     text-decoration: none;
+    box-sizing: border-box;
 }
 
 .clay-pill-btn-primary:hover {
@@ -303,6 +396,7 @@
     color: #141414 !important;
     border: none;
     padding: 0.75rem 1.8rem;
+    min-height: 44px;
     border-radius: 50px;
     font-family: 'Plus Jakarta Sans', sans-serif;
     font-weight: 700;
@@ -312,8 +406,10 @@
     transition: all 0.2s ease;
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     gap: 8px;
     text-decoration: none;
+    box-sizing: border-box;
 }
 
 .clay-pill-btn-secondary:hover {
@@ -327,7 +423,15 @@
     transform: translateY(1px);
 }
 
-/* ── IDEA 3: HERO DE REGISTRO CON BENTO SUPERIOR & PANEL INFERIOR DE SUMMARY ── */
+@media (max-width: 576px) {
+    .clay-pill-btn-primary,
+    .clay-pill-btn-secondary {
+        width: 100%;
+        padding: 0.75rem 1.25rem;
+    }
+}
+
+/* ── HERO DE REGISTRO CON BENTO SUPERIOR & PANEL INFERIOR DE SUMMARY ── */
 .editorial-register-container {
     background: #FAF8F5;
     border-radius: 28px;
@@ -335,21 +439,46 @@
     overflow: hidden;
     margin-bottom: 2.5rem;
     border: none;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+@media (max-width: 768px) {
+    .editorial-register-container {
+        border-radius: 18px;
+        margin-bottom: 1.5rem;
+    }
 }
 
 .editorial-register-top {
     background: #FAF8F5;
-    padding: 2.5rem;
+    padding: 2.25rem 2.5rem;
+    box-sizing: border-box;
+    width: 100%;
+}
+
+@media (max-width: 768px) {
+    .editorial-register-top {
+        padding: 1.25rem 1rem;
+    }
 }
 
 .editorial-register-bottom {
-    background: linear-gradient(135deg, rgba(20, 20, 20, 0.92) 0%, rgba(30, 41, 59, 0.95) 100%), 
+    background: linear-gradient(135deg, rgba(20, 20, 20, 0.94) 0%, rgba(30, 41, 59, 0.96) 100%), 
                 url('/static/images/editorial_register_product.jpg');
     background-size: cover;
     background-position: center;
     padding: 2rem 2.5rem;
     color: #FFFFFF;
     border-top: 3.5px solid #FF6B35;
+    box-sizing: border-box;
+    width: 100%;
+}
+
+@media (max-width: 768px) {
+    .editorial-register-bottom {
+        padding: 1.25rem 1rem;
+    }
 }
 
 .preset-pill-dark {
@@ -359,7 +488,7 @@
     background: #FFFFFF;
     color: #141414;
     border: 1.5px solid #141414;
-    padding: 6px 16px;
+    padding: 6px 14px;
     border-radius: 50px;
     font-family: 'Plus Jakarta Sans', sans-serif;
     font-size: 0.78rem;
@@ -367,6 +496,13 @@
     cursor: pointer;
     transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+}
+
+@media (max-width: 768px) {
+    .preset-pill-dark {
+        padding: 5px 11px;
+        font-size: 0.74rem;
+    }
 }
 
 .preset-pill-dark:hover {
@@ -383,16 +519,98 @@
     border: 1px solid rgba(255, 255, 255, 0.18);
     border-radius: 20px;
     padding: 1.25rem 1.75rem;
+    box-sizing: border-box;
+    width: 100%;
 }
- 
- / *    % %  B E N T O   C L A Y   M O D A L    % % % % % % % % % % % % % % % % % % % % % % % % %  * /  
- . b e n t o - m o d a l   {   b a c k g r o u n d - c o l o r :   # F A F 8 F 5 ;   b o r d e r - r a d i u s :   2 8 p x   ! i m p o r t a n t ;   b o r d e r :   1 p x   s o l i d   r g b a ( 0 , 0 , 0 , 0 . 0 5 ) ;   }  
- . c l a y - s u r f a c e   {   b o x - s h a d o w :   i n s e t   0   2 p x   4 p x   r g b a ( 2 5 5 ,   2 5 5 ,   2 5 5 ,   0 . 8 ) ,   0   1 6 p x   4 0 p x   r g b a ( 0 ,   0 ,   0 ,   0 . 1 ) ;   }  
- . c l a y - i c o n - p i l l   {   b a c k g r o u n d :   # F F F F F F ;   w i d t h :   8 0 p x ;   h e i g h t :   8 0 p x ;   b o r d e r - r a d i u s :   2 4 p x ;   b o x - s h a d o w :   i n s e t   0   2 p x   4 p x   r g b a ( 2 5 5 ,   2 5 5 ,   2 5 5 ,   0 . 9 ) ,   0   8 p x   1 6 p x   r g b a ( 0 ,   0 ,   0 ,   0 . 0 5 ) ;   b o r d e r :   1 p x   s o l i d   r g b a ( 0 , 0 , 0 , 0 . 0 2 ) ;   }  
- . s e r i f - t i t l e   {   f o n t - f a m i l y :   ' P l a y f a i r   D i s p l a y ' ,   s e r i f ;   f o n t - w e i g h t :   7 0 0 ;   c o l o r :   # 1 4 1 4 1 4 ;   l e t t e r - s p a c i n g :   - 0 . 0 1 e m ;   }  
- . b e n t o - w a r n i n g - b o x   {   b a c k g r o u n d :   # F F F F F F ;   b o r d e r - r a d i u s :   1 6 p x ;   p a d d i n g :   1 6 p x ;   b o x - s h a d o w :   0   4 p x   1 2 p x   r g b a ( 0 , 0 , 0 , 0 . 0 3 ) ;   b o r d e r :   1 p x   s o l i d   r g b a ( 0 , 0 , 0 , 0 . 0 4 ) ;   }  
- . c l a y - b t n - p r i m a r y   {   b a c k g r o u n d - c o l o r :   # 1 4 1 4 1 4   ! i m p o r t a n t ;   c o l o r :   # F F F F F F   ! i m p o r t a n t ;   b o r d e r - r a d i u s :   1 6 p x   ! i m p o r t a n t ;   f o n t - w e i g h t :   6 0 0 ;   p a d d i n g :   1 4 p x   2 4 p x ;   b o x - s h a d o w :   i n s e t   0   1 p x   1 p x   r g b a ( 2 5 5 , 2 5 5 , 2 5 5 , 0 . 2 ) ,   0   6 p x   1 6 p x   r g b a ( 2 0 , 2 0 , 2 0 , 0 . 2 )   ! i m p o r t a n t ;   b o r d e r :   n o n e ;   t r a n s i t i o n :   t r a n s f o r m   0 . 2 s ,   b o x - s h a d o w   0 . 2 s ;   }  
- . c l a y - b t n - p r i m a r y : h o v e r   {   t r a n s f o r m :   t r a n s l a t e Y ( - 2 p x ) ;   b o x - s h a d o w :   i n s e t   0   1 p x   1 p x   r g b a ( 2 5 5 , 2 5 5 , 2 5 5 , 0 . 2 ) ,   0   1 0 p x   2 4 p x   r g b a ( 2 0 , 2 0 , 2 0 , 0 . 2 5 )   ! i m p o r t a n t ;   }  
- . c l a y - b t n - s e c o n d a r y   {   b a c k g r o u n d - c o l o r :   # F F F F F F   ! i m p o r t a n t ;   c o l o r :   # 1 4 1 4 1 4   ! i m p o r t a n t ;   b o r d e r - r a d i u s :   1 6 p x   ! i m p o r t a n t ;   f o n t - w e i g h t :   6 0 0 ;   p a d d i n g :   1 4 p x   2 4 p x ;   b o x - s h a d o w :   i n s e t   0   2 p x   4 p x   r g b a ( 2 5 5 ,   2 5 5 ,   2 5 5 ,   0 . 8 ) ,   0   4 p x   1 2 p x   r g b a ( 0 ,   0 ,   0 ,   0 . 0 6 )   ! i m p o r t a n t ;   b o r d e r :   1 p x   s o l i d   r g b a ( 0 , 0 , 0 , 0 . 0 5 ) ;   t r a n s i t i o n :   t r a n s f o r m   0 . 2 s ,   b o x - s h a d o w   0 . 2 s ;   }  
- . c l a y - b t n - s e c o n d a r y : h o v e r   {   t r a n s f o r m :   t r a n s l a t e Y ( - 2 p x ) ;   b o x - s h a d o w :   i n s e t   0   2 p x   4 p x   r g b a ( 2 5 5 ,   2 5 5 ,   2 5 5 ,   0 . 8 ) ,   0   8 p x   1 6 p x   r g b a ( 0 ,   0 ,   0 ,   0 . 0 8 )   ! i m p o r t a n t ;   }  
- 
+
+@media (max-width: 768px) {
+    .preview-summary-card {
+        padding: 1rem;
+        border-radius: 16px;
+    }
+}
+
+/* ── MODALES BENTO CLAY RESPONSIVOS ──────────────────────────── */
+.bento-modal {
+    background-color: #FAF8F5;
+    border-radius: 24px !important;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.clay-surface {
+    box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.8), 0 16px 40px rgba(0, 0, 0, 0.1);
+}
+
+.clay-icon-pill {
+    background: #FFFFFF;
+    width: 70px;
+    height: 70px;
+    border-radius: 22px;
+    box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.9), 0 8px 16px rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(0, 0, 0, 0.02);
+}
+
+.serif-title {
+    font-family: 'Playfair Display', serif;
+    font-weight: 700;
+    color: #141414;
+    letter-spacing: -0.01em;
+}
+
+.bento-warning-box {
+    background: #FFFFFF;
+    border-radius: 16px;
+    padding: 16px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+    border: 1px solid rgba(0, 0, 0, 0.04);
+}
+
+.clay-btn-primary {
+    background-color: #141414 !important;
+    color: #FFFFFF !important;
+    border-radius: 16px !important;
+    font-weight: 600;
+    padding: 14px 24px;
+    box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.2), 0 6px 16px rgba(20, 20, 20, 0.2) !important;
+    border: none;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.clay-btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.2), 0 10px 24px rgba(20, 20, 20, 0.25) !important;
+}
+
+.clay-btn-secondary {
+    background-color: #FFFFFF !important;
+    color: #141414 !important;
+    border-radius: 16px !important;
+    font-weight: 600;
+    padding: 14px 24px;
+    box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.8), 0 4px 12px rgba(0, 0, 0, 0.06) !important;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.clay-btn-secondary:hover {
+    transform: translateY(-2px);
+    box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.8), 0 8px 16px rgba(0, 0, 0, 0.08) !important;
+}
+
+/* ── PESTAÑAS (TABS) EN MÓVIL ────────────────────────────────── */
+@media (max-width: 768px) {
+    #pills-tab-productos {
+        flex-direction: column !important;
+        gap: 8px;
+    }
+
+    #pills-tab-productos .nav-link {
+        font-size: 0.95rem !important;
+        padding: 10px 14px !important;
+        text-align: left;
+        border-radius: 10px !important;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+}

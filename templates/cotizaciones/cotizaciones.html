@@ -31,27 +31,42 @@
         <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
           <div class="card-body py-2 px-3" style="background: linear-gradient(135deg,#fff 0%,#f8f9fa 100%);">
 
-            <!-- Buscador -->
-            <div class="input-group mb-2">
-              <span class="input-group-text bg-white border-end-0">
-                <i class="bi bi-search text-primary"></i>
-              </span>
-              <input type="text" class="form-control border-start-0 ps-0" id="buscar-cliente-input"
-                     placeholder="Buscar por nombre, código o NIT…" autocomplete="off">
-              <span class="input-group-text bg-white text-muted small" id="clientes-total-info">…</span>
+            <!-- Buscador y Selector de Cantidad (5, 10, 15) -->
+            <div class="row g-2 mb-2 align-items-center">
+              <div class="col-8 col-sm-9">
+                <div class="input-group">
+                  <span class="input-group-text bg-white border-end-0">
+                    <i class="bi bi-search text-primary"></i>
+                  </span>
+                  <input type="text" class="form-control border-start-0 ps-0" id="buscar-cliente-input"
+                         placeholder="Buscar por nombre, código o NIT…" autocomplete="off">
+                  <span class="input-group-text bg-white text-muted small" id="clientes-total-info">…</span>
+                </div>
+              </div>
+              <div class="col-4 col-sm-3">
+                <div class="d-flex align-items-center justify-content-end gap-1 bg-white border rounded-3 px-2 py-1 shadow-sm" style="height: 38px;">
+                  <span class="small text-muted fw-bold d-none d-md-inline"><i class="bi bi-list-ol text-primary"></i> Ver:</span>
+                  <select id="selectPerPageCliente" class="form-select form-select-sm border-0 fw-bold text-primary py-0 ps-1 pe-4" style="background-color: transparent; font-size: 0.85rem; cursor: pointer; width: auto;" title="Clientes por página">
+                    <option value="5" selected>5</option>
+                    <option value="10">10</option>
+                    <option value="15">15</option>
+                  </select>
+                </div>
+              </div>
             </div>
 
-            <!-- Lista de resultados -->
-            <div id="lista-clientes-ajax" class="list-group list-group-flush" style="max-height:280px; overflow-y:auto;"></div>
+            <!-- Lista de resultados con Scroll Interno fluido -->
+            <div id="lista-clientes-ajax" class="list-group list-group-flush" 
+                 style="max-height: 240px; overflow-y: auto; scroll-behavior: smooth; border-radius: 8px; border: 1px solid rgba(0,0,0,0.06); scrollbar-width: thin;"></div>
 
             <!-- Controles de paginación -->
-            <div class="d-flex align-items-center justify-content-between mt-2">
-              <button type="button" class="btn btn-sm btn-light rounded-circle" id="prevClienteAjax" disabled
+            <div class="d-flex align-items-center justify-content-between mt-2 pt-1 border-top">
+              <button type="button" class="btn btn-sm btn-light rounded-circle shadow-sm" id="prevClienteAjax" disabled
                       style="width:30px;height:30px;" title="Anterior">
                 <i class="bi bi-chevron-left"></i>
               </button>
               <span class="text-muted small" id="clientes-page-info">Página 1 de 1</span>
-              <button type="button" class="btn btn-sm btn-light rounded-circle" id="nextClienteAjax" disabled
+              <button type="button" class="btn btn-sm btn-light rounded-circle shadow-sm" id="nextClienteAjax" disabled
                       style="width:30px;height:30px;" title="Siguiente">
                 <i class="bi bi-chevron-right"></i>
               </button>
@@ -72,13 +87,15 @@
       function buscarClientes(page) {
         _pageCliente = page || 1;
         const q = document.getElementById('buscar-cliente-input').value;
+        const perPageSelect = document.getElementById('selectPerPageCliente');
+        const perPage = perPageSelect ? (parseInt(perPageSelect.value) || 5) : 5;
         const lista = document.getElementById('lista-clientes-ajax');
         const info  = document.getElementById('clientes-total-info');
         const pageInfo = document.getElementById('clientes-page-info');
 
         lista.innerHTML = `<div class="list-group-item text-center text-muted py-3"><div class="spinner-border spinner-border-sm text-primary me-2"></div>Buscando…</div>`;
 
-        fetch(`/api/buscar_clientes_cotizacion?q=${encodeURIComponent(q)}&page=${_pageCliente}`)
+        fetch(`/api/buscar_clientes_cotizacion?q=${encodeURIComponent(q)}&page=${_pageCliente}&per_page=${perPage}`)
           .then(r => {
             if (r.status === 401) {
               // Sesión expirada: redirigir al login
@@ -128,6 +145,9 @@
               </button>`;
             }).join('');
 
+            // Scroll interno suave arriba al paginar
+            lista.scrollTop = 0;
+
             // Vincular evento click a cada botón generado
             lista.querySelectorAll('.btn-seleccionar-cliente').forEach(btn => {
               btn.addEventListener('click', function() {
@@ -164,6 +184,14 @@
           clearTimeout(_timeoutCliente);
           _timeoutCliente = setTimeout(() => buscarClientes(1), 300);
         });
+
+        // Selector de cantidad por página (5, 10, 15)
+        const perPageSelect = document.getElementById('selectPerPageCliente');
+        if (perPageSelect) {
+          perPageSelect.addEventListener('change', function() {
+            buscarClientes(1);
+          });
+        }
 
         // Paginación
         document.getElementById('prevClienteAjax').addEventListener('click', function() {

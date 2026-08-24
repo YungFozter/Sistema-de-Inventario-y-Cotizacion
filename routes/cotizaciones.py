@@ -1417,9 +1417,18 @@ def register_routes(app):
     def buscar_clientes_cotizacion():
         """Endpoint AJAX para buscar clientes sin recargar la página de cotizaciones."""
         try:
-            q         = request.args.get('q', '').strip()
-            page      = int(request.args.get('page', 1))
-            per_page  = 8   # clientes por página en el modal AJAX
+            q = request.args.get('q', '').strip()
+            try:
+                page = int(request.args.get('page', 1))
+            except (ValueError, TypeError):
+                page = 1
+
+            try:
+                per_page = int(request.args.get('per_page', 5))
+                if per_page not in [5, 10, 15, 20]:
+                    per_page = 5
+            except (ValueError, TypeError):
+                per_page = 5
 
             conn   = get_db_connection()
             cursor = conn.cursor()

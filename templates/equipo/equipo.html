@@ -397,7 +397,7 @@
 
 <!-- Modal Generar Código QR -->
 <div class="modal fade" id="modalQR" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered text-center">
+    <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content" style="border-radius: 24px; border: 1.5px solid rgba(0,0,0,0.08); overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.2);">
             <div class="modal-header" style="background: #141414; color: #fff; border: none; padding: 1.25rem 1.75rem;">
                 <div class="d-flex align-items-center gap-3">
@@ -591,8 +591,17 @@ function compartirQRWhatsApp() {
     document.getElementById('share-wa-preview-text').textContent = `¡Hola! Te invito a unirte a nuestro equipo de trabajo en la plataforma. Abre este enlace para registrarte: ${currentQRLink}`;
     document.getElementById('share-wa-telefono').value = '';
     
-    const shareModal = new bootstrap.Modal(document.getElementById('modalCompartirWhatsApp'));
-    shareModal.show();
+    // Ocultar modal QR para evitar superposición y desalineación visual
+    const qrModalEl = document.getElementById('modalQR');
+    const qrModalInst = bootstrap.Modal.getInstance(qrModalEl);
+    if (qrModalInst) {
+        qrModalInst.hide();
+    }
+    
+    setTimeout(() => {
+        const shareModal = new bootstrap.Modal(document.getElementById('modalCompartirWhatsApp'));
+        shareModal.show();
+    }, 200);
 }
 
 function ejecutarEnvioWhatsAppModal() {

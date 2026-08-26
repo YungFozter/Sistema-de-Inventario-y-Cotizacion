@@ -1001,7 +1001,11 @@ def migrar_tablas_equipo():
     try:
         conexion = get_db_connection()
         cursor = conexion.cursor()
-        is_postgres = bool(os.environ.get('DATABASE_URL') and os.environ.get('DATABASE_URL').startswith('postgres'))
+        is_postgres = bool(
+            not os.environ.get('TESTING_DB') and
+            os.environ.get('DATABASE_URL') and
+            os.environ.get('DATABASE_URL').startswith('postgres')
+        )
 
         cursor.execute(f'''
             CREATE TABLE IF NOT EXISTS equipo_chat (

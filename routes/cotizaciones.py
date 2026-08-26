@@ -433,7 +433,7 @@ def register_routes(app):
                     
                     # Para compatibilidad con Postgres / SQLite (algunos drivers soportan lastrowid, otros no, pero aquí se usa conn.commit después)
                     # En SQLite lastrowid funciona, en Postgres con pyscopg2 no si no usamos RETURNING
-                    is_postgres = bool(os.environ.get('DATABASE_URL') and os.environ.get('DATABASE_URL').startswith('postgres'))
+                    is_postgres = bool(not os.environ.get('TESTING_DB') and os.environ.get('DATABASE_URL') and os.environ.get('DATABASE_URL').startswith('postgres'))
                     if is_postgres:
                         cursor.execute("SELECT currval(pg_get_serial_sequence('cotizaciones', 'id'))")
                         cotizacion_id = cursor.fetchone()[0]
@@ -456,6 +456,8 @@ def register_routes(app):
                                 (cantidad, producto_id)
                             )
 
+                    conn.commit()
+
                     # 5. Registrar en logs
                     registrar_log(
                         usuario_id=session['user_id'],
@@ -466,8 +468,6 @@ def register_routes(app):
                             "productos": len(productos_cotizacion)
                         }
                     )
-
-                    conn.commit()
 
                     # ── POST-COMMIT: Incrementar contador freemium si está en prueba ──
                     if user_rol != 'superadmin' and not suscripcion_activa:

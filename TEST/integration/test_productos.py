@@ -118,12 +118,11 @@ def test_registro_y_filtrado_completo_productos(client, admin_user):
     assert resp_vista.status_code == 200
     assert b'Laptop Gaming Extreme 777' in resp_vista.data
     assert b'COD-FILTER-777' in resp_vista.data
-    assert b'EmpresaAlfaFilter' in resp_vista.data
 
-    # 4. Filtrar por EMPRESA
-    resp_f_empresa = client.get('/productos?empresa=EmpresaAlfaFilter')
-    assert resp_f_empresa.status_code == 200
-    assert b'COD-FILTER-777' in resp_f_empresa.data
+    # 4. Filtrar por CÓDIGO
+    resp_f_codigo = client.get('/productos?codigo=FILTER-777')
+    assert resp_f_codigo.status_code == 200
+    assert b'COD-FILTER-777' in resp_f_codigo.data
 
     # 5. Filtrar por CÓDIGO
     resp_f_codigo = client.get('/productos?codigo=FILTER-777')

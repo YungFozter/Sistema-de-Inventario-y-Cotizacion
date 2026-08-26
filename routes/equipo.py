@@ -362,13 +362,14 @@ def register_routes(app):
                     VALUES (?, NULL, ?, ?, ?, 'pendiente', ?, ?)
                 ''', (user_id, titulo, descripcion, prioridad, fecha_actual, fecha_limite_str))
 
+            conexion.commit()
+
             registrar_log(
                 usuario_id=user_id,
                 accion="crear_tarea",
                 detalle={"titulo": titulo, "prioridad": prioridad, "asignados": asignados_ids}
             )
 
-            conexion.commit()
             flash('Tarea(s) asignada(s) exitosamente', 'success')
         except Exception as e:
             conexion.rollback()
@@ -434,13 +435,14 @@ def register_routes(app):
                 VALUES (?, ?, 'tarea_completada', ?)
             ''', (tarea['creador_id'], msg_notif, fecha_completada_str))
 
+            conexion.commit()
+
             registrar_log(
                 usuario_id=user_id,
                 accion="completar_tarea",
                 detalle={"tarea_id": id, "titulo": tarea['titulo'], "fecha_completada": fecha_formateada}
             )
 
-            conexion.commit()
             return jsonify({'success': True, 'fecha_formateada': fecha_formateada, 'completado_por': user_nombre})
         except Exception as e:
             conexion.rollback()
@@ -478,13 +480,14 @@ def register_routes(app):
 
             cursor.execute("DELETE FROM equipo_tareas WHERE id = ?", (id,))
             
+            conexion.commit()
+
             registrar_log(
                 usuario_id=user_id,
                 accion="eliminar_tarea",
                 detalle={"tarea_id": id, "titulo": tarea['titulo']}
             )
 
-            conexion.commit()
             return jsonify({'success': True})
         except Exception as e:
             conexion.rollback()
@@ -531,13 +534,13 @@ def register_routes(app):
                 VALUES (?, ?, ?, ?, ?)
             ''', (user_id, token, tipo_expiracion, usos_restantes, fecha_expiracion))
 
+            conexion.commit()
+
             registrar_log(
                 usuario_id=user_id,
                 accion="crear_invitacion_equipo",
                 detalle={"tipo_expiracion": tipo_expiracion}
             )
-
-            conexion.commit()
 
             link_invitacion = url_for('unirse_equipo', token=token, _external=True)
             return jsonify({

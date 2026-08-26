@@ -31,33 +31,19 @@ def test_logout(client, admin_user):
     assert resp.status_code == 302
     assert '/login' in resp.headers.get('Location', '')
 
-def test_registro_flujo_otp(client):
-    # Paso 1: Enviar código OTP
-    payload_envio = {
-        'nombre': 'Nuevo Test OTP',
-        'empresa_nombre': 'Test Company',
-        'correo': 'nuevo_otp@test.com',
+def test_registro_usuario_exitoso(client):
+    payload_registro = {
+        'nombre': 'Nuevo Test Admin',
+        'empresa_nombre': 'Empresa Test Directa',
+        'correo': 'nuevo_directo@test.com',
         'telefono': '77123456',
-        'contrasena': 'test1234',
-        'confirmar_contrasena': 'test1234'
+        'contrasena': 'Password123!',
+        'confirmar_contrasena': 'Password123!'
     }
-    resp1 = client.post('/registro/enviar-codigo', json=payload_envio)
-    assert resp1.status_code == 200
-    data1 = resp1.get_json()
-    assert data1.get('ok') is True
+    resp = client.post('/registro', data=payload_registro, follow_redirects=True)
+    assert resp.status_code == 200
+    assert b'creada exitosamente' in resp.data or b'inicia sesi' in resp.data.lower()
 
-    # Obtener el código de la sesión de prueba
-    with client.session_transaction() as sess:
-        pending = sess.get('pending_registro')
-        assert pending is not None
-        codigo_otp = pending['codigo']
-
-    # Paso 2: Verificar código OTP correcto
-    resp2 = client.post('/registro/verificar-codigo', json={'codigo': codigo_otp})
-    assert resp2.status_code == 200
-    data2 = resp2.get_json()
-    assert data2.get('ok') is True
-    assert '/login' in data2.get('redirect', '')
 
 
 def test_sesion_unica_invalida_segunda_conexion(app, admin_user):

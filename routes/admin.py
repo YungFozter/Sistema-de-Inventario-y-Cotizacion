@@ -423,6 +423,9 @@ def register_routes(app):
                 VALUES (?, ?, ?, ?, ?, ?, TRUE, ?)
             ''', (nombre, correo, telefono, rol, contrasena_hash, session['user_id'], empresa_creador))
 
+            conexion.commit()
+            conexion.close()
+
             # Registrar en el historial
             registrar_log(
                 usuario_id=session['user_id'],
@@ -433,9 +436,6 @@ def register_routes(app):
                     "nombre": nombre
                 }
             )
-
-            conexion.commit()
-            conexion.close()
 
             # Corrección: Separar el código de estado del objeto JSON
             return jsonify({

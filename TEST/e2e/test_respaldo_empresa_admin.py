@@ -159,106 +159,90 @@ class RespaldoEmpresaAdminE2ETestCase(unittest.TestCase):
         }, follow_redirects=True)
         self.assertEqual(resp_login.status_code, 200)
 
-        # 2. Descargar el archivo de Respaldo de Empresa
+        # 2. Descargar el archivo de Respaldo de Empresa en formato Excel
         resp_export = self.app.get('/empresa/respaldo/exportar')
         self.assertEqual(resp_export.status_code, 200)
-        self.assertIn('application/json', resp_export.content_type)
+        self.assertIn('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', resp_export.content_type)
         
         content_disposition = resp_export.headers.get('Content-Disposition', '')
         self.assertIn('attachment;', content_disposition)
+        self.assertIn('.xlsx', content_disposition)
         self.assertIn('respaldo_empresa_Mendoza', content_disposition)
 
-        # 3. Abrir e inspeccionar el archivo entregado
-        backup_json_str = resp_export.data.decode('utf-8')
-        backup_data = json.loads(backup_json_str)
+        # 3. Abrir e inspeccionar el libro Excel entregado (.xlsx)
+        import io
+        import openpyxl
+        excel_bytes = io.BytesIO(resp_export.data)
+        wb = openpyxl.load_workbook(excel_bytes)
 
-        # A. Inspeccionar Metadatos
-        self.assertIn('metadata_respaldo', backup_data)
-        meta = backup_data['metadata_respaldo']
-        self.assertEqual(meta['tipo'], 'RESPALDO_EMPRESA_TENANT')
-        self.assertEqual(meta['version_formato'], '2.0')
-        self.assertEqual(meta['generado_por']['correo'], 'ieeimendoza@gmail.com')
-        self.assertEqual(meta['generado_por']['nombre'], 'Santiago Mendoza Soria')
-        self.assertEqual(meta['empresa']['nombre'], 'Mendoza & Asociados Tech')
-        self.assertEqual(meta['empresa']['nit'], '1029384756')
+        # A. Verificar Hojas del Libro Excel
+        expected_sheets = ['RESUMEN', 'CLIENTES', 'PRODUCTOS', 'PROVEEDORES', 'COTIZACIONES', 'VENTAS']
+        for sheet_name in expected_sheets:
+            self.assertIn(sheet_name, wb.sheetnames, f"Falta la hoja {sheet_name} en el archivo Excel")
 
-        # B. Inspeccionar Resumen Estadístico
-        stats = meta['resumen_estadisticas']
-        self.assertEqual(stats['total_productos'], 2)
-        self.assertEqual(stats['total_clientes'], 2)
-        self.assertEqual(stats['total_proveedores'], 1)
-        self.assertEqual(stats['total_cotizaciones'], 1)
-        self.assertEqual(stats['total_ventas'], 1)
-        self.assertEqual(stats['miembros_equipo'], 1)
-        self.assertEqual(stats['total_tareas'], 1)
+        # B. Inspeccionar Hoja RESUMEN
+        ws_res = wb['RESUMEN']
+        self.assertEqual(ws_res['A1'].value, "COTIZAPRO - COPIA DE SEGURIDAD EMPRESARIAL")
+        self.assertEqual(ws_res['B5'].value, "Mendoza & Asociados Tech")
 
-        # C. Inspeccionar Catálogo de Productos
-        self.assertIn('productos', backup_data)
-        prods = backup_data['productos']
-        self.assertEqual(len(prods), 2)
-        codigos = [p['codigo'] for p in prods]
-        self.assertIn('CAB-XL-100', codigos)
-        self.assertIn('DISY-32A', codigos)
-        cable = next(p for p in prods if p['codigo'] == 'CAB-XL-100')
-        self.assertEqual(cable['stock_fisico'], 50.0)
-        self.assertEqual(cable['precio_unitario'], 450.0)
+        # C. Inspeccionar Hoja CLIENTES
+        ws_cli = wb['CLIENTES']
+        cli_headers = [cell.value for cell in ws_cli[1]]
+        self.assertIn("Nombre / Razón Social", cli_headers)
+        self.assertIn("NIT / CI", cli_headers)
+        # Debe haber 2 clientes registrados (filas 2 y 3)
+        self.assertEqual(ws_cli.max_row, 3)
+        nombres_cli = [ws_cli.cell(row=r, column=3).value for r in range(2, 4)]
+        self.assertIn("PANKIMIA SRL", nombres_cli)
+        self.assertIn("ROSIO VELEZ", nombres_cli)
 
-        # D. Inspeccionar Cartera de Clientes
-        self.assertIn('clientes', backup_data)
-        clis = backup_data['clientes']
-        self.assertEqual(len(clis), 2)
-        cli_nombres = [c['nombre'] for c in clis]
-        self.assertIn('PANKIMIA SRL', cli_nombres)
-        self.assertIn('ROSIO VELEZ', cli_nombres)
+        # D. Inspeccionar Hoja PRODUCTOS
+        ws_prod = wb['PRODUCTOS']
+        prod_headers = [cell.value for cell in ws_prod[1]]
+        self.assertIn("Código", prod_headers)
+        self.assertIn("Stock Físico", prod_headers)
+        self.assertEqual(ws_prod.max_row, 3)
+        codigos_prod = [ws_prod.cell(row=r, column=2).value for r in range(2, 4)]
+        self.assertIn("CAB-XL-100", codigos_prod)
+        self.assertIn("DISY-32A", codigos_prod)
 
-        # E. Inspeccionar Proveedores
-        self.assertIn('proveedores', backup_data)
-        provs = backup_data['proveedores']
-        self.assertEqual(len(provs), 1)
-        self.assertEqual(provs[0]['nombre'], 'Electrored Distribuidora SRL')
-        self.assertEqual(provs[0]['contacto_nombre'], 'Ing. Ramiro Lopez')
+        # E. Inspeccionar Hoja PROVEEDORES
+        ws_prov = wb['PROVEEDORES']
+        prov_headers = [cell.value for cell in ws_prov[1]]
+        self.assertIn("Empresa / Razón Social", prov_headers)
+        self.assertEqual(ws_prov.max_row, 2) # 1 proveedor + 1 cabecera
+        self.assertEqual(ws_prov.cell(row=2, column=2).value, "Electrored Distribuidora SRL")
 
-        # F. Inspeccionar Cotizaciones y sus Ítems Detallados
-        self.assertIn('cotizaciones', backup_data)
-        cots = backup_data['cotizaciones']
-        self.assertEqual(len(cots), 1)
-        cot = cots[0]
-        self.assertEqual(cot['id'], self.cot_id)
-        self.assertEqual(cot['total'], 936.22)
-        self.assertEqual(len(cot['items']), 2)
-        self.assertEqual(cot['items'][0]['producto_codigo'], 'CAB-XL-100')
+        # F. Inspeccionar Hoja COTIZACIONES
+        ws_cot = wb['COTIZACIONES']
+        cot_headers = [cell.value for cell in ws_cot[1]]
+        self.assertIn("ID Cotización", cot_headers)
+        self.assertIn("Total (Bs.)", cot_headers)
+        self.assertIn("Detalle de Productos e Ítems Cotizados", cot_headers)
+        self.assertEqual(ws_cot.max_row, 2) # 1 cotización + 1 cabecera
+        self.assertEqual(ws_cot.cell(row=2, column=9).value, 936.22)
+        detalle_cot = ws_cot.cell(row=2, column=10).value
+        self.assertIn("CAB-XL-100", detalle_cot)
 
-        # G. Inspeccionar Ventas POS y sus Ítems Detallados
-        self.assertIn('ventas', backup_data)
-        vtas = backup_data['ventas']
-        self.assertEqual(len(vtas), 1)
-        vta = vtas[0]
-        self.assertEqual(vta['codigo_venta'], 'VTA-2026-001')
-        self.assertEqual(vta['metodo_pago'], 'qr')
-        self.assertEqual(vta['total'], 450.0)
-        self.assertEqual(len(vta['items']), 1)
+        # G. Inspeccionar Hoja VENTAS
+        ws_vta = wb['VENTAS']
+        vta_headers = [cell.value for cell in ws_vta[1]]
+        self.assertIn("ID Venta", vta_headers)
+        self.assertIn("Código Venta", vta_headers)
+        self.assertIn("Total (Bs.)", vta_headers)
+        self.assertEqual(ws_vta.max_row, 2) # 1 venta + 1 cabecera
+        self.assertEqual(ws_vta.cell(row=2, column=7).value, 450.0)
+        detalle_vta = ws_vta.cell(row=2, column=8).value
+        self.assertIn("CAB-XL-100", detalle_vta)
 
-        # H. Inspeccionar Equipo y Tareas
-        self.assertIn('equipo', backup_data)
-        self.assertEqual(len(backup_data['equipo']), 1)
-        self.assertEqual(backup_data['equipo'][0]['nombre'], 'Carlos Vendedor')
-
-        self.assertIn('tareas', backup_data)
-        self.assertEqual(len(backup_data['tareas']), 1)
-        self.assertEqual(backup_data['tareas'][0]['titulo'], 'Entregar bobinas de cable a Pankimia')
-        self.assertEqual(backup_data['tareas'][0]['prioridad'], 'alta')
-
-        # I. Inspeccionar Configuración PDF
-        self.assertIn('configuracion_pdf', backup_data)
-        self.assertEqual(backup_data['configuracion_pdf']['tipo_hoja'], 'A4')
-        self.assertEqual(backup_data['configuracion_pdf']['color_tema'], '#FF6B35')
-
-        # Imprimir resumen de apertura exitosa
-        print(f"\n[OK E2E] Archivo de Respaldo generado y verificado con exito:")
+        print(f"\n[OK E2E] Archivo Excel (.xlsx) generado y verificado con éxito:")
         print(f" - Nombre del archivo: {content_disposition}")
-        print(f" - Empresa: {meta['empresa']['nombre']}")
-        print(f" - Tamano JSON: {len(backup_json_str)} bytes")
-        print(f" - Resumen: {json.dumps(stats, indent=2)}")
+        print(f" - Hojas creadas: {wb.sheetnames}")
+        print(f" - Clientes exportados: {ws_cli.max_row - 1}")
+        print(f" - Productos exportados: {ws_prod.max_row - 1}")
+        print(f" - Proveedores exportados: {ws_prov.max_row - 1}")
+        print(f" - Cotizaciones exportadas: {ws_cot.max_row - 1}")
+        print(f" - Ventas exportadas: {ws_vta.max_row - 1}")
 
 if __name__ == '__main__':
     unittest.main()

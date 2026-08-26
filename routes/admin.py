@@ -977,7 +977,7 @@ def register_routes(app):
     @admin_required
     def exportar_respaldo_empresa():
         try:
-            from utils.backup import exportar_datos_empresa_dict
+            from utils.backup import generar_respaldo_empresa_excel
             user_id = session.get('user_id')
             user_rol = session.get('user_rol')
 
@@ -990,33 +990,28 @@ def register_routes(app):
             elif user_rol == 'standard':
                 target_admin_id = session.get('creador_id') or user_id
 
-            datos = exportar_datos_empresa_dict(target_admin_id)
-            if not datos:
+            excel_bytes, filename = generar_respaldo_empresa_excel(target_admin_id)
+            if not excel_bytes:
                 flash('No se encontraron datos para exportar de esta empresa.', 'danger')
                 return redirect(url_for('dashboard'))
 
-            empresa_raw = datos['metadata_respaldo']['empresa']['nombre']
-            empresa_clean = re.sub(r'[^a-zA-Z0-9_-]', '_', empresa_raw)
-            fecha_clean = datetime.now().strftime("%Y%m%d_%H%M%S")
-            filename = f"respaldo_empresa_{empresa_clean}_{fecha_clean}.json"
-
             registrar_log(
                 usuario_id=user_id,
-                accion="exportar_respaldo_empresa",
-                detalle={"empresa": empresa_raw, "target_admin_id": target_admin_id, "filename": filename}
+                accion="exportar_respaldo_empresa_excel",
+                detalle={"target_admin_id": target_admin_id, "filename": filename}
             )
 
             response = Response(
-                json.dumps(datos, indent=2, ensure_ascii=False, default=str),
-                mimetype="application/json; charset=utf-8",
+                excel_bytes,
+                mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                 headers={
                     "Content-Disposition": f"attachment; filename={filename}"
                 }
             )
             return response
         except Exception as e:
-            app.logger.error(f"Error exportando respaldo de empresa: {str(e)}")
-            flash(f"Error al generar la copia de seguridad: {str(e)}", 'danger')
+            app.logger.error(f"Error exportando respaldo Excel de empresa: {str(e)}")
+            flash(f"Error al generar la copia de seguridad en Excel: {str(e)}", 'danger')
             return redirect(url_for('dashboard'))
 
     @app.route('/admin/respaldos')

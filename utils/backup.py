@@ -1,7 +1,12 @@
 import os
 import shutil
 import sqlite3
+import io
+import re
 from datetime import datetime
+import openpyxl
+from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+from openpyxl.utils import get_column_letter
 
 def get_backup_dir():
     folder = os.environ.get('BACKUP_DIR', 'respaldo')
@@ -363,3 +368,238 @@ def exportar_datos_empresa_dict(admin_id, conexion=None):
     finally:
         if close_conn:
             conexion.close()
+
+def generar_respaldo_empresa_excel(admin_id, conexion=None):
+    """
+    Genera un archivo Excel (.xlsx) estructurado en memoria (BytesIO)
+    con las pestañas: RESUMEN, CLIENTES, PRODUCTOS, PROVEEDORES, COTIZACIONES, VENTAS.
+    """
+    datos = exportar_datos_empresa_dict(admin_id, conexion=conexion)
+    if not datos:
+        return None, None
+
+    wb = openpyxl.Workbook()
+    # Eliminar hoja por defecto
+    if "Sheet" in wb.sheetnames:
+        wb.remove(wb["Sheet"])
+
+    # Estilos corporativos elegantes
+    header_fill = PatternFill(start_color="1E3A8A", end_color="1E3A8A", fill_type="solid") # Azul oscuro elegante
+    header_font = Font(name="Calibri", size=11, bold=True, color="FFFFFF")
+    title_font = Font(name="Calibri", size=14, bold=True, color="1E3A8A")
+    subtitle_font = Font(name="Calibri", size=10, italic=True, color="555555")
+    bold_font = Font(name="Calibri", size=11, bold=True)
+    regular_font = Font(name="Calibri", size=10)
+
+    thin_border = Border(
+        left=Side(style='thin', color='D9D9D9'),
+        right=Side(style='thin', color='D9D9D9'),
+        top=Side(style='thin', color='D9D9D9'),
+        bottom=Side(style='thin', color='D9D9D9')
+    )
+
+    def aplicar_formato_tabla(ws, headers, rows):
+        ws.append(headers)
+        for col_num in range(1, len(headers) + 1):
+            cell = ws.cell(row=1, column=col_num)
+            cell.fill = header_fill
+            cell.font = header_font
+            cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+
+        for row_idx, r in enumerate(rows, start=2):
+            ws.append(r)
+            for col_num in range(1, len(r) + 1):
+                c = ws.cell(row=row_idx, column=col_num)
+                c.font = regular_font
+                c.border = thin_border
+                c.alignment = Alignment(vertical="center")
+
+        for col in ws.columns:
+            max_len = 0
+            col_letter = get_column_letter(col[0].column)
+            for cell in col:
+                val_str = str(cell.value or '')
+                if len(val_str) > max_len:
+                    max_len = len(val_str)
+            ws.column_dimensions[col_letter].width = min(max(max_len + 4, 12), 65)
+
+    # 1. PESTAÑA RESUMEN
+    ws_resumen = wb.create_sheet(title="RESUMEN")
+    meta = datos.get('metadata_respaldo', {})
+    empresa = meta.get('empresa', {})
+    gen_por = meta.get('generado_por', {})
+    stats = meta.get('resumen_estadisticas', {})
+
+    ws_resumen['A1'] = "COTIZAPRO - COPIA DE SEGURIDAD EMPRESARIAL"
+    ws_resumen['A1'].font = title_font
+    ws_resumen['A2'] = f"Generado el: {meta.get('fecha_exportacion', '')}"
+    ws_resumen['A2'].font = subtitle_font
+
+    resumen_data = [
+        ["", ""],
+        ["DATOS DE LA EMPRESA", ""],
+        ["Nombre / Razón Social:", empresa.get('nombre', '')],
+        ["NIT / CI:", empresa.get('nit', '') or 'S/N'],
+        ["Teléfono de Contacto:", empresa.get('telefono', '') or 'S/N'],
+        ["Administrador:", f"{gen_por.get('nombre', '')} ({gen_por.get('correo', '')})"],
+        ["Estado Suscripción:", empresa.get('estado_suscripcion', '')],
+        ["", ""],
+        ["RESUMEN DE REGISTROS RESPALDADOS", "CANTIDAD"],
+        ["Clientes Registrados", stats.get('total_clientes', 0)],
+        ["Productos en Inventario", stats.get('total_productos', 0)],
+        ["Proveedores Registrados", stats.get('total_proveedores', 0)],
+        ["Cotizaciones Emitidas", stats.get('total_cotizaciones', 0)],
+        ["Ventas Registradas", stats.get('total_ventas', 0)],
+        ["Miembros del Equipo", stats.get('miembros_equipo', 0)],
+        ["Tareas del Sistema", stats.get('total_tareas', 0)]
+    ]
+    for row in resumen_data:
+        ws_resumen.append(row)
+
+    ws_resumen.column_dimensions['A'].width = 34
+    ws_resumen.column_dimensions['B'].width = 45
+
+    # 2. PESTAÑA CLIENTES
+    ws_cli = wb.create_sheet(title="CLIENTES")
+    cli_headers = ["ID", "Código", "Nombre / Razón Social", "NIT / CI", "Teléfono", "Correo", "Tipo Cliente"]
+    cli_rows = []
+    clientes_map = {}
+    for c in datos.get('clientes', []):
+        clientes_map[c.get('id')] = c.get('nombre', 'Cliente Desconocido')
+        cli_rows.append([
+            c.get('id', ''),
+            c.get('codigo_cliente') or f"CLI-{c.get('id', '')}",
+            c.get('nombre', ''),
+            c.get('nit', '') or 'S/N',
+            c.get('telefono', '') or 'S/N',
+            c.get('correo', '') or 'S/N',
+            c.get('tipo_cliente', 'normal').capitalize()
+        ])
+    aplicar_formato_tabla(ws_cli, cli_headers, cli_rows)
+
+    # 3. PESTAÑA PRODUCTOS
+    ws_prod = wb.create_sheet(title="PRODUCTOS")
+    prod_headers = [
+        "ID", "Código", "Descripción / Nombre", "Marca", "Unidad (UM)",
+        "Moneda (TM)", "Stock Físico", "Precio Unitario (Bs.)", "Precio Total (Bs.)",
+        "Categoría", "Proveedor", "Última Actualización"
+    ]
+    prod_rows = []
+    for p in datos.get('productos', []):
+        prod_rows.append([
+            p.get('id', ''),
+            p.get('codigo', ''),
+            p.get('descripcion', ''),
+            p.get('marca', '') or 'General',
+            p.get('um', 'Pza'),
+            p.get('tm', 'Bs'),
+            p.get('stock_fisico', 0),
+            p.get('precio_unitario', 0.0),
+            p.get('precio_total', 0.0),
+            p.get('categoria', '') or 'General',
+            p.get('proveedor', '') or 'N/A',
+            str(p.get('fecha_actualizacion', '') or '')
+        ])
+    aplicar_formato_tabla(ws_prod, prod_headers, prod_rows)
+
+    # 4. PESTAÑA PROVEEDORES
+    ws_prov = wb.create_sheet(title="PROVEEDORES")
+    prov_headers = [
+        "ID", "Empresa / Razón Social", "NIT / RUC", "Persona de Contacto",
+        "Teléfono", "Correo Electrónico", "Dirección", "Rubro", "Fecha Registro"
+    ]
+    prov_rows = []
+    for pr in datos.get('proveedores', []):
+        prov_rows.append([
+            pr.get('id', ''),
+            pr.get('nombre', ''),
+            pr.get('nit_ruc', '') or 'S/N',
+            pr.get('contacto_nombre', '') or 'S/N',
+            pr.get('telefono', '') or 'S/N',
+            pr.get('correo', '') or 'S/N',
+            pr.get('direccion', '') or 'S/N',
+            pr.get('rubro', '') or 'General',
+            str(pr.get('fecha_creacion', '') or '')
+        ])
+    aplicar_formato_tabla(ws_prov, prov_headers, prov_rows)
+
+    # 5. PESTAÑA COTIZACIONES
+    ws_cot = wb.create_sheet(title="COTIZACIONES")
+    cot_headers = [
+        "ID Cotización", "Fecha", "ID Cliente", "Nombre Cliente",
+        "Estado", "Subtotal (Bs.)", "Descuento (%)", "Descuento (Bs.)",
+        "Total (Bs.)", "Detalle de Productos e Ítems Cotizados"
+    ]
+    cot_rows = []
+    for ct in datos.get('cotizaciones', []):
+        c_id = ct.get('cliente_id')
+        c_nombre = clientes_map.get(c_id, f"Cliente #{c_id}")
+        
+        items_list = []
+        for it in ct.get('items', []):
+            cant = it.get('cantidad', 1)
+            codigo = it.get('producto_codigo') or ''
+            desc = it.get('producto_descripcion') or 'Item'
+            item_desc = f"[{codigo}] {desc}" if codigo else desc
+            pu = it.get('precio_unitario', 0.0)
+            sub = it.get('subtotal', 0.0)
+            items_list.append(f"{cant}x {item_desc} (PU: Bs.{pu:.2f} | Sub: Bs.{sub:.2f})")
+        items_str = " // ".join(items_list) if items_list else "Sin detalle"
+
+        cot_rows.append([
+            ct.get('id', ''),
+            str(ct.get('fecha', '') or ''),
+            c_id,
+            c_nombre,
+            str(ct.get('estado', 'pendiente')).upper(),
+            ct.get('subtotal', 0.0),
+            ct.get('descuento_porcentaje', 0.0),
+            ct.get('descuento_monto', 0.0),
+            ct.get('total', 0.0),
+            items_str
+        ])
+    aplicar_formato_tabla(ws_cot, cot_headers, cot_rows)
+
+    # 6. PESTAÑA VENTAS
+    ws_vta = wb.create_sheet(title="VENTAS")
+    vta_headers = [
+        "ID Venta", "Código Venta", "Fecha", "Vendedor ID",
+        "Método de Pago", "Estado Pago", "Total (Bs.)",
+        "Detalle de Productos Vendidos", "Notas"
+    ]
+    vta_rows = []
+    for vt in datos.get('ventas', []):
+        items_list = []
+        for it in vt.get('items', []):
+            cant = it.get('cantidad', 1)
+            codigo = it.get('producto_codigo') or ''
+            desc = it.get('producto_descripcion') or 'Item'
+            item_desc = f"[{codigo}] {desc}" if codigo else desc
+            pu = it.get('precio_unitario', 0.0)
+            sub = it.get('subtotal', 0.0)
+            items_list.append(f"{cant}x {item_desc} (PU: Bs.{pu:.2f} | Sub: Bs.{sub:.2f})")
+        items_str = " // ".join(items_list) if items_list else "Sin detalle"
+
+        vta_rows.append([
+            vt.get('id', ''),
+            vt.get('codigo_venta', f"VTA-{vt.get('id', '')}"),
+            str(vt.get('fecha', '') or ''),
+            vt.get('vendedor_id', ''),
+            str(vt.get('metodo_pago', 'efectivo')).upper(),
+            str(vt.get('estado_pago', 'completado')).upper(),
+            vt.get('total', 0.0),
+            items_str,
+            vt.get('notas', '') or ''
+        ])
+    aplicar_formato_tabla(ws_vta, vta_headers, vta_rows)
+
+    # Guardar en buffer BytesIO
+    output = io.BytesIO()
+    wb.save(output)
+    output.seek(0)
+
+    empresa_clean = re.sub(r'[^a-zA-Z0-9_-]', '_', empresa.get('nombre', 'Empresa'))
+    fecha_clean = datetime.now().strftime("%Y%m%d_%H%M%S")
+    filename = f"respaldo_empresa_{empresa_clean}_{fecha_clean}.xlsx"
+
+    return output.getvalue(), filename

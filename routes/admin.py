@@ -1,4 +1,4 @@
-from flask import Flask, flash, render_template, request, redirect, session, url_for, make_response, jsonify, send_from_directory
+from flask import Flask, flash, render_template, request, redirect, session, url_for, make_response, jsonify, send_from_directory, Response
 from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
 import pdfkit
@@ -12,6 +12,7 @@ import sqlite3
 import random
 import string
 import secrets
+import re
 from db_wrapper import get_db_connection
 from sqlite3 import connect  # Esta es la importación que faltaba
 from markupsafe import Markup
@@ -969,7 +970,55 @@ def register_routes(app):
         except Exception as e:
             app.logger.error(f"Error al obtener usuario {id}: {str(e)}")
             return jsonify({'error': 'Error del servidor'}), 500
-    
+
+    @app.route('/empresa/respaldo/exportar')
+    @app.route('/admin/empresa/respaldo')
+    @login_required
+    @admin_required
+    def exportar_respaldo_empresa():
+        try:
+            from utils.backup import exportar_datos_empresa_dict
+            user_id = session.get('user_id')
+            user_rol = session.get('user_rol')
+
+            target_admin_id = user_id
+            if user_rol == 'superadmin' and request.args.get('admin_id'):
+                try:
+                    target_admin_id = int(request.args.get('admin_id'))
+                except ValueError:
+                    target_admin_id = user_id
+            elif user_rol == 'standard':
+                target_admin_id = session.get('creador_id') or user_id
+
+            datos = exportar_datos_empresa_dict(target_admin_id)
+            if not datos:
+                flash('No se encontraron datos para exportar de esta empresa.', 'danger')
+                return redirect(url_for('dashboard'))
+
+            empresa_raw = datos['metadata_respaldo']['empresa']['nombre']
+            empresa_clean = re.sub(r'[^a-zA-Z0-9_-]', '_', empresa_raw)
+            fecha_clean = datetime.now().strftime("%Y%m%d_%H%M%S")
+            filename = f"respaldo_empresa_{empresa_clean}_{fecha_clean}.json"
+
+            registrar_log(
+                usuario_id=user_id,
+                accion="exportar_respaldo_empresa",
+                detalle={"empresa": empresa_raw, "target_admin_id": target_admin_id, "filename": filename}
+            )
+
+            response = Response(
+                json.dumps(datos, indent=2, ensure_ascii=False, default=str),
+                mimetype="application/json; charset=utf-8",
+                headers={
+                    "Content-Disposition": f"attachment; filename={filename}"
+                }
+            )
+            return response
+        except Exception as e:
+            app.logger.error(f"Error exportando respaldo de empresa: {str(e)}")
+            flash(f"Error al generar la copia de seguridad: {str(e)}", 'danger')
+            return redirect(url_for('dashboard'))
+
     @app.route('/admin/respaldos')
     @login_required
     @superadmin_required

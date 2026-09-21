@@ -705,6 +705,114 @@
   </div>
   </form>
 
+  <!-- ====================================================================
+       MODAL PROFESIONAL: AGREGAR PRODUCTO AL CARRITO (Colores Claros y Neutros)
+       ==================================================================== -->
+  <div class="modal fade" id="modalAgregarCarrito" tabindex="-1" aria-labelledby="modalAgregarCarritoLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 440px; margin: 1.25rem auto;">
+      <div class="modal-content border-0 shadow-lg" style="border-radius: 20px; overflow: hidden; background: #ffffff; border: 1px solid rgba(0,0,0,0.08) !important;">
+        
+        <!-- Header Claro & Neutro -->
+        <div class="modal-header px-4 py-3" style="background: #ffffff; border-bottom: 1px solid #f1f5f9;">
+          <div class="d-flex align-items-center gap-2">
+            <div class="d-flex align-items-center justify-content-center rounded-circle" 
+                 style="width: 38px; height: 38px; background: #f8fafc; color: #334155; border: 1px solid #e2e8f0;">
+              <i class="bi bi-cart-plus fs-5"></i>
+            </div>
+            <div>
+              <h5 class="modal-title fw-bold mb-0" id="modalAgregarCarritoLabel" style="font-size: 1.05rem; color: #1e293b; letter-spacing: -0.2px;">
+                Agregar a la Cotización
+              </h5>
+              <span class="text-muted" style="font-size: 0.78rem;">Indica las unidades requeridas</span>
+            </div>
+          </div>
+          <button type="button" class="btn-close shadow-none" data-bs-dismiss="modal" aria-label="Cerrar" style="font-size: 0.8rem;"></button>
+        </div>
+
+        <!-- Body -->
+        <div class="modal-body p-4 pt-3">
+          <!-- Tarjeta Resumen del Producto -->
+          <div class="p-3 mb-3 rounded-3" style="background: #f8fafc; border: 1px solid #e2e8f0;">
+            <div class="d-flex justify-content-between align-items-center mb-1">
+              <span class="badge bg-white text-dark border px-2 py-1 font-monospace" style="font-size: 0.8rem; font-weight: 600;">
+                <i class="bi bi-upc-scan text-muted me-1"></i><span id="modal-item-codigo">-</span>
+              </span>
+              <span class="badge px-2.5 py-1 fw-semibold" id="modal-item-stock-badge" style="background: #e2e8f0; color: #334155; font-size: 0.8rem;">
+                <i class="bi bi-boxes me-1"></i>Disp: <strong id="modal-item-stock-disp">0</strong>
+              </span>
+            </div>
+            <div class="fw-semibold mb-2" id="modal-item-descripcion" style="font-size: 0.92rem; line-height: 1.35; color: #0f172a;">-</div>
+            <div class="d-flex justify-content-between align-items-center small text-muted pt-2 border-top" style="border-color: #e2e8f0 !important;">
+              <span style="font-size: 0.82rem;">Precio Unitario:</span>
+              <strong class="fs-6" id="modal-item-precio" style="color: #0f172a;">Bs 0.00</strong>
+            </div>
+          </div>
+
+          <!-- Selector de Cantidad (Stepper) -->
+          <div class="mb-3 text-center">
+            <label class="form-label small fw-bold text-uppercase mb-2 d-block" style="font-size: 0.75rem; letter-spacing: 0.5px; color: #64748b;">
+              Cantidad de unidades
+            </label>
+            
+            <div class="d-flex align-items-center justify-content-center gap-2 mb-2">
+              <button type="button" class="btn btn-light border d-flex align-items-center justify-content-center" 
+                      id="btn-modal-qty-minus" 
+                      style="width: 46px; height: 46px; border-radius: 12px; background: #f8fafc; border-color: #cbd5e1; font-size: 1.25rem; color: #334155;"
+                      title="Disminuir">
+                <i class="bi bi-dash-lg"></i>
+              </button>
+              <input type="number" 
+                     id="modal-item-cantidad" 
+                     class="form-control text-center fw-bold shadow-none" 
+                     value="1" 
+                     min="1" 
+                     step="1"
+                     style="height: 48px; max-width: 130px; font-size: 1.4rem; border-radius: 12px; border: 2px solid #e2e8f0; color: #0f172a; background: #ffffff;" 
+                     autocomplete="off">
+              <button type="button" class="btn btn-light border d-flex align-items-center justify-content-center" 
+                      id="btn-modal-qty-plus" 
+                      style="width: 46px; height: 46px; border-radius: 12px; background: #f8fafc; border-color: #cbd5e1; font-size: 1.25rem; color: #334155;"
+                      title="Aumentar">
+                <i class="bi bi-plus-lg"></i>
+              </button>
+            </div>
+
+            <!-- Accesos rápidos de cantidad (+1, +5, +10, Máx) -->
+            <div class="d-flex justify-content-center gap-1.5 flex-wrap mt-2">
+              <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-2.5 py-0.5" style="font-size: 0.75rem; border-color: #cbd5e1;" onclick="ajustarCantidadModalRelativo(1)">+1</button>
+              <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-2.5 py-0.5" style="font-size: 0.75rem; border-color: #cbd5e1;" onclick="ajustarCantidadModalRelativo(5)">+5</button>
+              <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-2.5 py-0.5" style="font-size: 0.75rem; border-color: #cbd5e1;" onclick="ajustarCantidadModalRelativo(10)">+10</button>
+              <button type="button" class="btn btn-sm btn-outline-dark rounded-pill px-2.5 py-0.5 fw-semibold" id="btn-modal-qty-max" style="font-size: 0.75rem; border-color: #94a3b8;" onclick="fijarCantidadModalMax()">Máx</button>
+            </div>
+          </div>
+
+          <!-- Subtotal Estimado Dinámico -->
+          <div class="d-flex justify-content-between align-items-center p-2.5 rounded-3 mb-2" style="background: #f1f5f9; border: 1px solid #e2e8f0;">
+            <span class="small fw-semibold" style="color: #475569; font-size: 0.85rem;">Subtotal estimado:</span>
+            <span class="fs-6 fw-bold" id="modal-item-subtotal" style="color: #0f172a;">Bs 0.00</span>
+          </div>
+
+          <!-- Información de unidades ya añadidas y advertencias -->
+          <div id="modal-item-alerta-carrito" class="small text-muted d-none text-center mb-1" style="font-size: 0.8rem;">
+            <i class="bi bi-info-circle text-primary me-1"></i>Ya tienes <strong id="modal-item-en-carrito">0</strong> en la lista
+          </div>
+          <div id="modal-item-error" class="alert alert-danger py-2 px-3 small text-center mb-0 d-none" role="alert" style="border-radius: 10px; font-size: 0.82rem;"></div>
+        </div>
+
+        <!-- Footer Claro & Neutro -->
+        <div class="modal-footer px-4 py-3 border-0 d-flex gap-2 justify-content-end" style="background: #ffffff; border-top: 1px solid #f1f5f9;">
+          <button type="button" class="btn btn-light border text-secondary px-3.5 py-2 rounded-3 fw-semibold" data-bs-dismiss="modal" style="font-size: 0.88rem; min-height: 42px;">
+            Cancelar
+          </button>
+          <button type="button" class="btn btn-dark px-4 py-2 rounded-3 fw-semibold d-flex align-items-center gap-2 shadow-sm" id="btn-modal-confirmar-agregar" style="background: #1e293b; border-color: #1e293b; font-size: 0.88rem; min-height: 42px;">
+            <i class="bi bi-check2-circle fs-6"></i> Confirmar y Agregar
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
   <hr class="my-5">
 
   <!-- Filtros de búsqueda y Cotizaciones Registradas -->
@@ -850,41 +958,172 @@
     mostrarOcultarCarritoVacio();
   }
 
-  // Función para agregar producto
+  // ====================================================================
+  // SISTEMA PROFESIONAL DE MODAL PARA AGREGAR PRODUCTOS AL CARRITO
+  // ====================================================================
+  let productoModalActual = null;
+  let modalAgregarCarritoBS = null;
+
+  // Función para abrir el modal de agregar producto
   function agregarAlCarrito(id, codigo, descripcion, precio, stockDisponible) {
-    let cantidad = prompt(`¿Cuántas unidades de ${codigo} desea agregar? (Disp: ${stockDisponible})`, "1");
-    if (cantidad === null) return;
-    cantidad = parseInt(cantidad);
-    if (isNaN(cantidad) || cantidad < 1) {
-      alert('Cantidad inválida');
-      return;
-    }
-    
-    // Validar stock disponible
-    stockDisponible = parseFloat(stockDisponible);
     const isAdmin = {{ 'true' if session.get('user_rol') == 'superadmin' else 'false' }};
-    
+    const stockDispNum = parseFloat(stockDisponible) || 0;
+    const precioNum = parseFloat(precio) || 0;
+
     // Obtener cantidad que ya está en el carrito
-    let cantidadEnCarrito = 0;
-    const existe = productosSeleccionados.find(p => p.id === id);
-    if (existe) {
-      cantidadEnCarrito = existe.cantidad;
-    }
+    const existe = productosSeleccionados.find(p => String(p.id) === String(id));
+    const yaEnCarrito = existe ? parseInt(existe.cantidad) || 0 : 0;
+    const stockRestante = isAdmin ? 999999 : Math.max(0, stockDispNum - yaEnCarrito);
+
+    productoModalActual = {
+      id: id,
+      codigo: codigo,
+      descripcion: descripcion,
+      precio: precioNum,
+      stockDisponible: stockDispNum,
+      stockRestante: stockRestante,
+      yaEnCarrito: yaEnCarrito,
+      isAdmin: isAdmin
+    };
+
+    // Poblar datos en el modal
+    const elCodigo = document.getElementById('modal-item-codigo');
+    const elDesc = document.getElementById('modal-item-descripcion');
+    const elPrecio = document.getElementById('modal-item-precio');
+    const elStock = document.getElementById('modal-item-stock-disp');
     
-    if (!isAdmin && (cantidad + cantidadEnCarrito) > stockDisponible) {
-      alert(`No puedes agregar esa cantidad. Stock disponible: ${stockDisponible}, Ya en carrito: ${cantidadEnCarrito}`);
+    if (elCodigo) elCodigo.textContent = codigo;
+    if (elDesc) elDesc.textContent = descripcion;
+    if (elPrecio) elPrecio.textContent = `Bs ${precioNum.toFixed(2)}`;
+    if (elStock) elStock.textContent = stockDispNum;
+    
+    // Indicador de unidades que ya están en el carrito
+    const alertaCarrito = document.getElementById('modal-item-alerta-carrito');
+    const elEnCarrito = document.getElementById('modal-item-en-carrito');
+    if (alertaCarrito && elEnCarrito) {
+      if (yaEnCarrito > 0) {
+        elEnCarrito.textContent = yaEnCarrito;
+        alertaCarrito.classList.remove('d-none');
+      } else {
+        alertaCarrito.classList.add('d-none');
+      }
+    }
+
+    // Input de cantidad
+    const inputCant = document.getElementById('modal-item-cantidad');
+    if (inputCant) {
+      inputCant.value = stockRestante > 0 || isAdmin ? "1" : "0";
+    }
+
+    // Limpiar error previo
+    const divError = document.getElementById('modal-item-error');
+    if (divError) {
+      divError.classList.add('d-none');
+      divError.textContent = '';
+    }
+
+    // Recalcular subtotal
+    actualizarSubtotalModal();
+
+    // Instanciar y abrir modal Bootstrap
+    const modalEl = document.getElementById('modalAgregarCarrito');
+    if (modalEl && window.bootstrap) {
+      modalAgregarCarritoBS = bootstrap.Modal.getOrCreateInstance(modalEl);
+      modalAgregarCarritoBS.show();
+    }
+
+    setTimeout(() => {
+      if (inputCant) {
+        inputCant.focus();
+        inputCant.select();
+      }
+    }, 300);
+  }
+
+  function actualizarSubtotalModal() {
+    if (!productoModalActual) return;
+    const inputCant = document.getElementById('modal-item-cantidad');
+    let cant = parseInt(inputCant ? inputCant.value : 0) || 0;
+    const divSubtotal = document.getElementById('modal-item-subtotal');
+    const divError = document.getElementById('modal-item-error');
+    const btnConfirmar = document.getElementById('btn-modal-confirmar-agregar');
+
+    const subtotal = Math.max(0, cant) * productoModalActual.precio;
+    if (divSubtotal) {
+      divSubtotal.textContent = `Bs ${subtotal.toFixed(2)}`;
+    }
+
+    let errorMsg = '';
+    if (cant < 1) {
+      errorMsg = 'Debes ingresar una cantidad válida (mínimo 1).';
+    } else if (!productoModalActual.isAdmin && (cant + productoModalActual.yaEnCarrito) > productoModalActual.stockDisponible) {
+      errorMsg = `Supera el stock disponible (${productoModalActual.stockDisponible}). Máximo posible a agregar: ${productoModalActual.stockRestante}`;
+    }
+
+    if (divError && btnConfirmar) {
+      if (errorMsg) {
+        divError.textContent = errorMsg;
+        divError.classList.remove('d-none');
+        btnConfirmar.disabled = true;
+      } else {
+        divError.classList.add('d-none');
+        divError.textContent = '';
+        btnConfirmar.disabled = false;
+      }
+    }
+  }
+
+  function ajustarCantidadModalRelativo(delta) {
+    if (!productoModalActual) return;
+    const inputCant = document.getElementById('modal-item-cantidad');
+    if (!inputCant) return;
+    let actual = parseInt(inputCant.value) || 0;
+    let nuevo = actual + delta;
+    if (nuevo < 1) nuevo = 1;
+    if (!productoModalActual.isAdmin && nuevo > productoModalActual.stockRestante) {
+      nuevo = Math.max(1, productoModalActual.stockRestante);
+    }
+    inputCant.value = nuevo;
+    actualizarSubtotalModal();
+  }
+
+  function fijarCantidadModalMax() {
+    if (!productoModalActual) return;
+    const inputCant = document.getElementById('modal-item-cantidad');
+    if (!inputCant) return;
+    if (productoModalActual.isAdmin) {
+      inputCant.value = 100;
+    } else {
+      inputCant.value = Math.max(1, productoModalActual.stockRestante);
+    }
+    actualizarSubtotalModal();
+  }
+
+  function confirmarAgregarDesdeModal() {
+    if (!productoModalActual) return;
+    const inputCant = document.getElementById('modal-item-cantidad');
+    const cantidad = parseInt(inputCant ? inputCant.value : 0);
+    
+    if (isNaN(cantidad) || cantidad < 1) {
+      actualizarSubtotalModal();
       return;
     }
 
+    if (!productoModalActual.isAdmin && (cantidad + productoModalActual.yaEnCarrito) > productoModalActual.stockDisponible) {
+      actualizarSubtotalModal();
+      return;
+    }
+
+    const existe = productosSeleccionados.find(p => String(p.id) === String(productoModalActual.id));
     if (existe) {
       existe.cantidad += cantidad;
       actualizarProductoEnDOM(existe);
     } else {
       const nuevoProducto = {
-        id: id,
-        codigo: codigo,
-        descripcion: descripcion,
-        precio: parseFloat(precio),
+        id: productoModalActual.id,
+        codigo: productoModalActual.codigo,
+        descripcion: productoModalActual.descripcion,
+        precio: parseFloat(productoModalActual.precio),
         cantidad: cantidad,
         uniqueId: ++contadorProductos
       };
@@ -895,8 +1134,33 @@
     actualizarTotal();
     mostrarOcultarCarritoVacio();
     guardarEstadoCarrito();
-    mostrarNotificacion(`${codigo} agregado al carrito`, 'success');
+    mostrarNotificacion(`${productoModalActual.codigo} (${cantidad} unid.) agregado al carrito`, 'success');
+
+    if (modalAgregarCarritoBS) {
+      modalAgregarCarritoBS.hide();
+    }
   }
+
+  // Vincular eventos del modal al cargar el DOM
+  document.addEventListener('DOMContentLoaded', function() {
+    const btnMinus = document.getElementById('btn-modal-qty-minus');
+    const btnPlus = document.getElementById('btn-modal-qty-plus');
+    const inputCant = document.getElementById('modal-item-cantidad');
+    const btnConfirmar = document.getElementById('btn-modal-confirmar-agregar');
+
+    if (btnMinus) btnMinus.addEventListener('click', () => ajustarCantidadModalRelativo(-1));
+    if (btnPlus) btnPlus.addEventListener('click', () => ajustarCantidadModalRelativo(1));
+    if (inputCant) {
+      inputCant.addEventListener('input', actualizarSubtotalModal);
+      inputCant.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          confirmarAgregarDesdeModal();
+        }
+      });
+    }
+    if (btnConfirmar) btnConfirmar.addEventListener('click', confirmarAgregarDesdeModal);
+  });
 
   // Función para agregar producto al DOM
   function agregarProductoAlDOM(producto) {

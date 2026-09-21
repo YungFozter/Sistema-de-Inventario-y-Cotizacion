@@ -336,12 +336,23 @@ def register_routes(app):
             if rol == 'admin':
                 session['trial_usadas'] = trial_usadas or 0
                 session['trial_activo'] = (not suscripcion_activa)
+                session['suscripcion_activa'] = suscripcion_activa
                 session['creador_id'] = None
             elif rol == 'standard':
                 session['creador_id'] = cliente['creador_id'] if cliente else None
                 session['trial_activo'] = False
+                creador_venc = cliente['creador_fecha_vencimiento'] if (cliente and 'creador_fecha_vencimiento' in cliente.keys()) else None
+                suscrip_creador = False
+                if creador_venc:
+                    try:
+                        venc_dt = datetime.strptime(str(creador_venc).split('.')[0], '%Y-%m-%d %H:%M:%S')
+                        suscrip_creador = venc_dt > datetime.now()
+                    except Exception:
+                        pass
+                session['suscripcion_activa'] = suscrip_creador
             else:
                 session['trial_activo'] = False
+                session['suscripcion_activa'] = True
 
             if es_nuevo_registro:
                 flash('¡Bienvenido a COTIZAPro! Tu cuenta fue creada exitosamente.', 'success')
@@ -474,26 +485,7 @@ def register_routes(app):
                     error = 'La suscripción del Administrador principal ha sido suspendida. Por favor, contacta a tu superior.'
                     return render_template('autenticacion/login.html', error=error, tipo=tipo_login)
 
-                # 3. Verificar si la suscripción venció (Para Admins o Vendedores)
-                from datetime import datetime
-                ahora = datetime.now()
-
-                if cliente['rol'] == 'admin' and cliente['fecha_vencimiento_suscripcion']:
-                    vence_str = str(cliente['fecha_vencimiento_suscripcion']).split('.')[0]
-                    vence = datetime.strptime(vence_str, '%Y-%m-%d %H:%M:%S')
-                    if ahora > vence:
-                        conexion.close()
-                        error = 'Tu suscripción ha vencido. Por favor, contacta a soporte para renovarla.'
-                        return render_template('autenticacion/login.html', error=error, tipo=tipo_login)
-                    
-                if cliente['creador_id'] and cliente['creador_fecha_vencimiento']:
-                    vence_str = str(cliente['creador_fecha_vencimiento']).split('.')[0]
-                    vence = datetime.strptime(vence_str, '%Y-%m-%d %H:%M:%S')
-                    if ahora > vence:
-                        conexion.close()
-                        error = 'La suscripción del Administrador principal ha vencido. Por favor, contacta a tu superior.'
-                        return render_template('autenticacion/login.html', error=error, tipo=tipo_login)
-
+                # 3. Estado de suscripción (no bloquea el login; el estado activo/inactivo se guarda en sesión)
                 rol = cliente['rol']
 
                 # Registrar login exitoso
@@ -548,12 +540,23 @@ def register_routes(app):
                             pass
                     session['trial_usadas'] = trial_usadas or 0
                     session['trial_activo'] = (not suscripcion_activa)
+                    session['suscripcion_activa'] = suscripcion_activa
                     session['creador_id'] = None
                 elif rol == 'standard':
                     session['creador_id'] = cliente['creador_id']
                     session['trial_activo'] = False
+                    creador_venc = cliente['creador_fecha_vencimiento'] if (cliente and 'creador_fecha_vencimiento' in cliente.keys()) else None
+                    suscrip_creador = False
+                    if creador_venc:
+                        try:
+                            venc_dt = datetime.strptime(str(creador_venc).split('.')[0], '%Y-%m-%d %H:%M:%S')
+                            suscrip_creador = venc_dt > datetime.now()
+                        except Exception:
+                            pass
+                    session['suscripcion_activa'] = suscrip_creador
                 else:
                     session['trial_activo'] = False
+                    session['suscripcion_activa'] = True
 
                 # Redirigir según el rol
                 if rol == 'superadmin':

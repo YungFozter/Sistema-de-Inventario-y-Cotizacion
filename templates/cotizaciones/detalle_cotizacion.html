@@ -3,14 +3,33 @@
 {% block titulo %}Detalle de Cotización{% endblock %}
 
 {% block contenido %}
-<div class="container mt-4">
-    <div class="card shadow">
-        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-            <h2 class="mb-0">
-                <i class="bi bi-file-earmark-text me-2"></i>
-                Detalle de Cotización #{{ cotizacion[0] }}
-            </h2>
-            <span class="badge bg-light text-dark fs-5">
+<div class="container mt-4 mb-5">
+    <!-- Barra Superior de Navegación Rápida -->
+    <div class="d-flex align-items-center justify-content-between mb-3">
+        <button type="button" 
+                class="btn btn-outline-secondary btn-sm rounded-pill px-3 py-1.5 fw-semibold d-inline-flex align-items-center gap-1.5 shadow-sm bg-white text-secondary" 
+                onclick="volverAtras()" 
+                title="Volver a la ubicación anterior">
+            <i class="bi bi-arrow-left"></i> Volver
+        </button>
+        <span class="text-muted small fw-semibold">Cotización #{{ cotizacion[0] }}</span>
+    </div>
+
+    <div class="card shadow border-0 rounded-4 overflow-hidden">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center flex-wrap gap-2 py-3 px-3 px-md-4">
+            <div class="d-flex align-items-center gap-2 gap-md-3">
+                <button type="button" 
+                        class="btn btn-light btn-sm rounded-pill px-3 py-1.5 fw-bold text-primary d-inline-flex align-items-center gap-1.5 shadow-sm border-0" 
+                        onclick="volverAtras()" 
+                        title="Volver a la ubicación anterior">
+                    <i class="bi bi-arrow-left fw-bold"></i> Volver
+                </button>
+                <h2 class="mb-0 fs-4 fw-bold text-white d-flex align-items-center">
+                    <i class="bi bi-file-earmark-text me-2 d-none d-sm-inline"></i>
+                    Detalle de Cotización #{{ cotizacion[0] }}
+                </h2>
+            </div>
+            <span class="badge bg-light text-dark fs-6 px-3 py-2 rounded-pill shadow-sm">
                 {% if cotizacion[7] == 'pendiente' %}
                     <i class="bi bi-hourglass-split text-warning"></i> Pendiente
                 {% elif cotizacion[7] == 'aprobada' %}
@@ -157,34 +176,34 @@
             
             <!-- Botones de acción -->
             <div class="mt-4 d-flex gap-2 align-items-center flex-wrap">
-                <a href="{{ url_for('gestion_cotizaciones') }}" class="btn btn-outline-secondary">
-                    <i class="bi bi-arrow-left me-1"></i> Volver a Cotizaciones
-                </a>
-                <a href="{{ url_for('pdf_cotizacion', id=cotizacion[0]) }}" class="btn btn-primary">
+                <button type="button" class="btn btn-outline-secondary rounded-pill px-3 py-2 fw-semibold d-inline-flex align-items-center gap-1.5" onclick="volverAtras()" title="Volver a la pantalla anterior">
+                    <i class="bi bi-arrow-left"></i> Volver
+                </button>
+                <a href="{{ url_for('pdf_cotizacion', id=cotizacion[0]) }}" class="btn btn-primary rounded-pill px-3 py-2 fw-semibold">
                     <i class="bi bi-file-pdf me-1"></i> Descargar PDF
                 </a>
-                <a href="{{ url_for('vista_previa_cotizacion', id=cotizacion[0]) }}" class="btn btn-info text-white" target="_blank">
+                <a href="{{ url_for('vista_previa_cotizacion', id=cotizacion[0]) }}" class="btn btn-info text-white rounded-pill px-3 py-2 fw-semibold" target="_blank">
                     <i class="bi bi-eye me-1"></i> Vista Previa
                 </a>
                 
-                <div class="ms-auto d-flex gap-2">
+                <div class="ms-auto d-flex gap-2 flex-wrap">
                     {% if cotizacion[7] == 'pendiente' %}
-                        <button class="btn btn-success" onclick="cambiarEstadoCotizacion({{ cotizacion[0] }}, 'aprobada')">
-                            <i class="bi bi-check-circle-fill"></i> Aprobar (Venta)
+                        <button class="btn btn-success rounded-pill px-3 py-2 fw-semibold" onclick="cambiarEstadoCotizacion({{ cotizacion[0] }}, 'aprobada')">
+                            <i class="bi bi-check-circle-fill me-1"></i> Aprobar (Venta)
                         </button>
-                        <button class="btn btn-danger" onclick="cambiarEstadoCotizacion({{ cotizacion[0] }}, 'rechazada')">
-                            <i class="bi bi-x-circle-fill"></i> Rechazar
+                        <button class="btn btn-danger rounded-pill px-3 py-2 fw-semibold" onclick="cambiarEstadoCotizacion({{ cotizacion[0] }}, 'rechazada')">
+                            <i class="bi bi-x-circle-fill me-1"></i> Rechazar
                         </button>
                     {% elif cotizacion[7] == 'aprobada' %}
-                        <button class="btn btn-warning text-dark fw-bold" onclick="cambiarEstadoCotizacion({{ cotizacion[0] }}, 'anulada')">
-                            <i class="bi bi-arrow-counterclockwise"></i> Anular / Devolver Stock
+                        <button class="btn btn-warning text-dark fw-bold rounded-pill px-3 py-2" onclick="cambiarEstadoCotizacion({{ cotizacion[0] }}, 'anulada')">
+                            <i class="bi bi-arrow-counterclockwise me-1"></i> Anular / Devolver Stock
                         </button>
                     {% elif cotizacion[7] in ['rechazada', 'anulada'] %}
-                        <button class="btn btn-outline-primary" onclick="cambiarEstadoCotizacion({{ cotizacion[0] }}, 'pendiente')">
-                            <i class="bi bi-arrow-return-left"></i> Restablecer a Pendiente
+                        <button class="btn btn-outline-primary rounded-pill px-3 py-2 fw-semibold" onclick="cambiarEstadoCotizacion({{ cotizacion[0] }}, 'pendiente')">
+                            <i class="bi bi-arrow-return-left me-1"></i> Restablecer a Pendiente
                         </button>
-                        <button class="btn btn-success" onclick="cambiarEstadoCotizacion({{ cotizacion[0] }}, 'aprobada')">
-                            <i class="bi bi-check-circle-fill"></i> Re-Aprobar (Venta)
+                        <button class="btn btn-success rounded-pill px-3 py-2 fw-semibold" onclick="cambiarEstadoCotizacion({{ cotizacion[0] }}, 'aprobada')">
+                            <i class="bi bi-check-circle-fill me-1"></i> Re-Aprobar (Venta)
                         </button>
                     {% endif %}
                 </div>
@@ -194,6 +213,31 @@
 </div>
 
 <script>
+// Función para volver a la ubicación exacta donde estaba el usuario anteriormente
+function volverAtras() {
+    if (document.referrer && document.referrer !== window.location.href) {
+        try {
+            const refUrl = new URL(document.referrer);
+            // Verificar que sea una URL de la misma aplicación
+            if (refUrl.origin === window.location.origin) {
+                window.history.back();
+                return;
+            }
+        } catch (e) {
+            // Error analizando referrer, continuar con fallback
+        }
+    }
+    
+    // Si el historial del navegador tiene páginas en la sesión
+    if (window.history.length > 1) {
+        window.history.back();
+        return;
+    }
+    
+    // Fallback si entró directo o en nueva pestaña
+    window.location.href = "{{ url_for('gestion_cotizaciones') }}";
+}
+
 function cambiarEstadoCotizacion(id, estado) {
     const mensajes = {
         'aprobada': 'aprobar (descontar del stock real)',

@@ -2,6 +2,11 @@
 
 {% block titulo %}Punto de Venta (POS) - COTIZAPro{% endblock %}
 
+{% block styles %}
+{{ super() }}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/ventas.css') }}">
+{% endblock %}
+
 {% block extra_css %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/ventas.css') }}">
 {% endblock %}
@@ -10,22 +15,27 @@
 <div class="container-fluid pos-container mt-3">
 
   <!-- ❶ HEADER DE SECCIÓN POS -->
-  <div class="pos-header d-flex flex-wrap align-items-center justify-content-between gap-3">
-    <div>
-      <div class="pos-title">
-        <i class="bi bi-cart-check-fill text-warning"></i> Punto de Venta Directa (POS)
-        <span class="pos-badge">Módulo de Ventas</span>
+  <div class="pos-header-card d-flex flex-wrap align-items-center justify-content-between gap-3">
+    <div class="d-flex align-items-center gap-3">
+      <div class="pos-header-icon shadow-sm">
+        <i class="bi bi-cart-check-fill"></i>
       </div>
-      <p class="text-muted small mb-0 mt-1">
-        Agrega productos directamente al carrito, procesa ventas al contado o crédito y descuenta stock en tiempo real.
-      </p>
+      <div>
+        <div class="d-flex align-items-center gap-2 flex-wrap">
+          <h2 class="pos-header-title mb-0">Punto de Venta Directa (POS)</h2>
+          <span class="pos-header-badge">Módulo de Ventas</span>
+        </div>
+        <p class="pos-header-desc">
+          Agrega productos directamente al carrito, procesa ventas al contado o crédito y descuenta stock en tiempo real.
+        </p>
+      </div>
     </div>
     <div class="d-flex align-items-center gap-2">
-      <button class="btn btn-outline-secondary btn-sm rounded-pill px-3" onclick="limpiarCarrito()">
-        <i class="bi bi-trash"></i> Vaciar Carrito
+      <button class="btn btn-outline-secondary btn-sm rounded-pill px-3.5 py-1.5 fw-semibold shadow-2xs" onclick="limpiarCarrito()" title="Vaciar todos los productos del carrito">
+        <i class="bi bi-trash me-1"></i> Vaciar Carrito
       </button>
-      <a href="#historial-ventas" class="btn btn-light btn-sm rounded-pill px-3 border">
-        <i class="bi bi-clock-history"></i> Historial de Ventas
+      <a href="#historial-ventas" class="btn btn-light border btn-sm rounded-pill px-3.5 py-1.5 fw-semibold text-secondary shadow-2xs" title="Ver historial de transacciones">
+        <i class="bi bi-clock-history me-1 text-primary"></i> Historial de Ventas
       </a>
     </div>
   </div>
@@ -34,18 +44,18 @@
     
     <!-- ❷ COLUMNA IZQUIERDA: CATÁLOGO DE PRODUCTOS -->
     <div class="col-lg-8 col-xl-8">
-      <div class="catalog-card p-3">
+      <div class="pos-catalog-card">
         
         <!-- Barra de herramientas: Búsqueda, Filtro Categoría y Acción Masiva -->
         <div class="row g-2 align-items-center mb-3">
           <div class="col-md-5">
-            <div class="input-group">
-              <span class="input-group-text bg-white border-end-0 rounded-start-3"><i class="bi bi-search text-muted"></i></span>
-              <input type="text" id="posSearchInput" class="form-control pos-search-input border-start-0" placeholder="Buscar por código, nombre o marca..." onkeyup="filtrarProductosPOS()">
+            <div class="input-group pos-search-group">
+              <span class="input-group-text bg-transparent border-0 text-muted ps-3 pe-1"><i class="bi bi-search"></i></span>
+              <input type="text" id="posSearchInput" class="form-control pos-search-input" placeholder="Buscar por código, nombre o marca..." onkeyup="filtrarProductosPOS()">
             </div>
           </div>
           <div class="col-md-4">
-            <select id="posCategoryFilter" class="form-select pos-search-input" onchange="filtrarProductosPOS()">
+            <select id="posCategoryFilter" class="form-select pos-filter-select" onchange="filtrarProductosPOS()">
               <option value="">Todas las Categorías</option>
               {% for cat in categorias %}
               <option value="{{ cat.nombre }}">{{ cat.nombre }}</option>
@@ -53,25 +63,25 @@
             </select>
           </div>
           <div class="col-md-3 text-end">
-            <button id="btnAddSelected" class="btn btn-warning btn-sm w-100 fw-bold rounded-3 shadow-sm py-2" onclick="agregarSeleccionadosAlCarrito()" disabled>
+            <button id="btnAddSelected" class="btn-pos-batch w-100" onclick="agregarSeleccionadosAlCarrito()" disabled>
               <i class="bi bi-check2-square"></i> Agregar (<span id="selectedCount">0</span>)
             </button>
           </div>
         </div>
 
         <!-- Tabla de Productos con Marcado Directo -->
-        <div class="pos-table-container border rounded-3">
+        <div class="pos-table-scroll">
           <table class="table pos-table align-middle">
             <thead>
               <tr>
-                <th style="width: 40px;" class="text-center">
-                  <input type="checkbox" id="selectAllCheckbox" class="pos-check-input" onchange="toggleSelectAllProductos(this)">
+                <th style="width: 44px;" class="text-center">
+                  <input type="checkbox" id="selectAllCheckbox" class="pos-check-box" onchange="toggleSelectAllProductos(this)" title="Seleccionar todos">
                 </th>
                 <th>Código / Producto</th>
                 <th>Marca</th>
                 <th class="text-center">Stock</th>
                 <th class="text-end">Precio Unit.</th>
-                <th class="text-center" style="width: 140px;">Acción Directa</th>
+                <th class="text-center" style="width: 145px;">Acción Directa</th>
               </tr>
             </thead>
             <tbody id="posProductTbody">
@@ -88,13 +98,13 @@
                   data-precio="{{ p.precio_unitario }}"
                   data-stock="{{ stock_disp|int }}">
                 <td class="text-center">
-                  <input type="checkbox" class="pos-check-input prod-checkbox" data-id="{{ p.id }}" onchange="actualizarContadorSeleccionados()">
+                  <input type="checkbox" class="pos-check-box prod-checkbox" data-id="{{ p.id }}" onchange="actualizarContadorSeleccionados()">
                 </td>
                 <td>
-                  <div class="fw-bold text-dark mb-0">{{ p.descripcion }}</div>
-                  <div class="text-muted small">Cód: <span class="badge bg-light text-dark border">{{ p.codigo }}</span> | {{ p.um or 'UN' }}</div>
+                  <div class="pos-prod-title">{{ p.descripcion }}</div>
+                  <div class="pos-prod-meta">Cód: <span class="badge bg-light text-dark border font-monospace">{{ p.codigo }}</span> <span class="text-muted">| {{ p.um or 'UN' }}</span></div>
                 </td>
-                <td><span class="text-muted small">{{ p.marca or 'Generico' }}</span></td>
+                <td><span class="text-secondary small fw-medium">{{ p.marca or 'Genérico' }}</span></td>
                 <td class="text-center">
                   {% if stock_disp > 5 %}
                     <span class="stock-pill stock-ok"><i class="bi bi-box-seam"></i> {{ stock_disp|int }} {{ p.um or 'UN' }}</span>
@@ -108,12 +118,13 @@
                   Bs. {{ "%.2f"|format(p.precio_unitario) }}
                 </td>
                 <td class="text-center">
-                  <div class="d-flex align-items-center justify-content-center gap-1">
-                    <button class="qty-btn" onclick="decrementarProdTabla({{ p.id }})">-</button>
-                    <input type="number" id="tbl-qty-{{ p.id }}" class="qty-input" value="1" min="1" max="{{ stock_disp|int if stock_disp > 0 else 1 }}">
-                    <button class="qty-btn" onclick="incrementarProdTabla({{ p.id }}, {{ stock_disp|int }})">+</button>
-                    <button class="btn btn-warning btn-sm rounded-2 ms-1 px-2 py-1" title="Agregar al carrito" 
-                            onclick="agregarDirectoAlCarrito(this)">
+                  <div class="d-flex align-items-center justify-content-center gap-1.5">
+                    <div class="pos-stepper">
+                      <button type="button" class="pos-stepper-btn" onclick="decrementarProdTabla({{ p.id }})" title="Restar">-</button>
+                      <input type="number" id="tbl-qty-{{ p.id }}" class="pos-stepper-input" value="1" min="1" max="{{ stock_disp|int if stock_disp > 0 else 1 }}">
+                      <button type="button" class="pos-stepper-btn" onclick="incrementarProdTabla({{ p.id }}, {{ stock_disp|int }})" title="Sumar">+</button>
+                    </div>
+                    <button type="button" class="btn-pos-add-row" title="Agregar al carrito" onclick="agregarDirectoAlCarrito(this)">
                       <i class="bi bi-cart-plus-fill"></i>
                     </button>
                   </div>
@@ -129,19 +140,21 @@
 
     <!-- ❸ COLUMNA DERECHA: CARRITO FLOTANTE Y PROCESAMIENTO -->
     <div class="col-lg-4 col-xl-4">
-      <div class="cart-sidebar">
+      <div class="pos-cart-card">
         
-        <div class="cart-header">
-          <div class="cart-title">
-            <i class="bi bi-cart3 text-warning"></i> Carrito de Venta
+        <div class="pos-cart-header">
+          <div class="pos-cart-title">
+            <i class="bi bi-cart3 text-primary"></i> Carrito de Venta
           </div>
-          <span id="cartBadgeCount" class="badge bg-secondary rounded-pill fs-7">0 items</span>
+          <span id="cartBadgeCount" class="pos-cart-badge">0 items</span>
         </div>
 
         <!-- Selector de Cliente -->
         <div class="mb-3">
-          <label class="form-label small fw-bold text-secondary mb-1">Cliente de la Venta:</label>
-          <select id="cartClientSelect" class="form-select form-select-sm rounded-3">
+          <label class="form-label small fw-bold text-dark mb-1 d-flex align-items-center gap-1">
+            <i class="bi bi-person-circle text-primary"></i> Cliente de la Venta:
+          </label>
+          <select id="cartClientSelect" class="form-select form-select-sm rounded-3 fw-medium">
             <option value="0" selected>👤 Cliente Contado / Venta Mostrador (General)</option>
             {% for c in clientes %}
             <option value="{{ c.id }}">{{ c.nombre }} {% if c.nit %}(NIT: {{ c.nit }}){% endif %}</option>
@@ -150,34 +163,37 @@
         </div>
 
         <!-- Lista Dinámica de Items en Carrito -->
-        <div id="cartItemsList" class="cart-items-container">
+        <div id="cartItemsList" class="pos-cart-items-container">
           <div class="text-center text-muted py-5" id="cartEmptyMsg">
-            <i class="bi bi-cart-x fs-1 opacity-25 d-block mb-2"></i>
-            El carrito está vacío.<br>Selecciona productos de la lista para vender.
+            <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-light mb-3" style="width: 56px; height: 56px;">
+              <i class="bi bi-cart-x fs-3 text-muted opacity-75"></i>
+            </div>
+            <div class="fw-bold text-dark mb-1">El carrito está vacío</div>
+            <div class="small text-secondary">Selecciona productos de la lista para vender.</div>
           </div>
         </div>
 
         <!-- Resumen de Totales -->
-        <div class="cart-summary mt-auto">
-          <div class="summary-row">
+        <div class="pos-cart-summary mt-auto">
+          <div class="pos-summary-row">
             <span>Subtotal Bruto:</span>
-            <span id="cartSubtotalText" class="fw-bold">Bs. 0.00</span>
+            <span id="cartSubtotalText" class="fw-bold text-dark">Bs. 0.00</span>
           </div>
-          <div class="summary-row">
+          <div class="pos-summary-row">
             <span>Descuento (%):</span>
-            <div style="width: 90px;">
-              <input type="number" id="cartDiscountPercent" class="form-control form-control-sm text-end" value="0" min="0" max="100" onchange="recalcularTotalesCarrito()" onkeyup="recalcularTotalesCarrito()">
+            <div style="width: 85px;">
+              <input type="number" id="cartDiscountPercent" class="form-control form-control-sm text-end fw-bold rounded-2" value="0" min="0" max="100" onchange="recalcularTotalesCarrito()" onkeyup="recalcularTotalesCarrito()">
             </div>
           </div>
-          <div class="summary-total summary-row">
+          <div class="pos-summary-total pos-summary-row">
             <span>TOTAL:</span>
-            <span id="cartTotalText">Bs. 0.00</span>
+            <span id="cartTotalText" class="total-val">Bs. 0.00</span>
           </div>
         </div>
 
         <!-- Botón Procesar Venta -->
-        <button id="btnOpenCheckout" class="btn-process-sale" onclick="abrirModalCheckout()" disabled>
-          <i class="bi bi-currency-dollar"></i> Cobrar y Procesar Venta
+        <button id="btnOpenCheckout" class="btn-pos-checkout" onclick="abrirModalCheckout()" disabled>
+          <i class="bi bi-currency-dollar fs-5"></i> Cobrar y Procesar Venta
         </button>
 
       </div>
@@ -186,13 +202,18 @@
   </div>
 
   <!-- ❹ HISTORIAL DE VENTAS RECIENTES -->
-  <div id="historial-ventas" class="catalog-card p-4 mt-4">
-    <div class="d-flex align-items-center justify-content-between mb-3">
-      <h5 class="fw-bold mb-0 text-dark"><i class="bi bi-receipt"></i> Historial Reciente de Ventas</h5>
-      <span class="badge bg-light text-dark border">Últimas 20 transacciones</span>
+  <div id="historial-ventas" class="pos-history-card">
+    <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
+      <div class="d-flex align-items-center gap-2">
+        <div class="rounded-circle bg-primary bg-opacity-10 text-primary d-flex align-items-center justify-content-center" style="width: 36px; height: 36px;">
+          <i class="bi bi-receipt"></i>
+        </div>
+        <h5 class="fw-bold mb-0 text-dark">Historial Reciente de Ventas</h5>
+      </div>
+      <span class="badge bg-light text-secondary border px-3 py-1.5 rounded-pill fw-semibold">Últimas 20 transacciones</span>
     </div>
     <div class="table-responsive">
-      <table class="table align-middle table-hover">
+      <table class="table align-middle table-hover mb-0">
         <thead class="table-light">
           <tr>
             <th>Código Venta</th>
@@ -208,29 +229,29 @@
         <tbody>
           {% for v in ventas_recientes %}
           <tr>
-            <td class="fw-bold text-primary">{{ v.codigo_venta }}</td>
-            <td class="small">{{ v.fecha|date('%d/%m/%Y %H:%M') }}</td>
-            <td>{{ v.cliente_nombre }}</td>
+            <td class="fw-bold text-primary font-monospace">{{ v.codigo_venta }}</td>
+            <td class="small text-muted">{{ v.fecha|date('%d/%m/%Y %H:%M') }}</td>
+            <td class="fw-semibold text-dark">{{ v.cliente_nombre }}</td>
             <td>
-              <span class="badge bg-secondary-subtle text-dark border text-capitalize">
-                <i class="bi bi-credit-card-2-front me-1"></i> {{ v.metodo_pago }}
+              <span class="badge bg-light text-dark border text-capitalize px-2.5 py-1">
+                <i class="bi bi-credit-card-2-front me-1 text-primary"></i> {{ v.metodo_pago }}
               </span>
             </td>
-            <td class="small text-muted">{{ v.vendedor_nombre or 'Sistema' }}</td>
-            <td class="text-end fw-bold">Bs. {{ "%.2f"|format(v.total) }}</td>
+            <td class="small text-secondary">{{ v.vendedor_nombre or 'Sistema' }}</td>
+            <td class="text-end fw-bold text-dark">Bs. {{ "%.2f"|format(v.total) }}</td>
             <td class="text-center">
               {% if v.estado_pago == 'pagado' %}
-                <span class="badge bg-success">Completado</span>
+                <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-2.5 py-1 rounded-pill fw-bold">Completado</span>
               {% else %}
-                <span class="badge bg-danger">Anulado</span>
+                <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 px-2.5 py-1 rounded-pill fw-bold">Anulado</span>
               {% endif %}
             </td>
             <td class="text-center">
-              <a href="{{ url_for('ver_comprobante_venta', id=v.id) }}" target="_blank" class="btn btn-sm btn-outline-dark rounded-2" title="Imprimir / Ver Comprobante">
-                <i class="bi bi-printer-fill"></i> Recibo
+              <a href="{{ url_for('ver_comprobante_venta', id=v.id) }}" target="_blank" class="btn btn-sm btn-light border rounded-pill px-3 py-1 fw-semibold text-secondary shadow-2xs" title="Imprimir / Ver Comprobante">
+                <i class="bi bi-printer-fill me-1 text-primary"></i> Recibo
               </a>
               {% if v.estado_pago == 'pagado' %}
-              <button class="btn btn-sm btn-outline-danger rounded-2 ms-1" title="Anular venta y devolver stock" onclick="anularVentaPOS({{ v.id }}, '{{ v.codigo_venta }}')">
+              <button class="btn btn-sm btn-outline-danger rounded-circle p-0 ms-1" style="width: 28px; height: 28px;" title="Anular venta y devolver stock" onclick="anularVentaPOS({{ v.id }}, '{{ v.codigo_venta }}')">
                 <i class="bi bi-x-circle"></i>
               </button>
               {% endif %}
@@ -249,67 +270,69 @@
 </div>
 
 <!-- ❺ MODAL DE PAGO Y CHECKOUT -->
-<div class="modal fade" id="modalCheckout" tabindex="-1" aria-hidden="true">
+<div class="modal fade pos-checkout-modal" id="modalCheckout" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content rounded-4 border-0 shadow-lg">
-      <div class="modal-header bg-dark text-white rounded-top-4">
-        <h5 class="modal-title fw-bold"><i class="bi bi-cash-stack text-warning"></i> Confirmar y Cobrar Venta</h5>
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title mb-0">
+          <i class="bi bi-cash-stack text-warning"></i> Confirmar y Cobrar Venta
+        </h5>
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body p-4">
         
-        <div class="text-center mb-4">
-          <div class="text-muted small uppercase">Monto Total a Cobrar</div>
-          <div id="modalTotalText" class="display-6 fw-extrabold text-warning">Bs. 0.00</div>
+        <div class="text-center p-3 rounded-4 mb-4" style="background: #f8fafc; border: 1px solid #e2e8f0;">
+          <div class="text-muted small fw-bold text-uppercase" style="letter-spacing: 0.5px;">Monto Total a Cobrar</div>
+          <div id="modalTotalText" class="display-6 fw-bold mt-1" style="color: #FF6B35;">Bs. 0.00</div>
         </div>
 
         <div class="mb-3">
-          <label class="form-label fw-bold small text-secondary">Método de Pago:</label>
+          <label class="form-label fw-bold small text-secondary mb-2">Selecciona el Método de Pago:</label>
           <div class="row g-2">
             <div class="col-4">
               <input type="radio" class="btn-check" name="metodoPago" id="payEfectivo" value="efectivo" checked onchange="toggleMontoRecibido()">
-              <label class="btn btn-outline-warning w-100 py-2 rounded-3 fw-bold" for="payEfectivo">
-                <i class="bi bi-cash d-block fs-5"></i> Efectivo
+              <label class="pos-pay-method-tile" for="payEfectivo">
+                <i class="bi bi-cash-coin text-success"></i> Efectivo
               </label>
             </div>
             <div class="col-4">
               <input type="radio" class="btn-check" name="metodoPago" id="payQR" value="qr" onchange="toggleMontoRecibido()">
-              <label class="btn btn-outline-primary w-100 py-2 rounded-3 fw-bold" for="payQR">
-                <i class="bi bi-qr-code d-block fs-5"></i> Transfer. / QR
+              <label class="pos-pay-method-tile" for="payQR">
+                <i class="bi bi-qr-code text-primary"></i> QR / Transf.
               </label>
             </div>
             <div class="col-4">
               <input type="radio" class="btn-check" name="metodoPago" id="payTarjeta" value="tarjeta" onchange="toggleMontoRecibido()">
-              <label class="btn btn-outline-info w-100 py-2 rounded-3 fw-bold" for="payTarjeta">
-                <i class="bi bi-credit-card d-block fs-5"></i> Tarjeta
+              <label class="pos-pay-method-tile" for="payTarjeta">
+                <i class="bi bi-credit-card text-info"></i> Tarjeta
               </label>
             </div>
           </div>
         </div>
 
         <!-- Cálculo de Cambio (solo en Efectivo) -->
-        <div id="divCalculoCambio" class="bg-light p-3 rounded-3 border mb-3">
+        <div id="divCalculoCambio" class="pos-change-box mb-3">
           <div class="row g-2 align-items-center">
             <div class="col-6">
-              <label class="form-label small fw-bold mb-1">Efectivo Recibido (Bs):</label>
-              <input type="number" id="inputEfectivoRecibido" class="form-control fw-bold" placeholder="0.00" step="0.5" onkeyup="calcularVuelto()" onchange="calcularVuelto()">
+              <label class="form-label small fw-bold mb-1 text-dark">Efectivo Recibido (Bs):</label>
+              <input type="number" id="inputEfectivoRecibido" class="form-control fw-bold rounded-3" placeholder="0.00" step="0.5" onkeyup="calcularVuelto()" onchange="calcularVuelto()">
             </div>
             <div class="col-6 text-end">
-              <div class="small text-muted mb-1">Cambio / Vuelto:</div>
-              <div id="textVuelto" class="fs-5 fw-bold text-success">Bs. 0.00</div>
+              <div class="small text-muted mb-1 fw-semibold">Cambio / Vuelto:</div>
+              <div id="textVuelto" class="fs-4 fw-bold text-success">Bs. 0.00</div>
             </div>
           </div>
         </div>
 
-        <div class="mb-3">
+        <div class="mb-2">
           <label class="form-label small fw-bold text-secondary mb-1">Notas u Observaciones (opcional):</label>
-          <input type="text" id="inputNotasVenta" class="form-control rounded-3" placeholder="Ej: Pago de contado, entregado en tienda...">
+          <input type="text" id="inputNotasVenta" class="form-control rounded-3" placeholder="Ej: Pago de contado, entregado en mostrador...">
         </div>
 
       </div>
-      <div class="modal-footer bg-light rounded-bottom-4">
-        <button type="button" class="btn btn-secondary rounded-3" data-bs-dismiss="modal">Cancelar</button>
-        <button type="button" id="btnFinalizarVenta" class="btn btn-warning fw-bold px-4 rounded-3 shadow-sm" onclick="ejecutarFinalizarVenta()">
+      <div class="modal-footer bg-light px-4 py-3 border-top-0 d-flex justify-content-end gap-2">
+        <button type="button" class="btn btn-light border text-secondary rounded-pill px-3.5 py-2 fw-semibold" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" id="btnFinalizarVenta" class="btn-pos-batch px-4 py-2" onclick="ejecutarFinalizarVenta()">
           <i class="bi bi-check-circle-fill"></i> Confirmar Venta
         </button>
       </div>
@@ -347,10 +370,10 @@ function filtrarProductosPOS() {
   const rows = document.querySelectorAll('#posProductTbody tr');
 
   rows.forEach(row => {
-    const code = row.getAttribute('data-codigo') || '';
-    const desc = row.getAttribute('data-desc') || '';
-    const marca = row.getAttribute('data-marca') || '';
-    const cat = row.getAttribute('data-cat') || '';
+    const code = (row.getAttribute('data-codigo') || '').toLowerCase();
+    const desc = (row.getAttribute('data-descripcion') || row.getAttribute('data-desc') || '').toLowerCase();
+    const marca = (row.getAttribute('data-marca') || '').toLowerCase();
+    const cat = (row.getAttribute('data-cat') || '').toLowerCase();
 
     const matchQuery = !query || code.includes(query) || desc.includes(query) || marca.includes(query);
     const matchCat = !category || cat.includes(category);
@@ -473,8 +496,11 @@ function renderizarCarrito() {
   if (carritoPOS.length === 0) {
     container.innerHTML = `
       <div class="text-center text-muted py-5" id="cartEmptyMsg">
-        <i class="bi bi-cart-x fs-1 opacity-25 d-block mb-2"></i>
-        El carrito está vacío.<br>Selecciona productos de la lista para vender.
+        <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-light mb-3" style="width: 56px; height: 56px;">
+          <i class="bi bi-cart-x fs-3 text-muted opacity-75"></i>
+        </div>
+        <div class="fw-bold text-dark mb-1">El carrito está vacío</div>
+        <div class="small text-secondary">Selecciona productos de la lista para vender.</div>
       </div>`;
     badgeCount.innerText = '0 items';
     btnProcess.disabled = true;
@@ -489,21 +515,23 @@ function renderizarCarrito() {
     totalItems += item.cantidad;
     const subtot = item.cantidad * item.precio_unitario;
     html += `
-      <div class="cart-item">
-        <div class="flex-grow-1">
-          <div class="cart-item-title">${item.descripcion}</div>
-          <div class="cart-item-sub">Bs. ${item.precio_unitario.toFixed(2)} c/u</div>
+      <div class="pos-cart-item">
+        <div class="flex-grow-1 min-w-0 me-2">
+          <div class="pos-cart-item-title text-truncate" title="${item.descripcion}">${item.descripcion}</div>
+          <div class="pos-cart-item-sub">Bs. ${item.precio_unitario.toFixed(2)} c/u</div>
         </div>
-        <div class="d-flex align-items-center gap-1">
-          <button class="qty-btn" onclick="cambiarCantidadItemCarrito(${item.producto_id}, -1)">-</button>
-          <span class="fw-bold px-1">${item.cantidad}</span>
-          <button class="qty-btn" onclick="cambiarCantidadItemCarrito(${item.producto_id}, 1)">+</button>
+        <div class="d-flex align-items-center">
+          <div class="pos-stepper">
+            <button type="button" class="pos-stepper-btn" onclick="cambiarCantidadItemCarrito(${item.producto_id}, -1)">-</button>
+            <span class="pos-stepper-input d-flex align-items-center justify-content-center">${item.cantidad}</span>
+            <button type="button" class="pos-stepper-btn" onclick="cambiarCantidadItemCarrito(${item.producto_id}, 1)">+</button>
+          </div>
         </div>
-        <div class="text-end fw-bold ms-2" style="min-width: 65px;">
+        <div class="text-end fw-bold text-dark ms-2 text-nowrap" style="min-width: 65px; font-size: 0.86rem;">
           Bs. ${subtot.toFixed(2)}
         </div>
-        <button class="btn btn-link text-danger p-0 ms-1" title="Quitar" onclick="eliminarItemCarrito(${item.producto_id})">
-          <i class="bi bi-x-lg"></i>
+        <button type="button" class="pos-cart-btn-remove ms-1" title="Quitar producto" onclick="eliminarItemCarrito(${item.producto_id})">
+          <i class="bi bi-trash3"></i>
         </button>
       </div>
     `;

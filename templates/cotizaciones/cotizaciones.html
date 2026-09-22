@@ -820,9 +820,10 @@
 
   <hr class="my-5">
 
-  <!-- Filtros de búsqueda y Cotizaciones Registradas -->
-  <div class="card shadow-sm mb-4" id="cotizaciones-registradas-sec">
-    <div class="card-header bg-primary text-white">
+  <!-- Apartado de Cotizaciones Registradas (Filtros + Lista) -->
+  <div id="cotizaciones-registradas" class="seccion-cotizaciones-registradas">
+    <div class="card shadow-sm mb-4" id="cotizaciones-registradas-sec">
+      <div class="card-header bg-primary text-white">
       <h4 class="mb-0"><i class="bi bi-funnel"></i> Filtrar Cotizaciones</h4>
     </div>
     <div class="card-body">
@@ -860,7 +861,7 @@
   </div>
 
   <!-- Sección de Cotizaciones Registradas -->
-  <h2 class="mb-4">Cotizaciones Registradas</h2>
+  <h2 class="mb-4" id="titulo-cotizaciones-registradas">Cotizaciones Registradas</h2>
   <div id="contenedor-cotizaciones-registradas">
     <div class="table-responsive" id="wrapper-tabla-cotizaciones" {% if not cotizaciones %}style="display:none;"{% endif %}>
       <table class="table table-striped table-bordered">
@@ -874,7 +875,7 @@
             <th>Acciones</th>
           </tr>
         </thead>
-        <tbody id="tbody-cotizaciones-registradas" style="transition: opacity 0.2s ease;">
+        <tbody id="tbody-cotizaciones-registradas">
           {% for c in cotizaciones %}
           <tr>
             <td data-label="ID">{{ c[0] }}</td>
@@ -883,13 +884,13 @@
             <td data-label="Fecha">{{ c[1] }}</td>
             <td data-label="Total">Bs {{ "%.2f"|format(c[2]) }}</td>
             <td class="text-nowrap" data-label="Acciones">
-              <a href="/cotizaciones/{{ c[0] }}" class="btn btn-info btn-sm" title="Ver detalle">
+              <a href="{{ url_for('detalle_cotizacion', id=c[0]) }}" class="btn btn-info btn-sm" title="Ver detalle">
                 <i class="bi bi-eye"></i>
               </a>
-              <a href="/cotizaciones/editar/{{ c[0] }}" class="btn btn-warning btn-sm" title="Editar">
+              <a href="{{ url_for('editar_cotizacion', id=c[0]) }}" class="btn btn-warning btn-sm" title="Editar">
                 <i class="bi bi-pencil"></i>
               </a>
-              <a href="/cotizaciones/eliminar/{{ c[0] }}" class="btn btn-danger btn-sm"
+              <a href="{{ url_for('eliminar_cotizacion', id=c[0]) }}" class="btn btn-danger btn-sm"
                 onclick="return confirm('¿Eliminar esta cotización?')" title="Eliminar">
                 <i class="bi bi-trash"></i>
               </a>
@@ -912,6 +913,7 @@
       No se encontraron cotizaciones {% if filtros.cliente or filtros.codigo_cliente or filtros.desde or filtros.hasta %}con los filtros aplicados{% endif %}.
     </div>
   </div>
+  </div> <!-- /#cotizaciones-registradas -->
 
   <script>
     let paginaActualCotizacion = {{ page_cotizacion }};
@@ -1095,6 +1097,16 @@
           if (document.getElementById('hasta')) document.getElementById('hasta').value = '';
           cargarPaginaCotizaciones(1);
         });
+      }
+
+      // Auto-desplazamiento suave si se navega directamente a la sección de cotizaciones registradas
+      if (window.location.hash === '#cotizaciones-registradas' || window.location.hash === '#cotizaciones-registradas-sec') {
+        setTimeout(function() {
+          const seccion = document.getElementById('cotizaciones-registradas') || document.getElementById('cotizaciones-registradas-sec');
+          if (seccion) {
+            seccion.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
+        }, 150);
       }
     });
   </script>

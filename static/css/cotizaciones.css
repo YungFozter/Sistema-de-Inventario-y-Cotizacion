@@ -86,3 +86,12 @@
   background-color: #0f172a !important;
   transform: translateY(-1px);
 }
+
+/* --- Posicionamiento y Scroll hacia Cotizaciones Registradas --- */
+#cotizaciones-registradas,
+#cotizaciones-registradas-sec,
+#titulo-cotizaciones-registradas,
+#contenedor-cotizaciones-registradas {
+  scroll-margin-top: 85px;
+}
+

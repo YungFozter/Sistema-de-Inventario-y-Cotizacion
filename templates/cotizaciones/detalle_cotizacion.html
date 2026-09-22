@@ -17,18 +17,10 @@
 
     <div class="card shadow border-0 rounded-4 overflow-hidden">
         <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center flex-wrap gap-2 py-3 px-3 px-md-4">
-            <div class="d-flex align-items-center gap-2 gap-md-3">
-                <button type="button" 
-                        class="btn btn-light btn-sm rounded-pill px-3 py-1.5 fw-bold text-primary d-inline-flex align-items-center gap-1.5 shadow-sm border-0" 
-                        onclick="volverAtras()" 
-                        title="Volver a la ubicación anterior">
-                    <i class="bi bi-arrow-left fw-bold"></i> Volver
-                </button>
-                <h2 class="mb-0 fs-4 fw-bold text-white d-flex align-items-center">
-                    <i class="bi bi-file-earmark-text me-2 d-none d-sm-inline"></i>
-                    Detalle de Cotización #{{ cotizacion[0] }}
-                </h2>
-            </div>
+            <h2 class="mb-0 fs-4 fw-bold text-white d-flex align-items-center">
+                <i class="bi bi-file-earmark-text me-2"></i>
+                Detalle de Cotización #{{ cotizacion[0] }}
+            </h2>
             <span class="badge bg-light text-dark fs-6 px-3 py-2 rounded-pill shadow-sm">
                 {% if cotizacion[7] == 'pendiente' %}
                     <i class="bi bi-hourglass-split text-warning"></i> Pendiente

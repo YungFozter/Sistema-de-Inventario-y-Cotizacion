@@ -884,7 +884,7 @@
             <td data-label="Fecha">{{ c[1] }}</td>
             <td data-label="Total">Bs {{ "%.2f"|format(c[2]) }}</td>
             <td class="text-nowrap" data-label="Acciones">
-              <a href="{{ url_for('detalle_cotizacion', id=c[0]) }}" class="btn btn-info btn-sm" title="Ver detalle">
+              <a href="{{ url_for('ver_cotizacion', id=c[0]) }}" class="btn btn-info btn-sm" title="Ver detalle">
                 <i class="bi bi-eye"></i>
               </a>
               <a href="{{ url_for('editar_cotizacion', id=c[0]) }}" class="btn btn-warning btn-sm" title="Editar">

@@ -599,6 +599,12 @@
               );
             });
           });
+
+          // Si el usuario navegó para ver cotizaciones registradas, re-alinear scroll tras renderizar productos
+          if (typeof window.scrollHaciaCotizacionesRegistradas === 'function' &&
+              (window.location.hash.includes('cotizaciones-registradas') || new URLSearchParams(window.location.search).get('seccion') === 'cotizaciones-registradas')) {
+            setTimeout(window.scrollHaciaCotizacionesRegistradas, 120);
+          }
         }
 
         function actualizarPaginacionControles(total, page, totalPages, perPageVal) {
@@ -652,14 +658,16 @@
           });
         }
 
-        // Inicializar preferencia de per_page y búsqueda inicial
+        // Inicializar preferencia de per_page y búsqueda inicial solo si difiere del renderizado del servidor
         document.addEventListener('DOMContentLoaded', function() {
           const savedPerPage = localStorage.getItem('productos_per_page');
           const selectElement = document.getElementById('select-per-page');
           if (savedPerPage && selectElement) {
             selectElement.value = savedPerPage;
+            if (savedPerPage !== '15') {
+              buscarProductos(1);
+            }
           }
-          buscarProductos(1);
         });
       </script>
     </div> <!-- Fin table-responsive -->
@@ -1099,15 +1107,40 @@
         });
       }
 
-      // Auto-desplazamiento suave si se navega directamente a la sección de cotizaciones registradas
-      if (window.location.hash === '#cotizaciones-registradas' || window.location.hash === '#cotizaciones-registradas-sec') {
-        setTimeout(function() {
-          const seccion = document.getElementById('cotizaciones-registradas') || document.getElementById('cotizaciones-registradas-sec');
-          if (seccion) {
-            seccion.scrollIntoView({ behavior: 'smooth', block: 'start' });
-          }
-        }, 150);
+      // Función global para desplazar la vista limpiamente hacia Cotizaciones Registradas
+      window.scrollHaciaCotizacionesRegistradas = function() {
+        const seccion = document.getElementById('cotizaciones-registradas') || document.getElementById('cotizaciones-registradas-sec');
+        if (seccion) {
+          const navHeight = 90;
+          const rect = seccion.getBoundingClientRect();
+          const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+          const targetY = rect.top + scrollTop - navHeight;
+          window.scrollTo({
+            top: Math.max(0, targetY),
+            behavior: 'smooth'
+          });
+        }
+      };
+
+      function debeDesplazarACotizaciones() {
+        const hash = window.location.hash || '';
+        const params = new URLSearchParams(window.location.search);
+        return hash.includes('cotizaciones-registradas') || params.get('seccion') === 'cotizaciones-registradas';
       }
+
+      if (debeDesplazarACotizaciones()) {
+        window.scrollHaciaCotizacionesRegistradas();
+        setTimeout(window.scrollHaciaCotizacionesRegistradas, 120);
+        setTimeout(window.scrollHaciaCotizacionesRegistradas, 400);
+        setTimeout(window.scrollHaciaCotizacionesRegistradas, 900);
+      }
+
+      window.addEventListener('load', function() {
+        if (debeDesplazarACotizaciones()) {
+          window.scrollHaciaCotizacionesRegistradas();
+          setTimeout(window.scrollHaciaCotizacionesRegistradas, 250);
+        }
+      });
     });
   </script>
 </div>

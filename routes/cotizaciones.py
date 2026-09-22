@@ -191,35 +191,59 @@ def register_routes(app):
                 cotizaciones_per_page = 5
                 try:
                     page_cotizacion = int(request.args.get('page_cotizacion', 1))
+                    if page_cotizacion < 1:
+                        page_cotizacion = 1
                 except (ValueError, TypeError):
                     page_cotizacion = 1
                 offset_cotizacion = (page_cotizacion - 1) * cotizaciones_per_page
 
-                if session.get('user_rol') == 'superadmin':
-                    cursor.execute('SELECT COUNT(*) FROM cotizaciones')
-                    total_cotizaciones = cursor.fetchone()[0]
-                    query = '''
-                        SELECT c.id, c.fecha, c.total, c.estado, cli.nombre, cli.codigo_cliente
-                        FROM cotizaciones c
-                        JOIN clientes cli ON c.cliente_id = cli.id
-                        ORDER BY c.fecha DESC
-                        LIMIT ? OFFSET ?
-                    '''
-                    params = [cotizaciones_per_page, offset_cotizacion]
-                else:
-                    cursor.execute('SELECT COUNT(*) FROM cotizaciones WHERE creador_id = ?', (session['user_id'],))
-                    total_cotizaciones = cursor.fetchone()[0]
-                    query = '''
-                        SELECT c.id, c.fecha, c.total, c.estado, cli.nombre, cli.codigo_cliente
-                        FROM cotizaciones c
-                        JOIN clientes cli ON c.cliente_id = cli.id
-                        WHERE c.creador_id = ?
-                        ORDER BY c.fecha DESC
-                        LIMIT ? OFFSET ?
-                    '''
-                    params = [session['user_id'], cotizaciones_per_page, offset_cotizacion]
+                where_clauses = []
+                params_cotiz = []
 
-                cursor.execute(query, params)
+                if user_rol == 'superadmin':
+                    pass
+                elif user_rol == 'admin':
+                    where_clauses.append("(c.creador_id = ? OR c.creador_id IN (SELECT id FROM clientes WHERE creador_id = ?))")
+                    params_cotiz.extend([user_id, user_id])
+                else:
+                    where_clauses.append("c.creador_id = ?")
+                    params_cotiz.append(user_id)
+
+                if cliente.strip():
+                    where_clauses.append("LOWER(cli.nombre) LIKE LOWER(?)")
+                    params_cotiz.append(f"%{cliente.strip()}%")
+
+                if codigo_cliente.strip():
+                    where_clauses.append("LOWER(cli.codigo_cliente) LIKE LOWER(?)")
+                    params_cotiz.append(f"%{codigo_cliente.strip()}%")
+
+                if desde.strip():
+                    where_clauses.append("c.fecha >= ?")
+                    params_cotiz.append(f"{desde.strip()} 00:00:00")
+
+                if hasta.strip():
+                    where_clauses.append("c.fecha <= ?")
+                    params_cotiz.append(f"{hasta.strip()} 23:59:59")
+
+                where_sql = ("WHERE " + " AND ".join(where_clauses)) if where_clauses else ""
+
+                cursor.execute(f'''
+                    SELECT COUNT(*) 
+                    FROM cotizaciones c
+                    JOIN clientes cli ON c.cliente_id = cli.id
+                    {where_sql}
+                ''', params_cotiz)
+                total_cotizaciones = cursor.fetchone()[0]
+
+                query = f'''
+                    SELECT c.id, c.fecha, c.total, c.estado, cli.nombre, cli.codigo_cliente
+                    FROM cotizaciones c
+                    JOIN clientes cli ON c.cliente_id = cli.id
+                    {where_sql}
+                    ORDER BY c.fecha DESC
+                    LIMIT ? OFFSET ?
+                '''
+                cursor.execute(query, params_cotiz + [cotizaciones_per_page, offset_cotizacion])
                 cotizaciones = cursor.fetchall()
                 total_pages_cotizaciones = max(1, (total_cotizaciones + cotizaciones_per_page - 1) // cotizaciones_per_page)
 
@@ -1490,6 +1514,114 @@ def register_routes(app):
 
         except Exception as e:
             return jsonify({'success': False, 'error': str(e)}), 500
+
+    @app.route('/api/cotizaciones_registradas', methods=['GET'])
+    @login_required
+    def api_cotizaciones_registradas():
+        """Endpoint AJAX para paginar y filtrar cotizaciones registradas sin recargar la página."""
+        conexion = get_db_connection()
+        conexion.row_factory = sqlite3.Row
+        cursor = conexion.cursor()
+
+        try:
+            cotizaciones_per_page = 5
+            try:
+                page_cotizacion = int(request.args.get('page_cotizacion', 1))
+                if page_cotizacion < 1:
+                    page_cotizacion = 1
+            except (ValueError, TypeError):
+                page_cotizacion = 1
+            offset_cotizacion = (page_cotizacion - 1) * cotizaciones_per_page
+
+            cliente = request.args.get('cliente', '').strip()
+            codigo_cliente = request.args.get('codigo_cliente', '').strip()
+            desde = request.args.get('desde', '').strip()
+            hasta = request.args.get('hasta', '').strip()
+
+            user_id = session.get('user_id')
+            user_rol = session.get('user_rol')
+
+            where_clauses = []
+            params = []
+
+            if user_rol == 'superadmin':
+                pass
+            elif user_rol == 'admin':
+                where_clauses.append("(c.creador_id = ? OR c.creador_id IN (SELECT id FROM clientes WHERE creador_id = ?))")
+                params.extend([user_id, user_id])
+            else:
+                where_clauses.append("c.creador_id = ?")
+                params.append(user_id)
+
+            if cliente:
+                where_clauses.append("LOWER(cli.nombre) LIKE LOWER(?)")
+                params.append(f"%{cliente}%")
+
+            if codigo_cliente:
+                where_clauses.append("LOWER(cli.codigo_cliente) LIKE LOWER(?)")
+                params.append(f"%{codigo_cliente}%")
+
+            if desde:
+                where_clauses.append("c.fecha >= ?")
+                params.append(f"{desde} 00:00:00")
+
+            if hasta:
+                where_clauses.append("c.fecha <= ?")
+                params.append(f"{hasta} 23:59:59")
+
+            where_sql = ("WHERE " + " AND ".join(where_clauses)) if where_clauses else ""
+
+            count_query = f'''
+                SELECT COUNT(*)
+                FROM cotizaciones c
+                JOIN clientes cli ON c.cliente_id = cli.id
+                {where_sql}
+            '''
+            cursor.execute(count_query, params)
+            total_cotizaciones = cursor.fetchone()[0]
+
+            query = f'''
+                SELECT c.id, c.fecha, c.total, c.estado, cli.nombre, cli.codigo_cliente
+                FROM cotizaciones c
+                JOIN clientes cli ON c.cliente_id = cli.id
+                {where_sql}
+                ORDER BY c.fecha DESC
+                LIMIT ? OFFSET ?
+            '''
+            cursor.execute(query, params + [cotizaciones_per_page, offset_cotizacion])
+            cotizaciones = cursor.fetchall()
+            total_pages_cotizaciones = max(1, (total_cotizaciones + cotizaciones_per_page - 1) // cotizaciones_per_page)
+
+            lista_cotizaciones = []
+            for c in cotizaciones:
+                fecha_val = c['fecha']
+                if hasattr(fecha_val, 'strftime'):
+                    fecha_str = fecha_val.strftime('%Y-%m-%d %H:%M:%S')
+                else:
+                    fecha_str = str(fecha_val) if fecha_val else ''
+
+                lista_cotizaciones.append({
+                    'id': c['id'],
+                    'fecha': fecha_str,
+                    'total': float(c['total']) if c['total'] is not None else 0.0,
+                    'estado': c['estado'] or 'pendiente',
+                    'cliente_nombre': c['nombre'] or '',
+                    'codigo_cliente': c['codigo_cliente'] or '-'
+                })
+
+            return jsonify({
+                'success': True,
+                'cotizaciones': lista_cotizaciones,
+                'page_cotizacion': page_cotizacion,
+                'total_pages_cotizaciones': total_pages_cotizaciones,
+                'total_cotizaciones': total_cotizaciones
+            })
+
+        except Exception as err:
+            app.logger.error(f"Error en api_cotizaciones_registradas: {err}")
+            return jsonify({'success': False, 'error': str(err)}), 500
+        finally:
+            conexion.close()
 
     @app.route('/api/pdf-config', methods=['GET', 'POST'])
     @login_required

@@ -846,9 +846,9 @@
           <button type="submit" class="btn btn-primary me-2">
             <i class="bi bi-search"></i> Buscar
           </button>
-          <a href="/cotizaciones" class="btn btn-outline-secondary">
+          <button type="button" class="btn btn-outline-secondary" id="btn-limpiar-filtro-cotizaciones">
             <i class="bi bi-arrow-counterclockwise"></i> Limpiar
-          </a>
+          </button>
         </div>
       </form>
     </div>
@@ -856,80 +856,243 @@
 
   <!-- Sección de Cotizaciones Registradas -->
   <h2 class="mb-4">Cotizaciones Registradas</h2>
-  {% if cotizaciones %}
-  <div class="table-responsive">
-    <table class="table table-striped table-bordered">
-      <thead class="table-dark">
-        <tr>
-          <th>ID</th>
-          <th>Cliente</th>
-          <th>Código</th>
-          <th>Fecha</th>
-          <th>Total</th>
-          <th>Acciones</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for c in cotizaciones %}
-        <tr>
-          <td data-label="ID">{{ c[0] }}</td>
-          <td data-label="Cliente">{{ c[4] }}</td>
-          <td data-label="Código">{{ c[5] if c[5] else '-' }}</td>
-          <td data-label="Fecha">{{ c[1] }}</td>
-          <td data-label="Total">Bs {{ "%.2f"|format(c[2]) }}</td>
-          <td class="text-nowrap" data-label="Acciones">
-            <a href="/cotizaciones/{{ c[0] }}" class="btn btn-info btn-sm" title="Ver detalle">
-              <i class="bi bi-eye"></i>
-            </a>
-            <a href="/cotizaciones/editar/{{ c[0] }}" class="btn btn-warning btn-sm" title="Editar">
-              <i class="bi bi-pencil"></i>
-            </a>
-            <a href="/cotizaciones/eliminar/{{ c[0] }}" class="btn btn-danger btn-sm"
-              onclick="return confirm('¿Eliminar esta cotización?')" title="Eliminar">
-              <i class="bi bi-trash"></i>
-            </a>
-            <a href="{{ url_for('vista_previa_cotizacion', id=c[0]) }}"
-                class="btn btn-primary btn-sm" target="_blank" title="Vista previa PDF">
-                <i class="bi bi-file-earmark-pdf"></i>
-            </a>
-          </td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-    <div class="d-flex justify-content-end align-items-center gap-2 mt-2">
-      <button class="btn btn-outline-secondary" type="button" id="prevCotizacion" {% if page_cotizacion <= 1 %}disabled{% endif %}>&laquo;</button>
-      <span class="input-group-text">Página {{ page_cotizacion }} de {{ total_pages_cotizaciones }}</span>
-      <button class="btn btn-outline-secondary" type="button" id="nextCotizacion" {% if page_cotizacion >= total_pages_cotizaciones %}disabled{% endif %}>&raquo;</button>
+  <div id="contenedor-cotizaciones-registradas">
+    <div class="table-responsive" id="wrapper-tabla-cotizaciones" {% if not cotizaciones %}style="display:none;"{% endif %}>
+      <table class="table table-striped table-bordered">
+        <thead class="table-dark">
+          <tr>
+            <th>ID</th>
+            <th>Cliente</th>
+            <th>Código</th>
+            <th>Fecha</th>
+            <th>Total</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody id="tbody-cotizaciones-registradas" style="transition: opacity 0.2s ease;">
+          {% for c in cotizaciones %}
+          <tr>
+            <td data-label="ID">{{ c[0] }}</td>
+            <td data-label="Cliente">{{ c[4] }}</td>
+            <td data-label="Código">{{ c[5] if c[5] else '-' }}</td>
+            <td data-label="Fecha">{{ c[1] }}</td>
+            <td data-label="Total">Bs {{ "%.2f"|format(c[2]) }}</td>
+            <td class="text-nowrap" data-label="Acciones">
+              <a href="/cotizaciones/{{ c[0] }}" class="btn btn-info btn-sm" title="Ver detalle">
+                <i class="bi bi-eye"></i>
+              </a>
+              <a href="/cotizaciones/editar/{{ c[0] }}" class="btn btn-warning btn-sm" title="Editar">
+                <i class="bi bi-pencil"></i>
+              </a>
+              <a href="/cotizaciones/eliminar/{{ c[0] }}" class="btn btn-danger btn-sm"
+                onclick="return confirm('¿Eliminar esta cotización?')" title="Eliminar">
+                <i class="bi bi-trash"></i>
+              </a>
+              <a href="{{ url_for('vista_previa_cotizacion', id=c[0]) }}"
+                  class="btn btn-primary btn-sm" target="_blank" title="Vista previa PDF">
+                  <i class="bi bi-file-earmark-pdf"></i>
+              </a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      <div class="d-flex justify-content-end align-items-center gap-2 mt-2">
+        <button class="btn btn-outline-secondary" type="button" id="prevCotizacion" {% if page_cotizacion <= 1 %}disabled{% endif %} title="Página Anterior">&laquo;</button>
+        <span class="input-group-text" id="info-paginacion-cotizaciones">Página {{ page_cotizacion }} de {{ total_pages_cotizaciones }}</span>
+        <button class="btn btn-outline-secondary" type="button" id="nextCotizacion" {% if page_cotizacion >= total_pages_cotizaciones %}disabled{% endif %} title="Página Siguiente">&raquo;</button>
+      </div>
     </div>
-    <script>
-      document.addEventListener('DOMContentLoaded', function() {
-        const prevBtn = document.getElementById('prevCotizacion');
-        const nextBtn = document.getElementById('nextCotizacion');
-        if (prevBtn && nextBtn) {
-          prevBtn.addEventListener('click', function() {
-            const url = new URL(window.location.href);
-            let page = parseInt(url.searchParams.get('page_cotizacion') || '1');
-            if (page > 1) {
-              url.searchParams.set('page_cotizacion', page - 1);
-              window.location.href = url.toString();
-            }
-          });
-          nextBtn.addEventListener('click', function() {
-            const url = new URL(window.location.href);
-            let page = parseInt(url.searchParams.get('page_cotizacion') || '1');
-            url.searchParams.set('page_cotizacion', page + 1);
-            window.location.href = url.toString();
-          });
-        }
+    <div class="alert alert-info" id="alerta-sin-cotizaciones" {% if cotizaciones %}style="display:none;"{% endif %}>
+      No se encontraron cotizaciones {% if filtros.cliente or filtros.codigo_cliente or filtros.desde or filtros.hasta %}con los filtros aplicados{% endif %}.
+    </div>
+  </div>
+
+  <script>
+    let paginaActualCotizacion = {{ page_cotizacion }};
+    let totalPaginasCotizaciones = {{ total_pages_cotizaciones }};
+    let cargandoCotizaciones = false;
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    function renderizarTablaCotizaciones(lista) {
+      const tbody = document.getElementById('tbody-cotizaciones-registradas');
+      const wrapper = document.getElementById('wrapper-tabla-cotizaciones');
+      const alertaSin = document.getElementById('alerta-sin-cotizaciones');
+      if (!tbody) return;
+
+      if (!lista || lista.length === 0) {
+        if (wrapper) wrapper.style.display = 'none';
+        if (alertaSin) alertaSin.style.display = 'block';
+        tbody.innerHTML = '';
+        return;
+      }
+
+      if (wrapper) wrapper.style.display = 'block';
+      if (alertaSin) alertaSin.style.display = 'none';
+
+      let html = '';
+      lista.forEach(c => {
+        const totalFmt = parseFloat(c.total || 0).toFixed(2);
+        const codCliente = c.codigo_cliente || '-';
+        html += `
+          <tr>
+            <td data-label="ID">${c.id}</td>
+            <td data-label="Cliente">${escapeHtml(c.cliente_nombre || '-')}</td>
+            <td data-label="Código">${escapeHtml(codCliente)}</td>
+            <td data-label="Fecha">${escapeHtml(c.fecha || '-')}</td>
+            <td data-label="Total">Bs ${totalFmt}</td>
+            <td class="text-nowrap" data-label="Acciones">
+              <a href="/cotizaciones/${c.id}" class="btn btn-info btn-sm" title="Ver detalle">
+                <i class="bi bi-eye"></i>
+              </a>
+              <a href="/cotizaciones/editar/${c.id}" class="btn btn-warning btn-sm" title="Editar">
+                <i class="bi bi-pencil"></i>
+              </a>
+              <a href="/cotizaciones/eliminar/${c.id}" class="btn btn-danger btn-sm"
+                onclick="return confirm('¿Eliminar esta cotización?')" title="Eliminar">
+                <i class="bi bi-trash"></i>
+              </a>
+              <a href="/cotizaciones/vista_previa/${c.id}"
+                  class="btn btn-primary btn-sm" target="_blank" title="Vista previa PDF">
+                  <i class="bi bi-file-earmark-pdf"></i>
+              </a>
+            </td>
+          </tr>
+        `;
       });
-    </script>
-  </div>
-  {% else %}
-  <div class="alert alert-info">
-    No se encontraron cotizaciones {% if filtros.cliente or filtros.codigo_cliente or filtros.desde or filtros.hasta %}con los filtros aplicados{% endif %}.
-  </div>
-  {% endif %}
+
+      tbody.innerHTML = html;
+    }
+
+    function actualizarControlesPaginacionCotizaciones(page, totalPages) {
+      const prevBtn = document.getElementById('prevCotizacion');
+      const nextBtn = document.getElementById('nextCotizacion');
+      const infoSpan = document.getElementById('info-paginacion-cotizaciones');
+
+      if (infoSpan) {
+        infoSpan.textContent = `Página ${page} de ${totalPages}`;
+      }
+      if (prevBtn) {
+        prevBtn.disabled = (page <= 1);
+      }
+      if (nextBtn) {
+        nextBtn.disabled = (page >= totalPages);
+      }
+    }
+
+    function cargarPaginaCotizaciones(page) {
+      if (cargandoCotizaciones) return;
+      if (page < 1) page = 1;
+
+      cargandoCotizaciones = true;
+      const tbody = document.getElementById('tbody-cotizaciones-registradas');
+      const prevBtn = document.getElementById('prevCotizacion');
+      const nextBtn = document.getElementById('nextCotizacion');
+
+      if (tbody) tbody.style.opacity = '0.4';
+      if (prevBtn) prevBtn.disabled = true;
+      if (nextBtn) nextBtn.disabled = true;
+
+      const filtroCliente = document.getElementById('filtro_cliente')?.value || '';
+      const filtroCodigo = document.getElementById('filtro_codigo')?.value || '';
+      const filtroDesde = document.getElementById('desde')?.value || '';
+      const filtroHasta = document.getElementById('hasta')?.value || '';
+
+      const params = new URLSearchParams({
+        page_cotizacion: page,
+        cliente: filtroCliente,
+        codigo_cliente: filtroCodigo,
+        desde: filtroDesde,
+        hasta: filtroHasta
+      });
+
+      fetch('/api/cotizaciones_registradas?' + params.toString())
+        .then(response => {
+          if (response.status === 401) {
+            window.location.href = '/login';
+            return null;
+          }
+          return response.json();
+        })
+        .then(data => {
+          cargandoCotizaciones = false;
+          if (tbody) tbody.style.opacity = '1';
+
+          if (!data || !data.success) {
+            console.error('Error al cargar cotizaciones:', data ? data.error : 'Sin respuesta');
+            return;
+          }
+
+          paginaActualCotizacion = data.page_cotizacion;
+          totalPaginasCotizaciones = data.total_pages_cotizaciones;
+
+          renderizarTablaCotizaciones(data.cotizaciones);
+          actualizarControlesPaginacionCotizaciones(paginaActualCotizacion, totalPaginasCotizaciones);
+
+          // Actualizar URL en navegador sin recargar la pestaña
+          const url = new URL(window.location.href);
+          url.searchParams.set('page_cotizacion', paginaActualCotizacion);
+          window.history.replaceState({ page_cotizacion: paginaActualCotizacion }, '', url.toString());
+        })
+        .catch(err => {
+          cargandoCotizaciones = false;
+          if (tbody) tbody.style.opacity = '1';
+          console.error('Error en fetch cotizaciones:', err);
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      const prevBtn = document.getElementById('prevCotizacion');
+      const nextBtn = document.getElementById('nextCotizacion');
+      const formFiltro = document.getElementById('form-filtro-cotizaciones');
+      const btnLimpiar = document.getElementById('btn-limpiar-filtro-cotizaciones');
+
+      if (prevBtn) {
+        prevBtn.addEventListener('click', function(e) {
+          e.preventDefault();
+          if (paginaActualCotizacion > 1) {
+            cargarPaginaCotizaciones(paginaActualCotizacion - 1);
+          }
+        });
+      }
+
+      if (nextBtn) {
+        nextBtn.addEventListener('click', function(e) {
+          e.preventDefault();
+          if (paginaActualCotizacion < totalPaginasCotizaciones) {
+            cargarPaginaCotizaciones(paginaActualCotizacion + 1);
+          }
+        });
+      }
+
+      if (formFiltro) {
+        formFiltro.addEventListener('submit', function(e) {
+          e.preventDefault();
+          cargarPaginaCotizaciones(1);
+        });
+      }
+
+      if (btnLimpiar) {
+        btnLimpiar.addEventListener('click', function(e) {
+          e.preventDefault();
+          if (document.getElementById('filtro_cliente')) document.getElementById('filtro_cliente').value = '';
+          if (document.getElementById('filtro_codigo')) document.getElementById('filtro_codigo').value = '';
+          if (document.getElementById('desde')) document.getElementById('desde').value = '';
+          if (document.getElementById('hasta')) document.getElementById('hasta').value = '';
+          cargarPaginaCotizaciones(1);
+        });
+      }
+    });
+  </script>
 </div>
 {% endblock %}
 

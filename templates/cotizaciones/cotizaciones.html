@@ -2,6 +2,11 @@
 
 {% block titulo %}Nueva Cotización{% endblock %}
 
+{% block styles %}
+{{ super() }}
+<link href="{{ url_for('static', filename='css/cotizaciones.css') }}" rel="stylesheet">
+{% endblock %}
+
 {% block contenido %}
 <div class="container">
   <h2 class="mb-4">Crear Cotización</h2>
@@ -1551,52 +1556,4 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
-<style>
-  /* Estilos para la vista responsive */
-  @media (max-width: 576px) {
-    table {
-      font-size: 0.85rem;
-    }
-
-    .table-responsive {
-      border: 0;
-    }
-
-    .table-responsive thead {
-      display: none;
-    }
-
-    .table-responsive tr {
-      display: block;
-      margin-bottom: 1rem;
-      border: 1px solid #dee2e6;
-      border-radius: 0.25rem;
-    }
-
-    .table-responsive td {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border-bottom: 1px solid #dee2e6;
-    }
-
-    .table-responsive td:before {
-      content: attr(data-label);
-      font-weight: bold;
-      margin-right: 1rem;
-    }
-  }
-
-  /* Estilos para las notificaciones */
-  .toast {
-    max-width: 300px;
-    z-index: 9999;
-    animation: fadeIn 0.3s;
-  }
-
-  @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-</style>
 {% endblock %}

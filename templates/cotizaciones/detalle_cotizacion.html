@@ -2,6 +2,11 @@
 
 {% block titulo %}Detalle de Cotización{% endblock %}
 
+{% block styles %}
+{{ super() }}
+<link href="{{ url_for('static', filename='css/cotizaciones.css') }}" rel="stylesheet">
+{% endblock %}
+
 {% block contenido %}
 <div class="container mt-4 mb-5">
     <!-- Barra Superior de Navegación Rápida -->

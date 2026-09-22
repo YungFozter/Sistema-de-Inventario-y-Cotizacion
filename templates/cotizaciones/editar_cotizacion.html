@@ -2,6 +2,11 @@
 
 {% block titulo %}Editar Cotización{% endblock %}
 
+{% block styles %}
+{{ super() }}
+<link href="{{ url_for('static', filename='css/cotizaciones.css') }}" rel="stylesheet">
+{% endblock %}
+
 {% block contenido %}
 <div class="container">
   <h2 class="mb-4">Editar Cotización #{{ cotizacion['id'] }}</h2>

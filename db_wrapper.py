@@ -106,3 +106,13 @@ class PostgresCursorWrapper:
     @property
     def description(self):
         return self._cursor.description
+
+def is_postgres(obj=None):
+    if obj is not None:
+        if isinstance(obj, (PostgresConnectionWrapper, PostgresCursorWrapper)):
+            return True
+        if isinstance(obj, (sqlite3.Connection, sqlite3.Cursor)):
+            return False
+    database_url = os.environ.get('DATABASE_URL')
+    return bool(not os.environ.get('TESTING_DB') and database_url and database_url.startswith('postgres'))
+

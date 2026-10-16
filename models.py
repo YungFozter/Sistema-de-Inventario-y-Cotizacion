@@ -1,6 +1,6 @@
 import os
 import sqlite3
-from db_wrapper import get_db_connection
+from db_wrapper import get_db_connection, is_postgres as check_is_postgres
 import json
 from datetime import datetime, timezone, timedelta
 
@@ -21,12 +21,7 @@ def crear_tablas():
     conexion = get_db_connection()
     cursor = conexion.cursor()
     
-    is_postgres = bool(
-        not os.environ.get('TESTING_DB') and
-        os.environ.get('DATABASE_URL') and
-        os.environ.get('DATABASE_URL').startswith('postgres')
-    )
-
+    is_postgres = check_is_postgres(conexion)
 
     try:
         # Tabla de clientes/usuarios
@@ -45,6 +40,7 @@ def crear_tablas():
                 empresa_nombre TEXT,
                 fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 ultima_conexion TIMESTAMP,
+                fecha_vencimiento_suscripcion TIMESTAMP,
                 session_token TEXT,
                 activo {"BOOLEAN DEFAULT TRUE" if is_postgres else "BOOLEAN DEFAULT 1"},
                 creador_id INTEGER,
@@ -506,11 +502,7 @@ def migrar_esquema_productos():
         conexion = get_db_connection()
         cursor = conexion.cursor()
         
-        is_postgres = bool(
-            not os.environ.get('TESTING_DB') and
-            os.environ.get('DATABASE_URL') and
-            os.environ.get('DATABASE_URL').startswith('postgres')
-        )
+        is_postgres = check_is_postgres(conexion)
 
         
         if is_postgres:
@@ -600,11 +592,7 @@ def migrar_columnas_nuevas_categorias():
         conexion = get_db_connection()
         cursor = conexion.cursor()
         
-        is_postgres = bool(
-            not os.environ.get('TESTING_DB') and
-            os.environ.get('DATABASE_URL') and
-            os.environ.get('DATABASE_URL').startswith('postgres')
-        )
+        is_postgres = check_is_postgres(conexion)
 
         
         if is_postgres:
@@ -701,11 +689,7 @@ def migrar_columna_auth_provider():
         conexion = get_db_connection()
         cursor = conexion.cursor()
         
-        is_postgres = bool(
-            not os.environ.get('TESTING_DB') and
-            os.environ.get('DATABASE_URL') and
-            os.environ.get('DATABASE_URL').startswith('postgres')
-        )
+        is_postgres = check_is_postgres(conexion)
 
         if is_postgres:
             cursor.execute("SELECT column_name FROM information_schema.columns WHERE table_name='clientes'")
@@ -761,7 +745,7 @@ def guardar_importacion_pdf(nombre_importacion, items, usuario_id=None):
         if cursor.fetchone()[0] > 0:
             nombre_importacion = f"{nombre_importacion} ({now_dt.strftime('%H:%M:%S')})"
 
-        is_postgres = bool(os.environ.get('DATABASE_URL') and os.environ.get('DATABASE_URL').startswith('postgres'))
+        is_postgres = check_is_postgres(cursor)
         if is_postgres:
             cursor.execute('''
                 INSERT INTO importaciones_pdf (nombre_importacion, fecha_importacion, usuario_id, total_items, estado)
@@ -1001,11 +985,7 @@ def migrar_tablas_equipo():
     try:
         conexion = get_db_connection()
         cursor = conexion.cursor()
-        is_postgres = bool(
-            not os.environ.get('TESTING_DB') and
-            os.environ.get('DATABASE_URL') and
-            os.environ.get('DATABASE_URL').startswith('postgres')
-        )
+        is_postgres = check_is_postgres(conexion)
 
         cursor.execute(f'''
             CREATE TABLE IF NOT EXISTS equipo_chat (
@@ -1120,11 +1100,7 @@ def migrar_columnas_nuevas_clientes():
         conexion = get_db_connection()
         cursor = conexion.cursor()
         
-        is_postgres = bool(
-            not os.environ.get('TESTING_DB') and
-            os.environ.get('DATABASE_URL') and
-            os.environ.get('DATABASE_URL').startswith('postgres')
-        )
+        is_postgres = check_is_postgres(conexion)
 
         
         if is_postgres:
@@ -1222,11 +1198,7 @@ def migrar_columnas_nuevas_productos():
     try:
         conexion = get_db_connection()
         cursor = conexion.cursor()
-        is_postgres = bool(
-            not os.environ.get('TESTING_DB') and
-            os.environ.get('DATABASE_URL') and
-            os.environ.get('DATABASE_URL').startswith('postgres')
-        )
+        is_postgres = check_is_postgres(conexion)
         if is_postgres:
             for sql_col in [
                 "ALTER TABLE productos ADD COLUMN IF NOT EXISTS campos_personalizados TEXT",
@@ -1267,7 +1239,7 @@ def migrar_columnas_nuevas_productos():
 
 def asegurar_tabla_configuracion_pdf(cursor):
     """Crea la tabla configuracion_pdf si no existe en la base de datos (SQLite y PostgreSQL)"""
-    is_postgres = bool(not os.environ.get('TESTING_DB') and os.environ.get('DATABASE_URL') and os.environ.get('DATABASE_URL').startswith('postgres'))
+    is_postgres = check_is_postgres(cursor)
     try:
         cursor.execute(f'''
             CREATE TABLE IF NOT EXISTS configuracion_pdf (

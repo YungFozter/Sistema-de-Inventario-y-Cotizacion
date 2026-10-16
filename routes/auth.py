@@ -438,13 +438,36 @@ def register_routes(app):
             cursor = conexion.cursor()
         
             # Obtener el cliente y el estado de su creador
-            cursor.execute('''
-                SELECT c.*, creador.activo as creador_activo, creador.fecha_vencimiento_suscripcion as creador_fecha_vencimiento
-                FROM clientes c 
-                LEFT JOIN clientes creador ON c.creador_id = creador.id 
-                WHERE LOWER(c.correo) = ?
-            ''', (correo,))
-            cliente = cursor.fetchone()
+            try:
+                cursor.execute('''
+                    SELECT c.*, creador.activo as creador_activo, creador.fecha_vencimiento_suscripcion as creador_fecha_vencimiento
+                    FROM clientes c 
+                    LEFT JOIN clientes creador ON c.creador_id = creador.id 
+                    WHERE LOWER(c.correo) = ?
+                ''', (correo,))
+                cliente = cursor.fetchone()
+            except Exception as e_fetch:
+                if 'fecha_vencimiento_suscripcion' in str(e_fetch).lower():
+                    try:
+                        cursor.execute("ALTER TABLE clientes ADD COLUMN fecha_vencimiento_suscripcion TIMESTAMP")
+                        conexion.commit()
+                        cursor.execute('''
+                            SELECT c.*, creador.activo as creador_activo, creador.fecha_vencimiento_suscripcion as creador_fecha_vencimiento
+                            FROM clientes c 
+                            LEFT JOIN clientes creador ON c.creador_id = creador.id 
+                            WHERE LOWER(c.correo) = ?
+                        ''', (correo,))
+                        cliente = cursor.fetchone()
+                    except Exception:
+                        cursor.execute('''
+                            SELECT c.*, creador.activo as creador_activo, NULL as creador_fecha_vencimiento
+                            FROM clientes c 
+                            LEFT JOIN clientes creador ON c.creador_id = creador.id 
+                            WHERE LOWER(c.correo) = ?
+                        ''', (correo,))
+                        cliente = cursor.fetchone()
+                else:
+                    raise e_fetch
 
             # Verificación de cuenta creada con Google OAuth
             if cliente and cliente['auth_provider'] == 'google' and not cliente['contrasena']:
@@ -530,7 +553,7 @@ def register_routes(app):
                     from models import obtener_fecha_bolivia
                     from datetime import timedelta as _td
                     trial_usadas = cliente['cotizaciones_trial_usadas'] if 'cotizaciones_trial_usadas' in cliente.keys() else 0
-                    fecha_venc = cliente['fecha_vencimiento_suscripcion']
+                    fecha_venc = cliente['fecha_vencimiento_suscripcion'] if (cliente and 'fecha_vencimiento_suscripcion' in cliente.keys()) else None
                     suscripcion_activa = False
                     if fecha_venc:
                         try:

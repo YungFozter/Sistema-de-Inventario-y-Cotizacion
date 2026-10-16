@@ -10,9 +10,13 @@ def get_db_connection(timeout=30):
 
     database_url = os.environ.get('DATABASE_URL')
     if database_url and database_url.startswith('postgres'):
-        import psycopg2
-        from psycopg2.extras import DictCursor
-        return PostgresConnectionWrapper(database_url)
+        try:
+            return PostgresConnectionWrapper(database_url)
+        except Exception as e:
+            print(f"[WARN] Fallo de conexion a PostgreSQL ({e}). Usando base de datos SQLite local de respaldo...")
+            conn = sqlite3.connect('database/db.sqlite3', timeout=timeout)
+            conn.row_factory = sqlite3.Row
+            return conn
     else:
         # Fallback a sqlite3
         conn = sqlite3.connect('database/db.sqlite3', timeout=timeout)

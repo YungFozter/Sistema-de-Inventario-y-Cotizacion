@@ -1,6 +1,9 @@
 # Usar una imagen base oficial de Python (bullseye aún incluye wkhtmltopdf)
 FROM python:3.9-slim-bullseye
 
+# Evitar interrupciones interactivas de debconf
+ENV DEBIAN_FRONTEND=noninteractive
+
 # Establecer el directorio de trabajo en /app
 WORKDIR /app
 
@@ -18,10 +21,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libxrender1 \
     xfonts-75dpi \
     xfonts-base \
-    && wget -q https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6.1-2/wkhtmltox_0.12.6.1-2.bullseye_amd64.deb \
-    && apt-get install -y --no-install-recommends ./wkhtmltox_0.12.6.1-2.bullseye_amd64.deb \
-    && rm wkhtmltox_0.12.6.1-2.bullseye_amd64.deb \
-    && rm -rf /var/lib/apt/lists/*
+    && ARCH=$(dpkg --print-architecture) \
+    && wget -nv "https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6.1-2/wkhtmltox_0.12.6.1-2.bullseye_${ARCH}.deb" -O /tmp/wkhtmltox.deb \
+    && (dpkg -i /tmp/wkhtmltox.deb || apt-get install -f -y --no-install-recommends) \
+    && rm -f /tmp/wkhtmltox.deb \
+    && rm -rf /var/lib/apt/lists/* \
+    && wkhtmltopdf --version
 
 # Copiar el archivo de dependencias
 COPY requirements.txt .

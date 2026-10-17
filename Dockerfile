@@ -7,9 +7,12 @@ ENV DEBIAN_FRONTEND=noninteractive
 # Establecer el directorio de trabajo en /app
 WORKDIR /app
 
-# Instalar dependencias del sistema requeridas para pdfkit (wkhtmltopdf)
-RUN apt-get update && apt-get install -y \
-    wkhtmltopdf \
+# Instalar dependencias del sistema requeridas para pdfkit (wkhtmltopdf) usando archive.debian.org
+RUN echo 'deb http://archive.debian.org/debian bullseye main contrib non-free' > /etc/apt/sources.list \
+    && echo 'deb http://archive.debian.org/debian-security bullseye-security main contrib non-free' >> /etc/apt/sources.list \
+    && echo 'Acquire::Check-Valid-Until "false";' > /etc/apt/apt.conf.d/99archive \
+    && apt-get update && apt-get install -y --no-install-recommends \
+        wkhtmltopdf \
     && rm -rf /var/lib/apt/lists/*
 
 # Copiar el archivo de dependencias

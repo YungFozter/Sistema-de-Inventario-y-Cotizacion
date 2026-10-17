@@ -161,7 +161,7 @@
         .custom-header-grid {
             display: table;
             width: 100%;
-            border-bottom: 2px solid {{ config_pdf.color_tema if config_pdf and config_pdf.color_tema else '#dc2626' }};
+            border-bottom: 2px solid #2c3e50;
             padding-bottom: 12px;
             margin-bottom: 15px;
         }
@@ -203,7 +203,7 @@
         .header-title {
             font-size: 16pt;
             font-weight: bold;
-            color: {{ config_pdf.color_tema if config_pdf and config_pdf.color_tema else '#dc2626' }};
+            color: #2c3e50;
             margin-bottom: 5px;
             text-transform: uppercase;
         }
@@ -629,38 +629,13 @@
     <div class="container">
         <div class="custom-header-grid">
             <div class="header-left">
-                {% if config_pdf and config_pdf.header_layout == 'right' %}
-                    <table style="width: 100%; border: none; margin-bottom: 0;">
-                        <tr>
-                            <td style="width: 50%; text-align: left; vertical-align: middle; border: none; padding: 0;">
-                                {% if config_pdf and config_pdf.logo_base64 %}
-                                    <img src="{{ config_pdf.logo_base64 }}" style="max-width: 160px; max-height: 120px;" alt="Logo">
-                                {% endif %}
-                            </td>
-                            <td style="width: 50%; text-align: left; vertical-align: middle; border: none; padding: 0; padding-left: 15px;">
-                                <div class="header-company">{{ config_pdf.empresa_nombre if config_pdf and config_pdf.empresa_nombre else (usuario.empresa_nombre if usuario and usuario.empresa_nombre else usuario_sesion) }}</div>
-                                {% if (config_pdf and config_pdf.nit_emisor) or (usuario and usuario.nit) %}
-                                <div class="header-muted">NIT: {{ config_pdf.nit_emisor if config_pdf and config_pdf.nit_emisor else usuario.nit }}</div>
-                                {% endif %}
-                            </td>
-                        </tr>
-                    </table>
-                {% elif config_pdf and config_pdf.header_layout == 'hidden' %}
-                    {% if config_pdf and config_pdf.logo_base64 %}
-                        <img src="{{ config_pdf.logo_base64 }}" class="header-logo-solo" alt="Logo">
-                    {% endif %}
-                {% else %}
-                    {% if config_pdf and config_pdf.logo_base64 %}
-                        <img src="{{ config_pdf.logo_base64 }}" class="header-logo" alt="Logo">
-                    {% endif %}
-                    <div class="header-company">{{ config_pdf.empresa_nombre if config_pdf and config_pdf.empresa_nombre else (usuario.empresa_nombre if usuario and usuario.empresa_nombre else usuario_sesion) }}</div>
-                    {% if (config_pdf and config_pdf.nit_emisor) or (usuario and usuario.nit) %}
-                    <div class="header-muted">NIT: {{ config_pdf.nit_emisor if config_pdf and config_pdf.nit_emisor else usuario.nit }}</div>
-                    {% endif %}
+                <div class="header-company">{{ usuario.empresa_nombre if usuario and usuario.empresa_nombre else (usuario.nombre if usuario and usuario.nombre else usuario_sesion) }}</div>
+                {% if usuario and usuario.nit %}
+                <div class="header-muted">NIT: {{ usuario.nit }}</div>
                 {% endif %}
             </div>
             <div class="header-right">
-                <div class="header-title">{{ config_pdf.titulo_documento if config_pdf and config_pdf.titulo_documento else 'COTIZACIÓN DE VENTAS' }}</div>
+                <div class="header-title">COTIZACIÓN DE VENTAS</div>
                 <div class="badge-codigo">COT-{{ cotizacion.solicitud_numero if cotizacion.solicitud_numero else 'S/N' }}</div>
             </div>
         </div>
@@ -737,15 +712,15 @@
                         <table style="width: 100%; border: none; font-size: 8pt; border-collapse: collapse;">
                             <tr>
                                 <td style="width: 80px; font-weight: bold; color: #2c3e50; border: none; padding: 2px 0; text-align: left;">NOMBRE:</td>
-                                <td style="color: #333; border: none; padding: 2px 0; text-align: left;">{{ config_pdf.responsable_nombre if config_pdf and config_pdf.responsable_nombre else (usuario.nombre if usuario and usuario.nombre else usuario_sesion) }}</td>
+                                <td style="color: #333; border: none; padding: 2px 0; text-align: left;">{{ usuario.nombre if usuario and usuario.nombre else usuario_sesion }}</td>
                             </tr>
                             <tr>
                                 <td style="font-weight: bold; color: #2c3e50; border: none; padding: 2px 0; text-align: left;">CELULAR:</td>
-                                <td style="color: #333; border: none; padding: 2px 0; text-align: left;">{{ config_pdf.responsable_telefono if config_pdf and config_pdf.responsable_telefono else (usuario.telefono if usuario and usuario.telefono else "S/N") }}</td>
+                                <td style="color: #333; border: none; padding: 2px 0; text-align: left;">{{ usuario.telefono if usuario and usuario.telefono else "S/N" }}</td>
                             </tr>
                             <tr>
                                 <td style="font-weight: bold; color: #2c3e50; border: none; padding: 2px 0; text-align: left;">E-MAIL:</td>
-                                <td style="color: #333; border: none; padding: 2px 0; text-align: left;">{{ config_pdf.responsable_email if config_pdf and config_pdf.responsable_email else (usuario.email if usuario and usuario.email else "S/N") }}</td>
+                                <td style="color: #333; border: none; padding: 2px 0; text-align: left;">{{ usuario.email if usuario and usuario.email else "S/N" }}</td>
                             </tr>
                         </table>
                     </td>
@@ -776,7 +751,7 @@
         <!-- NUEVA SECCIÓN CONDICIONES -->
         <div class="section-title">CONDICIONES</div>
         <div class="conditions-container" style="display: block; padding: 10px 12px; margin: 10px 0 15px;">
-            <table style="width: 100%; border: none; margin-bottom: {% if config_pdf and config_pdf.terminos_condiciones %}6px{% else %}0{% endif %}; border-collapse: collapse;">
+            <table style="width: 100%; border: none; margin-bottom: 0; border-collapse: collapse;">
                 <tr>
                     <td style="width: 50%; border: none; padding: 0; text-align: left;">
                         <span class="condition-label">TIEMPO DE VALIDEZ:</span>
@@ -784,15 +759,10 @@
                     </td>
                     <td style="width: 50%; border: none; padding: 0; text-align: left;">
                         <span class="condition-label">PLAZO DE ENTREGA:</span>
-                        <span class="data-value">{{ config_pdf.plazo_entrega if config_pdf and config_pdf.plazo_entrega else "De acuerdo a la existencia / 48 horas" }}</span>
+                        <span class="data-value">De acuerdo a la existencia / 48 horas</span>
                     </td>
                 </tr>
             </table>
-            {% if config_pdf and config_pdf.terminos_condiciones %}
-            <div style="border-top: 1px solid #e2e8f0; padding-top: 6px; margin-top: 4px; font-size: 7.5pt; color: #555; white-space: pre-line; line-height: 1.35;">
-                {{ config_pdf.terminos_condiciones }}
-            </div>
-            {% endif %}
         </div>
 
         <!-- SECCIÓN FIRMA -->
@@ -819,9 +789,7 @@
 
         <!-- Pie de Página -->
         <div class="footer-section">
-            {% if config_pdf and config_pdf.direccion %}{{ config_pdf.direccion }}{% endif %}
-            {% if (config_pdf and config_pdf.direccion) and ((config_pdf and config_pdf.correo) or (usuario and usuario.email)) %} | {% endif %}
-            {% if config_pdf and config_pdf.correo %}Email: {{ config_pdf.correo }}{% elif usuario and usuario.email %}Email: {{ usuario.email }}{% endif %}
+            {% if usuario and usuario.email %}Email: {{ usuario.email }}{% endif %}
         </div>
         
         </div> <!-- Cierre del contenedor avoid-page-break -->

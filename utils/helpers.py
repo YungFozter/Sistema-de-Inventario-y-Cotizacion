@@ -29,10 +29,27 @@ from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter
 from PIL import Image
 import logging
-logging.getLogger("PyPDF2").setLevel(logging.ERROR)
-logging.getLogger("pypdf").setLevel(logging.ERROR)
+from flask import Flask, flash, render_template, request, redirect, session, url_for, make_response, jsonify, current_app
 
-@app.template_filter('date')
+logger = logging.getLogger("utils.helpers")
+
+class _AppProxy:
+    @property
+    def logger(self):
+        try:
+            return current_app.logger
+        except Exception:
+            return logger
+
+    @property
+    def static_folder(self):
+        try:
+            return current_app.static_folder
+        except Exception:
+            return os.path.join(os.path.dirname(os.path.dirname(__file__)), 'static')
+
+app = _AppProxy()
+
 def format_date(value, format='%d/%m/%Y'):
     if value is None:
         return ""
@@ -212,8 +229,10 @@ def aplicar_fondos_por_pagina(pdf_bytes):
             # Aplicar transformación de margen superior a partir de la página 2
             if margen_superior_extra > 0:
                 try:
-                    # Crear una transformación para mover el contenido hacia abajo
-                    from PyPDF2.generic import Transformation
+                    try:
+                        from PyPDF2 import Transformation
+                    except ImportError:
+                        from PyPDF2.generic import Transformation
                     transformation = Transformation().translate(tx=0, ty=-margen_superior_extra)
                     page.add_transformation(transformation)
                     app.logger.info(f"Aplicado margen superior extra de {margen_superior_extra} en página {page_num + 1}")

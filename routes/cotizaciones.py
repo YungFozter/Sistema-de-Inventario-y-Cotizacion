@@ -1060,12 +1060,6 @@ def register_routes(app):
             'es_pdf': True
         }
     
-        # Los fondos ahora se aplican por página después de generar el PDF
-
-        # Añadir configuración de PDF a los datos
-        from models import obtener_configuracion_pdf
-        datos['config_pdf'] = obtener_configuracion_pdf(session.get('user_id'))
-
         # Renderizar plantilla HTML
         html = render_template('cotizaciones/cotizacion_pdf.html', **datos)
 
@@ -1248,8 +1242,15 @@ def register_routes(app):
         # LOGO ANULADO - No cargar logo de ElectroRed
         logo_base64 = ""
 
-        # Cargar imagen de fondo para la cotización
-        fondo_path = os.path.join(app.static_folder, 'images', 'FondoCotizacion.png')
+        # Cargar imagen de fondo para la cotización según cantidad de productos
+        # Cotización de 1 página: FondoCotizacion.png
+        # Cotización de 2 o más páginas: FondoCotizacion2.png (primera página)
+        num_prods = len(productos)
+        fondo_nombre = 'FondoCotizacion.png' if num_prods <= 8 else 'FondoCotizacion2.png'
+        fondo_path = os.path.join(app.static_folder, 'images', fondo_nombre)
+        if not os.path.exists(fondo_path):
+            fondo_path = os.path.join(app.static_folder, 'images', 'FondoCotizacion.png')
+
         fondo_base64 = ""
         if os.path.exists(fondo_path):
             try:
@@ -1311,10 +1312,6 @@ def register_routes(app):
             'logo_base64': None,
             'fondo_base64': fondo_base64 if fondo_base64 else None
         }
-
-        # Añadir configuración de PDF a los datos
-        from models import obtener_configuracion_pdf
-        datos['config_pdf'] = obtener_configuracion_pdf(session.get('user_id'))
 
         return render_template('cotizaciones/cotizacion_pdf.html', **datos)
 

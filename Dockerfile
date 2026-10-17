@@ -7,26 +7,10 @@ ENV DEBIAN_FRONTEND=noninteractive
 # Establecer el directorio de trabajo en /app
 WORKDIR /app
 
-# Instalar dependencias del sistema y la versión oficial de wkhtmltopdf (con patched Qt)
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    wget \
-    ca-certificates \
-    fontconfig \
-    libfreetype6 \
-    libjpeg62-turbo \
-    libpng16-16 \
-    libx11-6 \
-    libxcb1 \
-    libxext6 \
-    libxrender1 \
-    xfonts-75dpi \
-    xfonts-base \
-    && ARCH=$(dpkg --print-architecture) \
-    && wget -nv "https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6.1-2/wkhtmltox_0.12.6.1-2.bullseye_${ARCH}.deb" -O /tmp/wkhtmltox.deb \
-    && (dpkg -i /tmp/wkhtmltox.deb || apt-get install -f -y --no-install-recommends) \
-    && rm -f /tmp/wkhtmltox.deb \
-    && rm -rf /var/lib/apt/lists/* \
-    && wkhtmltopdf --version
+# Instalar dependencias del sistema requeridas para pdfkit (wkhtmltopdf)
+RUN apt-get update && apt-get install -y \
+    wkhtmltopdf \
+    && rm -rf /var/lib/apt/lists/*
 
 # Copiar el archivo de dependencias
 COPY requirements.txt .

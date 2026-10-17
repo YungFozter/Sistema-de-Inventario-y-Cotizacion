@@ -31,6 +31,7 @@ from PIL import Image
 import logging
 from utils.decorators import login_required, superadmin_required, admin_required, standard_required
 from utils.helpers import format_date, aplicar_fondos_por_pagina, generar_pdf_margenes_dinamicos
+from PDF_Generador_2 import generar_cotizacion_pdf_v2
 
 def _validar_acceso_cotizacion(cursor, cotizacion_id, user_id, user_rol):
     """Verifica si el usuario actual tiene permisos para acceder a una cotización específica (Anti-IDOR)"""
@@ -1036,6 +1037,8 @@ def register_routes(app):
             'cotizacion': {
                 'solicitud_numero': str(id) if id else "S/N",
                 'fecha': fecha_cotizacion,
+                'validez': '1 Día',
+                'moneda': 'Bolivianos (Bs)',
             },
             'productos': [{
                 'codigo': p[1] if p[1] else "S/N",
@@ -1055,94 +1058,24 @@ def register_routes(app):
             'total_letras': total_letras,
             'usuario_sesion': session.get('user_nombre', 'Usuario del sistema'),
             'usuario': usuario,
-            'logo_base64': None,  # Logo anulado por solicitud del usuario
-            'fondo_base64': None,  # Fondo se aplicará por página después
+            'logo_base64': None,
+            'fondo_base64': None,
             'es_pdf': True
-        }
-    
-        # Renderizar plantilla HTML
-        html = render_template('cotizaciones/cotizacion_pdf.html', **datos)
-
-        # Detectar la ruta de wkhtmltopdf según el sistema operativo
-        wkhtmltopdf_path = None
-        if os.name == "nt":  # Windows
-            # Rutas comunes en Windows
-            possible_paths = [
-                r'C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe',
-                r'C:\Program Files (x86)\wkhtmltopdf\bin\wkhtmltopdf.exe',
-            ]
-            for path in possible_paths:
-                if os.path.exists(path):
-                    wkhtmltopdf_path = path
-                    break
-        else:  # Linux/Mac
-            # En Linux/Mac normalmente está en el PATH
-            import subprocess
-            try:
-                wkhtmltopdf_path = subprocess.check_output(['which', 'wkhtmltopdf']).decode().strip()
-            except:
-                wkhtmltopdf_path = '/usr/local/bin/wkhtmltopdf'  # Ruta común en Mac/Linux
-    
-        # Configuración de pdfkit con la ruta detectada
-        config = pdfkit.configuration(wkhtmltopdf=wkhtmltopdf_path)
-        options = {
-            'page-size': 'Letter',
-            'enable-local-file-access': None,
-            'encoding': 'UTF-8',
-            'quiet': '',
-            'margin-top': '10mm',
-            'margin-right': '10mm',
-            'margin-bottom': '10mm',
-            'margin-left': '10mm',
-            'no-background': None
         }
 
         try:
-            app.logger.info(f"=== GENERANDO PDF COTIZACIÓN {id} ===")
-        
-            # Generar PDF base sin fondo
-            pdf_sin_fondo = pdfkit.from_string(html, False, configuration=config, options=options)
-            app.logger.info(f"PDF base generado, tamaño: {len(pdf_sin_fondo)} bytes")
-        
-            # Verificar cuántas páginas tiene el PDF para decidir estrategia
-            temp_reader = PdfReader(io.BytesIO(pdf_sin_fondo))
-            num_pages = len(temp_reader.pages)
-            app.logger.info(f"PDF tiene {num_pages} páginas")
-        
-            if num_pages > 1:
-                app.logger.info("Aplicando estrategia para múltiples páginas")
-                # Para PDFs de múltiples páginas, generar versiones con diferentes márgenes
-                pdf_con_fondos = generar_pdf_margenes_dinamicos(html, config, id)
-            else:
-                app.logger.info("Aplicando estrategia para página única")
-                # Para PDF de una sola página, usar el método original
-                pdf_con_fondos = aplicar_fondos_por_pagina(pdf_sin_fondo)
-        
-            app.logger.info(f"PDF con fondos generado, tamaño final: {len(pdf_con_fondos)} bytes")
+            app.logger.info(f"=== GENERANDO PDF COTIZACIÓN {id} CON PDF_Generador_2 ===")
+            pdf_bytes = generar_cotizacion_pdf_v2(datos)
+            app.logger.info(f"PDF generado exitosamente con ReportLab v2, tamaño: {len(pdf_bytes)} bytes")
 
-            # Crear respuesta
-            response = make_response(pdf_con_fondos)
+            response = make_response(pdf_bytes)
             response.headers['Content-Type'] = 'application/pdf'
             response.headers['Content-Disposition'] = f'attachment; filename=cotizacion_{id}.pdf'
-
             return response
-        except OSError as e:
-            app.logger.error(f"Error con wkhtmltopdf: {str(e)}")
-            error_msg = """
-            <h1>Error al generar PDF</h1>
-            <p>No se pudo encontrar o ejecutar wkhtmltopdf. Por favor, instálelo siguiendo estos pasos:</p>
-            <ol>
-                <li>Descargue wkhtmltopdf desde <a href='https://wkhtmltopdf.org/downloads.html' target='_blank'>https://wkhtmltopdf.org/downloads.html</a></li>
-                <li>Instálelo en su sistema</li>
-                <li>Asegúrese de que la ruta al ejecutable esté correctamente configurada</li>
-            </ol>
-            <p>Ruta actual buscada: {}</p>
-            <p>Error: {}</p>
-            """.format(wkhtmltopdf_path if 'wkhtmltopdf_path' in locals() else "No configurada", str(e))
-        
-            return error_msg, 500
         except Exception as e:
-            app.logger.error(f"Error al generar PDF: {str(e)}")
+            app.logger.error(f"Error al generar PDF con PDF_Generador_2: {str(e)}")
+            import traceback
+            app.logger.error(traceback.format_exc())
             return f"Error al generar PDF: {str(e)}", 500
 
     @app.route('/cotizaciones/vista_previa/<int:id>')

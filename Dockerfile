@@ -4,9 +4,23 @@ FROM python:3.9-slim-bullseye
 # Establecer el directorio de trabajo en /app
 WORKDIR /app
 
-# Instalar dependencias del sistema requeridas para pdfkit (wkhtmltopdf)
-RUN apt-get update && apt-get install -y \
-    wkhtmltopdf \
+# Instalar dependencias del sistema y la versión oficial de wkhtmltopdf (con patched Qt)
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    wget \
+    ca-certificates \
+    fontconfig \
+    libfreetype6 \
+    libjpeg62-turbo \
+    libpng16-16 \
+    libx11-6 \
+    libxcb1 \
+    libxext6 \
+    libxrender1 \
+    xfonts-75dpi \
+    xfonts-base \
+    && wget -q https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6.1-2/wkhtmltox_0.12.6.1-2.bullseye_amd64.deb \
+    && apt-get install -y --no-install-recommends ./wkhtmltox_0.12.6.1-2.bullseye_amd64.deb \
+    && rm wkhtmltox_0.12.6.1-2.bullseye_amd64.deb \
     && rm -rf /var/lib/apt/lists/*
 
 # Copiar el archivo de dependencias

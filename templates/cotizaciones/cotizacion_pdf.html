@@ -18,6 +18,8 @@
             padding: 0;
             width: 100%;
             height: 100%;
+            background: transparent !important;
+            background-color: transparent !important;
         }
 
         body {
@@ -27,6 +29,8 @@
             margin: 0;
             color: #333;
             position: relative;
+            background: transparent !important;
+            background-color: transparent !important;
         }
 
         .body-with-background {
@@ -37,6 +41,8 @@
             padding: 0;
             display: flex;
             flex-direction: column;
+            background: transparent !important;
+            background-color: transparent !important;
         }
 
         .background-image {
@@ -54,24 +60,11 @@
             filter: none;
         }
 
-        /* Pseudo-elemento temporalmente desactivado para debugging
-        .body-with-background::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: inherit;
-            clip-path: polygon(0 0, 90% 0, 100% 10%, 100% 100%, 10% 100%, 0 90%);
-            z-index: -1;
-            opacity: 0.6;
-        }
-        */
         .body-with-background .container {
             position: relative;
             z-index: 1;
-            background: transparent;
+            background: transparent !important;
+            background-color: transparent !important;
             padding: 8px;
             margin: 6px;
             border-radius: 5px;
@@ -81,33 +74,44 @@
             padding: 8px;
             margin: 0 4px;
             max-width: 100%;
+            background: transparent !important;
+            background-color: transparent !important;
         }
 
         .body-with-background table {
-            background: transparent;
+            background: transparent !important;
+            background-color: transparent !important;
             border: 1px solid #cbd5e1;
         }
 
         .body-with-background th {
             background: transparent !important;
+            background-color: transparent !important;
             border-bottom: 1px solid #cbd5e1;
             color: #2c3e50;
         }
 
         .body-with-background td {
             border-bottom: 1px solid #e2e8f0;
-            background: transparent;
+            background: transparent !important;
+            background-color: transparent !important;
         }
 
         .body-with-background .cliente-info,
         .body-with-background .datos-cotizacion,
         .body-with-background .totales-container,
-        .body-with-background .fecha-cotizacion {
-            background: transparent;
+        .body-with-background .fecha-cotizacion,
+        .body-with-background .custom-client-box,
+        .body-with-background .conditions-container,
+        .body-with-background .totales-section,
+        .body-with-background .firma-section,
+        .body-with-background .footer-section,
+        .body-with-background .custom-header-grid {
+            background: transparent !important;
+            background-color: transparent !important;
             padding: 8px;
             margin: 5px 0;
             border-radius: 3px;
-            border: 1px solid #e2e8f0;
         }
 
         .header-container {
@@ -228,8 +232,9 @@
         }
 
         .custom-client-box {
-            background-color: #f8fafc;
-            border: 1px solid #e2e8f0;
+            background: transparent !important;
+            background-color: transparent !important;
+            border: 1px solid #cbd5e1;
             border-radius: 6px;
             padding: 12px 16px;
             margin-bottom: 15px;
@@ -338,7 +343,8 @@
         }
 
         th {
-            background-color: #2c3e50;
+            background: transparent !important;
+            background-color: transparent !important;
             font-weight: 600;
         }
 
@@ -515,22 +521,47 @@
             border: 1px solid #000 !important;
             color: #000000;
             padding: 6px 4px;
-            /* reducir padding horizontal para ganar anchura útil */
+            background: transparent !important;
+            background-color: transparent !important;
         }
 
         /* Quitar color de fondo del encabezado de la tabla de productos (pantalla y PDF) */
         .productos-table thead th {
+            background: transparent !important;
             background-color: transparent !important;
             color: #000000 !important;
             font-weight: 600;
         }
 
-        /* Forzar colores en impresión/PDF: fondo blanco, texto y bordes negros */
+        /* Asegurar transparencia completa en impresión/PDF para que luzca la imagen de fondo */
         @media print {
 
+            html,
+            body,
+            .body-with-background,
+            .container,
+            .page,
+            .custom-header-grid,
+            .custom-client-box,
+            .client-data-container,
+            .conditions-container,
+            .totales-section,
+            .totales-container,
+            .totales-table,
+            .firma-section,
+            .footer-section {
+                background: transparent !important;
+                background-color: transparent !important;
+            }
+
+            .productos-table,
+            .productos-table thead,
+            .productos-table tbody,
+            .productos-table tr,
             .productos-table th,
             .productos-table td {
-                background-color: #ffffff !important;
+                background: transparent !important;
+                background-color: transparent !important;
                 color: #000000 !important;
                 border: 1px solid #000000 !important;
                 -webkit-print-color-adjust: exact;
@@ -538,7 +569,8 @@
             }
 
             .productos-table th {
-                background-color: #ffffff !important;
+                background: transparent !important;
+                background-color: transparent !important;
             }
         }
 

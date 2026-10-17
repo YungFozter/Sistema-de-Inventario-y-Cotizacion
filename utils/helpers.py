@@ -284,7 +284,7 @@ def generar_pdf_margenes_dinamicos(html, config, cotizacion_id):
             'margin-right': '10mm',
             'margin-bottom': '10mm',
             'margin-left': '10mm',
-            'no-background': ''
+            'no-background': None
         }
         
         pdf_test = pdfkit.from_string(html, False, configuration=config, options=options_test)
@@ -308,7 +308,7 @@ def generar_pdf_margenes_dinamicos(html, config, cotizacion_id):
             'margin-bottom': '10mm',
             'margin-left': '10mm',
             'header-spacing': '5',      # Espacio adicional para el header en páginas 2+
-            'no-background': ''
+            'no-background': None
         }
         
         # Generar el PDF final con márgenes optimizados
@@ -328,7 +328,7 @@ def generar_pdf_margenes_dinamicos(html, config, cotizacion_id):
             'margin-right': '10mm',
             'margin-bottom': '10mm',
             'margin-left': '10mm',
-            'no-background': ''
+            'no-background': None
         }
         pdf_fallback = pdfkit.from_string(html, False, configuration=config, options=options_fallback)
         return aplicar_fondos_por_pagina(pdf_fallback)

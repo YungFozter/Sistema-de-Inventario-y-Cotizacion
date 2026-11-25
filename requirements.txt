@@ -5,7 +5,7 @@ num2words
 python-dotenv
 markupsafe
 PyPDF2
-reportlab
+reportlab<5.0.0
 Pillow
 pdfplumber
 gunicorn

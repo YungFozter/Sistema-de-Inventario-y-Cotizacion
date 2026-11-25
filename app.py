@@ -172,4 +172,5 @@ init_chatlife(app)
 init_ventas(app)
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    port = int(os.environ.get('PORT') or os.environ.get('FLASK_RUN_PORT') or 5000)
+    app.run(debug=True, host='0.0.0.0', port=port)

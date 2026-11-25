@@ -383,7 +383,9 @@ def crear_tablas():
                 tablas_rls = [
                     'clientes', 'logs', 'categorias', 'productos', 'cotizaciones',
                     'cotizacion_productos', 'importaciones_pdf', 'items_importados_temp',
-                    'configuracion_pdf', 'pines_admin', 'historial_renovaciones'
+                    'configuracion_pdf', 'pines_admin', 'historial_renovaciones',
+                    'proveedores', 'chatlife_mensajes', 'chatlife_config',
+                    'ventas', 'venta_productos'
                 ]
                 for t in tablas_rls:
                     try:

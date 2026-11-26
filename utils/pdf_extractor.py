@@ -11,8 +11,9 @@ class PDFProductExtractor:
     """
 
     KNOWN_COUNTRIES = [
-        'ALEMANIA', 'BRASIL', 'TAIWAN', 'TAIWÁN', 'CHINA', 'MEXICO', 'MÉXICO',
-        'COLOMBIA', 'UE', 'CN', 'USA', 'ESPAÑA', 'ITALIA', 'JAPON', 'JAPÓN'
+        'ALEMANIA', 'ASIA', 'BRASIL', 'TAIWAN', 'TAIWÁN', 'CHINA', 'MEXICO', 'MÉXICO',
+        'COLOMBIA', 'UE', 'CN', 'USA', 'ESPAÑA', 'ITALIA', 'JAPON', 'JAPÓN',
+        'EUROPA', 'INDIA', 'COREA', 'CHILE', 'PERU', 'PERÚ', 'ARGENTINA'
     ]
 
     KNOWN_UMS = [
@@ -187,7 +188,11 @@ class PDFProductExtractor:
         if not consolidar_duplicados:
             return raw_products
 
-        # Consolidar duplicados por código de producto sumando las cantidades
+        return cls.consolidar_productos(raw_products)
+
+    @classmethod
+    def consolidar_productos(cls, raw_products):
+        """Consolida productos duplicados por código sumando sus cantidades."""
         consolidated = {}
         for p in raw_products:
             cod = p['codigo']
@@ -268,13 +273,12 @@ class PDFProductExtractor:
                         if l.strip():
                             lines.append(l.strip())
 
-            prods = cls.parse_raw_lines(lines, consolidar_duplicados=consolidar_duplicados)
-            if prods:
-                return prods
+                prods = cls.parse_raw_lines(lines, consolidar_duplicados=consolidar_duplicados)
+                if prods:
+                    return prods
 
-            # Respado con extract_tables si extract_text no retorna ítems
-            table_lines = []
-            with pdfplumber.open(pdf_file) as pdf:
+                # Respaldo con extract_tables si extract_text no retorna ítems
+                table_lines = []
                 for page in pdf.pages:
                     tables = page.extract_tables()
                     if tables:

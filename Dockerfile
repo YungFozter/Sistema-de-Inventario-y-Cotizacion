@@ -31,4 +31,4 @@ RUN mkdir -p database
 EXPOSE $PORT
 
 # Comando para iniciar la aplicación con gunicorn
-CMD gunicorn app:app --bind 0.0.0.0:$PORT
+CMD gunicorn app:app --bind 0.0.0.0:$PORT --timeout 120

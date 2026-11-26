@@ -907,7 +907,7 @@ def register_routes(app):
         try:
             pdf_bytes = archivo.read()
             raw_items = PDFProductExtractor.extract_products(pdf_bytes, consolidar_duplicados=False)
-            consolidated_items = PDFProductExtractor.extract_products(pdf_bytes, consolidar_duplicados=True)
+            consolidated_items = PDFProductExtractor.consolidar_productos(raw_items)
             duplicados = PDFProductExtractor.detectar_duplicados(raw_items)
 
             items_to_return = consolidated_items if consolidar else raw_items
@@ -915,7 +915,7 @@ def register_routes(app):
             if not items_to_return:
                 return jsonify({
                     'success': False,
-                    'message': 'No se encontraron filas de productos válidos en el PDF. Verifique que el documento contenga una tabla con productos.'
+                    'message': 'No se encontraron filas de productos con texto extraíble en el PDF. Si el PDF es una imagen escaneada, usa la pestaña "Pegar Texto" o un PDF con texto seleccionable.'
                 }), 422
 
             return jsonify({

@@ -2128,7 +2128,16 @@
                 method: 'POST',
                 body: formData
               })
-                .then(res => res.json())
+                .then(async res => {
+                  const rawText = await res.text();
+                  let data = null;
+                  try {
+                    data = JSON.parse(rawText);
+                  } catch (e) {
+                    throw new Error(`HTTP ${res.status} ${res.statusText || ''}`.trim());
+                  }
+                  return data;
+                })
                 .then(data => {
                   document.getElementById('spinnerProcesandoPDF').style.display = 'none';
                   if (data.success) {
@@ -2159,7 +2168,7 @@
                 .catch(err => {
                   console.error(err);
                   document.getElementById('spinnerProcesandoPDF').style.display = 'none';
-                  mostrarAlertaPDF('Error de conexión o fallo procesando el PDF.', 'danger');
+                  mostrarAlertaPDF(`Error de conexión o fallo procesando el PDF (${err.message || 'sin respuesta'}).`, 'danger');
                 });
             }
 

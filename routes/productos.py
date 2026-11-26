@@ -32,6 +32,7 @@ from PIL import Image
 import logging
 from utils.decorators import login_required, superadmin_required, admin_required, standard_required
 from utils.helpers import format_date, aplicar_fondos_por_pagina, generar_pdf_margenes_dinamicos
+from PDF_Generador_2 import generar_cotizacion_pdf_v2
 
 def _obtener_columnas_productos(cursor):
     """Devuelve los nombres de las columnas de la tabla productos de forma compatible con SQLite y PostgreSQL"""
@@ -1201,6 +1202,8 @@ def register_routes(app):
                 'cotizacion': {
                     'solicitud_numero': "Directo",
                     'fecha': fecha_cotizacion,
+                    'validez': '1 Día',
+                    'moneda': 'Bolivianos (Bs)',
                 },
                 'productos': productos_formateados,
                 'subtotal': subtotal_bruto,
@@ -1211,61 +1214,21 @@ def register_routes(app):
                 'total_letras': total_letras,
                 'usuario_sesion': session.get('user_nombre', 'Usuario del sistema'),
                 'usuario': usuario,
-                'logo_base64': "",
-                'fondo_base64': None,  # El fondo se aplicará por página después con PyPDF2
+                'logo_base64': None,
+                'fondo_base64': None,
                 'es_pdf': True
             }
 
-            # Generar el HTML
-            html_renderizado = render_template('cotizaciones/cotizacion_pdf.html', **datos)
-        
-            # Buscar path de wkhtmltopdf
-            wkhtmltopdf_path = None
-            if os.name == "nt":
-                possible_paths = [
-                    r'C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe',
-                    r'C:\Program Files (x86)\wkhtmltopdf\bin\wkhtmltopdf.exe',
-                ]
-                for path in possible_paths:
-                    if os.path.exists(path):
-                        wkhtmltopdf_path = path
-                        break
-            else:
-                import subprocess
-                try:
-                    wkhtmltopdf_path = subprocess.check_output(['which', 'wkhtmltopdf']).decode().strip()
-                except:
-                    wkhtmltopdf_path = '/usr/local/bin/wkhtmltopdf'
-
-            # Generar PDF real usando la lógica de wkhtmltopdf y PyPDF2 (idéntica a pdf_cotizacion)
-            config = pdfkit.configuration(wkhtmltopdf=wkhtmltopdf_path)
-            options = {
-                'page-size': 'Letter',
-                'enable-local-file-access': None,
-                'encoding': 'UTF-8',
-                'quiet': '',
-                'margin-top': '10mm',
-                'margin-right': '10mm',
-                'margin-bottom': '10mm',
-                'margin-left': '10mm',
-            }
-
             try:
-                # Generar PDF base (como el usuario quiere hoja blanca, no aplicamos fondos)
-                pdf_sin_fondo = pdfkit.from_string(html_renderizado, False, configuration=config, options=options)
-                
-                # El usuario solicitó específicamente una hoja blanca para el PDF Directo,
-                # así que omitimos la lógica de PyPDF2 y devolvemos directamente el pdf de wkhtmltopdf
-                pdf_final = pdf_sin_fondo
+                pdf_final = generar_cotizacion_pdf_v2(datos)
 
                 response = make_response(pdf_final)
                 response.headers['Content-Type'] = 'application/pdf'
                 response.headers['Content-Disposition'] = 'inline; filename=cotizacion_directa.pdf'
                 return response
-            
-            except OSError as e:
-                print(f"Error con wkhtmltopdf en PDF Directo: {e}")
-                return f"Error al generar PDF: No se encontró wkhtmltopdf", 500
+            except Exception as e:
+                print(f"Error al generar PDF Directo con PDF_Generador_2: {e}")
+                return f"Error al generar PDF: {str(e)}", 500
 
         except Exception as e:
             print(f"Error general en PDF directo: {e}")

@@ -302,10 +302,43 @@ class PDFProductExtractor:
                                 if cleaned_cells:
                                     table_lines.append(" ".join(cleaned_cells))
 
-            return cls.parse_raw_lines(table_lines, consolidar_duplicados=consolidar_duplicados)
+                prods = cls.parse_raw_lines(table_lines, consolidar_duplicados=consolidar_duplicados)
+                if prods:
+                    return prods
+
+                # Respaldo final con OCR para PDFs escaneados o basados en imágenes
+                ocr_lines = cls._extract_ocr_lines_from_pdf(pdf)
+                if ocr_lines:
+                    return cls.parse_raw_lines(ocr_lines, consolidar_duplicados=consolidar_duplicados)
+
+            return []
         except Exception as e:
             print(f"Error extrayendo PDF: {e}")
             return []
+
+    @classmethod
+    def _extract_ocr_lines_from_pdf(cls, pdf):
+        """Extrae líneas de texto mediante Tesseract OCR cuando el PDF no contiene texto nativo."""
+        try:
+            import pytesseract
+        except ImportError:
+            return []
+
+        ocr_lines = []
+        for page in pdf.pages:
+            try:
+                pil_img = page.to_image(resolution=250).original
+                try:
+                    text = pytesseract.image_to_string(pil_img, lang='spa+eng', config='--psm 6')
+                except Exception:
+                    text = pytesseract.image_to_string(pil_img, config='--psm 6')
+                for line in (text or '').splitlines():
+                    if line.strip():
+                        ocr_lines.append(line.strip())
+            except Exception as ocr_err:
+                print(f"[WARN] Error OCR en página PDF: {ocr_err}")
+                break
+        return ocr_lines
 
     @classmethod
     def parse_pasted_text(cls, text, consolidar_duplicados=True):

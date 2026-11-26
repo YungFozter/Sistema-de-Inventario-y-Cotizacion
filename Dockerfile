@@ -13,6 +13,8 @@ RUN echo 'deb http://archive.debian.org/debian bullseye main contrib non-free' >
     && echo 'Acquire::Check-Valid-Until "false";' > /etc/apt/apt.conf.d/99archive \
     && apt-get update && apt-get install -y --no-install-recommends \
         wkhtmltopdf \
+        tesseract-ocr \
+        tesseract-ocr-spa \
     && rm -rf /var/lib/apt/lists/*
 
 # Copiar el archivo de dependencias

@@ -106,6 +106,15 @@ class PDFProductExtractor:
                     break
                 continue
 
+            # Si "SON:" quedó pegado en la misma línea que la última fila por solapamiento vertical, recortarlo
+            son_match = re.search(r'\bson\s*:', line_clean, flags=re.IGNORECASE)
+            stop_after_line = False
+            if son_match:
+                line_clean = line_clean[:son_match.start()].strip()
+                stop_after_line = True
+                if not line_clean:
+                    break
+
             # Si la línea empieza con un número de item o código (ej: "1 6232 ..." o "1. 6232 ...")
             if re.match(r'^\d{1,3}[\.\s]+\d+', line_clean):
                 if curr_block:
@@ -113,6 +122,9 @@ class PDFProductExtractor:
                 curr_block = [line_clean]
             elif curr_block:
                 curr_block.append(line_clean)
+
+            if stop_after_line:
+                break
 
         if curr_block:
             blocks.append(curr_block)

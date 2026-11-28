@@ -981,6 +981,7 @@ def register_routes(app):
             data = request.get_json() or {}
             nombre_importacion = data.get('nombre_importacion', '').strip()
             items = data.get('items', [])
+            orden_personalizado = bool(data.get('orden_personalizado', False))
 
             if not items:
                 return jsonify({'success': False, 'message': 'No hay productos para guardar en la importación'}), 400
@@ -988,7 +989,8 @@ def register_routes(app):
             importacion_id, nombre_final = guardar_importacion_pdf(
                 nombre_importacion=nombre_importacion,
                 items=items,
-                usuario_id=session.get('user_id')
+                usuario_id=session.get('user_id'),
+                orden_personalizado=orden_personalizado
             )
 
             return jsonify({

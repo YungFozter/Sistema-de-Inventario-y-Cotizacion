@@ -250,6 +250,7 @@ def crear_tablas():
                 usuario_id INTEGER,
                 total_items INTEGER DEFAULT 0,
                 estado TEXT DEFAULT 'pendiente',
+                orden_personalizado INTEGER DEFAULT 0,
                 FOREIGN KEY (usuario_id) REFERENCES clientes(id)
             ){";" if is_postgres else ""}
         ''')
@@ -263,13 +264,19 @@ def crear_tablas():
                 descripcion TEXT,
                 marca TEXT,
                 um TEXT DEFAULT 'Pza',
+                cantidad REAL DEFAULT 1.0,
                 precio_unitario REAL DEFAULT 0.0,
+                origen_pdf TEXT,
+                origen_tipo TEXT DEFAULT 'pdf',
+                origen_orden INTEGER DEFAULT 1,
                 registrado {"BOOLEAN DEFAULT FALSE" if is_postgres else "BOOLEAN DEFAULT 0"},
                 producto_registrado_id INTEGER,
                 FOREIGN KEY (importacion_id) REFERENCES importaciones_pdf(id) ON DELETE CASCADE,
                 FOREIGN KEY (producto_registrado_id) REFERENCES productos(id)
             ){";" if is_postgres else ""}
         ''')
+
+        _asegurar_columnas_importacion_pdf(cursor, is_postgres)
 
         # Tabla de pines de administrador
         cursor.execute(f'''
@@ -726,14 +733,47 @@ def migrar_columna_auth_provider():
 # FUNCIONES PARA IMPORTACIÓN DE PRODUCTOS PDF
 # =============================================
 
-def guardar_importacion_pdf(nombre_importacion, items, usuario_id=None):
+def _asegurar_columnas_importacion_pdf(cursor, is_postgres):
+    """Agrega de forma idempotente columnas de origen multi-PDF y cantidad en importaciones_pdf / items_importados_temp."""
+    try:
+        if is_postgres:
+            cursor.execute("ALTER TABLE importaciones_pdf ADD COLUMN IF NOT EXISTS orden_personalizado INTEGER DEFAULT 0")
+            cursor.execute("ALTER TABLE items_importados_temp ADD COLUMN IF NOT EXISTS cantidad REAL DEFAULT 1.0")
+            cursor.execute("ALTER TABLE items_importados_temp ADD COLUMN IF NOT EXISTS origen_pdf TEXT")
+            cursor.execute("ALTER TABLE items_importados_temp ADD COLUMN IF NOT EXISTS origen_tipo TEXT DEFAULT 'pdf'")
+            cursor.execute("ALTER TABLE items_importados_temp ADD COLUMN IF NOT EXISTS origen_orden INTEGER DEFAULT 1")
+        else:
+            cursor.execute("PRAGMA table_info(importaciones_pdf)")
+            cols_imp = {row[1] for row in cursor.fetchall()}
+            if 'orden_personalizado' not in cols_imp:
+                cursor.execute("ALTER TABLE importaciones_pdf ADD COLUMN orden_personalizado INTEGER DEFAULT 0")
+
+            cursor.execute("PRAGMA table_info(items_importados_temp)")
+            cols_items = {row[1] for row in cursor.fetchall()}
+            if 'cantidad' not in cols_items:
+                cursor.execute("ALTER TABLE items_importados_temp ADD COLUMN cantidad REAL DEFAULT 1.0")
+            if 'origen_pdf' not in cols_items:
+                cursor.execute("ALTER TABLE items_importados_temp ADD COLUMN origen_pdf TEXT")
+            if 'origen_tipo' not in cols_items:
+                cursor.execute("ALTER TABLE items_importados_temp ADD COLUMN origen_tipo TEXT DEFAULT 'pdf'")
+            if 'origen_orden' not in cols_items:
+                cursor.execute("ALTER TABLE items_importados_temp ADD COLUMN origen_orden INTEGER DEFAULT 1")
+    except Exception as e:
+        print(f"[WARN] No se pudieron verificar columnas multi-PDF: {e}")
+
+
+def guardar_importacion_pdf(nombre_importacion, items, usuario_id=None, orden_personalizado=False):
     """
-    Guarda un nuevo lote de importación de productos con un nombre único y sus celdas extraídas.
+    Guarda un nuevo lote de importación de productos con un nombre único y sus celdas extraídas,
+    conservando cantidad y metadatos de origen por PDF para reconstruir los grupos al reabrir.
     Garantiza que no se sobrescriban importaciones agregando sello de hora si ya existe el mismo nombre.
     """
     conexion = get_db_connection()
     cursor = conexion.cursor()
     try:
+        is_postgres = check_is_postgres(cursor)
+        _asegurar_columnas_importacion_pdf(cursor, is_postgres)
+
         now_dt = obtener_fecha_bolivia()
         fecha_str = now_dt.strftime('%Y-%m-%d %H:%M:%S')
 
@@ -747,19 +787,19 @@ def guardar_importacion_pdf(nombre_importacion, items, usuario_id=None):
         if cursor.fetchone()[0] > 0:
             nombre_importacion = f"{nombre_importacion} ({now_dt.strftime('%H:%M:%S')})"
 
-        is_postgres = check_is_postgres(cursor)
+        orden_pers_int = 1 if orden_personalizado else 0
         if is_postgres:
             cursor.execute('''
-                INSERT INTO importaciones_pdf (nombre_importacion, fecha_importacion, usuario_id, total_items, estado)
-                VALUES (?, ?, ?, ?, ?) RETURNING id
-            ''', (nombre_importacion, fecha_str, usuario_id, len(items), 'guardado'))
+                INSERT INTO importaciones_pdf (nombre_importacion, fecha_importacion, usuario_id, total_items, estado, orden_personalizado)
+                VALUES (?, ?, ?, ?, ?, ?) RETURNING id
+            ''', (nombre_importacion, fecha_str, usuario_id, len(items), 'guardado', orden_pers_int))
             row = cursor.fetchone()
             importacion_id = row[0] if row else getattr(cursor, 'lastrowid', None)
         else:
             cursor.execute('''
-                INSERT INTO importaciones_pdf (nombre_importacion, fecha_importacion, usuario_id, total_items, estado)
-                VALUES (?, ?, ?, ?, ?)
-            ''', (nombre_importacion, fecha_str, usuario_id, len(items), 'guardado'))
+                INSERT INTO importaciones_pdf (nombre_importacion, fecha_importacion, usuario_id, total_items, estado, orden_personalizado)
+                VALUES (?, ?, ?, ?, ?, ?)
+            ''', (nombre_importacion, fecha_str, usuario_id, len(items), 'guardado', orden_pers_int))
             importacion_id = cursor.lastrowid
 
         if not importacion_id:
@@ -773,17 +813,35 @@ def guardar_importacion_pdf(nombre_importacion, items, usuario_id=None):
                 pu = float(item.get('precio_unitario', 0.0) or 0.0)
             except (ValueError, TypeError):
                 pu = 0.0
+            try:
+                cant = float(item.get('cantidad', 1.0) if item.get('cantidad') is not None else 1.0)
+            except (ValueError, TypeError):
+                cant = 1.0
+            try:
+                origen_orden = int(item.get('origen_orden', 1) or 1)
+            except (ValueError, TypeError):
+                origen_orden = 1
+
+            origen_pdf = item.get('origen_pdf') or None
+            origen_tipo = item.get('origen_tipo') or 'pdf'
 
             cursor.execute('''
-                INSERT INTO items_importados_temp (importacion_id, codigo, descripcion, marca, um, precio_unitario)
-                VALUES (?, ?, ?, ?, ?, ?)
+                INSERT INTO items_importados_temp (
+                    importacion_id, codigo, descripcion, marca, um, cantidad,
+                    precio_unitario, origen_pdf, origen_tipo, origen_orden
+                )
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ''', (
                 importacion_id,
                 item.get('codigo', ''),
                 item.get('descripcion', ''),
                 item.get('marca', ''),
                 item.get('um', 'Pza'),
-                pu
+                cant,
+                pu,
+                origen_pdf,
+                origen_tipo,
+                origen_orden
             ))
 
         conexion.commit()

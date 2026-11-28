@@ -814,12 +814,34 @@
       }
     }
 
-    // Fusión secuencial estricta: PDF #1 -> PDF #2 -> ... -> PDF #N
+    // Fusión secuencial estricta: PDF #1 -> PDF #2 -> ... -> PDF #N (o orden personalizado libre)
     const itemsFusionados = obtenerItemsFusionados(false);
     if (!itemsFusionados || itemsFusionados.length === 0) {
       mostrarAlertaPDF('⚠️ No hay items extraídos para guardar.', 'warning');
       return;
     }
+
+    // Construir mapa de índice de lote (1-based) para preservar el origen de cada PDF al reabrir
+    const mapaOrdenLote = {};
+    lotesImportados.forEach((lote, idx) => {
+      mapaOrdenLote[lote.id] = {
+        orden: idx + 1,
+        nombre: lote.nombreOrigen,
+        tipo: lote.tipo === 'texto' ? 'texto' : 'pdf'
+      };
+    });
+
+    const itemsPayload = itemsFusionados.map((item) => {
+      const infoLote = mapaOrdenLote[item._loteId];
+      return {
+        ...item,
+        cantidad: parseFloat(item.cantidad) || 1.0,
+        precio_unitario: parseFloat(item.precio_unitario) || 0.0,
+        origen_pdf: (infoLote && infoLote.nombre) || item._origenNombre || null,
+        origen_tipo: (infoLote && infoLote.tipo) || item._origenTipo || 'pdf',
+        origen_orden: (infoLote && infoLote.orden) || item._origenOrden || 1
+      };
+    });
 
     const inputNombre = document.getElementById('nombreImportacionInput');
     let nombre = inputNombre ? inputNombre.value.trim() : '';
@@ -850,7 +872,8 @@
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         nombre_importacion: nombre,
-        items: itemsFusionados
+        orden_personalizado: ordenPersonalizadoActivo,
+        items: itemsPayload
       })
     })
       .then((res) => res.json())
@@ -1084,26 +1107,86 @@
           const inputNombre = document.getElementById('nombreImportacionInput');
           if (inputNombre) inputNombre.value = data.importacion.nombre_importacion;
 
-          const itemsNormalizados = (data.items || []).map((item) => ({
-            temp_id: item.id,
-            codigo: item.codigo,
-            descripcion: item.descripcion,
-            marca: item.marca,
-            um: item.um,
-            cantidad: item.cantidad || 1,
-            precio_unitario: item.precio_unitario,
-            selected: true
-          }));
+          const rawItems = data.items || [];
+          const tieneOrigenGuardado = rawItems.some((it) => it.origen_pdf && String(it.origen_pdf).trim() !== '');
+          const esOrdenPersonalizado = Boolean(data.importacion && data.importacion.orden_personalizado);
 
-          crearNuevoLote('historial', data.importacion.nombre_importacion, itemsNormalizados);
+          if (tieneOrigenGuardado) {
+            // Reconstruir los lotes originales (PDF #1, PDF #2, PDF #3...) respetando su orden guardado
+            const gruposMap = new Map();
+            rawItems.forEach((item) => {
+              const ord = parseInt(item.origen_orden, 10) || 1;
+              const nombreOrig = (item.origen_pdf || data.importacion.nombre_importacion || 'PDF').trim();
+              const tipoOrig = item.origen_tipo === 'texto' ? 'texto' : 'pdf';
+              const key = `${ord}::${nombreOrig}`;
+              if (!gruposMap.has(key)) {
+                gruposMap.set(key, {
+                  orden: ord,
+                  nombre: nombreOrig,
+                  tipo: tipoOrig,
+                  items: []
+                });
+              }
+              gruposMap.get(key).items.push({
+                temp_id: item.id,
+                codigo: item.codigo,
+                descripcion: item.descripcion,
+                marca: item.marca,
+                um: item.um,
+                cantidad: parseFloat(item.cantidad) || 1.0,
+                precio_unitario: parseFloat(item.precio_unitario) || 0.0,
+                selected: true,
+                _origenOrden: ord
+              });
+            });
+
+            // Ordenar grupos por origen_orden para reconstruir PDF #1, PDF #2, ...
+            const gruposOrdenados = Array.from(gruposMap.values()).sort((a, b) => a.orden - b.orden);
+            const itemRefPorTempId = new Map();
+
+            gruposOrdenados.forEach((g) => {
+              const loteCreado = crearNuevoLote(g.tipo, g.nombre, g.items);
+              loteCreado.items.forEach((it) => {
+                it._origenOrden = g.orden;
+                if (it.temp_id !== undefined) {
+                  itemRefPorTempId.set(it.temp_id, it);
+                }
+              });
+            });
+
+            // Si se había guardado con orden personalizado libre, restaurar exactamente la secuencia de filas guardada
+            if (esOrdenPersonalizado) {
+              listaOrdenPersonalizado = rawItems
+                .map((it) => itemRefPorTempId.get(it.id))
+                .filter(Boolean);
+              ordenPersonalizadoActivo = listaOrdenPersonalizado.length > 0;
+            }
+          } else {
+            // Compatibilidad total con importaciones antiguas (sin metadatos de origen por PDF)
+            const itemsNormalizados = rawItems.map((item) => ({
+              temp_id: item.id,
+              codigo: item.codigo,
+              descripcion: item.descripcion,
+              marca: item.marca,
+              um: item.um,
+              cantidad: parseFloat(item.cantidad) || 1.0,
+              precio_unitario: parseFloat(item.precio_unitario) || 0.0,
+              selected: true
+            }));
+            crearNuevoLote('pdf', data.importacion.nombre_importacion, itemsNormalizados);
+          }
+
           ultimoTextoProcesado = '';
           const txtEl = document.getElementById('textoPegadoInput');
           if (txtEl) txtEl.value = '';
           actualizarContadorLineasPegadas();
 
           renderTablaItemsImportados();
+          const resumenDocs = lotesImportados.length > 1
+            ? ` separados en ${lotesImportados.length} documentos`
+            : '';
           mostrarAlertaPDF(
-            `Importación "${escapeHtml(data.importacion.nombre_importacion)}" (${data.items.length} ítems) cargada. Puedes editarla o agregar más PDFs al final.`,
+            `Importación "${escapeHtml(data.importacion.nombre_importacion)}" (${rawItems.length} ítems${resumenDocs}) cargada. Puedes editarla o agregar más PDFs al final.`,
             'info'
           );
         } else {

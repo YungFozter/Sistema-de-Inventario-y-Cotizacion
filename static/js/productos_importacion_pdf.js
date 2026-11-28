@@ -571,6 +571,11 @@
               </div>
             </div>
             <div class="pdf-lote-actions">
+              <button type="button" class="btn btn-sm btn-outline-success"
+                onclick="agregarFilaManualImportacion(${loteIdx})"
+                title="Agregar fila manual a este documento">
+                <i class="bi bi-plus-lg"></i>
+              </button>
               <button type="button" class="btn btn-sm btn-outline-secondary"
                 onclick="moverLoteImportado(${loteIdx}, -1)"
                 ${loteIdx === 0 ? 'disabled' : ''}
@@ -754,6 +759,84 @@
     if (!lotesImportados[loteIdx]) return;
     lotesImportados[loteIdx].items.splice(itemIdx, 1);
     renderTablaItemsImportados();
+  }
+
+  /**
+   * Agrega una nueva fila editable de producto de forma manual.
+   * El número de ítem (#) se autoincrementa automáticamente según la cantidad total de ítems.
+   * Funciona tanto en una importación nueva (incluso vacía) como en una cargada desde el historial.
+   */
+  function agregarFilaManualImportacion(loteIdx = null) {
+    let targetLote = null;
+    let targetLoteIndex = -1;
+
+    if (loteIdx !== null && loteIdx !== undefined && lotesImportados[loteIdx]) {
+      targetLote = lotesImportados[loteIdx];
+      targetLoteIndex = loteIdx;
+    } else if (lotesImportados.length === 0) {
+      targetLote = crearNuevoLote('pdf', 'Ítems Manuales', []);
+      targetLoteIndex = 0;
+    } else {
+      targetLoteIndex = lotesImportados.length - 1;
+      targetLote = lotesImportados[targetLoteIndex];
+    }
+
+    const etiqueta = targetLote.tipo === 'texto'
+      ? `Texto #${targetLoteIndex + 1}`
+      : `PDF #${targetLoteIndex + 1}`;
+
+    const nuevoItem = {
+      codigo: '',
+      descripcion: '',
+      marca: '',
+      um: 'PZA',
+      cantidad: 1,
+      precio_unitario: 0,
+      precio_total: 0,
+      selected: true,
+      _loteId: targetLote.id,
+      _origenTipo: targetLote.tipo,
+      _origenEtiqueta: etiqueta,
+      _origenNombre: targetLote.nombreOrigen,
+      _origenColorIdx: targetLoteIndex % 6,
+      _origenOrden: targetLoteIndex + 1
+    };
+
+    targetLote.items.push(nuevoItem);
+
+    if (ordenPersonalizadoActivo) {
+      listaOrdenPersonalizado.push(nuevoItem);
+    }
+
+    renderTablaItemsImportados();
+
+    const modalAmpliado = document.getElementById('modalTablaAmpliadaPDF');
+    const ampliadoAbierto = Boolean(modalAmpliado && modalAmpliado.classList.contains('show'));
+    if (ampliadoAbierto) {
+      renderTablaAmpliada();
+    }
+
+    // Enfocar automáticamente el campo Código de la fila recién agregada
+    setTimeout(() => {
+      const tbodySelector = ampliadoAbierto ? '#tbodyItemsAmpliada' : '#tbodyItemsExtraidos';
+      const filas = document.querySelectorAll(`${tbodySelector} tr.pdf-item-row`);
+      if (filas.length > 0) {
+        let filaObjetivo = filas[filas.length - 1];
+        if (!ordenPersonalizadoActivo && loteIdx !== null && loteIdx !== undefined) {
+          // Calcular índice global de la última fila del lote indicado
+          let offset = 0;
+          for (let i = 0; i <= targetLoteIndex; i++) {
+            offset += lotesImportados[i].items.length;
+          }
+          if (filas[offset - 1]) {
+            filaObjetivo = filas[offset - 1];
+          }
+        }
+        filaObjetivo.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        const inputCodigo = filaObjetivo.querySelector('input[type="text"]');
+        if (inputCodigo) inputCodigo.focus();
+      }
+    }, 40);
   }
 
   function actualizarContadorItems(subtotalTotal = null) {
@@ -1582,6 +1665,11 @@
                 </div>
               </div>
               <div class="pdf-lote-actions">
+                <button type="button" class="btn btn-sm btn-outline-success"
+                  onclick="agregarFilaManualImportacion(${loteIdx})"
+                  title="Agregar fila manual a este documento">
+                  <i class="bi bi-plus-lg"></i>
+                </button>
                 <button type="button" class="btn btn-sm btn-outline-secondary"
                   onclick="moverLoteImportado(${loteIdx}, -1); renderTablaAmpliada();"
                   ${loteIdx === 0 ? 'disabled' : ''} title="Subir PDF">
@@ -1767,6 +1855,7 @@
   window.actualizarItemCantidad = actualizarItemCantidad;
   window.actualizarItemPrecio = actualizarItemPrecio;
   window.eliminarItemImportado = eliminarItemImportado;
+  window.agregarFilaManualImportacion = agregarFilaManualImportacion;
   window.actualizarContadorItems = actualizarContadorItems;
   window.guardarImportacionActual = guardarImportacionActual;
   window.imprimirPDFDirecto = imprimirPDFDirecto;

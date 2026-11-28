@@ -903,9 +903,15 @@
                   <i class="bi bi-tag-fill text-primary"></i> Nombre Importación:
                 </label>
               </div>
-              <div class="col-md-7">
+              <div class="col-md-5">
                 <input type="text" class="form-control" id="nombreImportacionInput"
                   placeholder="Ej: Cotización ElectroRed - Julio 2026 (se generará automático si lo dejas en blanco)">
+              </div>
+              <div class="col-md-2">
+                <button type="button" class="btn btn-outline-success w-100 fw-bold" onclick="agregarFilaManualImportacion()"
+                  title="Agregar un ítem manualmente a la lista">
+                  <i class="bi bi-plus-circle-fill"></i> Agregar Fila
+                </button>
               </div>
               <div class="col-md-2">
                 <button type="button" class="btn btn-outline-danger w-100 fw-bold" onclick="limpiarModalImportacion()"
@@ -1070,6 +1076,11 @@
                   Seleccionar / Marcar Todos
                 </label>
               </div>
+              <button type="button" class="btn btn-sm btn-success fw-bold rounded-pill px-3 shadow-sm"
+                id="btnAgregarFilaManual" onclick="agregarFilaManualImportacion()"
+                title="Agregar una nueva fila editable al final de la tabla">
+                <i class="bi bi-plus-lg me-1"></i> Agregar Fila
+              </button>
               <button type="button" class="btn btn-sm btn-dark fw-bold rounded-pill px-3 shadow-sm"
                 id="btnAbrirVistaAmpliadaPDF" onclick="abrirModalTablaAmpliadaPDF()"
                 title="Ver la tabla completa en pantalla amplia y reordenar ítems libremente">
@@ -1238,6 +1249,11 @@
           </div>
 
           <div class="d-flex align-items-center flex-wrap gap-2">
+            <button type="button" class="btn btn-sm btn-primary fw-bold px-3"
+              onclick="agregarFilaManualImportacion()"
+              title="Agregar un nuevo ítem manualmente al final de la tabla">
+              <i class="bi bi-plus-lg me-1"></i> Agregar Fila
+            </button>
             <button type="button" class="btn btn-sm btn-outline-secondary fw-bold" id="btnRestaurarOrdenAmpliado"
               style="display: none;" onclick="restaurarOrdenAgrupadoPorPDF()"
               title="Volver al orden original agrupado por PDF">

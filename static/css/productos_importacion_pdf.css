@@ -1,0 +1,304 @@
+/* ==========================================================================
+   Módulo Multi-PDF de Importación de Productos
+   Estilos responsivos, espaciados proporcionales y controles por lote/PDF
+   ========================================================================== */
+
+:root {
+  --pdf-imp-accent: #198754;
+  --pdf-imp-accent-soft: rgba(25, 135, 84, 0.08);
+  --pdf-imp-accent-border: rgba(25, 135, 84, 0.28);
+  --pdf-imp-slate-bg: #f8fafc;
+  --pdf-imp-slate-border: #e2e8f0;
+  --pdf-imp-text-main: #0f172a;
+  --pdf-imp-text-muted: #475569;
+  --pdf-imp-radius: 10px;
+}
+
+/* Barra de resumen de PDFs cargados en secuencia */
+.pdf-lotes-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 0.9rem;
+  margin-bottom: 0.85rem;
+  background: var(--pdf-imp-slate-bg);
+  border: 1px solid var(--pdf-imp-slate-border);
+  border-radius: var(--pdf-imp-radius);
+}
+
+.pdf-lotes-bar-title {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--pdf-imp-text-muted);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-right: 0.25rem;
+}
+
+.pdf-lote-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.7rem;
+  background: #ffffff;
+  border: 1px solid var(--pdf-imp-accent-border);
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--pdf-imp-text-main);
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05);
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+  max-width: 100%;
+}
+
+.pdf-lote-pill:hover {
+  transform: translateY(-1px);
+  border-color: var(--pdf-imp-accent);
+  box-shadow: 0 3px 8px rgba(25, 135, 84, 0.12);
+}
+
+.pdf-lote-pill-name {
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pdf-lote-arrow {
+  color: #94a3b8;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+/* Fila encabezada separadora de cada PDF dentro de la tabla */
+.pdf-lote-header-row > td {
+  background: linear-gradient(90deg, rgba(25, 135, 84, 0.12) 0%, rgba(248, 250, 252, 0.96) 65%) !important;
+  border-top: 2px solid var(--pdf-imp-accent) !important;
+  border-bottom: 1px solid var(--pdf-imp-accent-border) !important;
+  padding: 0.65rem 0.85rem !important;
+  animation: pdfLoteFadeIn 0.22s ease-out;
+}
+
+.pdf-lote-header-row.pdf-lote-tipo-texto > td {
+  background: linear-gradient(90deg, rgba(13, 110, 253, 0.11) 0%, rgba(248, 250, 252, 0.96) 65%) !important;
+  border-top-color: #0d6efd !important;
+  border-bottom-color: rgba(13, 110, 253, 0.25) !important;
+}
+
+.pdf-lote-header-inner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.65rem;
+}
+
+.pdf-lote-header-left {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.55rem;
+  min-width: 0;
+}
+
+.pdf-lote-badge-orden {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.28rem 0.65rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+
+.pdf-lote-nombre {
+  font-weight: 800;
+  font-size: 0.92rem;
+  color: var(--pdf-imp-text-main);
+  word-break: break-word;
+}
+
+.pdf-lote-meta {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.78rem;
+  color: var(--pdf-imp-text-muted);
+}
+
+.pdf-lote-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex-shrink: 0;
+}
+
+.pdf-lote-actions .btn {
+  min-width: 34px;
+  min-height: 34px;
+  padding: 0.25rem 0.5rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+}
+
+/* Filas de ítems dentro de un lote */
+.pdf-item-row {
+  transition: background-color 0.12s ease, opacity 0.15s ease;
+}
+
+.pdf-item-row-num {
+  font-size: 0.7rem;
+  color: #64748b;
+  font-weight: 700;
+  display: block;
+  margin-top: 2px;
+}
+
+/* Barra superior de previsualización responsive */
+.pdf-preview-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.65rem;
+  padding: 0.7rem 0.9rem;
+  margin-bottom: 0.75rem;
+  background: rgba(100, 116, 139, 0.09);
+  border-radius: var(--pdf-imp-radius);
+}
+
+.pdf-preview-badges {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+/* Contenedor de tabla con scroll horizontal/vertical limpio */
+.pdf-table-scroll-wrapper {
+  max-height: 520px;
+  overflow: auto;
+  border: 1px solid var(--pdf-imp-slate-border);
+  border-radius: var(--pdf-imp-radius);
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.04);
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Footer del modal responsive */
+#modalImportarPDF .modal-footer {
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+#modalImportarPDF .pdf-footer-controls {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+#modalImportarPDF .pdf-footer-cliente-group {
+  width: 280px;
+  max-width: 100%;
+}
+
+#modalImportarPDF .pdf-footer-desc-group {
+  width: 150px;
+  max-width: 100%;
+}
+
+/* Animación sutil */
+@keyframes pdfLoteFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pdf-lote-header-row > td,
+  .pdf-lote-pill,
+  .pdf-item-row {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* ==========================================================================
+   Adaptación Responsiva (Tablets y Móviles)
+   ========================================================================== */
+@media (max-width: 991.98px) {
+  #modalImportarPDF .modal-dialog {
+    margin: 0.5rem;
+    max-width: calc(100% - 1rem);
+  }
+
+  .pdf-table-scroll-wrapper {
+    max-height: 440px;
+  }
+}
+
+@media (max-width: 767.98px) {
+  #modalImportarPDF .modal-header {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    padding: 0.85rem 1rem;
+  }
+
+  #modalImportarPDF .modal-body {
+    padding: 0.85rem;
+  }
+
+  #modalImportarPDF .modal-footer {
+    padding: 0.85rem;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  #modalImportarPDF .pdf-footer-controls {
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  #modalImportarPDF .pdf-footer-cliente-group,
+  #modalImportarPDF .pdf-footer-desc-group,
+  #modalImportarPDF .pdf-footer-controls .btn,
+  #modalImportarPDF .modal-footer > .btn {
+    width: 100%;
+    min-height: 44px;
+  }
+
+  .pdf-lote-actions .btn {
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  .pdf-lote-pill {
+    min-height: 38px;
+    max-width: 100%;
+  }
+
+  .pdf-lote-pill-name {
+    max-width: 130px;
+  }
+
+  .pdf-preview-toolbar {
+    padding: 0.65rem;
+  }
+
+  .pdf-table-scroll-wrapper {
+    max-height: 380px;
+  }
+}

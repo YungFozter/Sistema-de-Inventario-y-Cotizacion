@@ -88,6 +88,18 @@
   border-bottom-color: rgba(13, 110, 253, 0.25) !important;
 }
 
+.pdf-lote-header-row.pdf-lote-tipo-manual > td {
+  background: linear-gradient(90deg, rgba(245, 158, 11, 0.15) 0%, rgba(255, 251, 235, 0.96) 65%) !important;
+  border-top-color: #d97706 !important;
+  border-bottom-color: rgba(217, 119, 6, 0.30) !important;
+}
+
+.pdf-origen-manual {
+  background: rgba(245, 158, 11, 0.16);
+  color: #b45309;
+  border: 1px solid rgba(217, 119, 6, 0.38);
+}
+
 .pdf-lote-header-inner {
   display: flex;
   flex-wrap: wrap;

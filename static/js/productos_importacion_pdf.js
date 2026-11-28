@@ -37,6 +37,18 @@
     el.style.height = Math.max(46, el.scrollHeight + 4) + 'px';
   }
 
+  function _etiquetaLote(lote, loteIdx) {
+    if (lote.tipo === 'manual') return 'FILA AGREGADA';
+    if (lote.tipo === 'texto') return `Texto #${loteIdx + 1}`;
+    return `PDF #${loteIdx + 1}`;
+  }
+
+  function _iconoLote(tipo) {
+    if (tipo === 'manual') return 'bi-pencil-square';
+    if (tipo === 'texto') return 'bi-clipboard-data-fill';
+    return 'bi-file-earmark-pdf-fill';
+  }
+
   /**
    * Fusiona todos los lotes en un único arreglo respetando estrictamente
    * el orden secuencial de los PDFs importados (PDF #1 -> PDF #2 -> PDF #N),
@@ -51,7 +63,7 @@
 
     const resultado = [];
     lotesImportados.forEach((lote, loteIdx) => {
-      const etiqueta = lote.tipo === 'texto' ? `Texto #${loteIdx + 1}` : `PDF #${loteIdx + 1}`;
+      const etiqueta = _etiquetaLote(lote, loteIdx);
       (lote.items || []).forEach((item) => {
         item._loteId = lote.id;
         item._origenTipo = lote.tipo;
@@ -95,13 +107,19 @@
     contadorLotesSecuencia += 1;
     const loteIdx = lotesImportados.length;
     const loteId = `lote_${Date.now()}_${contadorLotesSecuencia}`;
-    const nombreFinal = nombreOrigen || (tipo === 'pdf' ? `PDF #${loteIdx + 1}` : `Texto #${loteIdx + 1}`);
-    const etiqueta = tipo === 'texto' ? `Texto #${loteIdx + 1}` : `PDF #${loteIdx + 1}`;
+    const nombreFinal = nombreOrigen || (
+      tipo === 'manual'
+        ? 'FILA AGREGADA'
+        : (tipo === 'pdf' ? `PDF #${loteIdx + 1}` : `Texto #${loteIdx + 1}`)
+    );
+    const etiqueta = tipo === 'manual'
+      ? 'FILA AGREGADA'
+      : (tipo === 'texto' ? `Texto #${loteIdx + 1}` : `PDF #${loteIdx + 1}`);
     const colorIdx = loteIdx % 6;
 
     const lote = {
       id: loteId,
-      tipo: tipo, // 'pdf' | 'texto' | 'historial'
+      tipo: tipo, // 'pdf' | 'texto' | 'manual'
       nombreOrigen: nombreFinal,
       items: (products || []).map((p) => ({
         ...p,
@@ -386,12 +404,15 @@
     let html = `<span class="pdf-lotes-bar-title"><i class="bi bi-collection-fill text-success"></i> Orden de fusión (${lotesImportados.length}):</span>`;
 
     lotesImportados.forEach((lote, idx) => {
-      const icono = lote.tipo === 'texto' ? 'bi-clipboard-data-fill text-primary' : 'bi-file-earmark-pdf-fill text-danger';
-      const etiqueta = lote.tipo === 'texto' ? `Texto #${idx + 1}` : `PDF #${idx + 1}`;
+      const icono = lote.tipo === 'manual'
+        ? 'bi-pencil-square text-warning'
+        : (lote.tipo === 'texto' ? 'bi-clipboard-data-fill text-primary' : 'bi-file-earmark-pdf-fill text-danger');
+      const etiqueta = _etiquetaLote(lote, idx);
+      const pillBadge = lote.tipo === 'manual' ? 'bg-warning text-dark' : (lote.tipo === 'texto' ? 'bg-primary' : 'bg-success');
       html += `
         <button type="button" class="pdf-lote-pill" onclick="scrollALoteImportado('${lote.id}')" title="Ir a ${escapeHtml(lote.nombreOrigen)}">
           <i class="bi ${icono}"></i>
-          <span class="badge ${lote.tipo === 'texto' ? 'bg-primary' : 'bg-success'} rounded-pill">${etiqueta}</span>
+          <span class="badge ${pillBadge} rounded-pill">${etiqueta}</span>
           <span class="pdf-lote-pill-name">${escapeHtml(lote.nombreOrigen)}</span>
           <span class="badge bg-light text-dark border rounded-pill">${lote.items.length}</span>
         </button>
@@ -459,8 +480,10 @@
         item.precio_total = ptotal;
         if (item.selected) subtotalGeneral += ptotal;
 
-        const colorClass = `pdf-origen-color-${item._origenColorIdx || 0}`;
-        const origenChip = `<div class="mt-1"><span class="pdf-origen-chip ${colorClass}" title="${escapeHtml(item._origenNombre || '')}"><i class="bi bi-file-earmark-pdf-fill"></i> ${escapeHtml(item._origenEtiqueta || 'PDF')}</span></div>`;
+        const esManual = item._origenTipo === 'manual';
+        const colorClass = esManual ? 'pdf-origen-manual' : `pdf-origen-color-${item._origenColorIdx || 0}`;
+        const origenIcon = _iconoLote(item._origenTipo);
+        const origenChip = `<div class="mt-1"><span class="pdf-origen-chip ${colorClass}" title="${escapeHtml(item._origenNombre || '')}"><i class="bi ${origenIcon}"></i> ${escapeHtml(item._origenEtiqueta || 'PDF')}</span></div>`;
 
         let customBadgesHtml = '';
         if (item.campos_personalizados && typeof item.campos_personalizados === 'object' && Object.keys(item.campos_personalizados).length > 0) {
@@ -546,14 +569,16 @@
       }, 0);
 
       const esTexto = lote.tipo === 'texto';
-      const badgeEtiqueta = esTexto ? `TEXTO #${loteIdx + 1}` : `PDF #${loteIdx + 1}`;
-      const badgeColor = esTexto ? 'bg-primary text-white' : 'bg-success text-white';
-      const iconClass = esTexto ? 'bi-clipboard-data-fill' : 'bi-file-earmark-pdf-fill';
+      const esManual = lote.tipo === 'manual';
+      const badgeEtiqueta = esManual ? 'FILA AGREGADA' : (esTexto ? `TEXTO #${loteIdx + 1}` : `PDF #${loteIdx + 1}`);
+      const badgeColor = esManual ? 'bg-warning text-dark' : (esTexto ? 'bg-primary text-white' : 'bg-success text-white');
+      const iconClass = _iconoLote(lote.tipo);
+      const tipoClass = esManual ? 'pdf-lote-tipo-manual' : (esTexto ? 'pdf-lote-tipo-texto' : '');
 
       // 1. Fila separadora del PDF / lote
       const trHeader = document.createElement('tr');
       trHeader.id = `header_${lote.id}`;
-      trHeader.className = `pdf-lote-header-row ${esTexto ? 'pdf-lote-tipo-texto' : ''}`;
+      trHeader.className = `pdf-lote-header-row ${tipoClass}`;
       trHeader.innerHTML = `
         <td colspan="9">
           <div class="pdf-lote-header-inner">
@@ -773,17 +798,16 @@
     if (loteIdx !== null && loteIdx !== undefined && lotesImportados[loteIdx]) {
       targetLote = lotesImportados[loteIdx];
       targetLoteIndex = loteIdx;
-    } else if (lotesImportados.length === 0) {
-      targetLote = crearNuevoLote('pdf', 'Ítems Manuales', []);
-      targetLoteIndex = 0;
-    } else {
+    } else if (lotesImportados.length > 0 && lotesImportados[lotesImportados.length - 1].tipo === 'manual') {
       targetLoteIndex = lotesImportados.length - 1;
       targetLote = lotesImportados[targetLoteIndex];
+    } else {
+      targetLote = crearNuevoLote('manual', 'FILA AGREGADA', []);
+      targetLoteIndex = lotesImportados.length - 1;
     }
 
-    const etiqueta = targetLote.tipo === 'texto'
-      ? `Texto #${targetLoteIndex + 1}`
-      : `PDF #${targetLoteIndex + 1}`;
+    const esGrupoManual = targetLote.tipo === 'manual' || loteIdx === null || loteIdx === undefined;
+    const etiqueta = esGrupoManual ? 'FILA AGREGADA' : _etiquetaLote(targetLote, targetLoteIndex);
 
     const nuevoItem = {
       codigo: '',
@@ -795,9 +819,9 @@
       precio_total: 0,
       selected: true,
       _loteId: targetLote.id,
-      _origenTipo: targetLote.tipo,
+      _origenTipo: esGrupoManual ? 'manual' : targetLote.tipo,
       _origenEtiqueta: etiqueta,
-      _origenNombre: targetLote.nombreOrigen,
+      _origenNombre: esGrupoManual ? 'FILA AGREGADA' : targetLote.nombreOrigen,
       _origenColorIdx: targetLoteIndex % 6,
       _origenOrden: targetLoteIndex + 1
     };
@@ -910,7 +934,7 @@
       mapaOrdenLote[lote.id] = {
         orden: idx + 1,
         nombre: lote.nombreOrigen,
-        tipo: lote.tipo === 'texto' ? 'texto' : 'pdf'
+        tipo: lote.tipo === 'manual' ? 'manual' : (lote.tipo === 'texto' ? 'texto' : 'pdf')
       };
     });
 
@@ -1200,7 +1224,9 @@
             rawItems.forEach((item) => {
               const ord = parseInt(item.origen_orden, 10) || 1;
               const nombreOrig = (item.origen_pdf || data.importacion.nombre_importacion || 'PDF').trim();
-              const tipoOrig = item.origen_tipo === 'texto' ? 'texto' : 'pdf';
+              const tipoOrig = item.origen_tipo === 'manual'
+                ? 'manual'
+                : (item.origen_tipo === 'texto' ? 'texto' : 'pdf');
               const key = `${ord}::${nombreOrig}`;
               if (!gruposMap.has(key)) {
                 gruposMap.set(key, {
@@ -1508,7 +1534,9 @@
         const ptotal = Math.round(cant * pu * 100) / 100;
         item.precio_total = ptotal;
 
-        const colorClass = `pdf-origen-color-${item._origenColorIdx || 0}`;
+        const esManual = item._origenTipo === 'manual';
+        const colorClass = esManual ? 'pdf-origen-manual' : `pdf-origen-color-${item._origenColorIdx || 0}`;
+        const origenIcon = _iconoLote(item._origenTipo);
         const tr = document.createElement('tr');
         tr.className = `pdf-item-row ${item.selected ? '' : 'opacity-50 bg-light'}`;
         tr.setAttribute('draggable', 'true');
@@ -1569,7 +1597,7 @@
           </td>
           <td class="align-middle">
             <span class="pdf-origen-chip ${colorClass}" title="${escapeHtml(item._origenNombre || '')}">
-              <i class="bi bi-file-earmark-pdf-fill"></i> ${escapeHtml(item._origenEtiqueta || 'PDF')}
+              <i class="bi ${origenIcon}"></i> ${escapeHtml(item._origenEtiqueta || 'PDF')}
             </span>
           </td>
           <td class="align-middle">
@@ -1643,12 +1671,14 @@
         }, 0);
 
         const esTexto = lote.tipo === 'texto';
-        const badgeEtiqueta = esTexto ? `TEXTO #${loteIdx + 1}` : `PDF #${loteIdx + 1}`;
-        const badgeColor = esTexto ? 'bg-primary text-white' : 'bg-success text-white';
-        const iconClass = esTexto ? 'bi-clipboard-data-fill' : 'bi-file-earmark-pdf-fill';
+        const esManual = lote.tipo === 'manual';
+        const badgeEtiqueta = esManual ? 'FILA AGREGADA' : (esTexto ? `TEXTO #${loteIdx + 1}` : `PDF #${loteIdx + 1}`);
+        const badgeColor = esManual ? 'bg-warning text-dark' : (esTexto ? 'bg-primary text-white' : 'bg-success text-white');
+        const iconClass = _iconoLote(lote.tipo);
+        const tipoClass = esManual ? 'pdf-lote-tipo-manual' : (esTexto ? 'pdf-lote-tipo-texto' : '');
 
         const trHeader = document.createElement('tr');
-        trHeader.className = `pdf-lote-header-row ${esTexto ? 'pdf-lote-tipo-texto' : ''}`;
+        trHeader.className = `pdf-lote-header-row ${tipoClass}`;
         trHeader.innerHTML = `
           <td colspan="9">
             <div class="pdf-lote-header-inner">

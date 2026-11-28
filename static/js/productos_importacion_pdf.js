@@ -12,6 +12,11 @@
   let contadorLotesSecuencia = 0;
   let ultimoTextoProcesado = '';
 
+  // Estado de reordenamiento libre entre PDFs (Vista Ampliada)
+  let ordenPersonalizadoActivo = false;
+  let listaOrdenPersonalizado = [];
+  let dragItemIndex = null;
+
   // Mantener referencia global sincronizada por compatibilidad
   window.itemsImportados = [];
 
@@ -34,12 +39,25 @@
 
   /**
    * Fusiona todos los lotes en un único arreglo respetando estrictamente
-   * el orden secuencial de los PDFs importados (PDF #1 -> PDF #2 -> PDF #N).
+   * el orden secuencial de los PDFs importados (PDF #1 -> PDF #2 -> PDF #N),
+   * o el orden personalizado si el usuario reordenó ítems libremente.
    */
   function obtenerItemsFusionados(soloSeleccionados = false) {
+    if (ordenPersonalizadoActivo) {
+      return soloSeleccionados
+        ? listaOrdenPersonalizado.filter((item) => item.selected)
+        : listaOrdenPersonalizado.slice();
+    }
+
     const resultado = [];
-    lotesImportados.forEach((lote) => {
+    lotesImportados.forEach((lote, loteIdx) => {
+      const etiqueta = lote.tipo === 'texto' ? `Texto #${loteIdx + 1}` : `PDF #${loteIdx + 1}`;
       (lote.items || []).forEach((item) => {
+        item._loteId = lote.id;
+        item._origenTipo = lote.tipo;
+        item._origenEtiqueta = etiqueta;
+        item._origenNombre = lote.nombreOrigen;
+        item._origenColorIdx = loteIdx % 6;
         if (!soloSeleccionados || item.selected) {
           resultado.push(item);
         }
@@ -75,18 +93,35 @@
 
   function crearNuevoLote(tipo, nombreOrigen, products) {
     contadorLotesSecuencia += 1;
+    const loteIdx = lotesImportados.length;
+    const loteId = `lote_${Date.now()}_${contadorLotesSecuencia}`;
+    const nombreFinal = nombreOrigen || (tipo === 'pdf' ? `PDF #${loteIdx + 1}` : `Texto #${loteIdx + 1}`);
+    const etiqueta = tipo === 'texto' ? `Texto #${loteIdx + 1}` : `PDF #${loteIdx + 1}`;
+    const colorIdx = loteIdx % 6;
+
     const lote = {
-      id: `lote_${Date.now()}_${contadorLotesSecuencia}`,
+      id: loteId,
       tipo: tipo, // 'pdf' | 'texto' | 'historial'
-      nombreOrigen: nombreOrigen || (tipo === 'pdf' ? `PDF #${lotesImportados.length + 1}` : `Texto #${lotesImportados.length + 1}`),
+      nombreOrigen: nombreFinal,
       items: (products || []).map((p) => ({
         ...p,
         cantidad: parseFloat(p.cantidad) || 1.0,
         precio_unitario: parseFloat(p.precio_unitario) || 0.0,
-        selected: p.selected !== undefined ? Boolean(p.selected) : true
+        selected: p.selected !== undefined ? Boolean(p.selected) : true,
+        _loteId: loteId,
+        _origenTipo: tipo,
+        _origenEtiqueta: etiqueta,
+        _origenNombre: nombreFinal,
+        _origenColorIdx: colorIdx
       }))
     };
     lotesImportados.push(lote);
+
+    // Si el usuario ya había activado el orden libre, agregar al final sin perder su orden previo
+    if (ordenPersonalizadoActivo) {
+      lote.items.forEach((it) => listaOrdenPersonalizado.push(it));
+    }
+
     return lote;
   }
 
@@ -384,13 +419,28 @@
 
     // Limpiar lotes que hayan quedado sin ítems
     lotesImportados = lotesImportados.filter((l) => l.items && l.items.length > 0);
+    if (ordenPersonalizadoActivo && listaOrdenPersonalizado.length === 0) {
+      ordenPersonalizadoActivo = false;
+    }
     sincronizarEstadoGlobal();
-    renderBarraLotes();
+
+    const bannerOrden = document.getElementById('bannerOrdenPersonalizado');
+    if (bannerOrden) {
+      bannerOrden.style.display = ordenPersonalizadoActivo ? 'flex' : 'none';
+    }
+
+    if (ordenPersonalizadoActivo) {
+      const barra = document.getElementById('barraLotesImportados');
+      if (barra) barra.style.display = 'none';
+    } else {
+      renderBarraLotes();
+    }
 
     const secPrev = document.getElementById('secPrevisualizacionImport');
     const footerBotones = document.getElementById('footerBotonesImport');
 
-    if (lotesImportados.length === 0) {
+    const totalItemsActuales = obtenerItemsFusionados(false).length;
+    if (totalItemsActuales === 0) {
       if (secPrev) secPrev.style.display = 'none';
       if (footerBotones) footerBotones.style.display = 'none';
       actualizarContadorItems(0);
@@ -399,6 +449,93 @@
 
     let subtotalGeneral = 0;
     let contadorGlobal = 0;
+
+    if (ordenPersonalizadoActivo) {
+      listaOrdenPersonalizado.forEach((item, flatIdx) => {
+        contadorGlobal += 1;
+        const cant = parseFloat(item.cantidad) || 1.0;
+        const pu = parseFloat(item.precio_unitario) || 0.0;
+        const ptotal = Math.round(cant * pu * 100) / 100;
+        item.precio_total = ptotal;
+        if (item.selected) subtotalGeneral += ptotal;
+
+        const colorClass = `pdf-origen-color-${item._origenColorIdx || 0}`;
+        const origenChip = `<div class="mt-1"><span class="pdf-origen-chip ${colorClass}" title="${escapeHtml(item._origenNombre || '')}"><i class="bi bi-file-earmark-pdf-fill"></i> ${escapeHtml(item._origenEtiqueta || 'PDF')}</span></div>`;
+
+        let customBadgesHtml = '';
+        if (item.campos_personalizados && typeof item.campos_personalizados === 'object' && Object.keys(item.campos_personalizados).length > 0) {
+          customBadgesHtml = '<div class="mt-1 d-flex flex-wrap gap-1">';
+          for (const [k, v] of Object.entries(item.campos_personalizados)) {
+            customBadgesHtml += `<span class="badge bg-light text-dark border me-1 shadow-sm" style="font-size: 0.73rem;"><i class="bi bi-tag-fill text-warning me-1"></i><strong>${escapeHtml(k)}:</strong> ${escapeHtml(v)}</span>`;
+          }
+          customBadgesHtml += '</div>';
+        }
+
+        const tr = document.createElement('tr');
+        tr.className = `pdf-item-row ${item.selected ? '' : 'opacity-50 bg-light'}`;
+        tr.innerHTML = `
+          <td class="text-center align-middle">
+            <input class="form-check-input" type="checkbox" ${item.selected ? 'checked' : ''}
+              onchange="toggleItemOrdenLibre(${flatIdx}, this.checked)">
+            <span class="pdf-item-row-num">#${contadorGlobal}</span>
+          </td>
+          <td class="align-middle">
+            <input type="text" class="form-control form-control-sm font-monospace fw-bold text-primary border-secondary-subtle"
+              value="${escapeHtml(item.codigo || '')}"
+              onchange="actualizarItemOrdenLibreCampo(${flatIdx}, 'codigo', this.value)" style="border-radius: 6px;">
+            ${origenChip}
+          </td>
+          <td class="align-middle">
+            <textarea class="form-control form-control-sm fw-semibold text-dark border-secondary-subtle auto-expand-desc" rows="2"
+              style="min-height: 46px; max-height: 180px; font-size: 0.88rem; line-height: 1.35; resize: vertical; border-radius: 6px; background-color: #fcfcfc;"
+              onchange="actualizarItemOrdenLibreCampo(${flatIdx}, 'descripcion', this.value)"
+              oninput="autoAjustarTextarea(this)">${escapeHtml(item.descripcion || '')}</textarea>
+            ${customBadgesHtml}
+          </td>
+          <td class="align-middle">
+            <input type="text" class="form-control form-control-sm fw-medium border-secondary-subtle"
+              value="${escapeHtml(item.marca || '')}"
+              onchange="actualizarItemOrdenLibreCampo(${flatIdx}, 'marca', this.value)" style="border-radius: 6px;">
+          </td>
+          <td class="align-middle">
+            <input type="text" class="form-control form-control-sm text-center fw-bold border-secondary-subtle"
+              value="${escapeHtml(item.um || 'Pza')}"
+              onchange="actualizarItemOrdenLibreCampo(${flatIdx}, 'um', this.value)" style="border-radius: 6px;">
+          </td>
+          <td class="align-middle">
+            <input type="number" step="any" class="form-control form-control-sm text-center fw-bold text-primary border-secondary-subtle"
+              value="${cant}"
+              onchange="actualizarItemOrdenLibreCantidad(${flatIdx}, parseFloat(this.value) || 1)" style="border-radius: 6px;">
+          </td>
+          <td class="align-middle">
+            <input type="number" step="any" class="form-control form-control-sm text-end fw-bold border-secondary-subtle"
+              value="${pu}"
+              onchange="actualizarItemOrdenLibrePrecio(${flatIdx}, parseFloat(this.value) || 0)" style="border-radius: 6px;">
+          </td>
+          <td class="text-end align-middle">
+            <span class="badge bg-success-subtle text-success border border-success-subtle fs-6 px-2 py-1 fw-bold">
+              Bs ${ptotal.toFixed(2)}
+            </span>
+          </td>
+          <td class="text-center align-middle">
+            <button type="button" class="btn btn-sm btn-outline-danger border-0 rounded-circle" title="Eliminar fila"
+              onclick="eliminarItemOrdenLibre(${flatIdx})">
+              <i class="bi bi-trash-fill fs-6"></i>
+            </button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      if (secPrev) secPrev.style.display = 'block';
+      if (footerBotones) footerBotones.style.display = 'block';
+      actualizarContadorItems(subtotalGeneral);
+
+      setTimeout(() => {
+        document.querySelectorAll('#tbodyItemsExtraidos .auto-expand-desc').forEach((el) => autoAjustarTextarea(el));
+      }, 20);
+      return;
+    }
 
     lotesImportados.forEach((lote, loteIdx) => {
       const todosMarcadosLote = lote.items.length > 0 && lote.items.every((i) => i.selected);
@@ -581,11 +718,17 @@
   }
 
   function toggleSeleccionarTodos(checked) {
-    lotesImportados.forEach((lote) => {
-      lote.items.forEach((item) => {
+    if (ordenPersonalizadoActivo) {
+      listaOrdenPersonalizado.forEach((item) => {
         item.selected = checked;
       });
-    });
+    } else {
+      lotesImportados.forEach((lote) => {
+        lote.items.forEach((item) => {
+          item.selected = checked;
+        });
+      });
+    }
     renderTablaItemsImportados();
   }
 
@@ -936,6 +1079,8 @@
         if (spinner) spinner.style.display = 'none';
         if (data.success) {
           lotesImportados = [];
+          ordenPersonalizadoActivo = false;
+          listaOrdenPersonalizado = [];
           const inputNombre = document.getElementById('nombreImportacionInput');
           if (inputNombre) inputNombre.value = data.importacion.nombre_importacion;
 
@@ -1026,7 +1171,12 @@
     actualizarContadorLineasPegadas();
 
     lotesImportados = [];
+    ordenPersonalizadoActivo = false;
+    listaOrdenPersonalizado = [];
     sincronizarEstadoGlobal();
+
+    const bannerOrden = document.getElementById('bannerOrdenPersonalizado');
+    if (bannerOrden) bannerOrden.style.display = 'none';
 
     const tbody = document.getElementById('tbodyItemsExtraidos');
     if (tbody) tbody.innerHTML = '';
@@ -1047,6 +1197,473 @@
 
     const badge = document.getElementById('badgeContadorItems');
     if (badge) badge.textContent = 'Items extraídos: 0 | Marcados: 0';
+  }
+
+  // =========================================================================
+  // VISTA AMPLIADA Y MODO EDICIÓN DE ORDEN LIBRE ENTRE PDFs
+  // =========================================================================
+  function abrirModalTablaAmpliadaPDF() {
+    const items = obtenerItemsFusionados(false);
+    if (!items || items.length === 0) {
+      mostrarAlertaPDF('No hay ítems extraídos para mostrar en vista ampliada.', 'warning');
+      return;
+    }
+
+    const chkModo = document.getElementById('chkModoReordenarLibre');
+    if (chkModo) {
+      chkModo.checked = ordenPersonalizadoActivo;
+    }
+
+    renderTablaAmpliada();
+
+    const modalEl = document.getElementById('modalTablaAmpliadaPDF');
+    if (modalEl) {
+      const modalInst = bootstrap.Modal.getOrCreateInstance(modalEl);
+      modalInst.show();
+    }
+  }
+
+  function cerrarModalTablaAmpliadaPDF() {
+    const modalEl = document.getElementById('modalTablaAmpliadaPDF');
+    if (modalEl) {
+      const modalInst = bootstrap.Modal.getInstance(modalEl);
+      if (modalInst) modalInst.hide();
+    }
+
+    // Re-renderizar la tabla principal para reflejar ediciones y reordenamientos
+    renderTablaItemsImportados();
+
+    // Preservar scroll del modal padre (#modalImportarPDF) en modales apilados de Bootstrap
+    setTimeout(() => {
+      const modalPadre = document.getElementById('modalImportarPDF');
+      if (modalPadre && modalPadre.classList.contains('show')) {
+        document.body.classList.add('modal-open');
+      }
+    }, 180);
+  }
+
+  function toggleModoReordenarLibre(activado) {
+    if (activado) {
+      if (!ordenPersonalizadoActivo) {
+        listaOrdenPersonalizado = obtenerItemsFusionados(false);
+        ordenPersonalizadoActivo = true;
+      }
+    }
+    renderTablaAmpliada();
+    renderTablaItemsImportados();
+  }
+
+  function restaurarOrdenAgrupadoPorPDF() {
+    ordenPersonalizadoActivo = false;
+    listaOrdenPersonalizado = [];
+
+    const chkModo = document.getElementById('chkModoReordenarLibre');
+    if (chkModo) chkModo.checked = false;
+
+    renderTablaItemsImportados();
+
+    const modalAmpliado = document.getElementById('modalTablaAmpliadaPDF');
+    if (modalAmpliado && modalAmpliado.classList.contains('show')) {
+      renderTablaAmpliada();
+    }
+  }
+
+  function _actualizarResumenAmpliado() {
+    const todos = obtenerItemsFusionados(false);
+    const marcados = todos.filter((i) => i.selected);
+    const subtotal = marcados.reduce(
+      (sum, it) => sum + ((parseFloat(it.cantidad) || 1.0) * (parseFloat(it.precio_unitario) || 0.0)),
+      0
+    );
+
+    const badge = document.getElementById('badgeResumenAmpliado');
+    if (badge) {
+      badge.textContent = `${lotesImportados.length} PDF(s) | ${todos.length} ítems | Marcados: ${marcados.length} | Bs ${subtotal.toFixed(2)}`;
+    }
+
+    const chkModo = document.getElementById('chkModoReordenarLibre');
+    const enModoLibre = chkModo ? chkModo.checked : ordenPersonalizadoActivo;
+
+    const desc = document.getElementById('descModoAmpliado');
+    if (desc) {
+      if (enModoLibre) {
+        desc.className = 'badge bg-primary text-white';
+        desc.innerHTML = '<i class="bi bi-arrows-move me-1"></i> Modo Edición Libre: arrastra filas, usa ↑/↓ o escribe la posición #';
+      } else {
+        desc.className = 'badge bg-secondary-subtle text-dark border';
+        desc.innerHTML = '<i class="bi bi-collection me-1"></i> Vista agrupada por PDF de origen';
+      }
+    }
+
+    const btnRestaurar = document.getElementById('btnRestaurarOrdenAmpliado');
+    if (btnRestaurar) {
+      btnRestaurar.style.display = ordenPersonalizadoActivo ? 'inline-flex' : 'none';
+    }
+  }
+
+  function renderTablaAmpliada() {
+    const thead = document.getElementById('theadItemsAmpliada');
+    const tbody = document.getElementById('tbodyItemsAmpliada');
+    if (!thead || !tbody) return;
+
+    const chkModo = document.getElementById('chkModoReordenarLibre');
+    const enModoLibre = chkModo ? chkModo.checked : ordenPersonalizadoActivo;
+
+    tbody.innerHTML = '';
+    _actualizarResumenAmpliado();
+
+    if (enModoLibre) {
+      // Asegurar snapshot actualizado
+      if (!ordenPersonalizadoActivo) {
+        listaOrdenPersonalizado = obtenerItemsFusionados(false);
+        ordenPersonalizadoActivo = true;
+      }
+
+      thead.innerHTML = `
+        <tr>
+          <th style="width: 155px;" class="text-center">Orden / Mover</th>
+          <th style="width: 45px;" class="text-center">Sel.</th>
+          <th style="width: 130px;">Origen PDF</th>
+          <th style="width: 120px;">Código</th>
+          <th style="min-width: 320px;">Descripción</th>
+          <th style="width: 120px;">Marca</th>
+          <th style="width: 80px;" class="text-center">U/M</th>
+          <th style="width: 90px;" class="text-center">Cant.</th>
+          <th style="width: 115px;" class="text-end">P/Unit (Bs)</th>
+          <th style="width: 120px;" class="text-end">Subtotal (Bs)</th>
+          <th style="width: 50px;" class="text-center"><i class="bi bi-trash"></i></th>
+        </tr>
+      `;
+
+      const total = listaOrdenPersonalizado.length;
+      listaOrdenPersonalizado.forEach((item, flatIdx) => {
+        const cant = parseFloat(item.cantidad) || 1.0;
+        const pu = parseFloat(item.precio_unitario) || 0.0;
+        const ptotal = Math.round(cant * pu * 100) / 100;
+        item.precio_total = ptotal;
+
+        const colorClass = `pdf-origen-color-${item._origenColorIdx || 0}`;
+        const tr = document.createElement('tr');
+        tr.className = `pdf-item-row ${item.selected ? '' : 'opacity-50 bg-light'}`;
+        tr.setAttribute('draggable', 'true');
+        tr.dataset.flatIdx = flatIdx;
+
+        tr.addEventListener('dragstart', (e) => {
+          dragItemIndex = flatIdx;
+          tr.classList.add('pdf-row-dragging');
+          if (e.dataTransfer) {
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/plain', String(flatIdx));
+          }
+        });
+        tr.addEventListener('dragover', (e) => {
+          e.preventDefault();
+          if (e.dataTransfer) e.dataTransfer.dropEffect = 'move';
+          tr.classList.add('pdf-row-drag-over');
+        });
+        tr.addEventListener('dragleave', () => {
+          tr.classList.remove('pdf-row-drag-over');
+        });
+        tr.addEventListener('drop', (e) => {
+          e.preventDefault();
+          tr.classList.remove('pdf-row-drag-over');
+          if (dragItemIndex !== null && dragItemIndex !== flatIdx) {
+            moverItemOrdenLibre(dragItemIndex, flatIdx);
+          }
+          dragItemIndex = null;
+        });
+        tr.addEventListener('dragend', () => {
+          tr.classList.remove('pdf-row-dragging');
+          dragItemIndex = null;
+        });
+
+        tr.innerHTML = `
+          <td class="text-center align-middle">
+            <div class="pdf-reorder-controls">
+              <span class="pdf-drag-handle" title="Arrastrar para reordenar"><i class="bi bi-grip-vertical"></i></span>
+              <button type="button" class="btn btn-sm btn-outline-secondary"
+                onclick="moverItemOrdenLibre(${flatIdx}, ${flatIdx - 1})"
+                ${flatIdx === 0 ? 'disabled' : ''} title="Subir una posición">
+                <i class="bi bi-arrow-up"></i>
+              </button>
+              <input type="number" class="form-control form-control-sm pdf-pos-input border-primary-subtle"
+                min="1" max="${total}" value="${flatIdx + 1}"
+                title="Escribe la nueva posición (1 a ${total}) y presiona Enter"
+                onchange="moverItemAPosicionExacta(${flatIdx}, parseInt(this.value, 10))">
+              <button type="button" class="btn btn-sm btn-outline-secondary"
+                onclick="moverItemOrdenLibre(${flatIdx}, ${flatIdx + 1})"
+                ${flatIdx === total - 1 ? 'disabled' : ''} title="Bajar una posición">
+                <i class="bi bi-arrow-down"></i>
+              </button>
+            </div>
+          </td>
+          <td class="text-center align-middle">
+            <input class="form-check-input" type="checkbox" ${item.selected ? 'checked' : ''}
+              onchange="toggleItemOrdenLibre(${flatIdx}, this.checked)">
+          </td>
+          <td class="align-middle">
+            <span class="pdf-origen-chip ${colorClass}" title="${escapeHtml(item._origenNombre || '')}">
+              <i class="bi bi-file-earmark-pdf-fill"></i> ${escapeHtml(item._origenEtiqueta || 'PDF')}
+            </span>
+          </td>
+          <td class="align-middle">
+            <input type="text" class="form-control form-control-sm font-monospace fw-bold text-primary border-secondary-subtle"
+              value="${escapeHtml(item.codigo || '')}"
+              onchange="actualizarItemOrdenLibreCampo(${flatIdx}, 'codigo', this.value)">
+          </td>
+          <td class="align-middle">
+            <textarea class="form-control form-control-sm fw-semibold text-dark border-secondary-subtle auto-expand-desc" rows="2"
+              style="min-height: 46px; max-height: 160px; font-size: 0.88rem; line-height: 1.35;"
+              onchange="actualizarItemOrdenLibreCampo(${flatIdx}, 'descripcion', this.value)"
+              oninput="autoAjustarTextarea(this)">${escapeHtml(item.descripcion || '')}</textarea>
+          </td>
+          <td class="align-middle">
+            <input type="text" class="form-control form-control-sm fw-medium border-secondary-subtle"
+              value="${escapeHtml(item.marca || '')}"
+              onchange="actualizarItemOrdenLibreCampo(${flatIdx}, 'marca', this.value)">
+          </td>
+          <td class="align-middle">
+            <input type="text" class="form-control form-control-sm text-center fw-bold border-secondary-subtle"
+              value="${escapeHtml(item.um || 'Pza')}"
+              onchange="actualizarItemOrdenLibreCampo(${flatIdx}, 'um', this.value)">
+          </td>
+          <td class="align-middle">
+            <input type="number" step="any" class="form-control form-control-sm text-center fw-bold text-primary border-secondary-subtle"
+              value="${cant}"
+              onchange="actualizarItemOrdenLibreCantidad(${flatIdx}, parseFloat(this.value) || 1)">
+          </td>
+          <td class="align-middle">
+            <input type="number" step="any" class="form-control form-control-sm text-end fw-bold border-secondary-subtle"
+              value="${pu}"
+              onchange="actualizarItemOrdenLibrePrecio(${flatIdx}, parseFloat(this.value) || 0)">
+          </td>
+          <td class="text-end align-middle">
+            <span class="badge bg-success-subtle text-success border border-success-subtle fs-6 px-2 py-1 fw-bold">
+              Bs ${ptotal.toFixed(2)}
+            </span>
+          </td>
+          <td class="text-center align-middle">
+            <button type="button" class="btn btn-sm btn-outline-danger border-0 rounded-circle" title="Eliminar fila"
+              onclick="eliminarItemOrdenLibre(${flatIdx})">
+              <i class="bi bi-trash-fill fs-6"></i>
+            </button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    } else {
+      // MODO AGRUPADO POR PDF DE ORIGEN (POR DEFECTO EN VISTA AMPLIADA)
+      thead.innerHTML = `
+        <tr>
+          <th style="width: 55px;" class="text-center">#</th>
+          <th style="width: 135px;">Código</th>
+          <th style="min-width: 360px;">Descripción</th>
+          <th style="width: 130px;">Marca</th>
+          <th style="width: 85px;" class="text-center">U/M</th>
+          <th style="width: 95px;" class="text-center">Cantidad</th>
+          <th style="width: 125px;" class="text-end">P/Unit (Bs)</th>
+          <th style="width: 130px;" class="text-end">Subtotal (Bs)</th>
+          <th style="width: 50px;" class="text-center"><i class="bi bi-trash"></i></th>
+        </tr>
+      `;
+
+      let contadorGlobal = 0;
+      lotesImportados.forEach((lote, loteIdx) => {
+        const todosMarcadosLote = lote.items.length > 0 && lote.items.every((i) => i.selected);
+        const subtotalLote = lote.items.reduce((acc, it) => {
+          const c = parseFloat(it.cantidad) || 1.0;
+          const p = parseFloat(it.precio_unitario) || 0.0;
+          return acc + (it.selected ? Math.round(c * p * 100) / 100 : 0);
+        }, 0);
+
+        const esTexto = lote.tipo === 'texto';
+        const badgeEtiqueta = esTexto ? `TEXTO #${loteIdx + 1}` : `PDF #${loteIdx + 1}`;
+        const badgeColor = esTexto ? 'bg-primary text-white' : 'bg-success text-white';
+        const iconClass = esTexto ? 'bi-clipboard-data-fill' : 'bi-file-earmark-pdf-fill';
+
+        const trHeader = document.createElement('tr');
+        trHeader.className = `pdf-lote-header-row ${esTexto ? 'pdf-lote-tipo-texto' : ''}`;
+        trHeader.innerHTML = `
+          <td colspan="9">
+            <div class="pdf-lote-header-inner">
+              <div class="pdf-lote-header-left">
+                <input class="form-check-input m-0" type="checkbox" ${todosMarcadosLote ? 'checked' : ''}
+                  onchange="toggleSeleccionarLote(${loteIdx}, this.checked); renderTablaAmpliada();">
+                <span class="pdf-lote-badge-orden ${badgeColor}">
+                  <i class="bi ${iconClass}"></i> ${badgeEtiqueta}
+                </span>
+                <span class="pdf-lote-nombre">${escapeHtml(lote.nombreOrigen)}</span>
+                <div class="pdf-lote-meta">
+                  <span class="badge bg-dark text-white rounded-pill">${lote.items.length} ítem(s)</span>
+                  <span class="badge bg-white text-success border border-success-subtle rounded-pill fw-bold">Subtotal: Bs ${subtotalLote.toFixed(2)}</span>
+                </div>
+              </div>
+              <div class="pdf-lote-actions">
+                <button type="button" class="btn btn-sm btn-outline-secondary"
+                  onclick="moverLoteImportado(${loteIdx}, -1); renderTablaAmpliada();"
+                  ${loteIdx === 0 ? 'disabled' : ''} title="Subir PDF">
+                  <i class="bi bi-arrow-up"></i>
+                </button>
+                <button type="button" class="btn btn-sm btn-outline-secondary"
+                  onclick="moverLoteImportado(${loteIdx}, 1); renderTablaAmpliada();"
+                  ${loteIdx === lotesImportados.length - 1 ? 'disabled' : ''} title="Bajar PDF">
+                  <i class="bi bi-arrow-down"></i>
+                </button>
+              </div>
+            </div>
+          </td>
+        `;
+        tbody.appendChild(trHeader);
+
+        lote.items.forEach((item, itemIdx) => {
+          contadorGlobal += 1;
+          const cant = parseFloat(item.cantidad) || 1.0;
+          const pu = parseFloat(item.precio_unitario) || 0.0;
+          const ptotal = Math.round(cant * pu * 100) / 100;
+          item.precio_total = ptotal;
+
+          const tr = document.createElement('tr');
+          tr.className = `pdf-item-row ${item.selected ? '' : 'opacity-50 bg-light'}`;
+          tr.innerHTML = `
+            <td class="text-center align-middle">
+              <input class="form-check-input" type="checkbox" ${item.selected ? 'checked' : ''}
+                onchange="toggleItemSeleccionado(${loteIdx}, ${itemIdx}, this.checked); renderTablaAmpliada();">
+              <span class="pdf-item-row-num">#${contadorGlobal}</span>
+            </td>
+            <td class="align-middle">
+              <input type="text" class="form-control form-control-sm font-monospace fw-bold text-primary border-secondary-subtle"
+                value="${escapeHtml(item.codigo || '')}"
+                onchange="actualizarItemCampo(${loteIdx}, ${itemIdx}, 'codigo', this.value)">
+            </td>
+            <td class="align-middle">
+              <textarea class="form-control form-control-sm fw-semibold text-dark border-secondary-subtle auto-expand-desc" rows="2"
+                style="min-height: 46px; max-height: 160px; font-size: 0.88rem; line-height: 1.35;"
+                onchange="actualizarItemCampo(${loteIdx}, ${itemIdx}, 'descripcion', this.value)"
+                oninput="autoAjustarTextarea(this)">${escapeHtml(item.descripcion || '')}</textarea>
+            </td>
+            <td class="align-middle">
+              <input type="text" class="form-control form-control-sm fw-medium border-secondary-subtle"
+                value="${escapeHtml(item.marca || '')}"
+                onchange="actualizarItemCampo(${loteIdx}, ${itemIdx}, 'marca', this.value)">
+            </td>
+            <td class="align-middle">
+              <input type="text" class="form-control form-control-sm text-center fw-bold border-secondary-subtle"
+                value="${escapeHtml(item.um || 'Pza')}"
+                onchange="actualizarItemCampo(${loteIdx}, ${itemIdx}, 'um', this.value)">
+            </td>
+            <td class="align-middle">
+              <input type="number" step="any" class="form-control form-control-sm text-center fw-bold text-primary border-secondary-subtle"
+                value="${cant}"
+                onchange="actualizarItemCantidad(${loteIdx}, ${itemIdx}, parseFloat(this.value) || 1); renderTablaAmpliada();">
+            </td>
+            <td class="align-middle">
+              <input type="number" step="any" class="form-control form-control-sm text-end fw-bold border-secondary-subtle"
+                value="${pu}"
+                onchange="actualizarItemPrecio(${loteIdx}, ${itemIdx}, parseFloat(this.value) || 0); renderTablaAmpliada();">
+            </td>
+            <td class="text-end align-middle">
+              <span class="badge bg-success-subtle text-success border border-success-subtle fs-6 px-2 py-1 fw-bold">
+                Bs ${ptotal.toFixed(2)}
+              </span>
+            </td>
+            <td class="text-center align-middle">
+              <button type="button" class="btn btn-sm btn-outline-danger border-0 rounded-circle" title="Eliminar fila"
+                onclick="eliminarItemImportado(${loteIdx}, ${itemIdx}); renderTablaAmpliada();">
+                <i class="bi bi-trash-fill fs-6"></i>
+              </button>
+            </td>
+          `;
+          tbody.appendChild(tr);
+        });
+      });
+    }
+
+    setTimeout(() => {
+      document.querySelectorAll('#tbodyItemsAmpliada .auto-expand-desc').forEach((el) => autoAjustarTextarea(el));
+    }, 20);
+  }
+
+  function moverItemOrdenLibre(fromIdx, toIdx) {
+    if (!ordenPersonalizadoActivo) return;
+    const maxIdx = listaOrdenPersonalizado.length - 1;
+    if (fromIdx < 0 || fromIdx > maxIdx || toIdx < 0 || toIdx > maxIdx || fromIdx === toIdx) return;
+
+    const [movido] = listaOrdenPersonalizado.splice(fromIdx, 1);
+    listaOrdenPersonalizado.splice(toIdx, 0, movido);
+    sincronizarEstadoGlobal();
+    renderTablaAmpliada();
+  }
+
+  function moverItemAPosicionExacta(fromIdx, nuevaPos1Based) {
+    if (!ordenPersonalizadoActivo || isNaN(nuevaPos1Based)) {
+      renderTablaAmpliada();
+      return;
+    }
+    const clamped = Math.max(1, Math.min(listaOrdenPersonalizado.length, nuevaPos1Based));
+    moverItemOrdenLibre(fromIdx, clamped - 1);
+  }
+
+  function toggleItemOrdenLibre(flatIdx, checked) {
+    if (!listaOrdenPersonalizado[flatIdx]) return;
+    listaOrdenPersonalizado[flatIdx].selected = checked;
+    sincronizarEstadoGlobal();
+    renderTablaItemsImportados();
+    const modalAmpliado = document.getElementById('modalTablaAmpliadaPDF');
+    if (modalAmpliado && modalAmpliado.classList.contains('show')) {
+      renderTablaAmpliada();
+    }
+  }
+
+  function actualizarItemOrdenLibreCampo(flatIdx, campo, valor) {
+    if (!listaOrdenPersonalizado[flatIdx]) return;
+    listaOrdenPersonalizado[flatIdx][campo] = valor;
+    sincronizarEstadoGlobal();
+  }
+
+  function actualizarItemOrdenLibreCantidad(flatIdx, val) {
+    if (!listaOrdenPersonalizado[flatIdx]) return;
+    listaOrdenPersonalizado[flatIdx].cantidad = val;
+    sincronizarEstadoGlobal();
+    renderTablaItemsImportados();
+    const modalAmpliado = document.getElementById('modalTablaAmpliadaPDF');
+    if (modalAmpliado && modalAmpliado.classList.contains('show')) {
+      renderTablaAmpliada();
+    }
+  }
+
+  function actualizarItemOrdenLibrePrecio(flatIdx, val) {
+    if (!listaOrdenPersonalizado[flatIdx]) return;
+    listaOrdenPersonalizado[flatIdx].precio_unitario = val;
+    sincronizarEstadoGlobal();
+    renderTablaItemsImportados();
+    const modalAmpliado = document.getElementById('modalTablaAmpliadaPDF');
+    if (modalAmpliado && modalAmpliado.classList.contains('show')) {
+      renderTablaAmpliada();
+    }
+  }
+
+  function eliminarItemOrdenLibre(flatIdx) {
+    const eliminado = listaOrdenPersonalizado[flatIdx];
+    if (!eliminado) return;
+    listaOrdenPersonalizado.splice(flatIdx, 1);
+
+    // También eliminarlo de su lote original para mantener consistencia si restaura agrupado
+    lotesImportados.forEach((lote) => {
+      const idxEnLote = lote.items.indexOf(eliminado);
+      if (idxEnLote !== -1) {
+        lote.items.splice(idxEnLote, 1);
+      }
+    });
+
+    renderTablaItemsImportados();
+    const modalAmpliado = document.getElementById('modalTablaAmpliadaPDF');
+    if (modalAmpliado && modalAmpliado.classList.contains('show')) {
+      if (obtenerItemsFusionados(false).length === 0) {
+        cerrarModalTablaAmpliadaPDF();
+      } else {
+        renderTablaAmpliada();
+      }
+    }
   }
 
   // Exponer funciones públicas para los handlers inline del template
@@ -1078,4 +1695,16 @@
   window.ocultarAlertaPDF = ocultarAlertaPDF;
   window.actualizarContadorLineasPegadas = actualizarContadorLineasPegadas;
   window.limpiarModalImportacion = limpiarModalImportacion;
+  window.abrirModalTablaAmpliadaPDF = abrirModalTablaAmpliadaPDF;
+  window.cerrarModalTablaAmpliadaPDF = cerrarModalTablaAmpliadaPDF;
+  window.toggleModoReordenarLibre = toggleModoReordenarLibre;
+  window.restaurarOrdenAgrupadoPorPDF = restaurarOrdenAgrupadoPorPDF;
+  window.renderTablaAmpliada = renderTablaAmpliada;
+  window.moverItemOrdenLibre = moverItemOrdenLibre;
+  window.moverItemAPosicionExacta = moverItemAPosicionExacta;
+  window.toggleItemOrdenLibre = toggleItemOrdenLibre;
+  window.actualizarItemOrdenLibreCampo = actualizarItemOrdenLibreCampo;
+  window.actualizarItemOrdenLibreCantidad = actualizarItemOrdenLibreCantidad;
+  window.actualizarItemOrdenLibrePrecio = actualizarItemOrdenLibrePrecio;
+  window.eliminarItemOrdenLibre = eliminarItemOrdenLibre;
 })();

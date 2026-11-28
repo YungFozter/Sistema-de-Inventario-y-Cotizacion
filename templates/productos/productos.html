@@ -1050,13 +1050,31 @@
           <!-- Barra de secuencia de PDFs / Documentos agregados -->
           <div id="barraLotesImportados" class="pdf-lotes-bar" style="display: none;"></div>
 
+          <!-- Aviso de orden personalizado activo (cuando se reordenó libremente entre PDFs) -->
+          <div id="bannerOrdenPersonalizado" class="pdf-custom-order-banner" style="display: none;">
+            <div>
+              <i class="bi bi-shuffle me-1"></i>
+              <strong>Orden personalizado activo:</strong> Los ítems fueron reordenados libremente entre PDFs y se guardarán en este orden exacto.
+            </div>
+            <button type="button" class="btn btn-sm btn-outline-primary fw-bold" onclick="restaurarOrdenAgrupadoPorPDF()">
+              <i class="bi bi-arrow-counterclockwise me-1"></i> Restaurar agrupado por PDF
+            </button>
+          </div>
+
           <div class="pdf-preview-toolbar">
-            <div class="form-check form-switch mb-0">
-              <input class="form-check-input" type="checkbox" id="checkSeleccionarTodos"
-                onchange="toggleSeleccionarTodos(this.checked)">
-              <label class="form-check-label fw-bold ms-1" for="checkSeleccionarTodos">
-                Seleccionar / Marcar Todos
-              </label>
+            <div class="d-flex align-items-center flex-wrap gap-2">
+              <div class="form-check form-switch mb-0">
+                <input class="form-check-input" type="checkbox" id="checkSeleccionarTodos"
+                  onchange="toggleSeleccionarTodos(this.checked)">
+                <label class="form-check-label fw-bold ms-1" for="checkSeleccionarTodos">
+                  Seleccionar / Marcar Todos
+                </label>
+              </div>
+              <button type="button" class="btn btn-sm btn-dark fw-bold rounded-pill px-3 shadow-sm"
+                id="btnAbrirVistaAmpliadaPDF" onclick="abrirModalTablaAmpliadaPDF()"
+                title="Ver la tabla completa en pantalla amplia y reordenar ítems libremente">
+                <i class="bi bi-arrows-fullscreen me-1"></i> Vista Ampliada / Reordenar
+              </button>
             </div>
             <div class="pdf-preview-badges">
               <span id="badgeContadorItems" class="badge bg-primary fs-6">Items extraídos: 0 | Marcados: 0</span>
@@ -1183,6 +1201,75 @@
           </div>
         </div>
 
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de Vista Ampliada y Reordenamiento Libre de Ítems Extraídos -->
+<div class="modal fade" id="modalTablaAmpliadaPDF" tabindex="-1" aria-labelledby="modalTablaAmpliadaPDFLabel"
+  aria-hidden="true" data-bs-backdrop="static">
+  <div class="modal-dialog modal-fullscreen">
+    <div class="modal-content">
+      <div class="modal-header d-flex justify-content-between align-items-center flex-wrap">
+        <div class="d-flex align-items-center flex-wrap gap-2">
+          <h5 class="modal-title mb-0 fw-bold" id="modalTablaAmpliadaPDFLabel">
+            <i class="bi bi-table me-2 text-success"></i> Vista Ampliada de Ítems Extraídos
+          </h5>
+          <span id="badgeResumenAmpliado" class="badge bg-success fs-6">0 ítems</span>
+        </div>
+        <button type="button" class="btn-close btn-close-white" onclick="cerrarModalTablaAmpliadaPDF()"
+          aria-label="Cerrar"></button>
+      </div>
+
+      <div class="modal-body bg-light">
+        <div class="pdf-ampliada-toolbar">
+          <div class="pdf-ampliada-mode-group">
+            <div class="form-check form-switch mb-0">
+              <input class="form-check-input" type="checkbox" id="chkModoReordenarLibre"
+                onchange="toggleModoReordenarLibre(this.checked)">
+              <label class="form-check-label fw-bold text-dark" for="chkModoReordenarLibre">
+                <i class="bi bi-arrows-move text-primary me-1"></i> Habilitar Modo Edición de Orden Libre
+              </label>
+            </div>
+            <span id="descModoAmpliado" class="badge bg-secondary-subtle text-dark border">
+              Agrupado por PDF de origen
+            </span>
+          </div>
+
+          <div class="d-flex align-items-center flex-wrap gap-2">
+            <button type="button" class="btn btn-sm btn-outline-secondary fw-bold" id="btnRestaurarOrdenAmpliado"
+              style="display: none;" onclick="restaurarOrdenAgrupadoPorPDF()"
+              title="Volver al orden original agrupado por PDF">
+              <i class="bi bi-arrow-counterclockwise me-1"></i> Restaurar por PDF
+            </button>
+            <button type="button" class="btn btn-sm btn-success fw-bold px-3" onclick="cerrarModalTablaAmpliadaPDF()">
+              <i class="bi bi-check2-circle me-1"></i> Aplicar y Volver
+            </button>
+          </div>
+        </div>
+
+        <div class="table-responsive pdf-ampliada-table-wrap shadow-sm">
+          <table class="table table-hover table-striped align-middle mb-0" id="tablaItemsAmpliada"
+            style="min-width: 1120px;">
+            <thead class="table-dark sticky-top" style="z-index: 10;" id="theadItemsAmpliada">
+              <!-- Se renderiza dinámicamente según modo agrupado o modo reordenamiento libre -->
+            </thead>
+            <tbody id="tbodyItemsAmpliada">
+              <!-- Filas dinámicas -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="modal-footer justify-content-between bg-white">
+        <small class="text-muted" id="hintFooterAmpliado">
+          <i class="bi bi-info-circle text-primary me-1"></i>
+          Activa el <strong>Modo Edición de Orden Libre</strong> para arrastrar filas o mover cualquier ítem a cualquier posición sin importar su PDF de origen.
+        </small>
+        <button type="button" class="btn btn-primary fw-bold px-4" onclick="cerrarModalTablaAmpliadaPDF()">
+          <i class="bi bi-check-lg me-1"></i> Listo, volver a Importación
+        </button>
       </div>
     </div>
   </div>
